@@ -272,6 +272,7 @@ export async function GET(req: NextRequest) {
       customerPhone: s.customerPhone,
       branchId: s.branchId,
       date: s.date.toISOString().split('T')[0],
+      createdAt: s.createdAt ? s.createdAt.toISOString() : s.date.toISOString(),
       subtotal: Number(s.subtotal),
       overallDiscount: Number(s.overallDiscount),
       vatAmount: Number(s.vatAmount),
