@@ -1,0 +1,1318 @@
+# BUILD A COMPLETE ERP SYSTEM FOR NEED ELECTRO
+
+Build a production-ready, scalable, modern ERP and business management system for **NEED ELECTRO — Trusted Electrical & Technological Solutions**.
+
+NEED ELECTRO is a Bangladesh-based technology and electrical business that sells laptops, computers, smartphones, CCTV cameras, networking devices, accessories, electrical products, and provides electrical/technical services.
+
+A major part of the business is **laptop sales through EMI/installment plans**. Therefore, the ERP must have a powerful **POS + Inventory + Accounting + EMI Management + Customer Management** system.
+
+Do NOT build this as a basic CRUD dashboard. Build it as a real commercial ERP that can be used daily by sales staff, inventory managers, accountants, technicians, managers, and administrators.
+
+---
+
+# 1. CORE BUSINESS MODULES
+
+The ERP must contain:
+
+1. Dashboard
+2. POS / Billing
+3. Sales Management
+4. EMI / Installment Management
+5. Inventory Management
+6. Purchase Management
+7. Supplier Management
+8. Customer Management
+9. Product Management
+10. Warranty Management
+11. Service Management
+12. Expense Management
+13. Accounting
+14. Employee Management
+15. Branch Management
+16. Reports & Analytics
+17. Notifications
+18. User & Role Management
+19. Audit Logs
+20. System Settings
+
+The architecture must allow additional modules to be added later.
+
+---
+
+# 2. BRANDING & UI
+
+Brand:
+
+NEED ELECTRO
+
+Tagline:
+
+Trusted Electrical & Technological Solutions
+
+Create a premium technology-business interface.
+
+Design characteristics:
+
+* Modern
+* Professional
+* Clean
+* Fast
+* Responsive
+* Enterprise-grade
+* Mobile-friendly
+* Desktop optimized
+* Tablet optimized
+
+Use NEED ELECTRO branding throughout the system.
+
+Provide:
+
+* Light mode
+* Dark mode
+* Responsive sidebar
+* Top navigation
+* Search
+* Notifications
+* User profile
+* Breadcrumbs
+* Command/search menu
+* Toast notifications
+* Confirmation dialogs
+* Loading states
+* Empty states
+* Error states
+
+Do not overcrowd the interface.
+
+---
+
+# 3. DASHBOARD
+
+Create a real-time business dashboard.
+
+Show:
+
+* Today's Sales
+* Today's Collection
+* Today's Expenses
+* Today's Profit
+* Monthly Sales
+* Monthly Profit
+* Total Customers
+* Total Products
+* Total Stock Value
+* Low Stock Products
+* Pending EMI
+* Today's EMI Collection
+* Overdue EMI
+* Active EMI Accounts
+* Pending Service Requests
+* Completed Services
+
+Charts:
+
+* Daily Sales
+* Monthly Revenue
+* Profit Trend
+* EMI Collection
+* Expense Trend
+* Product Category Sales
+* Top Selling Products
+
+Quick Actions:
+
+* New Sale
+* New EMI Sale
+* Add Product
+* Add Customer
+* Add Purchase
+* Collect EMI
+* Create Service Job
+
+---
+
+# 4. PRODUCT MANAGEMENT
+
+Products must support both normal electrical products and technology products.
+
+Categories:
+
+* Laptop
+* Desktop
+* Monitor
+* Smartphone
+* Tablet
+* Printer
+* CCTV
+* Router
+* Networking
+* Computer Accessories
+* Laptop Accessories
+* Electrical Products
+* Cables
+* Chargers
+* Adapters
+* Other Gadgets
+
+Product fields:
+
+* Product Name
+* SKU
+* Category
+* Brand
+* Model
+* Description
+* Product Image
+* Purchase Price
+* Cost Price
+* Retail Price
+* Wholesale Price
+* EMI Price
+* Current Stock
+* Minimum Stock
+* Supplier
+* Warranty Period
+* Status
+
+For laptops and devices, support:
+
+* Serial Number
+* IMEI where applicable
+* Processor
+* RAM
+* Storage
+* Display
+* GPU
+* Operating System
+* Battery Condition
+* Physical Condition
+* Generation
+* Color
+
+Allow product specifications to be customized by category.
+
+---
+
+# 5. SERIAL NUMBER MANAGEMENT
+
+This is extremely important for laptop sales.
+
+Every serialized product should be individually trackable.
+
+Example:
+
+HP EliteBook 840 G7
+
+Serial:
+ABC123456
+
+The system must know:
+
+* When it was purchased
+* Supplier
+* Purchase price
+* When it was sold
+* Customer
+* Invoice
+* Payment method
+* EMI account
+* Warranty
+* Service history
+
+A serial number cannot be sold twice.
+
+The system must prevent duplicate serial numbers.
+
+---
+
+# 6. INVENTORY MANAGEMENT
+
+Create complete stock management.
+
+Features:
+
+* Stock In
+* Stock Out
+* Stock Adjustment
+* Stock Transfer
+* Damaged Stock
+* Returned Stock
+* Sold Stock
+* Reserved Stock
+* Available Stock
+* Low Stock Alert
+
+Inventory transaction types:
+
+PURCHASE
+SALE
+RETURN
+DAMAGE
+ADJUSTMENT
+TRANSFER
+SERVICE
+EXCHANGE
+
+Maintain a complete stock ledger.
+
+Show:
+
+Opening Stock
+Incoming
+Outgoing
+Current Stock
+
+Calculate inventory valuation automatically.
+
+---
+
+# 7. PURCHASE MANAGEMENT
+
+Create a purchase management system.
+
+Features:
+
+* Create Purchase
+* Purchase Invoice
+* Supplier
+* Product
+* Quantity
+* Cost Price
+* Discount
+* Tax
+* Total
+* Paid Amount
+* Supplier Due
+
+For serialized products:
+
+* Enter individual serial numbers
+* Validate duplicates
+* Automatically add products to inventory
+
+Purchase statuses:
+
+Draft
+Received
+Partially Paid
+Paid
+Cancelled
+
+---
+
+# 8. POS / BILLING SYSTEM
+
+Create a fast professional POS.
+
+Sales flow:
+
+Select Customer
+→ Search/Scan Product
+→ Add to Cart
+→ Apply Discount
+→ Select Payment Type
+→ Complete Sale
+→ Generate Invoice
+
+Payment methods:
+
+* Cash
+* bKash
+* Nagad
+* Rocket
+* Bank Transfer
+* Card
+* Mixed Payment
+* EMI
+
+Support:
+
+* Barcode scanner
+* QR scanner
+* Product search
+* Customer search
+* Serial number selection
+
+Generate:
+
+* A4 Invoice
+* Thermal Receipt
+* PDF Invoice
+
+Every invoice must have:
+
+* NEED ELECTRO branding
+* Invoice number
+* Date/time
+* Customer information
+* Product information
+* Serial number
+* Warranty
+* Payment information
+* Seller information
+* Total
+* Paid
+* Due
+
+---
+
+# 9. LAPTOP EMI SALES SYSTEM
+
+THIS IS A CORE FEATURE OF THE ERP.
+
+NEED ELECTRO sells laptops through EMI/installments.
+
+Create a dedicated EMI management system.
+
+A salesperson should be able to select:
+
+Customer
++
+Laptop
++
+Serial Number
++
+EMI Plan
+
+and generate an EMI contract.
+
+---
+
+# 10. EMI PLAN
+
+Allow admin to create configurable EMI plans.
+
+Example:
+
+Laptop Price:
+৳50,000
+
+Down Payment:
+৳20,000
+
+Remaining:
+৳30,000
+
+Duration:
+6 Months
+
+Monthly Installment:
+৳5,000
+
+Plans may be:
+
+3 Months
+6 Months
+9 Months
+12 Months
+
+The system must calculate installments automatically.
+
+Do not hardcode EMI periods.
+
+Admin should be able to configure:
+
+* Duration
+* Down payment
+* Processing fee if applicable
+* Discount
+* Installment frequency
+* Grace period
+* Late fee
+* Payment schedule
+
+---
+
+# 11. EMI CUSTOMER PROFILE
+
+Create a dedicated EMI customer profile.
+
+Store only necessary business information.
+
+Information:
+
+* Customer Name
+* Phone
+* Email
+* Address
+* NID information where legally required
+* Guarantor information where applicable
+* Customer photo where applicable
+
+Do NOT expose sensitive customer information unnecessarily.
+
+Restrict sensitive data using role permissions.
+
+---
+
+# 12. EMI CONTRACT
+
+Generate a professional EMI agreement.
+
+Include:
+
+* Customer details
+* Product details
+* Serial number
+* Product price
+* Down payment
+* Remaining amount
+* Installment amount
+* Number of installments
+* Payment schedule
+* Start date
+* End date
+* Terms and conditions
+* Customer signature
+* Authorized NEED ELECTRO representative
+
+Generate downloadable/printable PDF.
+
+---
+
+# 13. EMI PAYMENT SCHEDULE
+
+Automatically generate:
+
+Installment #1
+Due Date
+Amount
+Status
+
+Installment #2
+Due Date
+Amount
+Status
+
+etc.
+
+Statuses:
+
+Upcoming
+Due Today
+Paid
+Partially Paid
+Overdue
+Waived
+
+Allow partial payments if enabled by admin.
+
+---
+
+# 14. EMI COLLECTION
+
+Create a dedicated EMI collection screen.
+
+Search customer by:
+
+* Name
+* Phone
+* EMI ID
+* Invoice Number
+* Serial Number
+
+Show:
+
+Total EMI
+Paid
+Remaining
+Next Due
+Overdue Amount
+
+Action:
+
+COLLECT PAYMENT
+
+After payment:
+
+* Update balance
+* Mark installment paid
+* Generate receipt
+* Update customer ledger
+* Update accounting
+* Create audit log
+
+---
+
+# 15. EMI DASHBOARD
+
+Show:
+
+* Active EMI Accounts
+* Today's Due
+* Today's Collection
+* Upcoming Payments
+* Overdue Accounts
+* Total Outstanding
+* Total Collected
+* Default Rate
+
+Charts:
+
+* EMI Collection Trend
+* Outstanding Balance
+* Overdue Accounts
+
+---
+
+# 16. EMI REMINDERS
+
+Create automated notifications.
+
+Before due date:
+
+"Your NEED ELECTRO EMI payment is due soon."
+
+On due date:
+
+"Your NEED ELECTRO EMI payment is due today."
+
+After overdue:
+
+"Your NEED ELECTRO EMI payment is overdue."
+
+Support notification channels where configured:
+
+* SMS
+* WhatsApp
+* Email
+* In-App
+
+Create notification templates in both:
+
+English
+Bangla
+
+Allow admin to enable/disable each notification channel.
+
+---
+
+# 17. CUSTOMER MANAGEMENT
+
+Create complete CRM.
+
+Customer profile should show:
+
+* Personal information
+* Sales history
+* Invoices
+* EMI accounts
+* EMI payments
+* Service history
+* Warranty claims
+* Returns
+* Outstanding balance
+
+Customer timeline:
+
+Purchase
+→ EMI
+→ Payment
+→ Service
+→ Warranty
+→ Return
+
+---
+
+# 18. WARRANTY MANAGEMENT
+
+For every applicable product:
+
+Track:
+
+* Warranty Start
+* Warranty End
+* Warranty Duration
+* Serial Number
+* Customer
+* Invoice
+
+Show:
+
+Active Warranty
+Expired Warranty
+Warranty Ending Soon
+
+Allow warranty claims.
+
+---
+
+# 19. PRODUCT RETURN & EXCHANGE
+
+Create return management.
+
+Return types:
+
+* Customer Return
+* Warranty Return
+* Exchange
+* Defective Product
+
+When a serialized laptop is returned:
+
+The system must update:
+
+Customer
+Invoice
+Inventory
+Serial Number
+EMI Account if applicable
+Accounting
+
+Do not allow inconsistent inventory.
+
+---
+
+# 20. SERVICE MANAGEMENT
+
+NEED ELECTRO also provides electrical and technical services.
+
+Create:
+
+Service Request
+→ Assignment
+→ Technician Visit
+→ Work
+→ Payment
+→ Completion
+
+Service types:
+
+* Electrical Installation
+* Electrical Repair
+* Home Service
+* Office Service
+* CCTV Installation
+* Networking
+* Computer Service
+* Laptop Service
+* Maintenance
+
+Service statuses:
+
+Pending
+Assigned
+On The Way
+In Progress
+Completed
+Cancelled
+
+---
+
+# 21. TECHNICIAN MANAGEMENT
+
+Technicians should have:
+
+* Profile
+* Phone
+* Skills
+* Assigned Jobs
+* Completed Jobs
+* Earnings
+* Performance
+
+Admin can assign service jobs.
+
+Technician dashboard:
+
+* Today's Jobs
+* Pending Jobs
+* Completed Jobs
+* Upcoming Jobs
+
+---
+
+# 22. EXPENSE MANAGEMENT
+
+Track:
+
+* Office Rent
+* Electricity
+* Transport
+* Salary
+* Marketing
+* Purchase Expenses
+* Service Expenses
+* Other Expenses
+
+Fields:
+
+* Expense Category
+* Amount
+* Date
+* Payment Method
+* Description
+* Attachment
+* Created By
+
+---
+
+# 23. ACCOUNTING
+
+Create basic integrated business accounting.
+
+Track:
+
+Income
+Expenses
+Sales
+Purchases
+EMI Collections
+Customer Receivables
+Supplier Payables
+
+Automatically generate:
+
+* Daily Cash Flow
+* Revenue
+* Expenses
+* Gross Profit
+* Net Profit
+* Receivables
+* Payables
+
+Every financial transaction should have a source/reference.
+
+---
+
+# 24. CUSTOMER & SUPPLIER LEDGER
+
+Customer Ledger:
+
+Invoice
+Payment
+EMI
+Refund
+Adjustment
+Balance
+
+Supplier Ledger:
+
+Purchase
+Payment
+Return
+Adjustment
+Balance
+
+Show opening balance, transactions and closing balance.
+
+---
+
+# 25. EMPLOYEE MANAGEMENT
+
+Employees:
+
+* Admin
+* Manager
+* Sales Executive
+* Inventory Manager
+* Accountant
+* Technician
+* Electrician
+
+Features:
+
+* Employee Profile
+* Role
+* Salary
+* Commission
+* Attendance
+* Performance
+
+Sales commission can be connected to completed sales.
+
+---
+
+# 26. BRANCH MANAGEMENT
+
+Design the system as multi-branch ready.
+
+Admin can create:
+
+* Main Branch
+* New Branch
+* Warehouse
+
+Each branch should have:
+
+* Inventory
+* Sales
+* Employees
+* Customers
+* Expenses
+* Reports
+
+Allow stock transfer between branches.
+
+---
+
+# 27. REPORTING
+
+Create professional reports.
+
+Sales:
+
+* Daily
+* Weekly
+* Monthly
+* Yearly
+* Product-wise
+* Category-wise
+* Salesperson-wise
+* Branch-wise
+
+Inventory:
+
+* Current Stock
+* Low Stock
+* Stock Valuation
+* Stock Movement
+* Serial Number Report
+
+EMI:
+
+* Active EMI
+* Paid EMI
+* Due EMI
+* Overdue EMI
+* Collection
+* Outstanding
+* Customer-wise EMI
+* Salesperson-wise EMI
+
+Finance:
+
+* Income
+* Expense
+* Profit
+* Receivable
+* Payable
+
+Service:
+
+* Service Requests
+* Completed Jobs
+* Technician Performance
+* Service Revenue
+
+Export reports to:
+
+PDF
+Excel
+CSV
+
+---
+
+# 28. USER ROLES & PERMISSIONS
+
+Implement granular RBAC.
+
+Example:
+
+SUPER ADMIN
+Full system access.
+
+ADMIN
+Most business operations.
+
+SALES
+POS + customers + sales.
+
+INVENTORY
+Products + purchases + stock.
+
+ACCOUNTANT
+Payments + EMI + accounting + reports.
+
+TECHNICIAN
+Assigned services only.
+
+Each permission should be configurable.
+
+Permissions such as:
+
+view
+create
+edit
+delete
+approve
+export
+
+---
+
+# 29. AUDIT LOG
+
+Track important actions.
+
+Example:
+
+"Rahim created invoice INV-1025"
+
+"Karim collected ৳5,000 EMI"
+
+"Admin changed product price"
+
+"Inventory Manager adjusted stock"
+
+Store:
+
+* User
+* Action
+* Module
+* Record
+* Timestamp
+* IP/device information where appropriate
+
+Audit logs should not be editable by normal users.
+
+---
+
+# 30. SEARCH
+
+Implement global search.
+
+Search:
+
+Products
+Customers
+Invoices
+EMI Accounts
+Serial Numbers
+Suppliers
+Service Jobs
+
+A serial number search should immediately show the complete product history.
+
+---
+
+# 31. SECURITY
+
+Implement:
+
+* Secure authentication
+* Password hashing
+* Session management
+* Role-based permissions
+* Protected API routes
+* Input validation
+* SQL injection protection
+* XSS protection
+* CSRF protection where applicable
+* Rate limiting
+* Audit logs
+* Secure file uploads
+* Database backups
+
+Never expose passwords or sensitive information.
+
+---
+
+# 32. DATABASE
+
+Use a relational database with proper relationships.
+
+Suggested entities:
+
+users
+roles
+permissions
+employees
+customers
+suppliers
+products
+product_categories
+product_serials
+inventory_transactions
+branches
+warehouses
+purchases
+purchase_items
+sales
+sale_items
+payments
+emi_accounts
+emi_installments
+emi_payments
+services
+service_items
+technicians
+warranties
+returns
+expenses
+accounts
+ledger_entries
+notifications
+audit_logs
+settings
+
+Use proper foreign keys, indexes and constraints.
+
+---
+
+# 33. IMPORTANT BUSINESS RULES
+
+Implement these rules carefully:
+
+1. A serialized laptop cannot be sold twice.
+
+2. Selling a product automatically decreases stock.
+
+3. Purchasing a product automatically increases stock.
+
+4. Returning a product must correctly update inventory.
+
+5. EMI payment must update the EMI balance and accounting simultaneously.
+
+6. A paid installment cannot accidentally be collected twice.
+
+7. Invoice numbers must be unique.
+
+8. EMI account IDs must be unique.
+
+9. Serial numbers must be unique.
+
+10. Deleted financial transactions should use controlled reversal/void mechanisms rather than silently disappearing.
+
+11. Every important financial action must create an audit log.
+
+12. Stock cannot become negative unless explicitly allowed by an authorized administrator.
+
+13. EMI calculations must be transparent and visible to the customer.
+
+14. Product ownership/payment status must be clearly represented according to the signed agreement and applicable Bangladesh law.
+
+---
+
+# 34. MOBILE RESPONSIVENESS
+
+The ERP must work extremely well on smartphones.
+
+Mobile users should be able to:
+
+* Create sales
+* Search products
+* Scan barcode
+* Add customers
+* Collect EMI
+* View invoices
+* View service jobs
+* Update service status
+
+Do not simply shrink the desktop UI.
+
+Create a proper mobile experience.
+
+---
+
+# 35. PWA
+
+Make the ERP installable as a PWA.
+
+Features:
+
+* Install to phone
+* Fast loading
+* Responsive interface
+* Offline-friendly UI where technically appropriate
+* Automatic sync when connection returns where safely supported
+
+Financial transactions must never silently disappear during offline operation.
+
+---
+
+# 36. DEMO DATA
+
+Create realistic demo data for development.
+
+Include:
+
+Products:
+
+* HP EliteBook
+* Dell Latitude
+* Lenovo ThinkPad
+* Laptop Accessories
+* CCTV
+* Routers
+* Electrical Products
+
+Customers
+Suppliers
+Sales
+Purchases
+EMI Accounts
+Installments
+Services
+Expenses
+
+Use Bangladesh currency:
+
+৳ BDT
+
+Use Bangladesh date/time conventions.
+
+---
+
+# 37. INVOICE DESIGN
+
+Create a professional NEED ELECTRO invoice.
+
+Header:
+
+NEED ELECTRO
+Trusted Electrical & Technological Solutions
+
+Include:
+
+Invoice Number
+Date
+Customer
+Products
+Serial Number
+Price
+Discount
+Total
+Paid
+Due
+Payment Method
+Warranty
+
+Footer:
+
+Thank you for choosing NEED ELECTRO.
+
+Include configurable company contact information.
+
+---
+
+# 38. SYSTEM SETTINGS
+
+Admin should be able to configure:
+
+* Company Name
+* Logo
+* Address
+* Phone
+* Email
+* Website
+* Invoice Prefix
+* EMI Prefix
+* Currency
+* Tax/VAT settings
+* Payment methods
+* EMI plans
+* Notification settings
+* Branches
+* User permissions
+* Invoice template
+
+---
+
+# 39. ARCHITECTURE REQUIREMENT
+
+Build the application with clean separation between:
+
+Frontend
+Backend
+Database
+Authentication
+Business Logic
+Payments
+Notifications
+Reporting
+
+Use reusable components.
+
+Use reusable forms.
+
+Use reusable tables.
+
+Use reusable modal/dialog components.
+
+Use proper validation.
+
+Do not duplicate business logic.
+
+---
+
+# 40. ERROR HANDLING
+
+Every operation must have clear feedback.
+
+Examples:
+
+"Product added successfully."
+
+"Serial number already exists."
+
+"Insufficient stock."
+
+"EMI payment recorded successfully."
+
+"Invoice generated successfully."
+
+"Customer not found."
+
+"Payment amount exceeds remaining balance."
+
+Use professional error messages.
+
+---
+
+# 41. PERFORMANCE
+
+Optimize for:
+
+* Fast page loading
+* Pagination
+* Database indexing
+* Lazy loading
+* Optimized queries
+* Image optimization
+* Caching where appropriate
+
+Large product/customer lists must not load everything at once.
+
+---
+
+# 42. FINAL QUALITY STANDARD
+
+The finished application should look and behave like a professional commercial ERP used by a real Bangladeshi technology and electrical business.
+
+Prioritize these modules above everything else:
+
+### PRIORITY 1
+
+POS + Billing
+
+### PRIORITY 2
+
+Inventory + Serial Number Tracking
+
+### PRIORITY 3
+
+Laptop EMI Management
+
+### PRIORITY 4
+
+Customer Management
+
+### PRIORITY 5
+
+Accounting + Ledger
+
+### PRIORITY 6
+
+Service Management
+
+### PRIORITY 7
+
+Reports
+
+Build the system with a scalable architecture so NEED ELECTRO can later add more branches, warehouses, employees, products, customers, and services without redesigning the entire system.
+
+Do not use fake buttons, placeholder workflows, or non-functional pages.
+
+Every major button and workflow must work end-to-end.
+
+The final result should be a complete, production-ready NEED ELECTRO ERP rather than a UI prototype.

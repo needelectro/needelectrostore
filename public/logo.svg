@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 170" fill="none">
+  <!-- 3D Solid Black Extrusion Shadow -->
+  <path d="M78 8L22 92H56L32 166L104 82H68L78 8Z" fill="#000000" />
+
+  <!-- Vibrant Electric Blue Contour -->
+  <path d="M72 10L16 94H50L26 168L98 84H62L72 10Z" fill="#0072FF" />
+
+  <!-- Crisp White Interior Core -->
+  <path d="M70 16L24 92H52L34 154L90 86H60L70 16Z" fill="#FFFFFF" />
+</svg>

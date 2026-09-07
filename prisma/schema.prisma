@@ -1,0 +1,1023 @@
+// NEED ELECTRO ERP — Production PostgreSQL Relational Schema
+// Managed by Prisma ORM for Supabase PostgreSQL & Vercel Serverless Hosting
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = []
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------
+// 1. SYSTEM & ENTERPRISE CONFIGURATION
+// ---------------------------------------------------------
+
+model SystemSettings {
+  id                            String   @id @default("main")
+  companyName                   String   @default("NEED ELECTRO") @map("company_name")
+  companyTagline                String?  @default("Trusted Electrical & Technological Solutions") @map("company_tagline")
+  sisterConcern                 String?  @map("sister_concern")
+  mainBranchName                String?  @default("NEED ELECTRO Main Showroom") @map("main_branch_name")
+  phone                         String?  @default("+880 1733-983752")
+  email                         String?  @default("contact.amdadur@gmail.com")
+  website                       String?  @default("https://needelectroerp.vercel.app")
+  address                       String?  @default("NEED ELECTRO Building, Central Road, Moulvibazar, Sylhet, Bangladesh")
+  vatRegistrationNo             String?  @map("vat_registration_no")
+  binNumber                     String?  @default("BIN-NEED-2026-BD") @map("bin_number")
+  invoicePrefix                 String   @default("INV-2026-") @map("invoice_prefix")
+  emiPrefix                     String   @default("EMI-2026-") @map("emi_prefix")
+  defaultVatPercent             Decimal  @default(5.0) @map("default_vat_percent") @db.Decimal(5, 2)
+  currencySymbol                String   @default("৳") @map("currency_symbol")
+  currencyCode                  String   @default("BDT") @map("currency_code")
+  enableSmsNotifications        Boolean  @default(true) @map("enable_sms_notifications")
+  enableWhatsappNotifications   Boolean  @default(true) @map("enable_whatsapp_notifications")
+  notificationTemplateDueSoonEn String?  @map("notification_template_due_soon_en")
+  notificationTemplateDueSoonBn String?  @map("notification_template_due_soon_bn")
+  notificationTemplateOverdueEn String?  @map("notification_template_overdue_en")
+  notificationTemplateOverdueBn String?  @map("notification_template_overdue_bn")
+  theme                         String   @default("dark")
+  logoUrl                       String?  @map("logo_url")
+  faviconUrl                    String?  @map("favicon_url")
+  facebookUrl                   String?  @map("facebook_url")
+  youtubeUrl                    String?  @map("youtube_url")
+  linkedinUrl                   String?  @map("linkedin_url")
+  whatsappNumber                String?  @map("whatsapp_number")
+  supportEmail                  String?  @map("support_email")
+  footerText                    String?  @map("footer_text")
+  accentColor                   String   @default("#008CFF") @map("accent_color")
+  updatedAt                     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}
+
+model PosSettings {
+  id                     String   @id @default("main")
+  invoicePrefix          String   @default("INV-2026-") @map("invoice_prefix")
+  nextInvoiceNumber      Int      @default(1001) @map("next_invoice_number")
+  returnWindowDays       Int      @default(7) @map("return_window_days")
+  enablePosDiscounts     Boolean  @default(true) @map("enable_pos_discounts")
+  maxDiscountPercent     Decimal  @default(15.0) @map("max_discount_percent") @db.Decimal(5, 2)
+  enableCreditSales      Boolean  @default(true) @map("enable_credit_sales")
+  requireCustomerPhone   Boolean  @default(true) @map("require_customer_phone")
+  defaultInvoiceNotes    String?  @map("default_invoice_notes")
+  receiptFooterText      String?  @map("receipt_footer_text")
+  taxPercent             Decimal  @default(5.0) @map("tax_percent") @db.Decimal(5, 2)
+  printLogoOnReceipt     Boolean  @default(true) @map("print_logo_on_receipt")
+  printWarrantyOnReceipt Boolean  @default(true) @map("print_warranty_on_receipt")
+
+  @@map("pos_settings")
+}
+
+model InventoryRules {
+  id                        String   @id @default("main")
+  lowStockThresholdDefault  Int      @default(3) @map("low_stock_threshold_default")
+  enableOutOfStockWarnings  Boolean  @default(true) @map("enable_out_of_stock_warnings")
+  allowNegativeStock        Boolean  @default(false) @map("allow_negative_stock")
+  requireSerialOnPurchase   Boolean  @default(true) @map("require_serial_on_purchase")
+  requireSerialOnSale       Boolean  @default(true) @map("require_serial_on_sale")
+  autoGenerateSerials       Boolean  @default(true) @map("auto_generate_serials")
+  defaultSerialPrefix       String   @default("NEC-SN-") @map("default_serial_prefix")
+
+  @@map("inventory_rules")
+}
+
+model SetupStatus {
+  id                    String    @id @default("main")
+  initialSetupCompleted Boolean   @default(false) @map("initial_setup_completed")
+  setupDate             DateTime? @map("setup_date")
+  initializedBy         String?   @map("initialized_by")
+
+  @@map("setup_status")
+}
+
+// ---------------------------------------------------------
+// 2. MULTI-BRANCH & WAREHOUSES
+// ---------------------------------------------------------
+
+model Branch {
+  id          String   @id
+  name        String
+  code        String   @unique
+  address     String?
+  phone       String?
+  email       String?
+  isWarehouse Boolean  @default(false) @map("is_warehouse")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  users     User[]
+  serials   ProductSerial[]
+  sales     Sale[]
+  purchases Purchase[]
+
+  @@map("branches")
+}
+
+// ---------------------------------------------------------
+// 3. RBAC, ROLES & PERMISSIONS
+// ---------------------------------------------------------
+
+model Role {
+  id          String   @id
+  name        String
+  code        String   @unique
+  description String?
+  isSystem    Boolean  @default(false) @map("is_system")
+  permissions Json     // String array of permission keys
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  users User[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id
+  module      String
+  action      String
+  label       String
+  description String?
+  isSensitive Boolean  @default(false) @map("is_sensitive")
+
+  @@map("permissions")
+}
+
+// ---------------------------------------------------------
+// 4. USERS, SESSIONS & AUDIT
+// ---------------------------------------------------------
+
+model User {
+  id                  String    @id
+  name                String
+  email               String    @unique
+  username            String?   @unique
+  role                String    // Role code e.g. SUPER_ADMIN, ADMIN, etc.
+  roleId              String?   @map("role_id")
+  branchId            String    @map("branch_id")
+  primaryBranchId     String?   @map("primary_branch_id")
+  allowedBranchIds    Json?     @map("allowed_branch_ids") // String array of branch IDs
+  phone               String?
+  passwordHash        String    @map("password_hash")
+  employeeId          String?   @map("employee_id")
+  avatar              String?
+  active              Boolean   @default(true)
+  status              String    @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED, PENDING
+  mustChangePassword  Boolean   @default(false) @map("must_change_password")
+  lastLoginAt         DateTime? @map("last_login_at")
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime? @map("locked_until")
+  createdAt           DateTime  @default(now()) @map("created_at")
+
+  branch  Branch    @relation(fields: [branchId], references: [id])
+  roleRel Role?     @relation(fields: [roleId], references: [id])
+  sessions Session[]
+
+  @@map("users")
+}
+
+model Session {
+  id           String   @id
+  token        String   @unique
+  userId       String   @map("user_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  expiresAt    DateTime @map("expires_at")
+  lastActiveAt DateTime @default(now()) @map("last_active_at")
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  isRevoked    Boolean  @default(false) @map("is_revoked")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@map("sessions")
+}
+
+model LoginHistory {
+  id        String   @id
+  userId    String?  @map("user_id")
+  email     String
+  status    String   // SUCCESS, FAILED, LOCKED
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  details   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([email])
+  @@index([createdAt])
+  @@map("login_history")
+}
+
+// ---------------------------------------------------------
+// 5. CATALOG, CATEGORIES & BRANDS
+// ---------------------------------------------------------
+
+model CategoryConfig {
+  id                     String   @id
+  name                   String
+  code                   String   @unique
+  description            String?
+  icon                   String?
+  subcategories          Json?    // String array
+  attributes             Json?    // String array
+  isSerializedDefault    Boolean  @default(false) @map("is_serialized_default")
+  defaultWarrantyMonths  Int      @default(0) @map("default_warranty_months")
+  isActive               Boolean  @default(true) @map("is_active")
+  sortOrder              Int      @default(0) @map("sort_order")
+
+  @@map("categories_config")
+}
+
+model BrandConfig {
+  id          String   @id
+  name        String
+  code        String   @unique
+  categoryIds Json?    @map("category_ids") // String array of category IDs
+  logoUrl     String?  @map("logo_url")
+  website     String?
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+
+  @@map("brands_config")
+}
+
+// ---------------------------------------------------------
+// 6. PRODUCTS & SERIALIZED INVENTORY
+// ---------------------------------------------------------
+
+model Product {
+  id                   String   @id
+  name                 String
+  sku                  String   @unique
+  category             String
+  brand                String
+  model                String?
+  description          String?
+  imageUrl             String?  @map("image_url")
+  purchasePrice        Decimal  @default(0) @map("purchase_price") @db.Decimal(12, 2)
+  costPrice            Decimal  @default(0) @map("cost_price") @db.Decimal(12, 2)
+  retailPrice          Decimal  @default(0) @map("retail_price") @db.Decimal(12, 2)
+  wholesalePrice       Decimal  @default(0) @map("wholesale_price") @db.Decimal(12, 2)
+  emiPrice             Decimal  @default(0) @map("emi_price") @db.Decimal(12, 2)
+  currentStock         Int      @default(0) @map("current_stock")
+  minStock             Int      @default(5) @map("min_stock")
+  supplierId           String?  @map("supplier_id")
+  warrantyPeriodMonths Int      @default(0) @map("warranty_period_months")
+  isSerialized         Boolean  @default(false) @map("is_serialized")
+  status               String   @default("ACTIVE") // ACTIVE, DISCONTINUED, OUT_OF_STOCK
+  specs                Json?
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @default(now()) @updatedAt @map("updated_at")
+
+  serials       ProductSerial[]
+  saleItems     SaleItem[]
+  purchaseItems PurchaseItem[]
+
+  @@index([sku])
+  @@index([category])
+  @@index([brand])
+  @@index([status])
+  @@map("products")
+}
+
+model ProductSerial {
+  id                String    @id
+  serialNumber      String    @unique @map("serial_number")
+  productId         String    @map("product_id")
+  branchId          String    @map("branch_id")
+  status            String    @default("AVAILABLE") @map("status") // AVAILABLE, SOLD, RESERVED, DEFECTIVE, RETURNED
+  purchaseId        String?   @map("purchase_id")
+  purchaseDate      DateTime? @map("purchase_date")
+  supplierId        String?   @map("supplier_id")
+  purchaseCost      Decimal   @default(0) @map("purchase_cost") @db.Decimal(12, 2)
+  saleInvoiceId     String?   @map("sale_invoice_id")
+  saleDate          DateTime? @map("sale_date")
+  customerId        String?   @map("customer_id")
+  emiAccountId      String?   @map("emi_account_id")
+  warrantyStartDate DateTime? @map("warranty_start_date")
+  warrantyEndDate   DateTime? @map("warranty_end_date")
+  serviceHistory    Json?     @map("service_history") // Array of service history records
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  branch  Branch  @relation(fields: [branchId], references: [id])
+
+  @@index([serialNumber])
+  @@index([productId])
+  @@index([branchId])
+  @@index([status])
+  @@map("product_serials")
+}
+
+// ---------------------------------------------------------
+// 7. CUSTOMERS & CRM
+// ---------------------------------------------------------
+
+model Customer {
+  id             String   @id
+  customerId     String   @unique @map("customer_id")
+  name           String
+  phone          String
+  email          String?
+  address        String?
+  nid            String?
+  guarantor      Json?    // { name, phone, relation, address, nid }
+  customerPhoto  String?  @map("customer_photo")
+  creditLimit    Decimal  @default(0) @map("credit_limit") @db.Decimal(12, 2)
+  currentBalance Decimal  @default(0) @map("current_balance") @db.Decimal(12, 2)
+  notes          String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  sales       Sale[]
+  emiAccounts EMIAccount[]
+
+  @@index([customerId])
+  @@index([phone])
+  @@index([name])
+  @@map("customers")
+}
+
+// ---------------------------------------------------------
+// 8. SUPPLIERS & PURCHASES
+// ---------------------------------------------------------
+
+model Supplier {
+  id             String   @id
+  name           String
+  company        String
+  phone          String?
+  email          String?
+  address        String?
+  category       String?
+  openingBalance Decimal  @default(0) @map("opening_balance") @db.Decimal(12, 2)
+  currentPayable Decimal  @default(0) @map("current_payable") @db.Decimal(12, 2)
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  purchases Purchase[]
+  payments  SupplierPayment[]
+
+  @@index([name])
+  @@index([phone])
+  @@map("suppliers")
+}
+
+// ---------------------------------------------------------
+// 9. FINANCIAL ACCOUNTS & PAYMENT METHODS
+// ---------------------------------------------------------
+
+model FinancialAccount {
+  id            String  @id
+  name          String
+  type          String  // CASH, BANK, MOBILE_BANKING
+  accountNumber String? @map("account_number")
+  bankName      String? @map("bank_name")
+  branchName    String? @map("branch_name")
+  balance       Decimal @default(0) @db.Decimal(12, 2)
+  currency      String  @default("BDT")
+  isActive      Boolean @default(true) @map("is_active")
+
+  @@map("financial_accounts")
+}
+
+model ConfigurablePaymentMethod {
+  id              String  @id
+  name            String
+  code            String  @unique
+  type            String  // CASH, BANK, MOBILE_BANKING, OTHER
+  linkedAccountId String  @map("linked_account_id")
+  accountNumber   String? @map("account_number")
+  chargePercent   Decimal @default(0) @map("charge_percent") @db.Decimal(5, 2)
+  instructions    String?
+  isActive        Boolean @default(true) @map("is_active")
+  sortOrder       Int     @default(0) @map("sort_order")
+
+  @@map("configurable_payment_methods")
+}
+
+// ---------------------------------------------------------
+// 10. SALES & POINT OF SALE (POS)
+// ---------------------------------------------------------
+
+model Sale {
+  id              String   @id
+  invoiceNumber   String   @unique @map("invoice_number")
+  customerId      String   @map("customer_id")
+  customerName    String   @map("customer_name")
+  customerPhone   String   @map("customer_phone")
+  branchId        String   @map("branch_id")
+  date            DateTime @default(now())
+  subtotal        Decimal  @db.Decimal(12, 2)
+  overallDiscount Decimal  @default(0) @map("overall_discount") @db.Decimal(12, 2)
+  vatAmount       Decimal  @default(0) @map("vat_amount") @db.Decimal(12, 2)
+  vatPercent      Decimal  @default(0) @map("vat_percent") @db.Decimal(5, 2)
+  grandTotal      Decimal  @map("grand_total") @db.Decimal(12, 2)
+  paidAmount      Decimal  @default(0) @map("paid_amount") @db.Decimal(12, 2)
+  dueAmount       Decimal  @default(0) @map("due_amount") @db.Decimal(12, 2)
+  payments        Json?    // Array of { method, amount, accountId, ref }
+  saleType        String   @default("REGULAR") @map("sale_type") // REGULAR, EMI
+  emiAccountId    String?  @map("emi_account_id")
+  status          String   @default("COMPLETED") // COMPLETED, RETURNED, VOID
+  salespersonId   String?  @map("salesperson_id")
+  salespersonName String?  @map("salesperson_name")
+  notes           String?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  branch     Branch      @relation(fields: [branchId], references: [id])
+  customer   Customer    @relation(fields: [customerId], references: [id])
+  items      SaleItem[]
+  emiAccount EMIAccount?
+
+  @@index([invoiceNumber])
+  @@index([customerId])
+  @@index([branchId])
+  @@index([date])
+  @@index([status])
+  @@map("sales")
+}
+
+model SaleItem {
+  id             String  @id
+  saleId         String  @map("sale_id")
+  productId      String  @map("product_id")
+  productName    String  @map("product_name")
+  sku            String
+  category       String
+  quantity       Int
+  unitPrice      Decimal @map("unit_price") @db.Decimal(12, 2)
+  discount       Decimal @default(0) @db.Decimal(12, 2)
+  total          Decimal @db.Decimal(12, 2)
+  warrantyMonths Int     @default(0) @map("warranty_months")
+  isSerialized   Boolean @default(false) @map("is_serialized")
+  serialNumbers  Json?   @map("serial_numbers") // String array of serials
+
+  sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([saleId])
+  @@index([productId])
+  @@map("sale_items")
+}
+
+// ---------------------------------------------------------
+// 11. LAPTOP EMI & INSTALLMENTS SUBSYSTEM
+// ---------------------------------------------------------
+
+model EMIPlan {
+  id                     String   @id
+  name                   String
+  durationMonths         Int      @map("duration_months")
+  minDownPaymentPercent  Decimal  @default(20.0) @map("min_down_payment_percent") @db.Decimal(5, 2)
+  interestRatePercent    Decimal  @default(0.0) @map("interest_rate_percent") @db.Decimal(5, 2)
+  processingFee          Decimal  @default(0.0) @map("processing_fee") @db.Decimal(12, 2)
+  lateFeePerDay          Decimal  @default(50.0) @map("late_fee_per_day") @db.Decimal(12, 2)
+  gracePeriodDays        Int      @default(5) @map("grace_period_days")
+  isActive               Boolean  @default(true) @map("is_active")
+  version                Int      @default(1)
+  description            String?
+  eligibilityRules       String?  @map("eligibility_rules")
+  termsText              String?  @map("terms_text")
+
+  @@map("emi_plans")
+}
+
+model EMIAccount {
+  id                 String   @id
+  emiNumber          String   @unique @map("emi_number")
+  saleInvoiceId      String   @unique @map("sale_invoice_id")
+  customerId         String   @map("customer_id")
+  customerName       String   @map("customer_name")
+  customerPhone      String   @map("customer_phone")
+  customerAddress    String?  @map("customer_address")
+  customerNid        String?  @map("customer_nid")
+  guarantor          Json?    // { name, phone, relation, address, nid }
+  productId          String   @map("product_id")
+  productName        String   @map("product_name")
+  serialNumber       String   @map("serial_number")
+  laptopPrice        Decimal  @map("laptop_price") @db.Decimal(12, 2)
+  downPayment        Decimal  @map("down_payment") @db.Decimal(12, 2)
+  financedAmount     Decimal  @map("financed_amount") @db.Decimal(12, 2)
+  durationMonths     Int      @map("duration_months")
+  monthlyInstallment Decimal  @map("monthly_installment") @db.Decimal(12, 2)
+  totalPayable       Decimal  @map("total_payable") @db.Decimal(12, 2)
+  totalPaid          Decimal  @default(0) @map("total_paid") @db.Decimal(12, 2)
+  remainingBalance   Decimal  @map("remaining_balance") @db.Decimal(12, 2)
+  startDate          DateTime @map("start_date")
+  endDate            DateTime @map("end_date")
+  status             String   @default("ACTIVE") // ACTIVE, COMPLETED, DEFAULTED, SETTLED
+  contractTerms      String?  @map("contract_terms")
+  approvedBy         String?  @map("approved_by")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  sale         Sale             @relation(fields: [saleInvoiceId], references: [id])
+  customer     Customer         @relation(fields: [customerId], references: [id])
+  installments EMIInstallment[]
+  payments     EMIPayment[]
+
+  @@index([emiNumber])
+  @@index([customerId])
+  @@index([status])
+  @@map("emi_accounts")
+}
+
+model EMIInstallment {
+  id                String    @id
+  emiAccountId      String    @map("emi_account_id")
+  installmentNumber Int       @map("installment_number")
+  dueDate           DateTime  @map("due_date")
+  amount            Decimal   @db.Decimal(12, 2)
+  penaltyAmount     Decimal   @default(0) @map("penalty_amount") @db.Decimal(12, 2)
+  paidAmount        Decimal   @default(0) @map("paid_amount") @db.Decimal(12, 2)
+  paidDate          DateTime? @map("paid_date")
+  status            String    @default("UPCOMING") // UPCOMING, DUE_TODAY, PAID, PARTIALLY_PAID, OVERDUE, WAIVED
+  receiptNumber     String?   @map("receipt_number")
+  paymentMethod     String?   @map("payment_method")
+
+  emiAccount EMIAccount @relation(fields: [emiAccountId], references: [id], onDelete: Cascade)
+
+  @@index([emiAccountId])
+  @@index([status])
+  @@index([dueDate])
+  @@map("emi_installments")
+}
+
+model EMIPayment {
+  id                String   @id
+  receiptNumber     String   @unique @map("receipt_number")
+  emiAccountId      String   @map("emi_account_id")
+  emiNumber         String   @map("emi_number")
+  installmentId     String   @map("installment_id")
+  installmentNumber Int      @map("installment_number")
+  customerId        String   @map("customer_id")
+  customerName      String   @map("customer_name")
+  amount            Decimal  @db.Decimal(12, 2)
+  penaltyPaid       Decimal  @default(0) @map("penalty_paid") @db.Decimal(12, 2)
+  paymentDate       DateTime @default(now()) @map("payment_date")
+  paymentMethod     String   @map("payment_method")
+  transactionRef    String?  @map("transaction_ref")
+  collectedBy       String   @map("collected_by")
+  notes             String?
+
+  emiAccount EMIAccount @relation(fields: [emiAccountId], references: [id])
+
+  @@index([receiptNumber])
+  @@index([emiAccountId])
+  @@index([customerId])
+  @@map("emi_payments")
+}
+
+// ---------------------------------------------------------
+// 12. PURCHASES & PROCUREMENT
+// ---------------------------------------------------------
+
+model Purchase {
+  id            String   @id
+  invoiceNumber String   @unique @map("invoice_number")
+  supplierId    String   @map("supplier_id")
+  supplierName  String   @map("supplier_name")
+  branchId      String   @map("branch_id")
+  date          DateTime @default(now())
+  status        String   @default("Received")
+  subtotal      Decimal  @db.Decimal(12, 2)
+  discount      Decimal  @default(0) @db.Decimal(12, 2)
+  tax           Decimal  @default(0) @db.Decimal(12, 2)
+  total         Decimal  @db.Decimal(12, 2)
+  paidAmount    Decimal  @default(0) @map("paid_amount") @db.Decimal(12, 2)
+  dueAmount     Decimal  @default(0) @map("due_amount") @db.Decimal(12, 2)
+  paymentMethod String?  @map("payment_method")
+  notes         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  supplier Supplier       @relation(fields: [supplierId], references: [id])
+  branch   Branch         @relation(fields: [branchId], references: [id])
+  items    PurchaseItem[]
+
+  @@index([invoiceNumber])
+  @@index([supplierId])
+  @@index([branchId])
+  @@map("purchases")
+}
+
+model PurchaseItem {
+  id            String  @id
+  purchaseId    String  @map("purchase_id")
+  productId     String  @map("product_id")
+  productName   String  @map("product_name")
+  quantity      Int
+  costPrice     Decimal @map("cost_price") @db.Decimal(12, 2)
+  subtotal      Decimal @db.Decimal(12, 2)
+  serialNumbers Json?   @map("serial_numbers") // String array
+
+  purchase Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id])
+
+  @@index([purchaseId])
+  @@index([productId])
+  @@map("purchase_items")
+}
+
+model SupplierPayment {
+  id            String   @id
+  voucherNumber String   @unique @map("voucher_number")
+  supplierId    String   @map("supplier_id")
+  supplierName  String   @map("supplier_name")
+  amount        Decimal  @db.Decimal(12, 2)
+  paymentDate   DateTime @default(now()) @map("payment_date")
+  paymentMethod String   @map("payment_method")
+  accountId     String?  @map("account_id")
+  reference     String?
+  notes         String?
+  paidBy        String   @map("paid_by")
+
+  supplier Supplier @relation(fields: [supplierId], references: [id])
+
+  @@index([voucherNumber])
+  @@index([supplierId])
+  @@map("supplier_payments")
+}
+
+// ---------------------------------------------------------
+// 13. RETURNS & RMA
+// ---------------------------------------------------------
+
+model ProductReturn {
+  id                String   @id
+  returnNumber      String   @unique @map("return_number")
+  date              DateTime @default(now())
+  saleInvoiceId     String   @map("sale_invoice_id")
+  customerId        String   @map("customer_id")
+  customerName      String   @map("customer_name")
+  customerPhone     String   @map("customer_phone")
+  returnType        String   @map("return_type") // REFUND, EXCHANGE, REPAIR
+  reason            String
+  items             Json     // Array of returned item specifications
+  totalRefundAmount Decimal  @default(0) @map("total_refund_amount") @db.Decimal(12, 2)
+  refundMethod      String   @map("refund_method")
+  accountId         String?  @map("account_id")
+  status            String   @default("COMPLETED")
+  handledBy         String   @map("handled_by")
+  notes             String?
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@index([returnNumber])
+  @@index([saleInvoiceId])
+  @@index([customerId])
+  @@map("product_returns")
+}
+
+// ---------------------------------------------------------
+// 14. OPERATING EXPENSES
+// ---------------------------------------------------------
+
+model ExpenseCategoryConfig {
+  id              String  @id
+  name            String
+  code            String  @unique
+  description     String?
+  isTaxDeductible Boolean @default(true) @map("is_tax_deductible")
+  isActive        Boolean @default(true) @map("is_active")
+
+  @@map("expense_categories_config")
+}
+
+model Expense {
+  id             String   @id
+  voucherNumber  String   @unique @map("voucher_number")
+  category       String
+  amount         Decimal  @db.Decimal(12, 2)
+  date           DateTime @default(now())
+  paymentMethod  String   @map("payment_method")
+  branchId       String   @map("branch_id")
+  description    String
+  attachmentName String?  @map("attachment_name")
+  createdBy      String   @map("created_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([voucherNumber])
+  @@index([category])
+  @@index([branchId])
+  @@index([date])
+  @@map("expenses")
+}
+
+// ---------------------------------------------------------
+// 15. TECHNICAL & ELECTRICAL SERVICES
+// ---------------------------------------------------------
+
+model ServiceCategoryConfig {
+  id                     String  @id
+  name                   String
+  code                   String  @unique
+  defaultLaborCost       Decimal @default(0) @map("default_labor_cost") @db.Decimal(12, 2)
+  estimatedDurationHours Decimal @default(2.0) @map("estimated_duration_hours") @db.Decimal(4, 1)
+  warrantyDays           Int     @default(30) @map("warranty_days")
+  description            String?
+  isActive               Boolean @default(true) @map("is_active")
+
+  @@map("service_categories_config")
+}
+
+model ServiceJob {
+  id                    String    @id
+  jobCardNumber         String    @unique @map("job_card_number")
+  customerId            String    @map("customer_id")
+  customerName          String    @map("customer_name")
+  customerPhone         String    @map("customer_phone")
+  customerAddress       String?   @map("customer_address")
+  serviceType           String    @map("service_type")
+  deviceOrSite          String    @map("device_or_site")
+  serialNumber          String?   @map("serial_number")
+  reportedIssue         String    @map("reported_issue")
+  assignedTechnicianId  String?   @map("assigned_technician_id")
+  assignedTechnicianName String?  @map("assigned_technician_name")
+  status                String    @default("Pending")
+  partsUsed             Json?     @map("parts_used")
+  laborCost             Decimal   @default(0) @map("labor_cost") @db.Decimal(12, 2)
+  totalBill             Decimal   @default(0) @map("total_bill") @db.Decimal(12, 2)
+  paymentStatus         String    @default("UNPAID") @map("payment_status")
+  paymentMethod         String?   @map("payment_method")
+  scheduledDate         DateTime? @map("scheduled_date")
+  completedDate         DateTime? @map("completed_date")
+  notes                 String?
+  createdAt             DateTime  @default(now()) @map("created_at")
+
+  @@index([jobCardNumber])
+  @@index([customerId])
+  @@index([status])
+  @@map("service_jobs")
+}
+
+model Technician {
+  id                 String  @id
+  name               String
+  phone              String
+  email              String?
+  specialization     Json?   // String array
+  activeJobsCount    Int     @default(0) @map("active_jobs_count")
+  completedJobsCount Int     @default(0) @map("completed_jobs_count")
+  totalEarnings      Decimal @default(0) @map("total_earnings") @db.Decimal(12, 2)
+  rating             Decimal @default(5.0) @db.Decimal(3, 2)
+
+  @@map("technicians")
+}
+
+// ---------------------------------------------------------
+// 16. WARRANTY MANAGEMENT
+// ---------------------------------------------------------
+
+model WarrantyRuleConfig {
+  id                 String  @id
+  categoryName       String  @map("category_name")
+  defaultMonths      Int     @default(12) @map("default_months")
+  termsText          String  @map("terms_text")
+  replacementAllowed Boolean @default(false) @map("replacement_allowed")
+  repairAllowed      Boolean @default(true) @map("repair_allowed")
+  voidConditions     String? @map("void_conditions")
+  isActive           Boolean @default(true) @map("is_active")
+
+  @@map("warranty_rules_config")
+}
+
+model WarrantyClaim {
+  id               String    @id
+  claimNumber      String    @unique @map("claim_number")
+  serialNumber     String    @map("serial_number")
+  productName      String    @map("product_name")
+  customerId       String    @map("customer_id")
+  customerName     String    @map("customer_name")
+  customerPhone    String    @map("customer_phone")
+  invoiceNumber    String    @map("invoice_number")
+  issueDescription String    @map("issue_description")
+  claimDate        DateTime  @default(now()) @map("claim_date")
+  status           String    @default("PENDING")
+  resolutionNotes  String?   @map("resolution_notes")
+  resolvedDate     DateTime? @map("resolved_date")
+
+  @@index([claimNumber])
+  @@index([serialNumber])
+  @@index([status])
+  @@map("warranty_claims")
+}
+
+// ---------------------------------------------------------
+// 17. INVESTMENTS & FUND TRANSFERS
+// ---------------------------------------------------------
+
+model Investment {
+  id               String   @id
+  referenceNumber  String   @unique @map("reference_number")
+  investorName     String   @map("investor_name")
+  amount           Decimal  @db.Decimal(12, 2)
+  date             DateTime @default(now())
+  investmentType   String   @map("investment_type")
+  depositAccountId String   @map("deposit_account_id")
+  paymentMethod    String   @map("payment_method")
+  reference        String?
+  status           String   @default("ACTIVE")
+  notes            String?
+  createdBy        String   @map("created_by")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@index([referenceNumber])
+  @@map("investments")
+}
+
+model FundTransfer {
+  id             String   @id
+  transferNumber String   @unique @map("transfer_number")
+  date           DateTime @default(now())
+  fromAccountId  String   @map("from_account_id")
+  toAccountId    String   @map("to_account_id")
+  amount         Decimal  @db.Decimal(12, 2)
+  fee            Decimal  @default(0) @db.Decimal(12, 2)
+  reference      String?
+  transferredBy  String   @map("transferred_by")
+  notes          String?
+
+  @@index([transferNumber])
+  @@map("fund_transfers")
+}
+
+// ---------------------------------------------------------
+// 18. HUMAN RESOURCES & ATTENDANCE
+// ---------------------------------------------------------
+
+model Employee {
+  id                   String   @id
+  name                 String
+  email                String
+  phone                String
+  role                 String
+  designation          String?
+  branchId             String   @map("branch_id")
+  monthlySalary        Decimal  @default(0) @map("monthly_salary") @db.Decimal(12, 2)
+  salesCommissionRate  Decimal  @default(0) @map("sales_commission_rate") @db.Decimal(5, 2)
+  joinedDate           DateTime @default(now()) @map("joined_date")
+  nid                  String?
+  address              String?
+  emergencyContact     String?  @map("emergency_contact")
+  status               String   @default("ACTIVE")
+
+  @@index([email])
+  @@index([phone])
+  @@map("employees")
+}
+
+model Attendance {
+  id           String   @id
+  employeeId   String   @map("employee_id")
+  employeeName String   @map("employee_name")
+  date         DateTime @default(now())
+  status       String   // PRESENT, ABSENT, LATE, LEAVE
+  checkInTime  String?  @map("check_in_time")
+  checkOutTime String?  @map("check_out_time")
+  notes        String?
+
+  @@index([employeeId])
+  @@index([date])
+  @@map("attendance")
+}
+
+// ---------------------------------------------------------
+// 19. LEDGER-BASED INVENTORY & DOUBLE-ENTRY LEDGERS
+// ---------------------------------------------------------
+
+model InventoryTransaction {
+  id                String   @id
+  transactionNumber String   @unique @map("transaction_number")
+  date              DateTime @default(now())
+  type              String   // PURCHASE_IN, SALE_OUT, RETURN_IN, DAMAGE_OUT, ADJUSTMENT, TRANSFER
+  productId         String   @map("product_id")
+  productName       String   @map("product_name")
+  branchId          String   @map("branch_id")
+  fromBranchId      String?  @map("from_branch_id")
+  toBranchId        String?  @map("to_branch_id")
+  quantity          Int
+  unitCost          Decimal  @map("unit_cost") @db.Decimal(12, 2)
+  totalValue        Decimal  @map("total_value") @db.Decimal(12, 2)
+  openingStock      Int      @map("opening_stock")
+  closingStock      Int      @map("closing_stock")
+  referenceType     String?  @map("reference_type")
+  referenceId       String?  @map("reference_id")
+  serialNumbers     Json?    @map("serial_numbers")
+  notes             String?
+  createdBy         String   @map("created_by")
+
+  @@index([transactionNumber])
+  @@index([productId])
+  @@index([branchId])
+  @@index([date])
+  @@map("inventory_transactions")
+}
+
+model LedgerEntry {
+  id              String   @id
+  date            DateTime @default(now())
+  partyType       String   @map("party_type") // CUSTOMER, SUPPLIER, ACCOUNT, SYSTEM
+  partyId         String   @map("party_id")
+  referenceType   String   @map("reference_type") // SALE, EMI_PAYMENT, PURCHASE, EXPENSE, etc.
+  referenceNumber String   @map("reference_number")
+  description     String
+  debit           Decimal  @default(0) @db.Decimal(12, 2)
+  credit          Decimal  @default(0) @db.Decimal(12, 2)
+  runningBalance  Decimal  @default(0) @map("running_balance") @db.Decimal(12, 2)
+
+  @@index([partyType, partyId])
+  @@index([date])
+  @@index([referenceNumber])
+  @@map("ledger_entries")
+}
+
+// ---------------------------------------------------------
+// 20. AUDIT LOGS & COMPLIANCE
+// ---------------------------------------------------------
+
+model AuditLog {
+  id        String   @id
+  timestamp DateTime @default(now())
+  userId    String   @map("user_id")
+  userName  String   @map("user_name")
+  action    String
+  module    String
+  recordId  String   @map("record_id")
+  details   String
+  ipAddress String?  @map("ip_address")
+
+  @@index([timestamp])
+  @@index([userId])
+  @@index([module])
+  @@map("audit_logs")
+}
+
+model PriceAudit {
+  id          String   @id
+  productId   String   @map("product_id")
+  productName String   @map("product_name")
+  sku         String
+  priceType   String   @map("price_type")
+  oldPrice    Decimal  @map("old_price") @db.Decimal(12, 2)
+  newPrice    Decimal  @map("new_price") @db.Decimal(12, 2)
+  changedBy   String   @map("changed_by")
+  reason      String
+  timestamp   DateTime @default(now())
+
+  @@index([productId])
+  @@index([timestamp])
+  @@map("price_audits")
+}
+
+model CustomerMergeAudit {
+  id                     String   @id
+  sourceCustomerId       String   @map("source_customer_id")
+  sourceCustomerName     String   @map("source_customer_name")
+  targetCustomerId       String   @map("target_customer_id")
+  targetCustomerName     String   @map("target_customer_name")
+  movedInvoicesCount     Int      @map("moved_invoices_count")
+  movedEmiAccountsCount  Int      @map("moved_emi_accounts_count")
+  movedServiceJobsCount  Int      @map("moved_service_jobs_count")
+  performedBy            String   @map("performed_by")
+  timestamp              DateTime @default(now())
+  reason                 String
+
+  @@map("customer_merge_audits")
+}
+
+model OpeningBalance {
+  id         String   @id
+  date       DateTime @default(now())
+  type       String   // CASH, BANK, CUSTOMER, SUPPLIER
+  targetId   String   @map("target_id")
+  targetName String   @map("target_name")
+  amount     Decimal  @db.Decimal(12, 2)
+  notes      String?
+  approvedBy String   @map("approved_by")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("opening_balances")
+}
+
+model NotificationTemplateConfig {
+  id         String  @id
+  code       String  @unique
+  title      String
+  templateEn String  @map("template_en")
+  templateBn String  @map("template_bn")
+  channels   Json?   // String array
+  isActive   Boolean @default(true) @map("is_active")
+
+  @@map("notification_templates_config")
+}
+
+model DatabaseBackup {
+  id          String   @id
+  filename    String
+  sizeBytes   BigInt   @map("size_bytes")
+  createdAt   DateTime @default(now()) @map("created_at")
+  createdBy   String   @map("created_by")
+  description String?
+
+  @@map("database_backups")
+}

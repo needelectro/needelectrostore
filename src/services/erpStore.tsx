@@ -1,0 +1,1962 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import {
+  Branch, User, Product, ProductSerial, Supplier, Customer, Sale,
+  EMIPlan, EMIAccount, EMIInstallment, EMIPaymentRecord, ServiceJob,
+  Technician, Expense, SystemSettings, InventoryTransaction, AuditLog,
+  WarrantyClaim, LedgerEntry, PaymentMethod, UserRole,
+  Purchase, FinancialAccount, Investment, Employee, AttendanceRecord, ProductReturn,
+  SupplierPayment, FundTransfer, AttendanceStatus,
+  Role, Permission, SetupStatus, OpeningBalanceEntry, AccountStatus,
+  ProductCategoryConfig, BrandConfig, ConfigurablePaymentMethod, ExpenseCategoryConfig,
+  ServiceCategoryConfig, WarrantyRuleConfig, DynamicNotificationTemplate,
+  PriceChangeAudit, CustomerMergeAudit, PosSettings, InventoryRules
+} from '../types';
+import {
+  INITIAL_SETTINGS, INITIAL_BRANCHES, INITIAL_USERS, INITIAL_EMI_PLANS,
+  INITIAL_SUPPLIERS, INITIAL_PRODUCTS, INITIAL_PRODUCT_SERIALS,
+  INITIAL_CUSTOMERS, INITIAL_EMI_ACCOUNTS, INITIAL_EMI_PAYMENTS,
+  INITIAL_SALES, INITIAL_TECHNICIANS, INITIAL_SERVICES, INITIAL_EXPENSES,
+  INITIAL_AUDIT_LOGS, INITIAL_INVENTORY_TRANSACTIONS,
+  INITIAL_PURCHASES, INITIAL_FINANCIAL_ACCOUNTS, INITIAL_INVESTMENTS,
+  INITIAL_EMPLOYEES, INITIAL_ATTENDANCE, INITIAL_RETURNS,
+  INITIAL_ROLES, INITIAL_PERMISSIONS, INITIAL_SETUP_STATUS, INITIAL_OPENING_BALANCES,
+  INITIAL_CATEGORIES_CONFIG, INITIAL_BRANDS, INITIAL_PAYMENT_METHODS_CONFIG,
+  INITIAL_EXPENSE_CATEGORIES, INITIAL_SERVICE_CATEGORIES, INITIAL_WARRANTY_RULES,
+  INITIAL_NOTIFICATION_TEMPLATES, INITIAL_POS_SETTINGS, INITIAL_INVENTORY_RULES
+} from './mockData';
+import { getStoredData, setStoredData, clearAllStoredData, exportAllDataJSON, importAllDataJSON } from './storage';
+import { hashPassword, verifyPassword } from './authCrypto';
+import { api, getSessionToken, setSessionToken, clearSessionToken } from './api';
+
+export interface ToastMessage {
+  id: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+  title: string;
+  message: string;
+  timestamp: number;
+}
+
+interface ERPContextType {
+  // Auth & Session
+  isAuthenticated: boolean;
+  isLocked: boolean;
+  login: (email: string, password: string, rememberMe?: boolean, branchId?: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => void;
+  lockSession: () => void;
+  unlockSession: (password: string) => Promise<{ success: boolean; error?: string }>;
+  changePassword: (oldPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
+  hasPermission: (moduleOrPermission: string) => boolean;
+  refreshFromDatabase: () => Promise<boolean>;
+
+  // Master State
+  settings: SystemSettings;
+  updateSettings: (newSettings: Partial<SystemSettings>) => void;
+  branches: Branch[];
+  selectedBranch: Branch;
+  setSelectedBranchId: (id: string) => void;
+  addBranch: (branchData: Omit<Branch, 'id'>) => Promise<{ success: boolean; error?: string }>;
+  currentUser: User;
+  setCurrentUserId: (id: string) => void;
+  users: User[];
+
+  // Role & Permissions
+  roles: Role[];
+  permissionsList: Permission[];
+  createRole: (roleData: Omit<Role, 'id'>) => { success: boolean; error?: string };
+  updateRole: (roleData: Role) => { success: boolean; error?: string };
+  deleteRole: (roleId: string) => { success: boolean; error?: string };
+
+  // User Management
+  createUser: (userData: { name: string; email: string; phone: string; role: UserRole; branchId: string; allowedBranchIds?: string[]; employeeId?: string; password: string; status?: AccountStatus; username?: string }) => Promise<{ success: boolean; error?: string; user?: User }>;
+  updateUser: (userData: User) => { success: boolean; error?: string };
+  setUserStatus: (userId: string, status: AccountStatus) => { success: boolean; error?: string };
+  resetUserPassword: (userId: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
+  revokeUserSessions: (userId: string) => { success: boolean; error?: string };
+
+  // Setup, System Mode & Opening Balances
+  setupStatus: SetupStatus;
+  updateSetupStatus: (statusUpdates: Partial<SetupStatus>) => void;
+  completeInitialSetup: (adminData: { name: string; email: string; phone: string; username?: string; password: string }, companyData?: Partial<SystemSettings>) => Promise<{ success: boolean; error?: string }>;
+  setSystemMode: (mode: 'DEMO' | 'PRODUCTION') => void;
+  openingBalances: OpeningBalanceEntry[];
+  recordOpeningBalance: (entry: Omit<OpeningBalanceEntry, 'id' | 'createdAt'>) => { success: boolean; error?: string };
+
+  // Entities
+  products: Product[];
+  serials: ProductSerial[];
+  suppliers: Supplier[];
+  customers: Customer[];
+  sales: Sale[];
+  purchases: Purchase[];
+  returns: ProductReturn[];
+  investments: Investment[];
+  financialAccounts: FinancialAccount[];
+  employees: Employee[];
+  attendance: AttendanceRecord[];
+  emiPlans: EMIPlan[];
+  emiAccounts: EMIAccount[];
+  emiPayments: EMIPaymentRecord[];
+  technicians: Technician[];
+  services: ServiceJob[];
+  expenses: Expense[];
+  auditLogs: AuditLog[];
+  inventoryTransactions: InventoryTransaction[];
+  ledgerEntries: LedgerEntry[];
+  warrantyClaims: WarrantyClaim[];
+
+  // Toasts
+  toasts: ToastMessage[];
+  addToast: (type: ToastMessage['type'], title: string, message: string) => void;
+  removeToast: (id: string) => void;
+
+  // Active print / modal target
+  activeInvoiceToPrint: Sale | null;
+  setActiveInvoiceToPrint: (sale: Sale | null) => void;
+  activeEmiAgreementToPrint: EMIAccount | null;
+  setActiveEmiAgreementToPrint: (account: EMIAccount | null) => void;
+  activeThermalReceiptToPrint: Sale | null;
+  setActiveThermalReceiptToPrint: (sale: Sale | null) => void;
+
+  // Core Business Actions
+  createSale: (saleData: Omit<Sale, 'id' | 'invoiceNumber' | 'createdAt'>, emiPlanConfig?: { planId: string; downPayment: number; durationMonths: number }, paymentAccountId?: string) => Promise<{ success: boolean; sale?: Sale; error?: string }>;
+  collectEMIPayment: (emiAccountId: string, installmentId: string, amount: number, penaltyAmount: number, paymentMethod: PaymentMethod, ref?: string, notes?: string, accountId?: string) => Promise<{ success: boolean; error?: string; receiptNumber?: string }>;
+  createProduct: (productData: Omit<Product, 'id' | 'createdAt'>, initialSerials?: string[]) => Promise<{ success: boolean; error?: string; product?: Product }>;
+  updateProduct: (productData: Product) => Promise<{ success: boolean; error?: string }>;
+  createPurchase: (purchaseData: { supplierId: string; branchId: string; items: { productId: string; quantity: number; costPrice: number; serials: string[] }[]; paymentMethod: string; paidAmount: number; notes?: string; depositAccountId?: string }) => Promise<{ success: boolean; error?: string; purchase?: Purchase }>;
+  recordSupplierPayment: (supplierId: string, amount: number, paymentMethod: PaymentMethod, accountId?: string, reference?: string, notes?: string) => Promise<{ success: boolean; error?: string }>;
+  recordReturn: (returnData: Omit<ProductReturn, 'id' | 'returnNumber' | 'createdAt' | 'handledBy'>) => Promise<{ success: boolean; error?: string; returnRecord?: ProductReturn }>;
+  recordInvestment: (investmentData: Omit<Investment, 'id' | 'referenceNumber' | 'createdAt' | 'createdBy'>) => Promise<{ success: boolean; error?: string }>;
+  transferFunds: (fromAccountId: string, toAccountId: string, amount: number, fee?: number, notes?: string) => Promise<{ success: boolean; error?: string }>;
+  recordAttendance: (employeeId: string, status: AttendanceStatus, notes?: string) => Promise<{ success: boolean; error?: string }>;
+  disburseSalary: (employeeId: string, month: string, paymentMethod: PaymentMethod, accountId?: string) => Promise<{ success: boolean; error?: string }>;
+  createEmployee: (empData: Omit<Employee, 'id'>) => Promise<{ success: boolean; error?: string }>;
+  updateEmployee: (emp: Employee) => Promise<{ success: boolean; error?: string }>;
+  createFinancialAccount: (accountData: Omit<FinancialAccount, 'id'>) => Promise<{ success: boolean; error?: string }>;
+  stockAdjustment: (productId: string, branchId: string, quantityDiff: number, reason: string, serialNumbers?: string[]) => Promise<{ success: boolean; error?: string }>;
+  stockTransfer: (productId: string, fromBranchId: string, toBranchId: string, quantity: number, serialNumbers?: string[]) => Promise<{ success: boolean; error?: string }>;
+  createCustomer: (customerData: Omit<Customer, 'id' | 'customerId' | 'createdAt' | 'currentBalance'>) => Promise<{ success: boolean; error?: string; customer?: Customer }>;
+  updateCustomer: (customer: Customer) => Promise<{ success: boolean; error?: string }>;
+  createSupplier: (supplierData: Omit<Supplier, 'id' | 'createdAt' | 'currentPayable'>) => Promise<{ success: boolean; error?: string; supplier?: Supplier }>;
+  createServiceJob: (jobData: Omit<ServiceJob, 'id' | 'jobCardNumber' | 'createdAt' | 'partsUsed' | 'totalBill' | 'paymentStatus'>) => Promise<{ success: boolean; error?: string; job?: ServiceJob }>;
+  updateServiceStatus: (jobId: string, status: ServiceJob['status'], partsUsed?: ServiceJob['partsUsed'], laborCost?: number, paymentStatus?: 'UNPAID' | 'PAID', paymentMethod?: PaymentMethod) => Promise<{ success: boolean; error?: string }>;
+  createExpense: (expenseData: Omit<Expense, 'id' | 'voucherNumber' | 'createdAt' | 'createdBy'>) => Promise<{ success: boolean; error?: string; expense?: Expense }>;
+  submitWarrantyClaim: (claimData: Omit<WarrantyClaim, 'id' | 'claimNumber' | 'claimDate' | 'status'>) => Promise<{ success: boolean; error?: string; claim?: WarrantyClaim }>;
+  resolveWarrantyClaim: (claimId: string, status: WarrantyClaim['status'], notes: string) => Promise<{ success: boolean; error?: string }>;
+  saveEMIPlan: (plan: EMIPlan) => void;
+  saveEMIPlanWithVersioning: (plan: EMIPlan, reason?: string) => Promise<{ success: boolean; error?: string }>;
+
+  // Control Center Master Configurations
+  categoriesConfig: ProductCategoryConfig[];
+  saveCategoryConfig: (cat: ProductCategoryConfig) => Promise<{ success: boolean; error?: string }>;
+  deleteCategoryConfig: (id: string) => Promise<{ success: boolean; error?: string }>;
+  brandsConfig: BrandConfig[];
+  saveBrandConfig: (brand: BrandConfig) => Promise<{ success: boolean; error?: string }>;
+  deleteBrandConfig: (id: string) => Promise<{ success: boolean; error?: string }>;
+  paymentMethodsConfig: ConfigurablePaymentMethod[];
+  savePaymentMethodConfig: (pm: ConfigurablePaymentMethod) => Promise<{ success: boolean; error?: string }>;
+  deletePaymentMethodConfig: (id: string) => Promise<{ success: boolean; error?: string }>;
+  expenseCategoriesConfig: ExpenseCategoryConfig[];
+  saveExpenseCategoryConfig: (cat: ExpenseCategoryConfig) => Promise<{ success: boolean; error?: string }>;
+  deleteExpenseCategoryConfig: (id: string) => Promise<{ success: boolean; error?: string }>;
+  serviceCategoriesConfig: ServiceCategoryConfig[];
+  saveServiceCategoryConfig: (sc: ServiceCategoryConfig) => Promise<{ success: boolean; error?: string }>;
+  deleteServiceCategoryConfig: (id: string) => Promise<{ success: boolean; error?: string }>;
+  warrantyRulesConfig: WarrantyRuleConfig[];
+  saveWarrantyRuleConfig: (wr: WarrantyRuleConfig) => Promise<{ success: boolean; error?: string }>;
+  deleteWarrantyRuleConfig: (id: string) => Promise<{ success: boolean; error?: string }>;
+  notificationTemplatesConfig: DynamicNotificationTemplate[];
+  saveNotificationTemplateConfig: (tpl: DynamicNotificationTemplate) => Promise<{ success: boolean; error?: string }>;
+  deleteNotificationTemplateConfig: (id: string) => Promise<{ success: boolean; error?: string }>;
+  priceAuditLog: PriceChangeAudit[];
+  updateProductPrice: (productId: string, updates: { retailPrice?: number; emiPrice?: number; wholesalePrice?: number; purchasePrice?: number; costPrice?: number }, reason: string) => Promise<{ success: boolean; error?: string }>;
+  customerMergeAudit: CustomerMergeAudit[];
+  mergeCustomers: (sourceCustomerId: string, targetCustomerId: string, reason: string) => Promise<{ success: boolean; error?: string; audit?: CustomerMergeAudit }>;
+  posSettings: PosSettings;
+  updatePosSettings: (updates: Partial<PosSettings>) => Promise<void>;
+  inventoryRules: InventoryRules;
+  updateInventoryRules: (updates: Partial<InventoryRules>) => Promise<void>;
+
+  // Utilities
+  resetToDemoData: () => void;
+  exportDatabase: () => string;
+  importDatabase: (json: string) => boolean;
+}
+
+const ERPContext = createContext<ERPContextType | null>(null);
+
+export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // State initialization with local storage backup
+  const [settings, setSettings] = useState<SystemSettings>(() => getStoredData('settings', INITIAL_SETTINGS));
+  const [branches, setBranches] = useState<Branch[]>(() => getStoredData('branches', INITIAL_BRANCHES));
+  const [selectedBranchId, setSelectedBranchIdState] = useState<string>(() => branches[0]?.id || 'branch-1');
+  const [users, setUsers] = useState<User[]>(() => getStoredData('users', INITIAL_USERS));
+  const [authSession, setAuthSession] = useState<{ isAuthenticated: boolean; userId: string; isLocked: boolean }>(() => 
+    getStoredData('auth_session', { isAuthenticated: false, userId: 'user-1', isLocked: false })
+  );
+  const [currentUserId, setCurrentUserIdState] = useState<string>(() => authSession.userId || users[0]?.id || 'user-1');
+
+  useEffect(() => {
+    setStoredData('auth_session', authSession);
+  }, [authSession]);
+
+  const [products, setProducts] = useState<Product[]>(() => getStoredData('products', []));
+  const [serials, setSerials] = useState<ProductSerial[]>(() => getStoredData('serials', []));
+  const [suppliers, setSuppliers] = useState<Supplier[]>(() => getStoredData('suppliers', []));
+  const [customers, setCustomers] = useState<Customer[]>(() => getStoredData('customers', []));
+  const [sales, setSales] = useState<Sale[]>(() => getStoredData('sales', []));
+  const [emiPlans, setEmiPlans] = useState<EMIPlan[]>(() => getStoredData('emi_plans', INITIAL_EMI_PLANS));
+  const [emiAccounts, setEmiAccounts] = useState<EMIAccount[]>(() => getStoredData('emi_accounts', []));
+  const [emiPayments, setEmiPayments] = useState<EMIPaymentRecord[]>(() => getStoredData('emi_payments', []));
+  const [technicians, setTechnicians] = useState<Technician[]>(() => getStoredData('technicians', INITIAL_TECHNICIANS));
+  const [services, setServices] = useState<ServiceJob[]>(() => getStoredData('services', []));
+  const [expenses, setExpenses] = useState<Expense[]>(() => getStoredData('expenses', []));
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>(() => getStoredData('audit_logs', []));
+  const [inventoryTransactions, setInventoryTransactions] = useState<InventoryTransaction[]>(() => getStoredData('inventory_transactions', []));
+  const [warrantyClaims, setWarrantyClaims] = useState<WarrantyClaim[]>(() => getStoredData('warranty_claims', []));
+  const [ledgerEntries, setLedgerEntries] = useState<LedgerEntry[]>(() => getStoredData('ledger_entries', []));
+  const [purchases, setPurchases] = useState<Purchase[]>(() => getStoredData('purchases', []));
+  const [financialAccounts, setFinancialAccounts] = useState<FinancialAccount[]>(() => getStoredData('financial_accounts', INITIAL_FINANCIAL_ACCOUNTS));
+  const [investments, setInvestments] = useState<Investment[]>(() => getStoredData('investments', []));
+  const [employees, setEmployees] = useState<Employee[]>(() => getStoredData('employees', INITIAL_EMPLOYEES));
+  const [attendance, setAttendance] = useState<AttendanceRecord[]>(() => getStoredData('attendance', []));
+  const [returns, setReturns] = useState<ProductReturn[]>(() => getStoredData('returns', []));
+  const [roles, setRoles] = useState<Role[]>(() => getStoredData('roles', INITIAL_ROLES));
+  const [permissionsList, setPermissionsList] = useState<Permission[]>(() => getStoredData('permissions', INITIAL_PERMISSIONS));
+  const [setupStatus, setSetupStatus] = useState<SetupStatus>(() => getStoredData('setup_status', INITIAL_SETUP_STATUS));
+  const [openingBalances, setOpeningBalances] = useState<OpeningBalanceEntry[]>(() => getStoredData('opening_balances', []));
+
+  // Control Center Configurations & Audits
+  const [categoriesConfig, setCategoriesConfig] = useState<ProductCategoryConfig[]>(() => getStoredData('categories_config', INITIAL_CATEGORIES_CONFIG));
+  const [brandsConfig, setBrandsConfig] = useState<BrandConfig[]>(() => getStoredData('brands_config', INITIAL_BRANDS));
+  const [paymentMethodsConfig, setPaymentMethodsConfig] = useState<ConfigurablePaymentMethod[]>(() => getStoredData('payment_methods_config', INITIAL_PAYMENT_METHODS_CONFIG));
+  const [expenseCategoriesConfig, setExpenseCategoriesConfig] = useState<ExpenseCategoryConfig[]>(() => getStoredData('expense_categories', INITIAL_EXPENSE_CATEGORIES));
+  const [serviceCategoriesConfig, setServiceCategoriesConfig] = useState<ServiceCategoryConfig[]>(() => getStoredData('service_categories', INITIAL_SERVICE_CATEGORIES));
+  const [warrantyRulesConfig, setWarrantyRulesConfig] = useState<WarrantyRuleConfig[]>(() => getStoredData('warranty_rules', INITIAL_WARRANTY_RULES));
+  const [notificationTemplatesConfig, setNotificationTemplatesConfig] = useState<DynamicNotificationTemplate[]>(() => getStoredData('notification_templates', INITIAL_NOTIFICATION_TEMPLATES));
+  const [priceAuditLog, setPriceAuditLog] = useState<PriceChangeAudit[]>(() => getStoredData('price_audit_log', []));
+  const [customerMergeAudit, setCustomerMergeAudit] = useState<CustomerMergeAudit[]>(() => getStoredData('customer_merge_audit', []));
+  const [posSettings, setPosSettings] = useState<PosSettings>(() => getStoredData('pos_settings', INITIAL_POS_SETTINGS));
+  const [inventoryRules, setInventoryRules] = useState<InventoryRules>(() => getStoredData('inventory_rules', INITIAL_INVENTORY_RULES));
+
+  // Modals / Prints
+  const [activeInvoiceToPrint, setActiveInvoiceToPrint] = useState<Sale | null>(null);
+  const [activeEmiAgreementToPrint, setActiveEmiAgreementToPrint] = useState<EMIAccount | null>(null);
+  const [activeThermalReceiptToPrint, setActiveThermalReceiptToPrint] = useState<Sale | null>(null);
+
+  // Toasts
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  // Sync theme
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', settings.theme);
+  }, [settings.theme]);
+
+  // Persist handlers
+  useEffect(() => { setStoredData('settings', settings); }, [settings]);
+  useEffect(() => { setStoredData('branches', branches); }, [branches]);
+  useEffect(() => { setStoredData('users', users); }, [users]);
+  useEffect(() => { setStoredData('products', products); }, [products]);
+  useEffect(() => { setStoredData('serials', serials); }, [serials]);
+  useEffect(() => { setStoredData('suppliers', suppliers); }, [suppliers]);
+  useEffect(() => { setStoredData('customers', customers); }, [customers]);
+  useEffect(() => { setStoredData('sales', sales); }, [sales]);
+  useEffect(() => { setStoredData('purchases', purchases); }, [purchases]);
+  useEffect(() => { setStoredData('financial_accounts', financialAccounts); }, [financialAccounts]);
+  useEffect(() => { setStoredData('investments', investments); }, [investments]);
+  useEffect(() => { setStoredData('employees', employees); }, [employees]);
+  useEffect(() => { setStoredData('attendance', attendance); }, [attendance]);
+  useEffect(() => { setStoredData('returns', returns); }, [returns]);
+  useEffect(() => { setStoredData('emi_plans', emiPlans); }, [emiPlans]);
+  useEffect(() => { setStoredData('emi_accounts', emiAccounts); }, [emiAccounts]);
+  useEffect(() => { setStoredData('emi_payments', emiPayments); }, [emiPayments]);
+  useEffect(() => { setStoredData('technicians', technicians); }, [technicians]);
+  useEffect(() => { setStoredData('services', services); }, [services]);
+  useEffect(() => { setStoredData('expenses', expenses); }, [expenses]);
+  useEffect(() => { setStoredData('audit_logs', auditLogs); }, [auditLogs]);
+  useEffect(() => { setStoredData('inventory_transactions', inventoryTransactions); }, [inventoryTransactions]);
+  useEffect(() => { setStoredData('warranty_claims', warrantyClaims); }, [warrantyClaims]);
+  useEffect(() => { setStoredData('ledger_entries', ledgerEntries); }, [ledgerEntries]);
+  useEffect(() => { setStoredData('roles', roles); }, [roles]);
+  useEffect(() => { setStoredData('permissions', permissionsList); }, [permissionsList]);
+  useEffect(() => { setStoredData('setup_status', setupStatus); }, [setupStatus]);
+  useEffect(() => { setStoredData('opening_balances', openingBalances); }, [openingBalances]);
+  useEffect(() => { setStoredData('categories_config', categoriesConfig); }, [categoriesConfig]);
+  useEffect(() => { setStoredData('brands_config', brandsConfig); }, [brandsConfig]);
+  useEffect(() => { setStoredData('payment_methods_config', paymentMethodsConfig); }, [paymentMethodsConfig]);
+  useEffect(() => { setStoredData('expense_categories', expenseCategoriesConfig); }, [expenseCategoriesConfig]);
+  useEffect(() => { setStoredData('service_categories', serviceCategoriesConfig); }, [serviceCategoriesConfig]);
+  useEffect(() => { setStoredData('warranty_rules', warrantyRulesConfig); }, [warrantyRulesConfig]);
+  useEffect(() => { setStoredData('notification_templates', notificationTemplatesConfig); }, [notificationTemplatesConfig]);
+  useEffect(() => { setStoredData('price_audit_log', priceAuditLog); }, [priceAuditLog]);
+  useEffect(() => { setStoredData('customer_merge_audit', customerMergeAudit); }, [customerMergeAudit]);
+  useEffect(() => { setStoredData('pos_settings', posSettings); }, [posSettings]);
+  useEffect(() => { setStoredData('inventory_rules', inventoryRules); }, [inventoryRules]);
+
+  const refreshFromDatabase = async (): Promise<boolean> => {
+    try {
+      const res = await api.bootstrap.getAll();
+      if (res && res.success && res.data) {
+        const d = res.data;
+        if (d.settings) setSettings(d.settings);
+        if (Array.isArray(d.branches) && d.branches.length > 0) setBranches(d.branches);
+        if (d.posSettings) setPosSettings(d.posSettings);
+        if (d.inventoryRules) setInventoryRules(d.inventoryRules);
+        if (d.setupStatus) setSetupStatus(d.setupStatus);
+        if (Array.isArray(d.categoriesConfig)) setCategoriesConfig(d.categoriesConfig);
+        if (Array.isArray(d.brandsConfig)) setBrandsConfig(d.brandsConfig);
+        if (Array.isArray(d.paymentMethodsConfig)) setPaymentMethodsConfig(d.paymentMethodsConfig);
+        if (Array.isArray(d.expenseCategoriesConfig)) setExpenseCategoriesConfig(d.expenseCategoriesConfig);
+        if (Array.isArray(d.serviceCategoriesConfig)) setServiceCategoriesConfig(d.serviceCategoriesConfig);
+        if (Array.isArray(d.warrantyRulesConfig)) setWarrantyRulesConfig(d.warrantyRulesConfig);
+        if (Array.isArray(d.notificationTemplatesConfig)) setNotificationTemplatesConfig(d.notificationTemplatesConfig);
+
+        if (Array.isArray(d.roles) && d.roles.length > 0) setRoles(d.roles);
+        if (Array.isArray(d.permissionsList) && d.permissionsList.length > 0) setPermissionsList(d.permissionsList);
+        if (Array.isArray(d.users) && d.users.length > 0) setUsers(d.users);
+
+        if (Array.isArray(d.products)) setProducts(d.products);
+        if (Array.isArray(d.serials)) setSerials(d.serials);
+        if (Array.isArray(d.customers)) setCustomers(d.customers);
+        if (Array.isArray(d.suppliers)) setSuppliers(d.suppliers);
+        if (Array.isArray(d.sales)) setSales(d.sales);
+        if (Array.isArray(d.purchases)) setPurchases(d.purchases);
+        if (Array.isArray(d.returns)) setReturns(d.returns);
+        if (Array.isArray(d.expenses)) setExpenses(d.expenses);
+        if (Array.isArray(d.services)) setServices(d.services);
+        if (Array.isArray(d.technicians)) setTechnicians(d.technicians);
+        if (Array.isArray(d.warrantyClaims)) setWarrantyClaims(d.warrantyClaims);
+        if (Array.isArray(d.investments)) setInvestments(d.investments);
+        if (Array.isArray(d.financialAccounts)) setFinancialAccounts(d.financialAccounts);
+        if (Array.isArray(d.employees)) setEmployees(d.employees);
+        if (Array.isArray(d.attendance)) setAttendance(d.attendance);
+        if (Array.isArray(d.emiPlans)) setEmiPlans(d.emiPlans);
+        if (Array.isArray(d.emiAccounts)) setEmiAccounts(d.emiAccounts);
+        if (Array.isArray(d.emiPayments)) setEmiPayments(d.emiPayments);
+        if (Array.isArray(d.inventoryTransactions)) setInventoryTransactions(d.inventoryTransactions);
+        if (Array.isArray(d.ledgerEntries)) setLedgerEntries(d.ledgerEntries);
+        if (Array.isArray(d.auditLogs)) setAuditLogs(d.auditLogs);
+        if (Array.isArray(d.priceAuditLog)) setPriceAuditLog(d.priceAuditLog);
+        if (Array.isArray(d.customerMergeAudit)) setCustomerMergeAudit(d.customerMergeAudit);
+        if (Array.isArray(d.openingBalances)) setOpeningBalances(d.openingBalances);
+        return true;
+      }
+    } catch (err: any) {
+      console.warn('Database sync notice:', err.message);
+    }
+    return false;
+  };
+
+  // Hydrate from SQLite database on mount & verify session
+  useEffect(() => {
+    let isMounted = true;
+    const initDatabaseState = async () => {
+      try {
+        const setupRes = await api.auth.getSetupStatus().catch(() => null);
+        if (setupRes?.success && setupRes.data && isMounted) {
+          setSetupStatus(prev => ({ ...prev, ...setupRes.data }));
+        }
+
+        const token = getSessionToken();
+        if (token) {
+          const sessionRes = await api.auth.getSession().catch(() => null);
+          if (sessionRes?.success && sessionRes.user && isMounted) {
+            setAuthSession({
+              isAuthenticated: true,
+              userId: sessionRes.user.id,
+              isLocked: false
+            });
+            setCurrentUserIdState(sessionRes.user.id);
+            if (sessionRes.user.branchId) {
+              setSelectedBranchIdState(sessionRes.user.branchId);
+            }
+          } else {
+            clearSessionToken();
+            if (isMounted) {
+              setAuthSession({ isAuthenticated: false, userId: '', isLocked: false });
+            }
+          }
+        }
+
+        await refreshFromDatabase();
+      } catch (e) {
+        console.warn('Backend connection initialization:', e);
+      }
+    };
+
+    initDatabaseState();
+    return () => { isMounted = false; };
+  }, []);
+
+  const addToast = (type: ToastMessage['type'], title: string, message: string) => {
+    const newToast: ToastMessage = {
+      id: 'toast-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+      type,
+      title,
+      message,
+      timestamp: Date.now()
+    };
+    setToasts(prev => [newToast, ...prev].slice(0, 5));
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== newToast.id));
+    }, 4500);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
+
+  const selectedBranch = branches.find(b => b.id === selectedBranchId) || branches[0];
+  const currentUser = users.find(u => u.id === currentUserId) || users[0];
+
+  const logAction = (module: AuditLog['module'], action: string, recordId: string, details: string) => {
+    const newLog: AuditLog = {
+      id: 'log-' + Date.now(),
+      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      userId: currentUser.id,
+      userName: currentUser.name,
+      action,
+      module,
+      recordId,
+      details,
+      ipAddress: '127.0.0.1'
+    };
+    setAuditLogs(prev => [newLog, ...prev]);
+  };
+
+  // -------------------------------------------------------------
+  // PRODUCTION AUTHENTICATION & DATABASE-DRIVEN RBAC (MODULE.ACTION)
+  // -------------------------------------------------------------
+  const hasPermission = (moduleOrPermission: string): boolean => {
+    if (!authSession.isAuthenticated) return false;
+    
+    // Super Admin has unrestricted, permanent master access
+    if (currentUser.role === 'SUPER_ADMIN') return true;
+
+    // Look up database-driven role
+    const userRole = roles.find(r => r.code === currentUser.role || r.id === currentUser.roleId || r.name.toLowerCase() === currentUser.role.toLowerCase());
+    const assignedPermissions = userRole?.permissions || [];
+
+    if (assignedPermissions.includes('*')) return true;
+
+    const target = moduleOrPermission.toLowerCase().trim();
+
+    // Direct match or wildcard module match (e.g., 'sales.create' or 'sales.*')
+    if (target.includes('.')) {
+      const [mod] = target.split('.');
+      if (assignedPermissions.includes(`${mod}.*`)) return true;
+      return assignedPermissions.includes(target);
+    }
+
+    // High-level module check for navigation & sidebar routing (e.g. 'pos', 'sales', 'emi', 'accounting')
+    return assignedPermissions.some(perm => {
+      if (perm === target) return true;
+      if (perm.startsWith(`${target}.`)) return true;
+      if (target === 'pos' && (perm.startsWith('sales.') || perm === 'pos.view')) return true;
+      if (target === 'inventory' && (perm.startsWith('inventory.') || perm.startsWith('products.'))) return true;
+      if (target === 'accounting' && (perm.startsWith('accounting.') || perm.startsWith('financial.'))) return true;
+      if (target === 'service' && (perm.startsWith('services.') || perm.startsWith('service.'))) return true;
+      if (target === 'warranty' && perm.startsWith('warranty.')) return true;
+      if (target === 'ledgers' && (perm.startsWith('accounting.') || perm.startsWith('customers.') || perm.startsWith('suppliers.'))) return true;
+      return false;
+    });
+  };
+
+  const login = async (
+    email: string,
+    password: string,
+    rememberMe: boolean = true,
+    branchId?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const cleanEmail = email.trim().toLowerCase();
+      const res = await api.auth.login(cleanEmail, password, rememberMe, branchId);
+      if (res && res.success && res.token && res.user) {
+        setSessionToken(res.token, rememberMe);
+        setAuthSession({
+          isAuthenticated: true,
+          userId: res.user.id,
+          isLocked: false
+        });
+        setCurrentUserIdState(res.user.id);
+        const activeBranch = branchId || res.user.branchId || 'branch-1';
+        setSelectedBranchIdState(activeBranch);
+
+        // Fetch freshly authenticated data from centralized SQLite DB
+        await refreshFromDatabase();
+
+        logAction('SETTINGS', 'LOGIN_SUCCESS', res.user.id, `User ${res.user.name} (${res.user.email}) logged in successfully as ${res.user.role}.`);
+        addToast('success', `Welcome, ${res.user.name.split(' ')[0]}!`, `Authenticated as ${res.user.role}.`);
+        return { success: true };
+      }
+      const errMsg = (res as any)?.error || 'Authentication failed.';
+      addToast('error', 'Authentication Failed', errMsg);
+      return { success: false, error: errMsg };
+    } catch (err: any) {
+      const errMsg = err.message || 'Authentication failed.';
+      addToast('error', 'Authentication Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  const logout = () => {
+    api.auth.logout().catch(() => {});
+    clearSessionToken();
+    logAction('SETTINGS', 'LOGOUT', currentUser.id, `User ${currentUser.name} signed out.`);
+    setAuthSession({ isAuthenticated: false, userId: '', isLocked: false });
+    addToast('info', 'Signed Out', 'You have been logged out of NEED ELECTRO ERP.');
+    refreshFromDatabase();
+  };
+
+  const lockSession = () => {
+    setAuthSession(prev => ({ ...prev, isLocked: true }));
+    addToast('warning', 'Terminal Locked', 'Session locked for security. Enter your password to resume.');
+  };
+
+  const unlockSession = async (password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.auth.unlock(password);
+      if (res && res.success) {
+        setAuthSession(prev => ({ ...prev, isLocked: false }));
+        addToast('success', 'Terminal Resumed', `Welcome back, ${currentUser.name.split(' ')[0]}.`);
+        return { success: true };
+      }
+      addToast('error', 'Unlock Failed', 'Incorrect password.');
+      return { success: false, error: 'Incorrect password.' };
+    } catch (err: any) {
+      addToast('error', 'Unlock Failed', err.message || 'Incorrect password.');
+      return { success: false, error: err.message || 'Incorrect password.' };
+    }
+  };
+
+  const changePassword = async (oldPassword: string, newPassword: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.auth.changePassword(oldPassword, newPassword);
+      if (res && res.success) {
+        addToast('success', 'Password Updated', 'Security credentials updated on central database.');
+        logAction('SETTINGS', 'PASSWORD_CHANGE', currentUser.id, `User ${currentUser.name} updated their password.`);
+        return { success: true };
+      }
+      return { success: false, error: (res as any)?.error || 'Password change failed.' };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  // -------------------------------------------------------------
+  // USER ACCOUNT MANAGEMENT (SUPER ADMIN / ADMIN CONTROL)
+  // -------------------------------------------------------------
+  const createUser = async (userData: {
+    name: string;
+    email: string;
+    phone: string;
+    role: UserRole;
+    branchId: string;
+    allowedBranchIds?: string[];
+    employeeId?: string;
+    password: string;
+    status?: AccountStatus;
+    username?: string;
+  }): Promise<{ success: boolean; error?: string; user?: User }> => {
+    if (currentUser.role !== 'SUPER_ADMIN' && currentUser.role !== 'ADMIN') {
+      return { success: false, error: 'Only administrators can create user accounts.' };
+    }
+
+    const cleanEmail = userData.email.trim().toLowerCase();
+    if (users.some(u => u.email.toLowerCase() === cleanEmail)) {
+      return { success: false, error: 'A user account with this email address already exists.' };
+    }
+
+    // Do NOT allow normal administrators to create another Super Admin unless Super Admin
+    if (userData.role === 'SUPER_ADMIN' && currentUser.role !== 'SUPER_ADMIN') {
+      return { success: false, error: 'Only the Super Admin master account can create another Super Admin.' };
+    }
+
+    const pass = userData.password || 'needelectro2026';
+    const passwordHash = await hashPassword(pass);
+    const roleObj = roles.find(r => r.code === userData.role || r.name === userData.role);
+
+    const newUser: User = {
+      id: 'user-' + Date.now(),
+      name: userData.name.trim(),
+      email: cleanEmail,
+      username: userData.username?.toLowerCase().trim() || cleanEmail.split('@')[0],
+      role: userData.role,
+      roleId: roleObj?.id,
+      branchId: userData.branchId,
+      allowedBranchIds: userData.allowedBranchIds || [userData.branchId],
+      phone: userData.phone,
+      employeeId: userData.employeeId,
+      password: pass,
+      passwordHash,
+      active: userData.status ? userData.status === 'ACTIVE' : true,
+      status: userData.status || 'ACTIVE',
+      failedLoginAttempts: 0,
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+
+    setUsers(prev => [newUser, ...prev]);
+    logAction('SETTINGS', 'USER_CREATED', newUser.id, `Super Admin created account for ${newUser.name} (${newUser.email}) with role ${newUser.role} assigned to branch ${newUser.branchId}.`);
+    addToast('success', 'User Account Created', `Staff account for ${newUser.name} created successfully.`);
+
+    // Persist user to central SQLite database
+    api.auth.createUser({
+      name: userData.name.trim(),
+      email: cleanEmail,
+      username: userData.username?.toLowerCase().trim() || cleanEmail.split('@')[0],
+      role: userData.role,
+      roleId: roleObj?.id,
+      branchId: userData.branchId,
+      allowedBranchIds: userData.allowedBranchIds || [userData.branchId],
+      phone: userData.phone,
+      employeeId: userData.employeeId,
+      password: pass,
+      status: userData.status || 'ACTIVE'
+    }).catch(err => console.error('Failed to sync user creation to database:', err));
+
+    return { success: true, user: newUser };
+  };
+
+  const updateUser = (userData: User): { success: boolean; error?: string } => {
+    if (currentUser.role !== 'SUPER_ADMIN' && currentUser.role !== 'ADMIN') {
+      return { success: false, error: 'Unauthorized to update users.' };
+    }
+
+    // Protect Super Admin from demotion by non-super admin
+    const existing = users.find(u => u.id === userData.id);
+    if (existing?.role === 'SUPER_ADMIN' && currentUser.role !== 'SUPER_ADMIN') {
+      return { success: false, error: 'Cannot modify Super Admin privileges.' };
+    }
+
+    setUsers(prev => prev.map(u => u.id === userData.id ? { ...u, ...userData } : u));
+    logAction('SETTINGS', 'USER_UPDATED', userData.id, `Updated account profile for ${userData.name}.`);
+    addToast('success', 'User Updated', `Account details for ${userData.name} saved.`);
+
+    // Persist to central SQLite database
+    api.auth.updateUser(userData.id, userData).catch(err => console.error('Failed to sync user to database:', err));
+
+    return { success: true };
+  };
+
+  const setUserStatus = (userId: string, status: AccountStatus): { success: boolean; error?: string } => {
+    if (currentUser.role !== 'SUPER_ADMIN' && currentUser.role !== 'ADMIN') {
+      return { success: false, error: 'Unauthorized to change user account status.' };
+    }
+
+    const target = users.find(u => u.id === userId);
+    if (!target) return { success: false, error: 'User not found.' };
+
+    if (target.role === 'SUPER_ADMIN' && status !== 'ACTIVE') {
+      return { success: false, error: 'The Super Admin account cannot be disabled or suspended.' };
+    }
+
+    setUsers(prev => prev.map(u => u.id === userId ? {
+      ...u,
+      status,
+      active: status === 'ACTIVE'
+    } : u));
+
+    logAction('SETTINGS', 'USER_STATUS_CHANGED', userId, `Changed status of ${target.name} to ${status}. Historical business records preserved.`);
+    addToast('info', 'Status Updated', `Account for ${target.name} set to ${status}.`);
+
+    // Persist to central SQLite database
+    api.auth.setUserStatus(userId, status).catch(err => console.error('Failed to sync user status to database:', err));
+
+    return { success: true };
+  };
+
+  const resetUserPassword = async (userId: string, newPassword: string): Promise<{ success: boolean; error?: string }> => {
+    if (currentUser.role !== 'SUPER_ADMIN' && currentUser.role !== 'ADMIN' && currentUser.id !== userId) {
+      return { success: false, error: 'Unauthorized to reset password.' };
+    }
+
+    const target = users.find(u => u.id === userId);
+    if (!target) return { success: false, error: 'User not found.' };
+
+    const passwordHash = await hashPassword(newPassword);
+
+    setUsers(prev => prev.map(u => u.id === userId ? {
+      ...u,
+      password: newPassword,
+      passwordHash,
+      failedLoginAttempts: 0,
+      lockedUntil: undefined
+    } : u));
+
+    logAction('SETTINGS', 'PASSWORD_RESET', userId, `Password reset performed for user ${target.name} (${target.email}).`);
+    addToast('success', 'Password Reset', `Password successfully updated for ${target.name}.`);
+
+    // Persist to central SQLite database
+    api.auth.resetPassword(userId, newPassword).catch(err => console.error('Failed to reset password on database:', err));
+
+    return { success: true };
+  };
+
+  const revokeUserSessions = (userId: string): { success: boolean; error?: string } => {
+    if (currentUser.role !== 'SUPER_ADMIN') {
+      return { success: false, error: 'Only Super Admin can revoke active sessions.' };
+    }
+    const target = users.find(u => u.id === userId);
+    if (!target) return { success: false, error: 'User not found.' };
+
+    if (authSession.userId === userId) {
+      setAuthSession({ isAuthenticated: false, userId: '', isLocked: false });
+    }
+    logAction('SETTINGS', 'SESSION_REVOKED', userId, `Revoked all active sessions for ${target.name}.`);
+    addToast('info', 'Sessions Revoked', `All active sessions for ${target.name} terminated.`);
+    return { success: true };
+  };
+
+  // -------------------------------------------------------------
+  // DATABASE-DRIVEN ROLE MANAGEMENT
+  // -------------------------------------------------------------
+  const createRole = (roleData: Omit<Role, 'id'>): { success: boolean; error?: string } => {
+    if (currentUser.role !== 'SUPER_ADMIN') {
+      return { success: false, error: 'Only Super Admin can create new custom roles.' };
+    }
+
+    const newRole: Role = {
+      ...roleData,
+      id: 'role-' + Date.now(),
+      isSystem: false
+    };
+
+    setRoles(prev => [...prev, newRole]);
+    logAction('SETTINGS', 'ROLE_CREATED', newRole.id, `Created custom role ${newRole.name} (${newRole.code}) with ${newRole.permissions.length} permissions.`);
+    addToast('success', 'Role Created', `Role ${newRole.name} created.`);
+
+    // Persist to central SQLite database
+    api.auth.createRole(roleData).catch(err => console.error('Failed to sync role to database:', err));
+
+    return { success: true };
+  };
+
+  const updateRole = (roleData: Role): { success: boolean; error?: string } => {
+    if (currentUser.role !== 'SUPER_ADMIN') {
+      return { success: false, error: 'Only Super Admin can modify roles and permissions.' };
+    }
+
+    setRoles(prev => prev.map(r => r.id === roleData.id ? roleData : r));
+    logAction('SETTINGS', 'ROLE_UPDATED', roleData.id, `Updated permissions for role ${roleData.name}.`);
+    addToast('success', 'Role Saved', `Permissions for ${roleData.name} updated.`);
+
+    // Persist to central SQLite database
+    api.auth.updateRole(roleData.id, roleData).catch(err => console.error('Failed to sync role update to database:', err));
+
+    return { success: true };
+  };
+
+  const deleteRole = (roleId: string): { success: boolean; error?: string } => {
+    if (currentUser.role !== 'SUPER_ADMIN') {
+      return { success: false, error: 'Only Super Admin can delete roles.' };
+    }
+
+    const target = roles.find(r => r.id === roleId);
+    if (!target) return { success: false, error: 'Role not found.' };
+    if (target.isSystem) return { success: false, error: 'System roles cannot be deleted.' };
+
+    if (users.some(u => u.role === target.code || u.roleId === target.id)) {
+      return { success: false, error: 'Cannot delete role while user accounts are assigned to it.' };
+    }
+
+    setRoles(prev => prev.filter(r => r.id !== roleId));
+    logAction('SETTINGS', 'ROLE_DELETED', roleId, `Deleted custom role ${target.name}.`);
+    addToast('info', 'Role Removed', `Custom role ${target.name} removed.`);
+    return { success: true };
+  };
+
+  // -------------------------------------------------------------
+  // INITIAL SUPER ADMIN SETUP & SYSTEM CONFIGURATION WIZARD
+  // -------------------------------------------------------------
+  const completeInitialSetup = async (
+    adminData: { name: string; email: string; phone: string; username?: string; password: string },
+    companyData?: Partial<SystemSettings>
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.auth.initialSetup({
+        name: adminData.name,
+        email: adminData.email,
+        phone: adminData.phone,
+        username: adminData.username,
+        password: adminData.password,
+        companyData
+      });
+
+      if (res && res.success) {
+        // Log in immediately as the newly provisioned Super Admin
+        const loginRes = await login(adminData.email, adminData.password);
+        if (loginRes.success) {
+          addToast('success', 'System Initialized', 'Super Admin master account configured on central database.');
+          return { success: true };
+        }
+      }
+      return { success: false, error: (res as any)?.error || 'Setup failed' };
+    } catch (err: any) {
+      addToast('error', 'Setup Failed', err.message || 'Setup request failed.');
+      return { success: false, error: err.message || 'Setup request failed.' };
+    }
+  };
+
+  const updateSetupStatus = (statusUpdates: Partial<SetupStatus>) => {
+    setSetupStatus(prev => ({ ...prev, ...statusUpdates }));
+    logAction('SETTINGS', 'SETUP_STATUS_UPDATED', 'GLOBAL', 'Updated ERP setup checklist status.');
+  };
+
+  const setSystemMode = (mode: 'DEMO' | 'PRODUCTION') => {
+    if (currentUser.role !== 'SUPER_ADMIN') {
+      addToast('error', 'Unauthorized', 'Only Super Admin can toggle system environment mode.');
+      return;
+    }
+    setSetupStatus(prev => ({ ...prev, systemMode: mode }));
+    logAction('SETTINGS', 'SYSTEM_MODE_CHANGED', currentUser.id, `Environment mode changed to ${mode}.`);
+    addToast('warning', `Environment: ${mode} MODE`, mode === 'PRODUCTION' ? 'Production mode active: Only real transactional records will be used.' : 'Demo mode active with seed accounts.');
+  };
+
+  const recordOpeningBalance = (entry: Omit<OpeningBalanceEntry, 'id' | 'createdAt'>): { success: boolean; error?: string } => {
+    if (currentUser.role !== 'SUPER_ADMIN') {
+      return { success: false, error: 'Only Super Admin can authorize opening balance entries.' };
+    }
+
+    const newEntry: OpeningBalanceEntry = {
+      ...entry,
+      id: 'ob-' + Date.now(),
+      createdAt: new Date().toISOString().replace('T', ' ').substring(0, 19)
+    };
+
+    setOpeningBalances(prev => [newEntry, ...prev]);
+
+    // Update financial account balance if cash / bank / mobile banking
+    if (entry.type === 'CASH' || entry.type === 'BANK' || entry.type === 'MOBILE_BANKING') {
+      setFinancialAccounts(prev => prev.map(acc => {
+        if (acc.id === entry.targetId || acc.name.toLowerCase().includes(entry.targetName.toLowerCase())) {
+          return { ...acc, balance: acc.balance + entry.amount };
+        }
+        return acc;
+      }));
+    }
+
+    // Post double-entry ledger entry
+    const newLedger: LedgerEntry = {
+      id: 'led-ob-' + Date.now(),
+      date: entry.date,
+      partyType: entry.type === 'SUPPLIER_PAYABLE' ? 'SUPPLIER' : 'CUSTOMER',
+      partyId: entry.targetId || 'OB-SYS',
+      referenceType: 'ADJUSTMENT',
+      referenceNumber: 'OB-' + Date.now().toString().slice(-6),
+      description: `Opening Balance Authorization: ${entry.notes || entry.targetName}`,
+      debit: entry.type === 'SUPPLIER_PAYABLE' ? 0 : entry.amount,
+      credit: entry.type === 'SUPPLIER_PAYABLE' ? entry.amount : 0,
+      runningBalance: entry.amount
+    };
+    setLedgerEntries(prev => [newLedger, ...prev]);
+
+    logAction('ACCOUNTING', 'OPENING_BALANCE_RECORDED', newEntry.id, `Super Admin authorized opening balance of ৳${entry.amount.toLocaleString()} for ${entry.targetName} (${entry.type}).`);
+    addToast('success', 'Opening Balance Posted', `৳${entry.amount.toLocaleString()} posted to ${entry.targetName}.`);
+
+    // Persist opening balance to central SQLite database
+    api.accounting.recordOpeningBalance(entry).catch(err => console.error('Failed to sync opening balance to database:', err));
+
+    return { success: true };
+  };
+
+  const updateSettings = (newSettings: Partial<SystemSettings>) => {
+    setSettings(prev => ({ ...prev, ...newSettings }));
+    addToast('success', 'Settings Updated', 'System configuration has been saved successfully.');
+    logAction('SETTINGS', 'UPDATE_SETTINGS', 'GLOBAL', 'Updated system preferences and templates.');
+
+    // Persist to central SQLite database
+    api.settings.updateSettings(newSettings).catch(err => console.error('Failed to sync settings to database:', err));
+  };
+
+    // -------------------------------------------------------------
+  // BUSINESS RULE 1 & 2: POS SALE WITH SERIAL VALIDATION & EMI CREATION
+  // -------------------------------------------------------------
+  const createSale = async (
+    saleData: Omit<Sale, 'id' | 'invoiceNumber' | 'createdAt'>,
+    emiPlanConfig?: { planId: string; downPayment: number; durationMonths: number },
+    paymentAccountId?: string
+  ): Promise<{ success: boolean; sale?: Sale; error?: string }> => {
+    // 1. Stock & Serial Number Validation
+    for (const item of saleData.items) {
+      const prod = products.find(p => p.id === item.productId);
+      if (prod && prod.currentStock < item.quantity) {
+        return { success: false, error: `Insufficient stock for ${prod.name}. Available: ${prod.currentStock}, Requested: ${item.quantity}` };
+      }
+
+      if (item.isSerialized) {
+        if (item.serialNumbers.length !== item.quantity) {
+          return { success: false, error: `Please select exactly ${item.quantity} serial number(s) for ${item.productName}.` };
+        }
+      }
+    }
+
+    try {
+      const res = await api.sales.createSale(saleData, emiPlanConfig, paymentAccountId);
+      if (!res || !res.success || !res.sale) {
+        const err = (res as any)?.error || 'Sale transaction failed.';
+        addToast('error', 'Sale Failed', err);
+        return { success: false, error: err };
+      }
+
+      const completedSale: Sale = res.sale;
+      await refreshFromDatabase();
+
+      logAction('POS', 'CREATE_SALE', completedSale.invoiceNumber, `Created invoice ${completedSale.invoiceNumber} total ৳${completedSale.grandTotal.toLocaleString()} for ${completedSale.customerName}`);
+      addToast('success', 'Sale Completed!', `Invoice ${completedSale.invoiceNumber} generated successfully.`);
+
+      return { success: true, sale: completedSale };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error communicating with database during sale.';
+      addToast('error', 'Sale Error', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // -------------------------------------------------------------
+  // BUSINESS RULE 5 & 6: EMI PAYMENT COLLECTION & INSTANT LEDGER UPDATE
+  // -------------------------------------------------------------
+  const collectEMIPayment = async (
+    emiAccountId: string,
+    installmentId: string,
+    amount: number,
+    penaltyAmount: number,
+    paymentMethod: PaymentMethod,
+    ref?: string,
+    notes?: string,
+    accountId?: string
+  ): Promise<{ success: boolean; error?: string; receiptNumber?: string }> => {
+    if (amount <= 0) {
+      return { success: false, error: 'Collection amount must be greater than 0!' };
+    }
+
+    try {
+      const res = await api.emi.collectPayment({
+        emiAccountId,
+        installmentId,
+        amount,
+        penaltyAmount,
+        paymentMethod,
+        ref,
+        notes,
+        accountId
+      });
+
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'EMI collection failed.';
+        addToast('error', 'Collection Failed', err);
+        return { success: false, error: err };
+      }
+
+      const receiptNumber = res.receiptNumber || 'RCP-' + Date.now().toString().slice(-4);
+      await refreshFromDatabase();
+
+      logAction('EMI', 'COLLECT_PAYMENT', receiptNumber, `Collected ৳${amount.toLocaleString()} for EMI installment`);
+      addToast('success', 'EMI Collected!', `Receipt ${receiptNumber} created.`);
+
+      return { success: true, receiptNumber };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error communicating with database during EMI collection.';
+      addToast('error', 'Collection Error', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // -------------------------------------------------------------
+  // PURCHASE & INVENTORY RESTOCKING (CENTRAL DATABASE TRANSACTIONS)
+  // -------------------------------------------------------------
+  const createPurchase = async (
+    purchaseData: {
+      supplierId: string;
+      branchId: string;
+      items: { productId: string; quantity: number; costPrice: number; serials: string[] }[];
+      paymentMethod: string;
+      paidAmount: number;
+      notes?: string;
+      depositAccountId?: string;
+    }
+  ): Promise<{ success: boolean; error?: string; purchase?: Purchase }> => {
+    try {
+      const res = await api.purchases.createPurchase(purchaseData);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to record purchase.';
+        addToast('error', 'Purchase Failed', err);
+        return { success: false, error: err };
+      }
+
+      await refreshFromDatabase();
+      const invoiceNumber = res.purchase?.invoiceNumber || '';
+      logAction('PURCHASE', 'CREATE_PURCHASE', invoiceNumber, `Recorded purchase from supplier. Total: ৳${(res.purchase?.total || 0).toLocaleString()}`);
+      addToast('success', 'Purchase Recorded', `Inventory increased and purchase bill ${invoiceNumber} created.`);
+      return { success: true, purchase: res.purchase };
+    } catch (err: any) {
+      const errMsg = err.message || 'Database error processing purchase.';
+      addToast('error', 'Purchase Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // -------------------------------------------------------------
+  // SUPPLIER PAYMENT & LEDGER OUTFLOW
+  // -------------------------------------------------------------
+  const recordSupplierPayment = async (
+    supplierId: string,
+    amount: number,
+    paymentMethod: PaymentMethod,
+    accountId?: string,
+    reference?: string,
+    notes?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (amount <= 0) return { success: false, error: 'Payment amount must be greater than 0' };
+
+    try {
+      const res = await api.suppliers.recordPayment(supplierId, { amount, paymentMethod, accountId, reference, notes });
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Supplier payment failed.';
+        addToast('error', 'Payment Failed', err);
+        return { success: false, error: err };
+      }
+
+      await refreshFromDatabase();
+      logAction('PURCHASE', 'SUPPLIER_PAYMENT', supplierId, `Paid ৳${amount.toLocaleString()} to supplier via ${paymentMethod}`);
+      addToast('success', 'Payment Recorded', `Payment of ৳${amount.toLocaleString()} recorded and ledger reconciled.`);
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error recording supplier payment.';
+      addToast('error', 'Payment Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // -------------------------------------------------------------
+  // CONTROLLED PRODUCT RETURN & REVERSAL ENGINE
+  // -------------------------------------------------------------
+  const recordReturn = async (
+    returnData: Omit<ProductReturn, 'id' | 'returnNumber' | 'createdAt' | 'handledBy'>
+  ): Promise<{ success: boolean; error?: string; returnRecord?: ProductReturn }> => {
+    try {
+      const res = await api.returns.createReturn(returnData);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to process return.';
+        addToast('error', 'Return Failed', err);
+        return { success: false, error: err };
+      }
+
+      await refreshFromDatabase();
+      logAction('POS', 'PROCESS_RETURN', returnData.saleInvoiceId, `Processed product return for invoice ${returnData.saleInvoiceId} (৳${returnData.totalRefundAmount})`);
+      addToast('success', 'Return Processed', 'Product return processed and balances reconciled.');
+      return { success: true, returnRecord: res.data };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error processing return on database.';
+      addToast('error', 'Return Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // -------------------------------------------------------------
+  // INVESTMENT & CAPITAL INFLOW (NON-REVENUE)
+  // -------------------------------------------------------------
+  const recordInvestment = async (
+    investmentData: Omit<Investment, 'id' | 'referenceNumber' | 'createdAt' | 'createdBy'>
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.accounting.recordInvestment(investmentData);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to record investment.';
+        addToast('error', 'Investment Failed', err);
+        return { success: false, error: err };
+      }
+
+      await refreshFromDatabase();
+      logAction('ACCOUNTING', 'RECORD_INVESTMENT', investmentData.depositAccountId, `Recorded ৳${investmentData.amount.toLocaleString()} investment from ${investmentData.investorName}`);
+      addToast('success', 'Capital Inflow Recorded', `Investment of ৳${investmentData.amount.toLocaleString()} deposited.`);
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error recording investment.';
+      addToast('error', 'Investment Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // -------------------------------------------------------------
+  // INTER-ACCOUNT FUND TRANSFERS
+  // -------------------------------------------------------------
+  const transferFunds = async (
+    fromAccountId: string,
+    toAccountId: string,
+    amount: number,
+    fee: number = 0,
+    notes?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.accounting.transferFunds({ fromAccountId, toAccountId, amount, fee, notes });
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Transfer failed.';
+        addToast('error', 'Transfer Failed', err);
+        return { success: false, error: err };
+      }
+
+      await refreshFromDatabase();
+      logAction('ACCOUNTING', 'TRANSFER_FUNDS', `${fromAccountId} -> ${toAccountId}`, `Transferred ৳${amount.toLocaleString()} (Fee: ৳${fee})`);
+      addToast('success', 'Transfer Completed', `৳${amount.toLocaleString()} successfully transferred.`);
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error executing fund transfer.';
+      addToast('error', 'Transfer Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // -------------------------------------------------------------
+  // EMPLOYEE ATTENDANCE & PAYROLL
+  // -------------------------------------------------------------
+  const recordAttendance = async (
+    employeeId: string,
+    status: AttendanceStatus,
+    notes?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    const emp = employees.find(e => e.id === employeeId);
+    if (!emp) return { success: false, error: 'Employee not found' };
+
+    const today = new Date().toISOString().split('T')[0];
+    const existingIdx = attendance.findIndex(a => a.employeeId === employeeId && a.date === today);
+
+    const record: AttendanceRecord = {
+      id: existingIdx !== -1 ? attendance[existingIdx].id : 'att-' + Date.now(),
+      employeeId,
+      employeeName: emp.name,
+      date: today,
+      status,
+      checkInTime: status === 'PRESENT' || status === 'LATE' ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : undefined,
+      notes
+    };
+
+    if (existingIdx !== -1) {
+      setAttendance(prev => prev.map((a, i) => i === existingIdx ? record : a));
+    } else {
+      setAttendance(prev => [record, ...prev]);
+    }
+
+    addToast('info', 'Attendance Updated', `${emp.name} marked as ${status}`);
+    return { success: true };
+  };
+
+  const disburseSalary = async (
+    employeeId: string,
+    month: string,
+    paymentMethod: PaymentMethod,
+    accountId?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    const emp = employees.find(e => e.id === employeeId);
+    if (!emp) return { success: false, error: 'Employee not found' };
+
+    await createExpense({
+      category: 'Salary',
+      amount: emp.monthlySalary,
+      date: new Date().toISOString().split('T')[0],
+      paymentMethod,
+      branchId: emp.branchId || selectedBranch.id,
+      description: `Monthly salary disbursement for ${emp.name} (${emp.designation || emp.role}) - ${month}`
+    });
+
+    if (accountId) {
+      setFinancialAccounts(prev => prev.map(a => a.id === accountId ? { ...a, balance: Math.max(0, a.balance - emp.monthlySalary) } : a));
+    }
+
+    logAction('ACCOUNTING', 'SALARY_DISBURSEMENT', emp.id, `Disbursed ৳${emp.monthlySalary.toLocaleString()} salary to ${emp.name}`);
+    addToast('success', 'Salary Disbursed', `৳${emp.monthlySalary.toLocaleString()} paid to ${emp.name}`);
+    return { success: true };
+  };
+
+  const createEmployee = async (empData: Omit<Employee, 'id'>): Promise<{ success: boolean; error?: string }> => {
+    const newEmp: Employee = {
+      ...empData,
+      id: 'emp-' + Date.now()
+    };
+    setEmployees(prev => [...prev, newEmp]);
+    addToast('success', 'Employee Added', `${newEmp.name} registered.`);
+    return { success: true };
+  };
+
+  const updateEmployee = async (emp: Employee): Promise<{ success: boolean; error?: string }> => {
+    setEmployees(prev => prev.map(e => e.id === emp.id ? emp : e));
+    addToast('success', 'Employee Updated', 'Staff details saved.');
+    return { success: true };
+  };
+
+  const createFinancialAccount = async (accountData: Omit<FinancialAccount, 'id'>): Promise<{ success: boolean; error?: string }> => {
+    const newAcc: FinancialAccount = {
+      ...accountData,
+      id: 'acc-' + Date.now()
+    };
+    setFinancialAccounts(prev => [...prev, newAcc]);
+    addToast('success', 'Account Added', `${newAcc.name} created.`);
+    return { success: true };
+  };
+
+  const addBranch = async (branchData: Omit<Branch, 'id'>): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.settings.addBranch(branchData);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to add branch.';
+        addToast('error', 'Branch Failed', err);
+        return { success: false, error: err };
+      }
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'BRANCH_CREATED', res.branchId || '', `Configured branch/warehouse '${branchData.name}' (${branchData.code})`);
+      addToast('success', 'Branch Added', `${branchData.name} configured successfully.`);
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error configuring branch.';
+      addToast('error', 'Branch Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // Stock Adjustment
+  const stockAdjustment = async (productId: string, branchId: string, quantityDiff: number, reason: string, serialNumbers?: string[]): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.products.stockAdjust({ productId, branchId, quantityDiff, reason, serialNumbers });
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Stock adjustment failed.';
+        addToast('error', 'Adjustment Failed', err);
+        return { success: false, error: err };
+      }
+      await refreshFromDatabase();
+      const prod = products.find(p => p.id === productId);
+      logAction('INVENTORY', 'STOCK_ADJUST', prod?.sku || productId, `Adjusted ${prod?.name || productId} by ${quantityDiff}. Reason: ${reason}`);
+      addToast('info', 'Stock Adjusted', `Stock adjusted by ${quantityDiff > 0 ? '+' : ''}${quantityDiff}.`);
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error adjusting stock on database.';
+      addToast('error', 'Adjustment Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // Multi-Branch Stock Transfer
+  const stockTransfer = async (productId: string, fromBranchId: string, toBranchId: string, quantity: number, serialNumbers?: string[]): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.products.stockTransfer({ productId, fromBranchId, toBranchId, quantity, serialNumbers });
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Stock transfer failed.';
+        addToast('error', 'Transfer Failed', err);
+        return { success: false, error: err };
+      }
+      await refreshFromDatabase();
+      logAction('INVENTORY', 'TRANSFER', productId, `Transferred ${quantity} units between branches.`);
+      addToast('success', 'Stock Transferred', `${quantity} units transferred.`);
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error transferring stock.';
+      addToast('error', 'Transfer Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // Product CRUD
+  const createProduct = async (productData: Omit<Product, 'id' | 'createdAt'>, initialSerials?: string[]): Promise<{ success: boolean; error?: string; product?: Product }> => {
+    try {
+      const res = await api.products.createProduct(productData, initialSerials);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to create product.';
+        addToast('error', 'Product Creation Failed', err);
+        return { success: false, error: err };
+      }
+      await refreshFromDatabase();
+      logAction('INVENTORY', 'CREATE_PRODUCT', res.product?.sku || productData.sku, `Created product ${productData.name}`);
+      addToast('success', 'Product Added', `${productData.name} added successfully.`);
+      return { success: true, product: res.product };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error adding product to database.';
+      addToast('error', 'Product Creation Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  const updateProduct = async (productData: Product): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.products.updateProduct(productData.id, productData);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to update product.';
+        addToast('error', 'Product Update Failed', err);
+        return { success: false, error: err };
+      }
+      await refreshFromDatabase();
+      logAction('INVENTORY', 'UPDATE_PRODUCT', productData.sku, `Updated details for ${productData.name}`);
+      addToast('success', 'Product Updated', `${productData.name} saved.`);
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error saving product changes.';
+      addToast('error', 'Product Update Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // Customer CRUD
+  const createCustomer = async (customerData: Omit<Customer, 'id' | 'customerId' | 'createdAt' | 'currentBalance'>): Promise<{ success: boolean; error?: string; customer?: Customer }> => {
+    try {
+      const res = await api.customers.createCustomer(customerData);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to create customer.';
+        addToast('error', 'Customer Failed', err);
+        return { success: false, error: err };
+      }
+      await refreshFromDatabase();
+      logAction('CUSTOMER', 'CREATE_CUSTOMER', res.customer?.customerId || '', `Added customer ${customerData.name} (${customerData.phone})`);
+      addToast('success', 'Customer Added', `${customerData.name} registered.`);
+      return { success: true, customer: res.customer };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error creating customer on database.';
+      addToast('error', 'Customer Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  const updateCustomer = async (customer: Customer): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.customers.updateCustomer(customer.id, customer);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to update customer.';
+        addToast('error', 'Customer Update Failed', err);
+        return { success: false, error: err };
+      }
+      await refreshFromDatabase();
+      logAction('CUSTOMER', 'UPDATE_CUSTOMER', customer.customerId, `Updated info for ${customer.name}`);
+      addToast('success', 'Customer Updated', 'Changes saved successfully.');
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error saving customer updates.';
+      addToast('error', 'Customer Update Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // Supplier CRUD
+  const createSupplier = async (supplierData: Omit<Supplier, 'id' | 'createdAt' | 'currentPayable'>): Promise<{ success: boolean; error?: string; supplier?: Supplier }> => {
+    try {
+      const res = await api.suppliers.createSupplier(supplierData);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to create supplier.';
+        addToast('error', 'Supplier Failed', err);
+        return { success: false, error: err };
+      }
+      await refreshFromDatabase();
+      logAction('PURCHASE', 'CREATE_SUPPLIER', res.supplierId || '', `Registered supplier ${supplierData.name} (${supplierData.company})`);
+      addToast('success', 'Supplier Added', `${supplierData.name} saved.`);
+      return { success: true, supplier: { ...supplierData, id: res.supplierId, currentPayable: 0, createdAt: new Date().toISOString().split('T')[0] } };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error creating supplier on database.';
+      addToast('error', 'Supplier Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // Service Management
+  const createServiceJob = async (jobData: Omit<ServiceJob, 'id' | 'jobCardNumber' | 'createdAt' | 'partsUsed' | 'totalBill' | 'paymentStatus'>): Promise<{ success: boolean; error?: string; job?: ServiceJob }> => {
+    try {
+      const res = await api.services.createService(jobData);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to create service job.';
+        addToast('error', 'Service Failed', err);
+        return { success: false, error: err };
+      }
+      await refreshFromDatabase();
+      const cardNum = res.jobCardNumber || '';
+      logAction('SERVICE', 'CREATE_JOB', cardNum, `Created service job ${cardNum} for ${jobData.customerName}`);
+      addToast('success', 'Job Card Created', `${cardNum} assigned.`);
+      return { success: true, job: { ...jobData, id: res.jobId, jobCardNumber: cardNum, partsUsed: [], totalBill: jobData.laborCost || 0, paymentStatus: 'UNPAID', createdAt: new Date().toISOString().split('T')[0] } };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error creating service job.';
+      addToast('error', 'Service Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  const updateServiceStatus = async (
+    jobId: string,
+    status: ServiceJob['status'],
+    partsUsed?: ServiceJob['partsUsed'],
+    laborCost?: number,
+    paymentStatus?: 'UNPAID' | 'PAID',
+    paymentMethod?: PaymentMethod
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.services.updateService(jobId, { status, partsUsed, laborCost, paymentStatus, paymentMethod });
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to update service.';
+        addToast('error', 'Service Failed', err);
+        return { success: false, error: err };
+      }
+      await refreshFromDatabase();
+      addToast('info', 'Service Updated', `Status updated to ${status}`);
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error updating service status.';
+      addToast('error', 'Service Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // Expense Management
+  const createExpense = async (expenseData: Omit<Expense, 'id' | 'voucherNumber' | 'createdAt' | 'createdBy'>): Promise<{ success: boolean; error?: string; expense?: Expense }> => {
+    try {
+      const res = await api.expenses.createExpense(expenseData);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to record expense.';
+        addToast('error', 'Expense Failed', err);
+        return { success: false, error: err };
+      }
+      await refreshFromDatabase();
+      logAction('ACCOUNTING', 'CREATE_EXPENSE', expenseData.category, `Recorded ${expenseData.category} expense of ৳${expenseData.amount.toLocaleString()}`);
+      addToast('success', 'Expense Recorded', `Expense of ৳${expenseData.amount.toLocaleString()} registered.`);
+      return { success: true, expense: res.data };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error recording expense on database.';
+      addToast('error', 'Expense Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // Warranty
+  const submitWarrantyClaim = async (claimData: Omit<WarrantyClaim, 'id' | 'claimNumber' | 'claimDate' | 'status'>): Promise<{ success: boolean; error?: string; claim?: WarrantyClaim }> => {
+    try {
+      const res = await api.warranty.createClaim(claimData);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to submit warranty claim.';
+        addToast('error', 'Claim Failed', err);
+        return { success: false, error: err };
+      }
+      await refreshFromDatabase();
+      const claimNum = res.claimNumber || '';
+      addToast('info', 'Claim Submitted', `Warranty claim ${claimNum} logged.`);
+      return { success: true, claim: { ...claimData, id: 'claim-' + Date.now(), claimNumber: claimNum, claimDate: new Date().toISOString().split('T')[0], status: 'PENDING' } };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error submitting warranty claim.';
+      addToast('error', 'Claim Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  const resolveWarrantyClaim = async (claimId: string, status: WarrantyClaim['status'], notes: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.warranty.resolveClaim(claimId, { status, notes });
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to resolve warranty claim.';
+        addToast('error', 'Claim Failed', err);
+        return { success: false, error: err };
+      }
+      await refreshFromDatabase();
+      addToast('success', 'Claim Updated', `Claim marked as ${status}`);
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error resolving warranty claim.';
+      addToast('error', 'Claim Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  const saveEMIPlan = (plan: EMIPlan) => {
+    api.emi.savePlan(plan).then(() => refreshFromDatabase()).catch(err => console.error('Failed to sync EMI plan to database:', err));
+    addToast('success', 'Plan Saved', 'EMI Plan configuration updated on database.');
+  };
+
+  const saveEMIPlanWithVersioning = async (plan: EMIPlan, reason?: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const existing = emiPlans.find(p => p.id === plan.id);
+      const newVersion = existing ? ((existing.version || 1) + 1) : 1;
+      const updatedPlan: EMIPlan = {
+        ...plan,
+        version: newVersion
+      };
+
+      const res = await api.emi.savePlan(updatedPlan);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to save EMI plan.';
+        addToast('error', 'Plan Save Failed', err);
+        return { success: false, error: err };
+      }
+      await refreshFromDatabase();
+      logAction('EMI', 'UPDATE_EMI_PLAN', plan.id, `Updated EMI Plan "${plan.name}" to Version ${newVersion}: ${reason || 'Plan terms modified'}`);
+      addToast('success', 'EMI Plan Versioned', `Plan "${plan.name}" updated to v${newVersion}. Existing active contracts preserved.`);
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error saving EMI plan.';
+      addToast('error', 'Plan Save Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // -------------------------------------------------------------
+  // SUPER ADMIN SYSTEM CONTROL CENTER IMPLEMENTATION
+  // -------------------------------------------------------------
+  const saveCategoryConfig = async (cat: ProductCategoryConfig): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.settings.saveCategory(cat);
+      if (!res || !res.success) {
+        return { success: false, error: (res as any)?.error || 'Failed to save category.' };
+      }
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'SAVE_CATEGORY', cat.id, `Configured product category: ${cat.name}`);
+      addToast('success', 'Category Saved', `Category "${cat.name}" has been configured.`);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteCategoryConfig = async (id: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const cat = categoriesConfig.find(c => c.id === id);
+      const res = await api.settings.deleteCategory(id);
+      if (!res || !res.success) {
+        return { success: false, error: (res as any)?.error || 'Failed to delete category.' };
+      }
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'DELETE_CATEGORY', id, `Deleted category: ${cat?.name}`);
+      addToast('info', 'Category Removed', `Category "${cat?.name}" deleted.`);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const saveBrandConfig = async (brand: BrandConfig): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.settings.saveBrand(brand);
+      if (!res || !res.success) {
+        return { success: false, error: (res as any)?.error || 'Failed to save brand.' };
+      }
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'SAVE_BRAND', brand.id, `Configured brand: ${brand.name}`);
+      addToast('success', 'Brand Saved', `Brand "${brand.name}" updated.`);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteBrandConfig = async (id: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const b = brandsConfig.find(x => x.id === id);
+      const res = await api.settings.deleteBrand(id);
+      if (!res || !res.success) {
+        return { success: false, error: (res as any)?.error || 'Failed to delete brand.' };
+      }
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'DELETE_BRAND', id, `Deleted brand: ${b?.name}`);
+      addToast('info', 'Brand Removed', `Brand "${b?.name}" deleted.`);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const savePaymentMethodConfig = async (pm: ConfigurablePaymentMethod): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.settings.savePaymentMethod(pm);
+      if (!res || !res.success) {
+        return { success: false, error: (res as any)?.error || 'Failed to save payment method.' };
+      }
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'SAVE_PAYMENT_METHOD', pm.id, `Configured payment method: ${pm.name}`);
+      addToast('success', 'Payment Method Saved', `Payment method "${pm.name}" saved.`);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deletePaymentMethodConfig = async (id: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const pm = paymentMethodsConfig.find(p => p.id === id);
+      const res = await api.settings.deletePaymentMethod(id);
+      if (!res || !res.success) {
+        return { success: false, error: (res as any)?.error || 'Failed to delete payment method.' };
+      }
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'DELETE_PAYMENT_METHOD', id, `Deleted payment method: ${pm?.name}`);
+      addToast('info', 'Payment Method Removed', `Payment method "${pm?.name}" deleted.`);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const saveExpenseCategoryConfig = async (cat: ExpenseCategoryConfig): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.settings.saveExpenseCategory(cat);
+      if (!res || !res.success) {
+        return { success: false, error: (res as any)?.error || 'Failed to save expense category.' };
+      }
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'SAVE_EXPENSE_CATEGORY', cat.id, `Configured expense category: ${cat.name}`);
+      addToast('success', 'Expense Category Saved', `Saved "${cat.name}".`);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteExpenseCategoryConfig = async (id: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.settings.deleteExpenseCategory(id);
+      if (!res || !res.success) {
+        return { success: false, error: (res as any)?.error || 'Failed to delete expense category.' };
+      }
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'DELETE_EXPENSE_CATEGORY', id, 'Deleted expense category');
+      addToast('info', 'Expense Category Removed', 'Category removed.');
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const saveServiceCategoryConfig = async (sc: ServiceCategoryConfig): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.settings.saveServiceCategory(sc);
+      if (!res || !res.success) {
+        return { success: false, error: (res as any)?.error || 'Failed to save service category.' };
+      }
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'SAVE_SERVICE_CATEGORY', sc.id, `Configured service category: ${sc.name}`);
+      addToast('success', 'Service Category Saved', `Saved "${sc.name}".`);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteServiceCategoryConfig = async (id: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.settings.deleteServiceCategory(id);
+      if (!res || !res.success) {
+        return { success: false, error: (res as any)?.error || 'Failed to delete service category.' };
+      }
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'DELETE_SERVICE_CATEGORY', id, 'Deleted service category');
+      addToast('info', 'Service Category Removed', 'Service category removed.');
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const saveWarrantyRuleConfig = async (wr: WarrantyRuleConfig): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.settings.saveWarrantyRule(wr);
+      if (!res || !res.success) {
+        return { success: false, error: (res as any)?.error || 'Failed to save warranty rule.' };
+      }
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'SAVE_WARRANTY_RULE', wr.id, `Configured warranty rule for: ${wr.categoryName}`);
+      addToast('success', 'Warranty Rule Saved', `Updated "${wr.categoryName}".`);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteWarrantyRuleConfig = async (id: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.settings.deleteWarrantyRule(id);
+      if (!res || !res.success) {
+        return { success: false, error: (res as any)?.error || 'Failed to delete warranty rule.' };
+      }
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'DELETE_WARRANTY_RULE', id, 'Deleted warranty rule');
+      addToast('info', 'Warranty Rule Removed', 'Rule deleted.');
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const saveNotificationTemplateConfig = async (tpl: DynamicNotificationTemplate): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.settings.saveNotificationTemplate(tpl);
+      if (!res || !res.success) {
+        return { success: false, error: (res as any)?.error || 'Failed to save notification template.' };
+      }
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'SAVE_NOTIFICATION_TEMPLATE', tpl.id, `Configured notification template: ${tpl.name}`);
+      addToast('success', 'Template Saved', `Template "${tpl.name}" updated.`);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteNotificationTemplateConfig = async (id: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.settings.deleteNotificationTemplate(id);
+      if (!res || !res.success) {
+        return { success: false, error: (res as any)?.error || 'Failed to delete notification template.' };
+      }
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'DELETE_NOTIFICATION_TEMPLATE', id, 'Deleted notification template');
+      addToast('info', 'Template Removed', 'Notification template removed.');
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const updatePosSettings = async (updates: Partial<PosSettings>): Promise<void> => {
+    try {
+      await api.settings.updatePosSettings(updates);
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'UPDATE_POS_SETTINGS', 'pos-settings', 'POS and Invoicing configuration updated');
+      addToast('success', 'POS Settings Updated', 'POS rules successfully saved to database.');
+    } catch (err: any) {
+      addToast('error', 'POS Settings Failed', err.message);
+    }
+  };
+
+  const updateInventoryRules = async (updates: Partial<InventoryRules>): Promise<void> => {
+    try {
+      await api.settings.updateInventoryRules(updates);
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'UPDATE_INVENTORY_RULES', 'inv-rules', 'Inventory rules and serial number tracking updated');
+      addToast('success', 'Inventory Rules Updated', 'Stock rules successfully saved to database.');
+    } catch (err: any) {
+      addToast('error', 'Inventory Rules Failed', err.message);
+    }
+  };
+
+  const updateProductPrice = async (productId: string, updates: { retailPrice?: number; emiPrice?: number; wholesalePrice?: number; purchasePrice?: number; costPrice?: number }, reason: string): Promise<{ success: boolean; error?: string }> => {
+    const prod = products.find(p => p.id === productId);
+    if (!prod) return { success: false, error: 'Product not found' };
+
+    try {
+      const res = await api.products.updatePrice(productId, updates, reason);
+      if (!res || !res.success) {
+        return { success: false, error: (res as any)?.error || 'Price update failed.' };
+      }
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'UPDATE_PRICE', prod.id, `Price update for ${prod.name} (${prod.sku}): ${reason}`);
+      addToast('success', 'Price Updated', `Price updated with immutable audit log.`);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const mergeCustomers = async (sourceCustomerId: string, targetCustomerId: string, reason: string): Promise<{ success: boolean; error?: string; audit?: CustomerMergeAudit }> => {
+    if (sourceCustomerId === targetCustomerId) {
+      return { success: false, error: 'Source and target customer cannot be the same.' };
+    }
+    const source = customers.find(c => c.id === sourceCustomerId);
+    const target = customers.find(c => c.id === targetCustomerId);
+    if (!source || !target) {
+      return { success: false, error: 'Source or target customer not found.' };
+    }
+
+    try {
+      const res = await api.customers.mergeCustomers(sourceCustomerId, targetCustomerId, reason);
+      if (!res || !res.success) {
+        return { success: false, error: (res as any)?.error || 'Customer merge failed.' };
+      }
+      await refreshFromDatabase();
+      logAction('CUSTOMER', 'MERGE_CUSTOMERS', target.id, `Merged customer ${source.name} (${source.phone}) into ${target.name}.`);
+      addToast('success', 'Customers Merged', `Successfully merged ${source.name} into ${target.name}.`);
+      return { success: true, audit: res.data };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  // Reset to Demo Data
+  const resetToDemoData = () => {
+    clearAllStoredData();
+    setSettings(INITIAL_SETTINGS);
+    setBranches(INITIAL_BRANCHES);
+    setUsers(INITIAL_USERS);
+    setProducts(INITIAL_PRODUCTS);
+    setSerials(INITIAL_PRODUCT_SERIALS);
+    setSuppliers(INITIAL_SUPPLIERS);
+    setCustomers(INITIAL_CUSTOMERS);
+    setSales(INITIAL_SALES);
+    setPurchases(INITIAL_PURCHASES);
+    setFinancialAccounts(INITIAL_FINANCIAL_ACCOUNTS);
+    setInvestments(INITIAL_INVESTMENTS);
+    setEmployees(INITIAL_EMPLOYEES);
+    setAttendance(INITIAL_ATTENDANCE);
+    setReturns(INITIAL_RETURNS);
+    setEmiPlans(INITIAL_EMI_PLANS);
+    setEmiAccounts(INITIAL_EMI_ACCOUNTS);
+    setEmiPayments(INITIAL_EMI_PAYMENTS);
+    setTechnicians(INITIAL_TECHNICIANS);
+    setServices(INITIAL_SERVICES);
+    setExpenses(INITIAL_EXPENSES);
+    setAuditLogs(INITIAL_AUDIT_LOGS);
+    setInventoryTransactions(INITIAL_INVENTORY_TRANSACTIONS);
+    setRoles(INITIAL_ROLES);
+    setPermissionsList(INITIAL_PERMISSIONS);
+    setSetupStatus(INITIAL_SETUP_STATUS);
+    setOpeningBalances(INITIAL_OPENING_BALANCES);
+    setCategoriesConfig(INITIAL_CATEGORIES_CONFIG);
+    setBrandsConfig(INITIAL_BRANDS);
+    setPaymentMethodsConfig(INITIAL_PAYMENT_METHODS_CONFIG);
+    setExpenseCategoriesConfig(INITIAL_EXPENSE_CATEGORIES);
+    setServiceCategoriesConfig(INITIAL_SERVICE_CATEGORIES);
+    setWarrantyRulesConfig(INITIAL_WARRANTY_RULES);
+    setNotificationTemplatesConfig(INITIAL_NOTIFICATION_TEMPLATES);
+    setPriceAuditLog([]);
+    setCustomerMergeAudit([]);
+    setPosSettings(INITIAL_POS_SETTINGS);
+    setInventoryRules(INITIAL_INVENTORY_RULES);
+    setWarrantyClaims([]);
+    setLedgerEntries([]);
+    addToast('info', 'Demo Data Restored', 'All tables reset to original demo state.');
+  };
+
+  const exportDatabase = () => exportAllDataJSON();
+
+  const importDatabase = (json: string) => {
+    const ok = importAllDataJSON(json);
+    if (ok) {
+      window.location.reload();
+      return true;
+    }
+    return false;
+  };
+
+  return (
+    <ERPContext.Provider
+      value={{
+        isAuthenticated: authSession.isAuthenticated,
+        isLocked: authSession.isLocked,
+        login,
+        logout,
+        lockSession,
+        unlockSession,
+        changePassword,
+        hasPermission,
+        refreshFromDatabase,
+        settings,
+        updateSettings,
+        branches,
+        selectedBranch,
+        setSelectedBranchId: setSelectedBranchIdState,
+        addBranch,
+        currentUser,
+        setCurrentUserId: setCurrentUserIdState,
+        users,
+        roles,
+        permissionsList,
+        createRole,
+        updateRole,
+        deleteRole,
+        createUser,
+        updateUser,
+        setUserStatus,
+        resetUserPassword,
+        revokeUserSessions,
+        setupStatus,
+        updateSetupStatus,
+        completeInitialSetup,
+        setSystemMode,
+        openingBalances,
+        recordOpeningBalance,
+        products,
+        serials,
+        suppliers,
+        customers,
+        sales,
+        purchases,
+        returns,
+        investments,
+        financialAccounts,
+        employees,
+        attendance,
+        emiPlans,
+        emiAccounts,
+        emiPayments,
+        technicians,
+        services,
+        expenses,
+        auditLogs,
+        inventoryTransactions,
+        ledgerEntries,
+        warrantyClaims,
+        toasts,
+        addToast,
+        removeToast,
+        activeInvoiceToPrint,
+        setActiveInvoiceToPrint,
+        activeEmiAgreementToPrint,
+        setActiveEmiAgreementToPrint,
+        activeThermalReceiptToPrint,
+        setActiveThermalReceiptToPrint,
+        createSale,
+        collectEMIPayment,
+        createProduct,
+        updateProduct,
+        createPurchase,
+        recordSupplierPayment,
+        recordReturn,
+        recordInvestment,
+        transferFunds,
+        recordAttendance,
+        disburseSalary,
+        createEmployee,
+        updateEmployee,
+        createFinancialAccount,
+        stockAdjustment,
+        stockTransfer,
+        createCustomer,
+        updateCustomer,
+        createSupplier,
+        createServiceJob,
+        updateServiceStatus,
+        createExpense,
+        submitWarrantyClaim,
+        resolveWarrantyClaim,
+        saveEMIPlan,
+        saveEMIPlanWithVersioning,
+        categoriesConfig,
+        saveCategoryConfig,
+        deleteCategoryConfig,
+        brandsConfig,
+        saveBrandConfig,
+        deleteBrandConfig,
+        paymentMethodsConfig,
+        savePaymentMethodConfig,
+        deletePaymentMethodConfig,
+        expenseCategoriesConfig,
+        saveExpenseCategoryConfig,
+        deleteExpenseCategoryConfig,
+        serviceCategoriesConfig,
+        saveServiceCategoryConfig,
+        deleteServiceCategoryConfig,
+        warrantyRulesConfig,
+        saveWarrantyRuleConfig,
+        deleteWarrantyRuleConfig,
+        notificationTemplatesConfig,
+        saveNotificationTemplateConfig,
+        deleteNotificationTemplateConfig,
+        priceAuditLog,
+        updateProductPrice,
+        customerMergeAudit,
+        mergeCustomers,
+        posSettings,
+        updatePosSettings,
+        inventoryRules,
+        updateInventoryRules,
+        resetToDemoData,
+        exportDatabase,
+        importDatabase
+      }}
+    >
+      {children}
+    </ERPContext.Provider>
+  );
+};
+
+export const useERP = () => {
+  const context = useContext(ERPContext);
+  if (!context) {
+    throw new Error('useERP must be used within an ERPProvider');
+  }
+  return context;
+};

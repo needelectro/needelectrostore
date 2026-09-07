@@ -1,0 +1,371 @@
+// NEED ELECTRO ERP — Sales & POS Transactional Engine
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { requireAuth, hasPermission } from '@/lib/auth';
+import { createSaleSchema } from '@/lib/validations';
+import { Prisma } from '@prisma/client';
+
+export async function GET(req: NextRequest) {
+  const user = await requireAuth(req);
+  if (user instanceof NextResponse) return user;
+
+  const { searchParams } = new URL(req.url);
+  const branchId = searchParams.get('branchId');
+  const customerId = searchParams.get('customerId');
+  const status = searchParams.get('status');
+  const query = searchParams.get('query');
+
+  const where: any = {};
+  if (branchId) where.branchId = branchId;
+  if (customerId) where.customerId = customerId;
+  if (status) where.status = status;
+  if (query) {
+    where.OR = [
+      { invoiceNumber: { contains: query, mode: 'insensitive' } },
+      { customerName: { contains: query, mode: 'insensitive' } },
+      { customerPhone: { contains: query } },
+    ];
+  }
+
+  const sales = await prisma.sale.findMany({
+    where,
+    include: { items: true },
+    orderBy: { date: 'desc' },
+    take: 200,
+  });
+
+  return NextResponse.json({ success: true, data: sales });
+}
+
+export async function POST(req: NextRequest) {
+  const user = await requireAuth(req);
+  if (user instanceof NextResponse) return user;
+
+  if (!hasPermission(user, 'sales', 'create') && user.role !== 'SUPER_ADMIN') {
+    return NextResponse.json({ success: false, error: 'Access denied to POS/Sales' }, { status: 403 });
+  }
+
+  try {
+    const body = await req.json();
+    const parsed = createSaleSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ success: false, error: parsed.error.errors[0].message }, { status: 400 });
+    }
+
+    const { saleData, emiPlanConfig, paymentAccountId } = parsed.data;
+
+    // Execute within an ACID PostgreSQL transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Generate unique invoice number if not provided
+      let invoiceNumber = saleData.invoiceNumber;
+      if (!invoiceNumber) {
+        const pos = await tx.posSettings.findUnique({ where: { id: 'main' } });
+        const prefix = pos?.invoicePrefix || 'INV-2026-';
+        const nextNum = pos?.nextInvoiceNumber || 1001;
+        invoiceNumber = `${prefix}${nextNum}`;
+
+        await tx.posSettings.update({
+          where: { id: 'main' },
+          data: { nextInvoiceNumber: nextNum + 1 },
+        });
+      }
+
+      const saleId = 'sale-' + Date.now();
+
+      // 2. Create Sale Record
+      const sale = await tx.sale.create({
+        data: {
+          id: saleId,
+          invoiceNumber,
+          customerId: saleData.customerId,
+          customerName: saleData.customerName,
+          customerPhone: saleData.customerPhone,
+          branchId: saleData.branchId,
+          date: new Date(),
+          subtotal: new Prisma.Decimal(saleData.subtotal),
+          overallDiscount: new Prisma.Decimal(saleData.overallDiscount || 0),
+          vatAmount: new Prisma.Decimal(saleData.vatAmount || 0),
+          vatPercent: new Prisma.Decimal(saleData.vatPercent || 0),
+          grandTotal: new Prisma.Decimal(saleData.grandTotal),
+          paidAmount: new Prisma.Decimal(saleData.paidAmount || 0),
+          dueAmount: new Prisma.Decimal(saleData.dueAmount || 0),
+          payments: saleData.payments || [],
+          saleType: saleData.saleType || 'REGULAR',
+          status: 'COMPLETED',
+          salespersonId: user.id,
+          salespersonName: user.name,
+          notes: saleData.notes,
+        },
+      });
+
+      // 3. Process Sale Items, Inventory & Serials
+      for (const item of saleData.items) {
+        const saleItemId = 'si-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6);
+        await tx.saleItem.create({
+          data: {
+            id: saleItemId,
+            saleId: sale.id,
+            productId: item.productId,
+            productName: item.productName,
+            sku: item.sku,
+            category: item.category,
+            quantity: item.quantity,
+            unitPrice: new Prisma.Decimal(item.unitPrice),
+            discount: new Prisma.Decimal(item.discount || 0),
+            total: new Prisma.Decimal(item.total),
+            warrantyMonths: item.warrantyMonths || 0,
+            isSerialized: Boolean(item.isSerialized),
+            serialNumbers: item.serialNumbers || [],
+          },
+        });
+
+        // Get product to calculate stock and COGS
+        const product = await tx.product.findUnique({ where: { id: item.productId } });
+        if (!product) {
+          throw new Error(`Product ${item.productName} not found.`);
+        }
+
+        const openingStock = product.currentStock;
+        const closingStock = openingStock - item.quantity;
+
+        // Decrement Product Stock
+        await tx.product.update({
+          where: { id: item.productId },
+          data: { currentStock: closingStock },
+        });
+
+        // Record Inventory Transaction
+        await tx.inventoryTransaction.create({
+          data: {
+            id: 'itx-' + Date.now() + '-' + Math.random().toString(36).substring(2, 5),
+            transactionNumber: 'ITX-' + Date.now().toString().slice(-6),
+            date: new Date(),
+            type: 'SALE_OUT',
+            productId: item.productId,
+            productName: item.productName,
+            branchId: saleData.branchId,
+            quantity: item.quantity,
+            unitCost: product.costPrice,
+            totalValue: new Prisma.Decimal(Number(product.costPrice) * item.quantity),
+            openingStock,
+            closingStock,
+            referenceType: 'SALE',
+            referenceId: sale.id,
+            serialNumbers: item.serialNumbers || [],
+            notes: `Sold on invoice ${invoiceNumber}`,
+            createdBy: user.name,
+          },
+        });
+
+        // If serialized, assign serials to SOLD
+        if (item.isSerialized && item.serialNumbers && item.serialNumbers.length > 0) {
+          for (const sn of item.serialNumbers) {
+            const serialRecord = await tx.productSerial.findUnique({
+              where: { serialNumber: sn },
+            });
+
+            if (!serialRecord) {
+              throw new Error(`Serial number ${sn} does not exist in inventory.`);
+            }
+            if (serialRecord.status === 'SOLD') {
+              throw new Error(`Serial number ${sn} is already sold.`);
+            }
+
+            const warrantyMonths = item.warrantyMonths || 0;
+            const warrantyStart = new Date();
+            const warrantyEnd = new Date();
+            warrantyEnd.setMonth(warrantyEnd.getMonth() + warrantyMonths);
+
+            await tx.productSerial.update({
+              where: { serialNumber: sn },
+              data: {
+                status: 'SOLD',
+                saleInvoiceId: sale.id,
+                saleDate: new Date(),
+                customerId: saleData.customerId,
+                warrantyStartDate: warrantyMonths > 0 ? warrantyStart : null,
+                warrantyEndDate: warrantyMonths > 0 ? warrantyEnd : null,
+              },
+            });
+          }
+        }
+      }
+
+      // 4. Handle Laptop EMI Account if EMI Sale
+      if (saleData.saleType === 'EMI' && emiPlanConfig) {
+        const emiAccountId = 'emi-' + Date.now();
+        const emiNumber = 'EMI-' + Date.now().toString().slice(-6);
+
+        const primaryItem = saleData.items[0];
+        const primarySerial = (primaryItem.serialNumbers && primaryItem.serialNumbers[0]) || 'N/A';
+
+        const startDate = new Date();
+        const endDate = new Date();
+        endDate.setMonth(endDate.getMonth() + emiPlanConfig.durationMonths);
+
+        const emiAccount = await tx.eMIAccount.create({
+          data: {
+            id: emiAccountId,
+            emiNumber,
+            saleInvoiceId: sale.id,
+            customerId: saleData.customerId,
+            customerName: saleData.customerName,
+            customerPhone: saleData.customerPhone,
+            guarantor: emiPlanConfig.guarantor || {},
+            productId: primaryItem.productId,
+            productName: primaryItem.productName,
+            serialNumber: primarySerial,
+            laptopPrice: new Prisma.Decimal(saleData.grandTotal),
+            downPayment: new Prisma.Decimal(emiPlanConfig.downPayment),
+            financedAmount: new Prisma.Decimal(emiPlanConfig.financedAmount),
+            durationMonths: emiPlanConfig.durationMonths,
+            monthlyInstallment: new Prisma.Decimal(emiPlanConfig.monthlyInstallment),
+            totalPayable: new Prisma.Decimal(emiPlanConfig.totalPayable),
+            totalPaid: new Prisma.Decimal(emiPlanConfig.downPayment),
+            remainingBalance: new Prisma.Decimal(emiPlanConfig.financedAmount),
+            startDate,
+            endDate,
+            status: 'ACTIVE',
+            approvedBy: user.name,
+          },
+        });
+
+        // Link EMI account to Sale
+        await tx.sale.update({
+          where: { id: sale.id },
+          data: { emiAccountId: emiAccount.id },
+        });
+
+        // Link serial record to EMI account
+        if (primarySerial !== 'N/A') {
+          await tx.productSerial.updateMany({
+            where: { serialNumber: primarySerial },
+            data: { emiAccountId: emiAccount.id },
+          });
+        }
+
+        // Generate Installment Schedule
+        for (let i = 1; i <= emiPlanConfig.durationMonths; i++) {
+          const dueDate = new Date();
+          dueDate.setMonth(dueDate.getMonth() + i);
+
+          await tx.eMIInstallment.create({
+            data: {
+              id: 'inst-' + Date.now() + '-' + i,
+              emiAccountId: emiAccount.id,
+              installmentNumber: i,
+              dueDate,
+              amount: new Prisma.Decimal(emiPlanConfig.monthlyInstallment),
+              penaltyAmount: new Prisma.Decimal(0),
+              paidAmount: new Prisma.Decimal(0),
+              status: 'UPCOMING',
+            },
+          });
+        }
+
+        // Record Down Payment if received
+        if (emiPlanConfig.downPayment > 0) {
+          await tx.eMIPayment.create({
+            data: {
+              id: 'epay-' + Date.now(),
+              receiptNumber: 'REC-DP-' + Date.now().toString().slice(-6),
+              emiAccountId: emiAccount.id,
+              emiNumber,
+              installmentId: 'down-payment',
+              installmentNumber: 0,
+              customerId: saleData.customerId,
+              customerName: saleData.customerName,
+              amount: new Prisma.Decimal(emiPlanConfig.downPayment),
+              penaltyPaid: new Prisma.Decimal(0),
+              paymentDate: new Date(),
+              paymentMethod: 'CASH',
+              collectedBy: user.name,
+              notes: `Down payment for ${emiNumber}`,
+            },
+          });
+        }
+      }
+
+      // 5. Update Customer Balance if there is Due
+      if (saleData.dueAmount > 0) {
+        await tx.customer.update({
+          where: { id: saleData.customerId },
+          data: {
+            currentBalance: { increment: new Prisma.Decimal(saleData.dueAmount) },
+          },
+        });
+
+        await tx.ledgerEntry.create({
+          data: {
+            id: 'led-' + Date.now() + '-due',
+            date: new Date(),
+            partyType: 'CUSTOMER',
+            partyId: saleData.customerId,
+            referenceType: 'SALE',
+            referenceNumber: invoiceNumber,
+            description: `Receivable for invoice ${invoiceNumber}`,
+            debit: new Prisma.Decimal(saleData.dueAmount),
+            credit: new Prisma.Decimal(0),
+            runningBalance: new Prisma.Decimal(saleData.dueAmount),
+          },
+        });
+      }
+
+      // 6. Update Financial Account Balance if paid amount received
+      if (saleData.paidAmount > 0) {
+        const targetAccountId = paymentAccountId || 'acc-cash-1';
+        const account = await tx.financialAccount.findFirst({
+          where: { id: targetAccountId },
+        });
+
+        if (account) {
+          await tx.financialAccount.update({
+            where: { id: account.id },
+            data: {
+              balance: { increment: new Prisma.Decimal(saleData.paidAmount) },
+            },
+          });
+
+          await tx.ledgerEntry.create({
+            data: {
+              id: 'led-' + Date.now() + '-cash',
+              date: new Date(),
+              partyType: 'ACCOUNT',
+              partyId: account.id,
+              referenceType: 'SALE',
+              referenceNumber: invoiceNumber,
+              description: `Payment received for invoice ${invoiceNumber}`,
+              debit: new Prisma.Decimal(saleData.paidAmount),
+              credit: new Prisma.Decimal(0),
+              runningBalance: new Prisma.Decimal(Number(account.balance) + saleData.paidAmount),
+            },
+          });
+        }
+      }
+
+      // 7. Audit Log
+      await tx.auditLog.create({
+        data: {
+          id: 'audit-' + Date.now(),
+          userId: user.id,
+          userName: user.name,
+          action: 'SALE_COMPLETED',
+          module: 'POS',
+          recordId: sale.id,
+          details: `Invoice ${invoiceNumber} created for ${saleData.customerName}. Total: ৳${saleData.grandTotal}. Paid: ৳${saleData.paidAmount}`,
+        },
+      });
+
+      return sale;
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Sale successfully completed.',
+      sale: result,
+    });
+  } catch (err: any) {
+    console.error('POS Sale Transaction Error:', err);
+    return NextResponse.json({ success: false, error: err.message || 'Transaction failed' }, { status: 500 });
+  }
+}

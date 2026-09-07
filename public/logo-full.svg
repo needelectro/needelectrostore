@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" fill="none">
+  <!-- 3D Lightning Bolt on the Left -->
+  <g transform="translate(20, 10) scale(1.45)">
+    <!-- 3D Solid Black Extrusion Shadow -->
+    <path d="M78 8L22 92H56L32 166L104 82H68L78 8Z" fill="#000000" />
+    <!-- Vibrant Electric Blue Contour -->
+    <path d="M72 10L16 94H50L26 168L98 84H62L72 10Z" fill="#0072FF" />
+    <!-- Crisp White Interior Core -->
+    <path d="M70 16L24 92H52L34 154L90 86H60L70 16Z" fill="#FFFFFF" />
+  </g>
+
+  <!-- Typography matching official master artwork -->
+  <!-- NEED (Electric Blue) -->
+  <text x="260" y="115" font-family="'Plus Jakarta Sans', 'Arial Black', -apple-system, sans-serif" font-size="94" font-weight="900" fill="#0072FF" letter-spacing="1">NEED</text>
+
+  <!-- ELECTRO (Solid Black) -->
+  <text x="195" y="205" font-family="'Plus Jakarta Sans', 'Arial Black', -apple-system, sans-serif" font-size="96" font-weight="900" fill="#000000" letter-spacing="2">ELECTRO</text>
+
+  <!-- Tagline: Trusted Electrical and Technological Solutions -->
+  <text x="65" y="260" font-family="'Plus Jakarta Sans', sans-serif" font-size="28" font-weight="600" fill="#000000" letter-spacing="0.2">Trusted Electrical and Technological Solutions</text>
+</svg>

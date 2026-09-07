@@ -1,0 +1,197 @@
+/* NEED ELECTRO ERP - Specialized Print Stylesheets */
+
+@media screen {
+  .print-only {
+    display: none !important;
+  }
+}
+
+@media print {
+  /* Reset page for printing */
+  body, html {
+    background: #ffffff !important;
+    color: #000000 !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide entire app UI when printing */
+  .no-print,
+  .sidebar,
+  .header,
+  .btn,
+  .modal-overlay:not(.print-active-modal),
+  .toast-container {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  /* A4 Invoice Container */
+  .a4-print-document {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    padding: 20mm;
+    background: #ffffff !important;
+    color: #111827 !important;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+    page-break-after: always;
+  }
+
+  .a4-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #2563eb;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+  }
+
+  .a4-logo-group h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #1e3a8a;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .a4-tagline {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    margin-top: 2px;
+  }
+
+  .a4-company-details {
+    font-size: 10px;
+    color: #475569;
+    margin-top: 4px;
+    line-height: 1.3;
+  }
+
+  .a4-invoice-meta {
+    text-align: right;
+  }
+
+  .a4-invoice-badge {
+    font-size: 18px;
+    font-weight: 800;
+    color: #2563eb;
+    text-transform: uppercase;
+  }
+
+  .a4-meta-table {
+    margin-top: 6px;
+    font-size: 11px;
+    text-align: right;
+  }
+
+  .a4-party-details {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 30px;
+  }
+
+  .a4-bill-to {
+    flex: 1;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 14px;
+  }
+
+  .a4-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+
+  .a4-items-table th {
+    background: #f1f5f9;
+    color: #1e293b;
+    border-top: 1px solid #cbd5e1;
+    border-bottom: 2px solid #94a3b8;
+    padding: 8px 10px;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .a4-items-table td {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 9px 10px;
+    font-size: 11px;
+    vertical-align: top;
+  }
+
+  .a4-totals-section {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    gap: 20px;
+  }
+
+  .a4-signatures {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 50px;
+    padding-top: 20px;
+  }
+
+  .a4-signature-box {
+    text-align: center;
+    width: 180px;
+    border-top: 1px solid #94a3b8;
+    padding-top: 6px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* 80mm Thermal Receipt */
+  .thermal-receipt-document {
+    width: 78mm;
+    margin: 0 auto;
+    padding: 6mm 4mm;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px;
+    line-height: 1.3;
+    color: #000000 !important;
+    background: #ffffff !important;
+  }
+
+  .thermal-receipt-document * {
+    color: #000000 !important;
+  }
+
+  .thermal-header {
+    text-align: center;
+    border-bottom: 1px dashed #000;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+  }
+
+  .thermal-header h2 {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+  }
+
+  .thermal-line {
+    border-top: 1px dashed #000;
+    margin: 6px 0;
+  }
+
+  .thermal-item-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 3px 0;
+  }
+}
