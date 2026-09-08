@@ -1,0 +1,47 @@
+{
+  "name": "NEED ELECTRO ERP — Trusted Solutions",
+  "short_name": "NeedElectro",
+  "description": "Enterprise Retail POS, Laptop EMI Installment Financing, Inventory & Service Management System.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#008CFF",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/logo-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo-transparent.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["business", "finance", "productivity"],
+  "shortcuts": [
+    {
+      "name": "New POS Sale",
+      "url": "/?module=pos",
+      "description": "Quick checkout and barcode billing"
+    },
+    {
+      "name": "Laptop EMI Collection",
+      "url": "/?module=emi",
+      "description": "Collect monthly installment payments"
+    },
+    {
+      "name": "Service Jobs",
+      "url": "/?module=service",
+      "description": "Field repair and technician cards"
+    }
+  ]
+}
