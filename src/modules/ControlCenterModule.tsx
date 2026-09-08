@@ -36,7 +36,7 @@ type ControlCenterTab =
 
 export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavigate }) => {
   const {
-    settings, updateSettings, branches, addBranch, users, roles,
+    settings, updateSettings, branches, addBranch, updateBranch, deleteBranch, users, roles,
     products, customers, financialAccounts, auditLogs,
     categoriesConfig, saveCategoryConfig, deleteCategoryConfig,
     brandsConfig, saveBrandConfig, deleteBrandConfig,
@@ -81,6 +81,7 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
 
   // Branch Modal state
   const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
+  const [editingBranchInControl, setEditingBranchInControl] = useState<Branch | null>(null);
   const [newBranch, setNewBranch] = useState({
     name: '',
     code: '',
@@ -91,16 +92,60 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
     active: true
   });
 
+  const handleOpenAddBranchInControl = () => {
+    setEditingBranchInControl(null);
+    setNewBranch({ name: '', code: '', address: '', phone: '', email: '', isWarehouse: false, active: true });
+    setIsBranchModalOpen(true);
+  };
+
+  const handleOpenEditBranchInControl = (b: Branch) => {
+    setEditingBranchInControl(b);
+    setNewBranch({
+      name: b.name,
+      code: b.code,
+      address: b.address || '',
+      phone: b.phone || '',
+      email: b.email || '',
+      isWarehouse: Boolean(b.isWarehouse),
+      active: b.active !== undefined ? b.active : true
+    });
+    setIsBranchModalOpen(true);
+  };
+
   const handleCreateBranch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newBranch.name || !newBranch.code) {
+    if (!newBranch.name.trim() || !newBranch.code.trim()) {
       addToast('error', 'Validation Error', 'Branch Name and Code are mandatory.');
       return;
     }
-    const res = await addBranch(newBranch);
-    if (res.success) {
-      setIsBranchModalOpen(false);
-      setNewBranch({ name: '', code: '', address: '', phone: '', email: '', isWarehouse: false, active: true });
+    if (editingBranchInControl) {
+      const res = await updateBranch({
+        ...editingBranchInControl,
+        ...newBranch,
+        name: newBranch.name.trim(),
+        code: newBranch.code.trim().toUpperCase()
+      });
+      if (res.success) {
+        setIsBranchModalOpen(false);
+        setEditingBranchInControl(null);
+        setNewBranch({ name: '', code: '', address: '', phone: '', email: '', isWarehouse: false, active: true });
+      }
+    } else {
+      const res = await addBranch({
+        ...newBranch,
+        name: newBranch.name.trim(),
+        code: newBranch.code.trim().toUpperCase()
+      });
+      if (res.success) {
+        setIsBranchModalOpen(false);
+        setNewBranch({ name: '', code: '', address: '', phone: '', email: '', isWarehouse: false, active: true });
+      }
+    }
+  };
+
+  const handleDeleteBranchInControl = async (b: Branch) => {
+    if (window.confirm(`Are you sure you want to permanently delete branch '${b.name}' (${b.code})?`)) {
+      await deleteBranch(b.id);
     }
   };
 
@@ -819,7 +864,7 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
                 </div>
                 <button 
                   className="btn btn-primary btn-sm"
-                  onClick={() => setIsBranchModalOpen(true)}
+                  onClick={handleOpenAddBranchInControl}
                   style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}
                 >
                   <Plus size={15} />
@@ -836,31 +881,60 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
                       <th>Type</th>
                       <th>Phone</th>
                       <th>Status</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {branches.map(b => (
-                      <tr key={b.id}>
-                        <td>
-                          <span style={{ fontWeight: 700, color: 'var(--brand-primary)' }}>{b.code}</span>
-                        </td>
-                        <td>
-                          <div style={{ fontWeight: 600 }}>{b.name}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{b.address}</div>
-                        </td>
-                        <td>
-                          <span className={`badge ${b.isWarehouse ? 'badge-warning' : 'badge-primary'}`}>
-                            {b.isWarehouse ? 'Warehouse' : 'Showroom'}
-                          </span>
-                        </td>
-                        <td style={{ fontSize: '0.8rem' }}>{b.phone}</td>
-                        <td>
-                          <span className={`badge ${b.active ? 'badge-success' : 'badge-danger'}`}>
-                            {b.active ? 'Active' : 'Disabled'}
-                          </span>
+                    {branches.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--text-muted)' }}>
+                          No branches configured yet. Click 'Add Branch' above to register your first location.
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      branches.map(b => (
+                        <tr key={b.id}>
+                          <td>
+                            <span style={{ fontWeight: 700, color: 'var(--brand-primary)' }}>{b.code}</span>
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 600 }}>{b.name}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{b.address || '—'}</div>
+                          </td>
+                          <td>
+                            <span className={`badge ${b.isWarehouse ? 'badge-warning' : 'badge-primary'}`}>
+                              {b.isWarehouse ? 'Warehouse' : 'Showroom'}
+                            </span>
+                          </td>
+                          <td style={{ fontSize: '0.8rem' }}>{b.phone || '—'}</td>
+                          <td>
+                            <span className={`badge ${b.active ? 'badge-success' : 'badge-danger'}`}>
+                              {b.active ? 'Active' : 'Disabled'}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'right' }}>
+                            <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'flex-end' }}>
+                              <button 
+                                className="btn btn-secondary btn-xs" 
+                                title="Edit Branch"
+                                onClick={() => handleOpenEditBranchInControl(b)}
+                                style={{ padding: '0.2rem 0.45rem' }}
+                              >
+                                <Edit2 size={12} />
+                              </button>
+                              <button 
+                                className="btn btn-danger btn-xs" 
+                                title="Delete Branch"
+                                onClick={() => handleDeleteBranchInControl(b)}
+                                style={{ padding: '0.2rem 0.45rem' }}
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -2328,7 +2402,9 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
       {isBranchModalOpen && (
         <div className="modal-overlay" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
           <div className="modal-content" style={{ maxWidth: '480px', width: '90%', padding: '1.75rem' }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1rem' }}>Add New Branch / Warehouse</h3>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1rem' }}>
+              {editingBranchInControl ? `Edit Branch: ${editingBranchInControl.name}` : 'Add New Branch / Warehouse'}
+            </h3>
             <form onSubmit={handleCreateBranch} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <div>
                 <label className="form-label">Branch Name</label>
@@ -2384,7 +2460,9 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
               </label>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsBranchModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Create Branch</button>
+                <button type="submit" className="btn btn-primary">
+                  {editingBranchInControl ? 'Update Branch' : 'Create Branch'}
+                </button>
               </div>
             </form>
           </div>

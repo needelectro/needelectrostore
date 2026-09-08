@@ -122,7 +122,7 @@ export async function authenticateRequest(req: NextRequest): Promise<Authenticat
     }
 
     // Parse allowed branches
-    let allowedBranches: string[] = [session.user.branchId];
+    let allowedBranches: string[] = session.user.branchId ? [session.user.branchId] : [];
     if (session.user.allowedBranchIds) {
       const raw = session.user.allowedBranchIds;
       if (Array.isArray(raw)) {
@@ -137,8 +137,8 @@ export async function authenticateRequest(req: NextRequest): Promise<Authenticat
       username: session.user.username,
       role: session.user.role,
       roleId: session.user.roleId,
-      branchId: session.user.branchId,
-      primaryBranchId: session.user.primaryBranchId || session.user.branchId,
+      branchId: session.user.branchId || '',
+      primaryBranchId: session.user.primaryBranchId || session.user.branchId || '',
       allowedBranchIds: allowedBranches,
       status: session.user.status,
       phone: session.user.phone,

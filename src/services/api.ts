@@ -336,9 +336,18 @@ export const api = {
         body: JSON.stringify(rules)
       }),
     addBranch: (branch: any) =>
-      request<{ success: boolean; message: string; branchId: string }>('/api/settings/branches', {
+      request<{ success: boolean; message: string; branchId: string; branch?: any }>('/api/settings/branches', {
         method: 'POST',
         body: JSON.stringify(branch)
+      }),
+    updateBranch: (id: string, branch: any) =>
+      request<{ success: boolean; message: string; branch?: any }>(`/api/settings/branches/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(branch)
+      }),
+    deleteBranch: (id: string) =>
+      request<{ success: boolean; message: string }>(`/api/settings/branches/${id}`, {
+        method: 'DELETE'
       }),
     saveCategory: (category: any) =>
       request<{ success: boolean; message: string }>('/api/settings/categories', {

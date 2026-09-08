@@ -42,38 +42,7 @@ export const INITIAL_SETTINGS: SystemSettings = {
   accentColor: '#008CFF'
 };
 
-export const INITIAL_BRANCHES: Branch[] = [
-  {
-    id: 'branch-1',
-    name: 'Main Branch Moulvibazar',
-    code: 'MB-MAIN',
-    address: 'Shop#5, MR Plaza, Kusumbag, Moulvibazar',
-    phone: '01733-983752',
-    email: 'needelectro23@gmail.com',
-    isWarehouse: false,
-    active: true
-  },
-  {
-    id: 'branch-2',
-    name: 'Kusumbag Tech & CCTV Hub',
-    code: 'MB-TECH',
-    address: 'MR Plaza Level 1, Kusumbag, Moulvibazar',
-    phone: '01733-983752',
-    email: 'sales@needelectro.com',
-    isWarehouse: false,
-    active: true
-  },
-  {
-    id: 'branch-3',
-    name: 'Central Warehouse & Service Hub',
-    code: 'CENTRAL-WH',
-    address: 'Sreemangal Road Industrial Area, Moulvibazar',
-    phone: '01733-983752',
-    email: 'service@needelectro.com',
-    isWarehouse: true,
-    active: true
-  }
-];
+export const INITIAL_BRANCHES: Branch[] = [];
 
 export const INITIAL_USERS: User[] = [
   {

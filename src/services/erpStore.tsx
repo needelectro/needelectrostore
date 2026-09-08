@@ -55,6 +55,8 @@ interface ERPContextType {
   selectedBranch: Branch;
   setSelectedBranchId: (id: string) => void;
   addBranch: (branchData: Omit<Branch, 'id'>) => Promise<{ success: boolean; error?: string }>;
+  updateBranch: (branchData: Branch) => Promise<{ success: boolean; error?: string }>;
+  deleteBranch: (branchId: string) => Promise<{ success: boolean; error?: string }>;
   currentUser: User;
   setCurrentUserId: (id: string) => void;
   users: User[];
@@ -299,7 +301,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (res && res.success && res.data) {
         const d = res.data;
         if (d.settings) setSettings(d.settings);
-        if (Array.isArray(d.branches) && d.branches.length > 0) setBranches(d.branches);
+        if (Array.isArray(d.branches)) setBranches(d.branches);
         if (d.posSettings) setPosSettings(d.posSettings);
         if (d.inventoryRules) setInventoryRules(d.inventoryRules);
         if (d.setupStatus) setSetupStatus(d.setupStatus);
@@ -406,7 +408,18 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setToasts(prev => prev.filter(t => t.id !== id));
   };
 
-  const selectedBranch = branches.find(b => b.id === selectedBranchId) || branches[0];
+  const DEFAULT_FALLBACK_BRANCH: Branch = {
+    id: '',
+    name: 'No Branch Configured',
+    code: 'NONE',
+    address: '',
+    phone: '',
+    email: '',
+    isWarehouse: false,
+    active: false,
+  };
+
+  const selectedBranch = branches.find(b => b.id === selectedBranchId) || branches[0] || DEFAULT_FALLBACK_BRANCH;
   const currentUser = users.find(u => u.id === currentUserId) || users[0];
 
   const logAction = (module: AuditLog['module'], action: string, recordId: string, details: string) => {
@@ -1202,6 +1215,49 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const updateBranch = async (branchData: Branch): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.settings.updateBranch(branchData.id, branchData);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to update branch.';
+        addToast('error', 'Branch Update Failed', err);
+        return { success: false, error: err };
+      }
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'BRANCH_UPDATED', branchData.id, `Updated branch/warehouse '${branchData.name}' (${branchData.code})`);
+      addToast('success', 'Branch Updated', `${branchData.name} updated successfully.`);
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error updating branch.';
+      addToast('error', 'Branch Update Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  const deleteBranch = async (branchId: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const targetBranch = branches.find(b => b.id === branchId);
+      const res = await api.settings.deleteBranch(branchId);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to delete branch.';
+        addToast('error', 'Branch Deletion Failed', err);
+        return { success: false, error: err };
+      }
+      await refreshFromDatabase();
+      if (selectedBranchId === branchId) {
+        const nextBranch = branches.find(b => b.id !== branchId);
+        setSelectedBranchIdState(nextBranch?.id || '');
+      }
+      logAction('SETTINGS', 'BRANCH_DELETED', branchId, `Removed branch '${targetBranch?.name || branchId}'`);
+      addToast('success', 'Branch Removed', `${targetBranch?.name || 'Branch'} was removed.`);
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error deleting branch.';
+      addToast('error', 'Branch Deletion Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
   // Stock Adjustment
   const stockAdjustment = async (productId: string, branchId: string, quantityDiff: number, reason: string, serialNumbers?: string[]): Promise<{ success: boolean; error?: string }> => {
     try {
@@ -1785,6 +1841,8 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         selectedBranch,
         setSelectedBranchId: setSelectedBranchIdState,
         addBranch,
+        updateBranch,
+        deleteBranch,
         currentUser,
         setCurrentUserId: setCurrentUserIdState,
         users,

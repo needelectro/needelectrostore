@@ -158,7 +158,7 @@ model User {
   username            String?   @unique
   role                String    // Role code e.g. SUPER_ADMIN, ADMIN, etc.
   roleId              String?   @map("role_id")
-  branchId            String    @map("branch_id")
+  branchId            String?   @map("branch_id")
   primaryBranchId     String?   @map("primary_branch_id")
   allowedBranchIds    Json?     @map("allowed_branch_ids") // String array of branch IDs
   phone               String?
@@ -173,7 +173,7 @@ model User {
   lockedUntil         DateTime? @map("locked_until")
   createdAt           DateTime  @default(now()) @map("created_at")
 
-  branch  Branch    @relation(fields: [branchId], references: [id])
+  branch  Branch?   @relation(fields: [branchId], references: [id], onDelete: SetNull)
   roleRel Role?     @relation(fields: [roleId], references: [id])
   sessions Session[]
 
