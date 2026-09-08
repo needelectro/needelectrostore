@@ -17,31 +17,31 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  // Form State
+  // Form State - No defaults for new products
   const [name, setName] = useState('');
   const [sku, setSku] = useState('');
-  const [category, setCategory] = useState<ProductCategory>('Laptop');
+  const [category, setCategory] = useState<ProductCategory | ''>('');
   const [brand, setBrand] = useState('');
   const [model, setModel] = useState('');
   const [description, setDescription] = useState('');
-  const [purchasePrice, setPurchasePrice] = useState<number>(30000);
-  const [costPrice, setCostPrice] = useState<number>(31500);
-  const [retailPrice, setRetailPrice] = useState<number>(38000);
-  const [wholesalePrice, setWholesalePrice] = useState<number>(36000);
-  const [emiPrice, setEmiPrice] = useState<number>(42000);
-  const [currentStock, setCurrentStock] = useState<number>(5);
-  const [minStock, setMinStock] = useState<number>(2);
-  const [supplierId, setSupplierId] = useState<string>(suppliers[0]?.id || '');
-  const [warrantyMonths, setWarrantyMonths] = useState<number>(12);
-  const [isSerialized, setIsSerialized] = useState<boolean>(true);
+  const [purchasePrice, setPurchasePrice] = useState<number | ''>('');
+  const [costPrice, setCostPrice] = useState<number | ''>('');
+  const [retailPrice, setRetailPrice] = useState<number | ''>('');
+  const [wholesalePrice, setWholesalePrice] = useState<number | ''>('');
+  const [emiPrice, setEmiPrice] = useState<number | ''>('');
+  const [currentStock, setCurrentStock] = useState<number | ''>('');
+  const [minStock, setMinStock] = useState<number | ''>('');
+  const [supplierId, setSupplierId] = useState<string>('');
+  const [warrantyMonths, setWarrantyMonths] = useState<number | ''>('');
+  const [isSerialized, setIsSerialized] = useState<boolean>(false);
 
   // Tech Specs
-  const [cpu, setCpu] = useState('Intel Core i5 10th Gen');
-  const [ram, setRam] = useState('16GB DDR4');
-  const [storage, setStorage] = useState('512GB NVMe SSD');
-  const [display, setDisplay] = useState('14.0" FHD IPS');
-  const [batteryCondition, setBatteryCondition] = useState('92% Health (4-5 hrs)');
-  const [physicalCondition, setPhysicalCondition] = useState('Grade A+ Pristine');
+  const [cpu, setCpu] = useState('');
+  const [ram, setRam] = useState('');
+  const [storage, setStorage] = useState('');
+  const [display, setDisplay] = useState('');
+  const [batteryCondition, setBatteryCondition] = useState('');
+  const [physicalCondition, setPhysicalCondition] = useState('');
 
   const categories: ProductCategory[] = [
     'Laptop', 'Desktop', 'Monitor', 'Smartphone', 'Tablet', 'Printer',
@@ -60,74 +60,107 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
 
   const handleOpenAdd = () => {
     setName('');
-    setSku(`PROD-${Math.floor(1000 + Math.random() * 9000)}`);
-    setCategory('Laptop');
-    setBrand('HP');
-    setModel('EliteBook');
+    setSku('');
+    setCategory('');
+    setBrand('');
+    setModel('');
     setDescription('');
-    setIsSerialized(true);
+    setPurchasePrice('');
+    setCostPrice('');
+    setRetailPrice('');
+    setWholesalePrice('');
+    setEmiPrice('');
+    setCurrentStock('');
+    setMinStock('');
+    setSupplierId('');
+    setWarrantyMonths('');
+    setIsSerialized(false);
+    setCpu('');
+    setRam('');
+    setStorage('');
+    setDisplay('');
+    setBatteryCondition('');
+    setPhysicalCondition('');
     setEditingProduct(null);
     setShowAddModal(true);
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !sku.trim()) {
-      alert('Product name and SKU are required.');
+    if (!name.trim()) {
+      alert('Product name is required.');
+      return;
+    }
+    if (!category) {
+      alert('Please select a product category.');
       return;
     }
 
-    const specs: LaptopSpecifications | undefined = category === 'Laptop' ? {
-      processor: cpu,
-      ram,
-      storage,
-      display,
-      operatingSystem: 'Windows 11 Pro Genuine',
-      batteryCondition,
-      physicalCondition,
-      generation: '10th Gen',
-      color: 'Silver'
-    } : undefined;
+    const finalSku = sku.trim() || `PROD-${Math.floor(1000 + Math.random() * 9000)}`;
+    const finalBrand = brand.trim() || 'Generic';
+
+    const numPurchase = purchasePrice === '' ? 0 : Number(purchasePrice);
+    const numCost = costPrice === '' ? 0 : Number(costPrice);
+    const numRetail = retailPrice === '' ? 0 : Number(retailPrice);
+    const numWholesale = wholesalePrice === '' ? 0 : Number(wholesalePrice);
+    const numEmi = emiPrice === '' ? 0 : Number(emiPrice);
+    const numStock = currentStock === '' ? 0 : Number(currentStock);
+    const numMinStock = minStock === '' ? 0 : Number(minStock);
+    const numWarranty = warrantyMonths === '' ? 0 : Number(warrantyMonths);
+
+    const hasAnyLaptopSpec = !!(cpu.trim() || ram.trim() || storage.trim() || display.trim() || batteryCondition.trim() || physicalCondition.trim());
+
+    const specs: LaptopSpecifications | undefined = (category === 'Laptop' && hasAnyLaptopSpec) ? {
+      processor: cpu.trim(),
+      ram: ram.trim(),
+      storage: storage.trim(),
+      display: display.trim(),
+      operatingSystem: (editingProduct?.specs as LaptopSpecifications | undefined)?.operatingSystem || '',
+      batteryCondition: batteryCondition.trim(),
+      physicalCondition: physicalCondition.trim(),
+      generation: (editingProduct?.specs as LaptopSpecifications | undefined)?.generation || '',
+      color: (editingProduct?.specs as LaptopSpecifications | undefined)?.color || ''
+    } : (editingProduct?.specs as LaptopSpecifications | undefined);
 
     let res;
     if (editingProduct) {
       res = await updateProduct({
         ...editingProduct,
-        name,
-        sku,
-        category,
-        brand,
-        model,
-        description,
-        purchasePrice,
-        costPrice,
-        retailPrice,
-        wholesalePrice,
-        emiPrice,
-        currentStock,
-        minStock,
+        name: name.trim(),
+        sku: finalSku,
+        category: category as ProductCategory,
+        brand: finalBrand,
+        model: model.trim(),
+        description: description.trim(),
+        purchasePrice: numPurchase,
+        costPrice: numCost,
+        retailPrice: numRetail,
+        wholesalePrice: numWholesale,
+        emiPrice: numEmi,
+        currentStock: numStock,
+        minStock: numMinStock,
         supplierId,
-        warrantyPeriodMonths: warrantyMonths,
+        warrantyPeriodMonths: numWarranty,
         isSerialized,
         specs
       });
     } else {
       res = await createProduct({
-        name,
-        sku,
-        category,
-        brand,
-        model,
-        description,
-        purchasePrice,
-        costPrice,
-        retailPrice,
-        wholesalePrice,
-        emiPrice,
-        currentStock,
-        minStock,
+        name: name.trim(),
+        sku: finalSku,
+        category: category as ProductCategory,
+        brand: finalBrand,
+        model: model.trim(),
+        description: description.trim(),
+        purchasePrice: numPurchase,
+        costPrice: numCost,
+        retailPrice: numRetail,
+        wholesalePrice: numWholesale,
+        emiPrice: numEmi,
+        currentStock: numStock,
+        minStock: numMinStock,
         supplierId,
-        warrantyPeriodMonths: warrantyMonths,
+        warrantyPeriodMonths: numWarranty,
         isSerialized,
         status: 'ACTIVE',
         specs
@@ -257,17 +290,33 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                           setCategory(p.category);
                           setBrand(p.brand);
                           setModel(p.model);
-                          setDescription(p.description);
-                          setPurchasePrice(p.purchasePrice);
-                          setCostPrice(p.costPrice);
-                          setRetailPrice(p.retailPrice);
-                          setWholesalePrice(p.wholesalePrice);
-                          setEmiPrice(p.emiPrice);
-                          setCurrentStock(p.currentStock);
-                          setMinStock(p.minStock);
-                          setSupplierId(p.supplierId);
-                          setWarrantyMonths(p.warrantyPeriodMonths);
-                          setIsSerialized(p.isSerialized);
+                          setDescription(p.description || '');
+                          setPurchasePrice(p.purchasePrice || '');
+                          setCostPrice(p.costPrice || '');
+                          setRetailPrice(p.retailPrice || '');
+                          setWholesalePrice(p.wholesalePrice || '');
+                          setEmiPrice(p.emiPrice || '');
+                          setCurrentStock(p.currentStock || '');
+                          setMinStock(p.minStock || '');
+                          setSupplierId(p.supplierId || '');
+                          setWarrantyMonths(p.warrantyPeriodMonths || '');
+                          setIsSerialized(p.isSerialized || false);
+                          if (p.specs && 'processor' in p.specs) {
+                            const s = p.specs as LaptopSpecifications;
+                            setCpu(s.processor || '');
+                            setRam(s.ram || '');
+                            setStorage(s.storage || '');
+                            setDisplay(s.display || '');
+                            setBatteryCondition(s.batteryCondition || '');
+                            setPhysicalCondition(s.physicalCondition || '');
+                          } else {
+                            setCpu('');
+                            setRam('');
+                            setStorage('');
+                            setDisplay('');
+                            setBatteryCondition('');
+                            setPhysicalCondition('');
+                          }
                           setShowAddModal(true);
                         }}
                       >
@@ -304,19 +353,20 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                     <input
                       type="text"
                       className="form-input"
+                      placeholder="Enter product title or model name"
                       value={name}
                       onChange={e => setName(e.target.value)}
                       required
                     />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">SKU Code *</label>
+                    <label className="form-label">SKU Code</label>
                     <input
                       type="text"
                       className="form-input"
+                      placeholder="Leave blank to auto-generate"
                       value={sku}
                       onChange={e => setSku(e.target.value)}
-                      required
                     />
                   </div>
                   <div className="form-group">
@@ -325,7 +375,9 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                       className="form-select"
                       value={category}
                       onChange={e => setCategory(e.target.value as ProductCategory)}
+                      required
                     >
+                      <option value="">-- Select Category --</option>
                       {categories.map(c => (
                         <option key={c} value={c}>{c}</option>
                       ))}
@@ -339,6 +391,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                     <input
                       type="text"
                       className="form-input"
+                      placeholder="e.g. HP, Dell, Asus, Samsung"
                       value={brand}
                       onChange={e => setBrand(e.target.value)}
                     />
@@ -348,6 +401,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                     <input
                       type="text"
                       className="form-input"
+                      placeholder="e.g. EliteBook 840 G7"
                       value={model}
                       onChange={e => setModel(e.target.value)}
                     />
@@ -357,8 +411,10 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                     <input
                       type="number"
                       className="form-input"
+                      placeholder="0"
                       value={warrantyMonths}
-                      onChange={e => setWarrantyMonths(Number(e.target.value) || 0)}
+                      onChange={e => setWarrantyMonths(e.target.value === '' ? '' : Number(e.target.value))}
+                      min="0"
                     />
                   </div>
                 </div>
@@ -374,8 +430,10 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                       <input
                         type="number"
                         className="form-input"
+                        placeholder="0.00"
                         value={purchasePrice}
-                        onChange={e => setPurchasePrice(Number(e.target.value) || 0)}
+                        onChange={e => setPurchasePrice(e.target.value === '' ? '' : Number(e.target.value))}
+                        min="0"
                       />
                     </div>
                     <div className="form-group">
@@ -383,8 +441,10 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                       <input
                         type="number"
                         className="form-input"
+                        placeholder="0.00"
                         value={costPrice}
-                        onChange={e => setCostPrice(Number(e.target.value) || 0)}
+                        onChange={e => setCostPrice(e.target.value === '' ? '' : Number(e.target.value))}
+                        min="0"
                       />
                     </div>
                     <div className="form-group">
@@ -392,8 +452,10 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                       <input
                         type="number"
                         className="form-input"
+                        placeholder="0.00"
                         value={retailPrice}
-                        onChange={e => setRetailPrice(Number(e.target.value) || 0)}
+                        onChange={e => setRetailPrice(e.target.value === '' ? '' : Number(e.target.value))}
+                        min="0"
                       />
                     </div>
                     <div className="form-group">
@@ -401,8 +463,10 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                       <input
                         type="number"
                         className="form-input"
+                        placeholder="0.00"
                         value={wholesalePrice}
-                        onChange={e => setWholesalePrice(Number(e.target.value) || 0)}
+                        onChange={e => setWholesalePrice(e.target.value === '' ? '' : Number(e.target.value))}
+                        min="0"
                       />
                     </div>
                     <div className="form-group">
@@ -410,10 +474,49 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                       <input
                         type="number"
                         className="form-input"
+                        placeholder="0.00"
                         value={emiPrice}
-                        onChange={e => setEmiPrice(Number(e.target.value) || 0)}
+                        onChange={e => setEmiPrice(e.target.value === '' ? '' : Number(e.target.value))}
+                        min="0"
                       />
                     </div>
+                  </div>
+                </div>
+
+                {/* Inventory & Tracking Settings */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                  <div className="form-group">
+                    <label className="form-label">Opening Stock Quantity</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      placeholder="0"
+                      value={currentStock}
+                      onChange={e => setCurrentStock(e.target.value === '' ? '' : Number(e.target.value))}
+                      min="0"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Low Stock Alert Level</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      placeholder="0"
+                      value={minStock}
+                      onChange={e => setMinStock(e.target.value === '' ? '' : Number(e.target.value))}
+                      min="0"
+                    />
+                  </div>
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <label className="form-label">Tracking Mode</label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', marginTop: '6px' }}>
+                      <input
+                        type="checkbox"
+                        checked={isSerialized}
+                        onChange={e => setIsSerialized(e.target.checked)}
+                      />
+                      <span>Track Individual Serial / Barcode</span>
+                    </label>
                   </div>
                 </div>
 
@@ -430,6 +533,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                         <input
                           type="text"
                           className="form-input"
+                          placeholder="e.g. Intel Core i5 11th Gen"
                           value={cpu}
                           onChange={e => setCpu(e.target.value)}
                         />
@@ -439,6 +543,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                         <input
                           type="text"
                           className="form-input"
+                          placeholder="e.g. 16GB DDR4"
                           value={ram}
                           onChange={e => setRam(e.target.value)}
                         />
@@ -448,6 +553,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                         <input
                           type="text"
                           className="form-input"
+                          placeholder="e.g. 512GB NVMe SSD"
                           value={storage}
                           onChange={e => setStorage(e.target.value)}
                         />
@@ -457,6 +563,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                         <input
                           type="text"
                           className="form-input"
+                          placeholder="e.g. 14.0&quot; FHD IPS"
                           value={display}
                           onChange={e => setDisplay(e.target.value)}
                         />
@@ -466,6 +573,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                         <input
                           type="text"
                           className="form-input"
+                          placeholder="e.g. 92% Health (4-5 hrs)"
                           value={batteryCondition}
                           onChange={e => setBatteryCondition(e.target.value)}
                         />
@@ -475,6 +583,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                         <input
                           type="text"
                           className="form-input"
+                          placeholder="e.g. Grade A+ Pristine"
                           value={physicalCondition}
                           onChange={e => setPhysicalCondition(e.target.value)}
                         />
