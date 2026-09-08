@@ -18,7 +18,6 @@ authRouter.get('/setup-status', (req, res) => {
       data: {
         isSuperAdminConfigured: superAdminCount > 0,
         initialSetupCompleted: status ? Boolean(status.initial_setup_completed && superAdminCount > 0) : false,
-        systemMode: status?.system_mode || 'PRODUCTION',
         isCompanyConfigured: Boolean(status?.is_company_configured),
         isMainBranchConfigured: Boolean(status?.is_main_branch_configured),
         isWarehouseConfigured: Boolean(status?.is_warehouse_configured)

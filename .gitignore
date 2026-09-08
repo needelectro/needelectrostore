@@ -1,0 +1,44 @@
+# Node dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Next.js build output
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+
+# Environment files - NEVER commit secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Local SQLite databases & backups
+data/*.db
+data/*.db-wal
+data/*.db-shm
+backups/
+_backup_before_real_db/
+*.sqlite
+*.sqlite3
+
+# Scratch & debug directories
+scratch/
+
+# Vercel
+.vercel
+
+# IDE & OS files
+.DS_Store
+*.pem
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/

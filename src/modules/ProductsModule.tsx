@@ -11,7 +11,7 @@ interface ProductsModuleProps {
 }
 
 export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) => {
-  const { products, createProduct, updateProduct, suppliers } = useERP();
+  const { products, createProduct, updateProduct, suppliers, serials, setActiveBarcodeToPrint } = useERP();
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -235,31 +235,45 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                     )}
                   </td>
                   <td style={{ textAlign: 'center' }}>
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => {
-                        setEditingProduct(p);
-                        setName(p.name);
-                        setSku(p.sku);
-                        setCategory(p.category);
-                        setBrand(p.brand);
-                        setModel(p.model);
-                        setDescription(p.description);
-                        setPurchasePrice(p.purchasePrice);
-                        setCostPrice(p.costPrice);
-                        setRetailPrice(p.retailPrice);
-                        setWholesalePrice(p.wholesalePrice);
-                        setEmiPrice(p.emiPrice);
-                        setCurrentStock(p.currentStock);
-                        setMinStock(p.minStock);
-                        setSupplierId(p.supplierId);
-                        setWarrantyMonths(p.warrantyPeriodMonths);
-                        setIsSerialized(p.isSerialized);
-                        setShowAddModal(true);
-                      }}
-                    >
-                      <Edit2 size={13} /> Edit
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center' }}>
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', gap: '0.3rem' }}
+                        title="Print Barcode Labels"
+                        onClick={() => {
+                          const prodSerials = serials.filter(s => s.productId === p.id && s.status === 'AVAILABLE').map(s => s.serialNumber);
+                          setActiveBarcodeToPrint({ product: p, serials: prodSerials });
+                        }}
+                      >
+                        <Tag size={12} /> Barcode
+                      </button>
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', gap: '0.3rem' }}
+                        onClick={() => {
+                          setEditingProduct(p);
+                          setName(p.name);
+                          setSku(p.sku);
+                          setCategory(p.category);
+                          setBrand(p.brand);
+                          setModel(p.model);
+                          setDescription(p.description);
+                          setPurchasePrice(p.purchasePrice);
+                          setCostPrice(p.costPrice);
+                          setRetailPrice(p.retailPrice);
+                          setWholesalePrice(p.wholesalePrice);
+                          setEmiPrice(p.emiPrice);
+                          setCurrentStock(p.currentStock);
+                          setMinStock(p.minStock);
+                          setSupplierId(p.supplierId);
+                          setWarrantyMonths(p.warrantyPeriodMonths);
+                          setIsSerialized(p.isSerialized);
+                          setShowAddModal(true);
+                        }}
+                      >
+                        <Edit2 size={12} /> Edit
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

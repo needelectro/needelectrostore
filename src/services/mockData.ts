@@ -397,8 +397,7 @@ export const INITIAL_SETUP_STATUS: SetupStatus = {
   isInvoiceSettingsConfigured: true,
   isNotificationConfigured: true,
   isOpeningBalancesConfigured: false,
-  initialSetupCompleted: false,
-  systemMode: 'PRODUCTION'
+  initialSetupCompleted: false
 };
 
 export const INITIAL_CATEGORIES_CONFIG: ProductCategoryConfig[] = [

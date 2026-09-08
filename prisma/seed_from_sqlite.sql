@@ -1,7 +1,7 @@
 -- =========================================================================
 -- NEED ELECTRO ERP: PostgreSQL Data Migration Seed
 -- Source: data/need_electro.db (SQLite)
--- Generated: 2026-09-07T10:50:25.764Z
+-- Generated: 2026-09-07T13:44:45.853Z
 -- Target: Supabase PostgreSQL (47 Normalized Relational Tables)
 -- =========================================================================
 
@@ -475,9 +475,9 @@ INSERT INTO users (
 ) VALUES (
   'user-superadmin-1', 'Amdadur Rahman', 'contact.amdadur@gmail.com', 'amdadur',
   'SUPER_ADMIN', 'role-superadmin', 'branch-1', 'branch-1',
-  '["branch-1", "branch-2", "branch-3"]'::jsonb, '01733-983752', 'pbkdf2:sha256:100000:ed6f5d69f430e675ceedbe8fe5db733b:1e37cde554ace2df5e0d92e2f4c2ffd9bfdc5744692bfc965b851991ae06bbb6',
+  '["branch-1", "branch-2", "branch-3"]'::jsonb, '01733-983752', 'pbkdf2:sha256:100000:174c5fc2732a7223b3159ee541f70056:ec043801de1eb7e2b77d870ed0e108dfb46390f8fb8283d35b50acbec8a78683',
   NULL, NULL, TRUE,
-  'ACTIVE', FALSE, '2026-09-07T04:50:17.000Z',
+  'ACTIVE', FALSE, '2026-09-07T06:09:03.000Z',
   0, NULL, '2026-09-07T00:34:48.000Z'
 ) ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash, status = EXCLUDED.status;
 
@@ -713,6 +713,20 @@ INSERT INTO configurable_payment_methods (
 ) ON CONFLICT (id) DO NOTHING;
 
 
+INSERT INTO products (
+  id, name, sku, category, brand, model, description, image_url, purchase_price, cost_price,
+  retail_price, wholesale_price, emi_price, current_stock, min_stock, supplier_id,
+  warranty_period_months, is_serialized, status, specs, created_at, updated_at
+) VALUES (
+  'prod-1788783228026', 'HP 430 G8 8/256', 'PROD-3972', 'Laptop',
+  'HP', 'Probook', '', '',
+  30000.00, 500.00, 38000.00, 31000.00,
+  42000.00, 5, 2, '',
+  12, TRUE, 'ACTIVE',
+  '{"processor":"Intel Core i5 11th Gen","ram":"8GB DDR4","storage":"256GB NVMe SSD","display":"13.3\" FHD IPS","operatingSystem":"Windows 11 Pro Genuine","batteryCondition":"92% Health (4-5 hrs)","physicalCondition":"Grade A+ Pristine","generation":"10th Gen","color":"Silver"}'::jsonb, '2026-09-07T12:13:48.026Z', NOW()
+) ON CONFLICT (id) DO NOTHING;
+
+
 INSERT INTO customers (
   id, customer_id, name, phone, email, address, nid, guarantor, customer_photo,
   credit_limit, current_balance, notes, created_at
@@ -721,6 +735,28 @@ INSERT INTO customers (
   NULL, 'Moulvibazar', '', '[]'::jsonb,
   NULL, 50000.00, 0.00,
   '', '2026-09-07T10:50:17.437Z'
+) ON CONFLICT (id) DO NOTHING;
+
+
+INSERT INTO customers (
+  id, customer_id, name, phone, email, address, nid, guarantor, customer_photo,
+  credit_limit, current_balance, notes, created_at
+) VALUES (
+  'cust-1788778258504', 'CUST-01002', 'Shahidul Islam', '01711122233',
+  NULL, 'Sylhet', '', '[]'::jsonb,
+  NULL, 0.00, 0.00,
+  '', '2026-09-07T10:50:58.504Z'
+) ON CONFLICT (id) DO NOTHING;
+
+
+INSERT INTO customers (
+  id, customer_id, name, phone, email, address, nid, guarantor, customer_photo,
+  credit_limit, current_balance, notes, created_at
+) VALUES (
+  'cust-1788782994055', 'CUST-01003', 'Amdadur Rahman', '0173398375',
+  NULL, 'Moulvibazar', '', '[]'::jsonb,
+  NULL, 50000.00, 0.00,
+  '', '2026-09-07T12:09:54.055Z'
 ) ON CONFLICT (id) DO NOTHING;
 
 
@@ -802,6 +838,21 @@ INSERT INTO inventory_transactions (
   -1, 55000.00, 55000.00,
   1, 0, 'INVOICE',
   'INV-2026-1002', '["SN-HP-1788763054947-2"]'::jsonb, NULL,
+  'Amdadur Rahman'
+) ON CONFLICT (id) DO NOTHING;
+
+
+INSERT INTO inventory_transactions (
+  id, transaction_number, date, type, product_id, product_name, branch_id,
+  from_branch_id, to_branch_id, quantity, unit_cost, total_value, opening_stock,
+  closing_stock, reference_type, reference_id, serial_numbers, notes, created_by
+) VALUES (
+  'itx-1788783228027', 'TX-INIT-PROD-3972', '2026-09-07T00:00:00.000Z',
+  'ADJUSTMENT', 'prod-1788783228026', 'HP 430 G8 8/256',
+  'branch-1', NULL, NULL,
+  5, 500.00, 2500.00,
+  0, 5, 'INITIAL',
+  'PROD-REG', '[]'::jsonb, NULL,
   'Amdadur Rahman'
 ) ON CONFLICT (id) DO NOTHING;
 
@@ -1019,6 +1070,60 @@ INSERT INTO audit_logs (
   'audit-1788778217439', '2026-09-07T04:50:17.000Z', 'user-superadmin-1',
   'Amdadur Rahman', 'CUSTOMER_CREATED', 'CUSTOMER',
   'cust-1788778217437', 'Created customer record ''Amdadur Rahman'' (CUST-01001, Phone: 01733983752).', '::1'
+) ON CONFLICT (id) DO NOTHING;
+
+
+INSERT INTO audit_logs (
+  id, timestamp, user_id, user_name, action, module, record_id, details, ip_address
+) VALUES (
+  'audit-1788778254303', '2026-09-07T04:50:54.000Z', 'user-superadmin-1',
+  'Amdadur Rahman', 'LOGIN_SUCCESS', 'SETTINGS',
+  'user-superadmin-1', 'User Amdadur Rahman (contact.amdadur@gmail.com) logged in successfully as SUPER_ADMIN.', '::1'
+) ON CONFLICT (id) DO NOTHING;
+
+
+INSERT INTO audit_logs (
+  id, timestamp, user_id, user_name, action, module, record_id, details, ip_address
+) VALUES (
+  'audit-1788778258498', '2026-09-07T04:50:58.000Z', 'user-superadmin-1',
+  'Amdadur Rahman', 'LOGIN_SUCCESS', 'SETTINGS',
+  'user-superadmin-1', 'User Amdadur Rahman (contact.amdadur@gmail.com) logged in successfully as SUPER_ADMIN.', '::1'
+) ON CONFLICT (id) DO NOTHING;
+
+
+INSERT INTO audit_logs (
+  id, timestamp, user_id, user_name, action, module, record_id, details, ip_address
+) VALUES (
+  'audit-1788778258504', '2026-09-07T04:50:58.000Z', 'user-superadmin-1',
+  'Amdadur Rahman', 'CUSTOMER_CREATED', 'CUSTOMER',
+  'cust-1788778258504', 'Created customer record ''Shahidul Islam'' (CUST-01002, Phone: 01711122233).', '::1'
+) ON CONFLICT (id) DO NOTHING;
+
+
+INSERT INTO audit_logs (
+  id, timestamp, user_id, user_name, action, module, record_id, details, ip_address
+) VALUES (
+  'audit-1788782943399', '2026-09-07T06:09:03.000Z', 'user-superadmin-1',
+  'Amdadur Rahman', 'LOGIN_SUCCESS', 'SETTINGS',
+  'user-superadmin-1', 'User Amdadur Rahman (contact.amdadur@gmail.com) logged in successfully as SUPER_ADMIN.', '::1'
+) ON CONFLICT (id) DO NOTHING;
+
+
+INSERT INTO audit_logs (
+  id, timestamp, user_id, user_name, action, module, record_id, details, ip_address
+) VALUES (
+  'audit-1788782994125', '2026-09-07T06:09:54.000Z', 'user-superadmin-1',
+  'Amdadur Rahman', 'CUSTOMER_CREATED', 'CUSTOMER',
+  'cust-1788782994055', 'Created customer record ''Amdadur Rahman'' (CUST-01003, Phone: 0173398375).', '::1'
+) ON CONFLICT (id) DO NOTHING;
+
+
+INSERT INTO audit_logs (
+  id, timestamp, user_id, user_name, action, module, record_id, details, ip_address
+) VALUES (
+  'audit-1788783228027', '2026-09-07T06:13:48.000Z', 'user-superadmin-1',
+  'Amdadur Rahman', 'PRODUCT_CREATED', 'INVENTORY',
+  'prod-1788783228026', 'Registered new product ''HP 430 G8 8/256'' (PROD-3972) in Laptop with 5 initial stock.', '::1'
 ) ON CONFLICT (id) DO NOTHING;
 
 

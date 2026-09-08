@@ -7,6 +7,7 @@ import { ToastContainer } from './components/ToastContainer';
 import { A4InvoicePrint } from './components/print/A4InvoicePrint';
 import { ThermalReceiptPrint } from './components/print/ThermalReceiptPrint';
 import { EMIAgreementPrint } from './components/print/EMIAgreementPrint';
+import { BarcodeLabelPrint } from './components/print/BarcodeLabelPrint';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { LockScreenModal } from './components/auth/LockScreenModal';
 import { ShieldAlert } from 'lucide-react';
@@ -42,6 +43,7 @@ const MainAppLayout: React.FC = () => {
     settings, activeInvoiceToPrint, setActiveInvoiceToPrint,
     activeThermalReceiptToPrint, setActiveThermalReceiptToPrint,
     activeEmiAgreementToPrint, setActiveEmiAgreementToPrint,
+    activeBarcodeToPrint, setActiveBarcodeToPrint,
     isAuthenticated, isLocked, currentUser, hasPermission, setupStatus
   } = useERP();
 
@@ -265,6 +267,16 @@ const MainAppLayout: React.FC = () => {
           account={activeEmiAgreementToPrint}
           settings={settings}
           onClose={() => setActiveEmiAgreementToPrint(null)}
+        />
+      )}
+
+      {/* Barcode & Serial Label Print Overlay */}
+      {activeBarcodeToPrint && (
+        <BarcodeLabelPrint
+          product={activeBarcodeToPrint.product}
+          serials={activeBarcodeToPrint.serials}
+          settings={settings}
+          onClose={() => setActiveBarcodeToPrint(null)}
         />
       )}
     </div>

@@ -18,8 +18,29 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
   const { 
     emiAccounts, emiPlans, emiPayments, customers, products, serials, 
     collectEMIPayment, createSale, createCustomer, selectedBranch, currentUser, 
-    setActiveEmiAgreementToPrint, settings, updateSettings, saveEMIPlan 
+    setActiveEmiAgreementToPrint, settings, updateSettings, saveEMIPlan,
+    addToast, refreshFromDatabase
   } = useERP();
+
+  const [isEvaluatingOverdue, setIsEvaluatingOverdue] = useState(false);
+
+  const handleRunOverdueEvaluation = async () => {
+    setIsEvaluatingOverdue(true);
+    try {
+      const res = await fetch('/api/emi/evaluate-overdue', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        addToast('success', 'Overdue Audit Completed', `Evaluated ${data.data?.processedInstallments || 0} installments. Newly overdue: ${data.data?.newlyOverdueCount || 0}. Penalty accrued: ৳${data.data?.totalPenaltyAccrued || 0}`);
+        if (refreshFromDatabase) await refreshFromDatabase();
+      } else {
+        addToast('error', 'Audit Failed', data.error || 'Failed to run overdue evaluation');
+      }
+    } catch (err: any) {
+      addToast('error', 'Audit Error', err.message);
+    } finally {
+      setIsEvaluatingOverdue(false);
+    }
+  };
 
   // Active View Tab: 'dashboard' | 'accounts' | 'collect' | 'new_emi' | 'reminders' | 'plans'
   const [activeTab, setActiveTab] = useState<'dashboard' | 'accounts' | 'collect' | 'new_emi' | 'reminders' | 'plans'>(
@@ -299,6 +320,14 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
         </div>
 
         <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button 
+            className="btn btn-sm btn-secondary"
+            onClick={handleRunOverdueEvaluation}
+            disabled={isEvaluatingOverdue}
+            title="Run daily overdue audit and penalty calculation across all active accounts"
+          >
+            <Clock size={16} /> {isEvaluatingOverdue ? 'Auditing...' : 'Audit Overdue Penalties'}
+          </button>
           <button 
             className={`btn btn-sm ${activeTab === 'new_emi' ? 'btn-primary' : 'btn-warning'}`}
             onClick={() => setActiveTab('new_emi')}

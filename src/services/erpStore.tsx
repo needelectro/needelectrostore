@@ -77,7 +77,6 @@ interface ERPContextType {
   setupStatus: SetupStatus;
   updateSetupStatus: (statusUpdates: Partial<SetupStatus>) => void;
   completeInitialSetup: (adminData: { name: string; email: string; phone: string; username?: string; password: string }, companyData?: Partial<SystemSettings>) => Promise<{ success: boolean; error?: string }>;
-  setSystemMode: (mode: 'DEMO' | 'PRODUCTION') => void;
   openingBalances: OpeningBalanceEntry[];
   recordOpeningBalance: (entry: Omit<OpeningBalanceEntry, 'id' | 'createdAt'>) => { success: boolean; error?: string };
 
@@ -116,6 +115,8 @@ interface ERPContextType {
   setActiveEmiAgreementToPrint: (account: EMIAccount | null) => void;
   activeThermalReceiptToPrint: Sale | null;
   setActiveThermalReceiptToPrint: (sale: Sale | null) => void;
+  activeBarcodeToPrint: { product: Product; serials?: string[] } | null;
+  setActiveBarcodeToPrint: (data: { product: Product; serials?: string[] } | null) => void;
 
   // Core Business Actions
   createSale: (saleData: Omit<Sale, 'id' | 'invoiceNumber' | 'createdAt'>, emiPlanConfig?: { planId: string; downPayment: number; durationMonths: number }, paymentAccountId?: string) => Promise<{ success: boolean; sale?: Sale; error?: string }>;
@@ -177,7 +178,6 @@ interface ERPContextType {
   updateInventoryRules: (updates: Partial<InventoryRules>) => Promise<void>;
 
   // Utilities
-  resetToDemoData: () => void;
   exportDatabase: () => string;
   importDatabase: (json: string) => boolean;
 }
@@ -242,6 +242,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeInvoiceToPrint, setActiveInvoiceToPrint] = useState<Sale | null>(null);
   const [activeEmiAgreementToPrint, setActiveEmiAgreementToPrint] = useState<EMIAccount | null>(null);
   const [activeThermalReceiptToPrint, setActiveThermalReceiptToPrint] = useState<Sale | null>(null);
+  const [activeBarcodeToPrint, setActiveBarcodeToPrint] = useState<{ product: Product; serials?: string[] } | null>(null);
 
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -799,16 +800,6 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateSetupStatus = (statusUpdates: Partial<SetupStatus>) => {
     setSetupStatus(prev => ({ ...prev, ...statusUpdates }));
     logAction('SETTINGS', 'SETUP_STATUS_UPDATED', 'GLOBAL', 'Updated ERP setup checklist status.');
-  };
-
-  const setSystemMode = (mode: 'DEMO' | 'PRODUCTION') => {
-    if (currentUser.role !== 'SUPER_ADMIN') {
-      addToast('error', 'Unauthorized', 'Only Super Admin can toggle system environment mode.');
-      return;
-    }
-    setSetupStatus(prev => ({ ...prev, systemMode: mode }));
-    logAction('SETTINGS', 'SYSTEM_MODE_CHANGED', currentUser.id, `Environment mode changed to ${mode}.`);
-    addToast('warning', `Environment: ${mode} MODE`, mode === 'PRODUCTION' ? 'Production mode active: Only real transactional records will be used.' : 'Demo mode active with seed accounts.');
   };
 
   const recordOpeningBalance = (entry: Omit<OpeningBalanceEntry, 'id' | 'createdAt'>): { success: boolean; error?: string } => {
@@ -1765,51 +1756,6 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Reset to Demo Data
-  const resetToDemoData = () => {
-    clearAllStoredData();
-    setSettings(INITIAL_SETTINGS);
-    setBranches(INITIAL_BRANCHES);
-    setUsers(INITIAL_USERS);
-    setProducts(INITIAL_PRODUCTS);
-    setSerials(INITIAL_PRODUCT_SERIALS);
-    setSuppliers(INITIAL_SUPPLIERS);
-    setCustomers(INITIAL_CUSTOMERS);
-    setSales(INITIAL_SALES);
-    setPurchases(INITIAL_PURCHASES);
-    setFinancialAccounts(INITIAL_FINANCIAL_ACCOUNTS);
-    setInvestments(INITIAL_INVESTMENTS);
-    setEmployees(INITIAL_EMPLOYEES);
-    setAttendance(INITIAL_ATTENDANCE);
-    setReturns(INITIAL_RETURNS);
-    setEmiPlans(INITIAL_EMI_PLANS);
-    setEmiAccounts(INITIAL_EMI_ACCOUNTS);
-    setEmiPayments(INITIAL_EMI_PAYMENTS);
-    setTechnicians(INITIAL_TECHNICIANS);
-    setServices(INITIAL_SERVICES);
-    setExpenses(INITIAL_EXPENSES);
-    setAuditLogs(INITIAL_AUDIT_LOGS);
-    setInventoryTransactions(INITIAL_INVENTORY_TRANSACTIONS);
-    setRoles(INITIAL_ROLES);
-    setPermissionsList(INITIAL_PERMISSIONS);
-    setSetupStatus(INITIAL_SETUP_STATUS);
-    setOpeningBalances(INITIAL_OPENING_BALANCES);
-    setCategoriesConfig(INITIAL_CATEGORIES_CONFIG);
-    setBrandsConfig(INITIAL_BRANDS);
-    setPaymentMethodsConfig(INITIAL_PAYMENT_METHODS_CONFIG);
-    setExpenseCategoriesConfig(INITIAL_EXPENSE_CATEGORIES);
-    setServiceCategoriesConfig(INITIAL_SERVICE_CATEGORIES);
-    setWarrantyRulesConfig(INITIAL_WARRANTY_RULES);
-    setNotificationTemplatesConfig(INITIAL_NOTIFICATION_TEMPLATES);
-    setPriceAuditLog([]);
-    setCustomerMergeAudit([]);
-    setPosSettings(INITIAL_POS_SETTINGS);
-    setInventoryRules(INITIAL_INVENTORY_RULES);
-    setWarrantyClaims([]);
-    setLedgerEntries([]);
-    addToast('info', 'Demo Data Restored', 'All tables reset to original demo state.');
-  };
-
   const exportDatabase = () => exportAllDataJSON();
 
   const importDatabase = (json: string) => {
@@ -1855,7 +1801,6 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setupStatus,
         updateSetupStatus,
         completeInitialSetup,
-        setSystemMode,
         openingBalances,
         recordOpeningBalance,
         products,
@@ -1888,6 +1833,8 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setActiveEmiAgreementToPrint,
         activeThermalReceiptToPrint,
         setActiveThermalReceiptToPrint,
+        activeBarcodeToPrint,
+        setActiveBarcodeToPrint,
         createSale,
         collectEMIPayment,
         createProduct,
@@ -1943,7 +1890,6 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updatePosSettings,
         inventoryRules,
         updateInventoryRules,
-        resetToDemoData,
         exportDatabase,
         importDatabase
       }}

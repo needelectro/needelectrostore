@@ -1,0 +1,50 @@
+name: NEED ELECTRO ERP — Production CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, production ]
+  pull_request:
+    branches: [ main, production ]
+
+jobs:
+  validate-and-test:
+    name: Validate Schema, Types & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --prefer-offline
+
+      - name: Validate Prisma Schema
+        run: npx prisma validate
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+          DIRECT_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+          DIRECT_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+
+      - name: TypeScript Static Typecheck
+        run: npx tsc --noEmit
+
+      - name: Production Next.js Build
+        run: npm run build
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+          DIRECT_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+          NEXT_PUBLIC_APP_URL: "https://needelectroerp.vercel.app"
+          APP_URL: "https://needelectroerp.vercel.app"
+          AUTH_SECRET: "ci_pipeline_dummy_auth_secret_for_validation_only"
+          STORAGE_BUCKET: "needelectro-storage"

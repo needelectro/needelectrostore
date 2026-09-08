@@ -84,8 +84,7 @@ bootstrapRouter.get('/', authenticate, (req, res) => {
             isInvoiceSettingsConfigured: Boolean(setupStatus.is_invoice_settings_configured),
             isNotificationConfigured: Boolean(setupStatus.is_notification_configured),
             isOpeningBalancesConfigured: Boolean(setupStatus.is_opening_balances_configured),
-            initialSetupCompleted: Boolean(setupStatus.initial_setup_completed),
-            systemMode: setupStatus.system_mode || 'PRODUCTION'
+            initialSetupCompleted: Boolean(setupStatus.initial_setup_completed)
           },
           branches: branches.map(b => ({
             ...b,
@@ -398,8 +397,7 @@ bootstrapRouter.get('/', authenticate, (req, res) => {
           isInvoiceSettingsConfigured: Boolean(setupStatus.is_invoice_settings_configured),
           isNotificationConfigured: Boolean(setupStatus.is_notification_configured),
           isOpeningBalancesConfigured: Boolean(setupStatus.is_opening_balances_configured),
-          initialSetupCompleted: Boolean(setupStatus.initial_setup_completed),
-          systemMode: setupStatus.system_mode || 'PRODUCTION'
+          initialSetupCompleted: Boolean(setupStatus.initial_setup_completed)
         },
         branches: branches.map(b => ({
           ...b,

@@ -3,7 +3,7 @@ import { useERP } from '../services/erpStore';
 import { Product, ProductSerial, InventoryTransaction } from '../types';
 import {
   Boxes, Search, Hash, AlertTriangle, ArrowRightLeft, 
-  Plus, Check, X, ShieldCheck, History, Laptop, Filter, TrendingDown, TrendingUp
+  Plus, Check, X, ShieldCheck, History, Laptop, Filter, TrendingDown, TrendingUp, Tag
 } from 'lucide-react';
 
 interface InventoryModuleProps {
@@ -13,7 +13,7 @@ interface InventoryModuleProps {
 export const InventoryModule: React.FC<InventoryModuleProps> = ({ onNavigate }) => {
   const { 
     products, serials, inventoryTransactions, branches, 
-    selectedBranch, suppliers, customers, stockAdjustment, stockTransfer 
+    selectedBranch, suppliers, customers, stockAdjustment, stockTransfer, setActiveBarcodeToPrint 
   } = useERP();
 
   const [activeTab, setActiveTab] = useState<'stock' | 'serials' | 'ledger' | 'transfer' | 'adjust'>('stock');
@@ -373,12 +373,27 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({ onNavigate }) 
                         )}
                       </td>
                       <td style={{ textAlign: 'center' }}>
-                        <button 
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => setInspectingSerial(s)}
-                        >
-                          Lifecycle Details
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center' }}>
+                          <button 
+                            className="btn btn-secondary btn-sm"
+                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', gap: '0.3rem' }}
+                            title="Print Barcode Label"
+                            onClick={() => {
+                              if (prod) {
+                                setActiveBarcodeToPrint({ product: prod, serials: [s.serialNumber] });
+                              }
+                            }}
+                          >
+                            <Tag size={12} /> Label
+                          </button>
+                          <button 
+                            className="btn btn-secondary btn-sm"
+                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                            onClick={() => setInspectingSerial(s)}
+                          >
+                            Lifecycle Details
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

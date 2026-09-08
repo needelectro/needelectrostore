@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth, hasPermission } from '@/lib/auth';
 import { createSaleSchema } from '@/lib/validations';
+import { sendNotification } from '@/lib/notifications';
 import { Prisma } from '@prisma/client';
 
 export async function GET(req: NextRequest) {
@@ -358,6 +359,20 @@ export async function POST(req: NextRequest) {
 
       return sale;
     });
+
+    // Asynchronously trigger customer SMS / WhatsApp digital receipt
+    if (saleData.customerPhone) {
+      sendNotification({
+        recipientPhone: saleData.customerPhone,
+        recipientName: saleData.customerName,
+        channel: 'BOTH',
+        customMessage: `NEED ELECTRO: Dear ${saleData.customerName}, your invoice ${result.invoiceNumber} has been generated. Total: ৳${Number(result.grandTotal).toLocaleString('en-IN')}, Paid: ৳${Number(result.paidAmount).toLocaleString('en-IN')}. Shop#5, MR Plaza, Kusumbag, Moulvibazar. Hotline: 01733-983752.`,
+        metadata: {
+          referenceType: 'SALE',
+          referenceId: result.id,
+        },
+      }).catch((e) => console.warn('Background sale notification notice:', e));
+    }
 
     return NextResponse.json({
       success: true,

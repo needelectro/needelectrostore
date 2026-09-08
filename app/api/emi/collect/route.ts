@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth, hasPermission } from '@/lib/auth';
 import { collectEmiPaymentSchema } from '@/lib/validations';
+import { sendNotification } from '@/lib/notifications';
 import { Prisma } from '@prisma/client';
 
 export async function POST(req: NextRequest) {
@@ -133,6 +134,24 @@ export async function POST(req: NextRequest) {
 
       return { payment, receiptNumber, isAccountCompleted };
     });
+
+    // Asynchronously dispatch EMI payment confirmation SMS / WhatsApp to customer
+    prisma.eMIAccount.findUnique({
+      where: { id: parsed.data.emiAccountId },
+    }).then((acc) => {
+      if (acc && acc.customerPhone) {
+        sendNotification({
+          recipientPhone: acc.customerPhone,
+          recipientName: acc.customerName,
+          channel: 'BOTH',
+          customMessage: `NEED ELECTRO: Received ৳${amount} for EMI ${acc.emiNumber} (Receipt: ${result.receiptNumber}). Remaining balance: ৳${Number(acc.remainingBalance).toLocaleString('en-IN')}. Thank you! Need Electro (01733-983752).`,
+          metadata: {
+            referenceType: 'EMI_PAYMENT',
+            referenceId: result.receiptNumber,
+          },
+        }).catch((e) => console.warn('Background EMI notification dispatch notice:', e));
+      }
+    }).catch(() => {});
 
     return NextResponse.json({
       success: true,

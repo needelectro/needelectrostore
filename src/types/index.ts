@@ -83,7 +83,6 @@ export interface SetupStatus {
   isNotificationConfigured: boolean;
   isOpeningBalancesConfigured: boolean;
   initialSetupCompleted: boolean;
-  systemMode: 'DEMO' | 'PRODUCTION';
 }
 
 export interface OpeningBalanceEntry {
@@ -104,7 +103,6 @@ export interface AuthSession {
   loginTime: string;
   rememberMe: boolean;
   isLocked: boolean;
-  systemMode?: 'DEMO' | 'PRODUCTION';
 }
 
 export type ProductCategory = 

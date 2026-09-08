@@ -217,9 +217,9 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
         </div>
 
         <div className="erp-card" style={{ padding: '1rem' }}>
-          <div style={{ fontSize: '0.72rem', color: '#f59e0b', textTransform: 'uppercase', fontWeight: 700 }}>Environment</div>
-          <div style={{ fontSize: '1.1rem', fontWeight: 800, color: setupStatus?.systemMode === 'PRODUCTION' ? '#10b981' : '#f59e0b', marginTop: '0.35rem' }}>
-            {setupStatus?.systemMode || 'DEMO'} MODE
+          <div style={{ fontSize: '0.72rem', color: '#10b981', textTransform: 'uppercase', fontWeight: 700 }}>Security Status</div>
+          <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#10b981', marginTop: '0.35rem' }}>
+            ENFORCED
           </div>
         </div>
       </div>

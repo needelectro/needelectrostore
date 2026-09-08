@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useERP } from '../services/erpStore';
 import { 
-  Settings, Save, RotateCcw, Download, Upload, 
+  Settings, Save, Download, Upload, 
   Building, Phone, Globe, DollarSign, MessageSquare, Sun, Moon, ShieldCheck, Wrench, CheckCircle2,
-  Check, AlertTriangle, Sliders, ShieldAlert, Sparkles
+  Check, AlertTriangle, Sparkles
 } from 'lucide-react';
 import { NeedElectroLogo } from '../components/NeedElectroLogo';
 import { SetupWizardModal } from '../components/setup/SetupWizardModal';
@@ -15,8 +15,8 @@ interface SettingsModuleProps {
 
 export const SettingsModule: React.FC<SettingsModuleProps> = ({ onNavigate }) => {
   const { 
-    settings, updateSettings, resetToDemoData, 
-    exportDatabase, importDatabase, setupStatus, setSystemMode, currentUser
+    settings, updateSettings, 
+    exportDatabase, importDatabase, setupStatus, currentUser
   } = useERP();
 
   const [isSetupWizardOpen, setIsSetupWizardOpen] = useState(false);
@@ -106,127 +106,65 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ onNavigate }) =>
           <button className="btn btn-secondary btn-sm" onClick={handleExportJSON}>
             <Download size={15} /> Export JSON Backup
           </button>
-          <button 
-            className="btn btn-danger btn-sm" 
-            onClick={() => {
-              if (window.confirm('Reset all tables to fresh Bangladesh demo data?')) {
-                resetToDemoData();
-              }
-            }}
-          >
-            <RotateCcw size={15} /> Restore Demo Data
-          </button>
         </div>
       </div>
 
-      {/* Environment Mode Switcher & Setup Status (Req 66 & 69) */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: '1.25rem' }}>
-        {/* Environment Mode Card */}
-        <div className="erp-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ShieldAlert size={20} color={setupStatus?.systemMode === 'PRODUCTION' ? '#10b981' : '#f59e0b'} />
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
-                  Environment Mode (Req 69)
-                </h3>
-              </div>
-              <span className={`badge ${setupStatus?.systemMode === 'PRODUCTION' ? 'badge-success' : 'badge-warning'}`} style={{ fontWeight: 800 }}>
-                {setupStatus?.systemMode || 'DEMO'} MODE
-              </span>
+      {/* Setup Status Checklist Card (Req 66) */}
+      <div className="erp-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <CheckCircle2 size={20} color="#38bdf8" />
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+                System Setup Status (Req 66)
+              </h3>
             </div>
-
-            <p style={{ fontSize: '0.8125rem', color: '#94a3b8', lineHeight: '1.45', marginBottom: '1rem' }}>
-              {setupStatus?.systemMode === 'PRODUCTION' ? (
-                <span>
-                  <strong style={{ color: '#10b981' }}>Production Mode Active:</strong> The ERP operates exclusively with authentic transactional database records. All demo bypasses, quick-logins, and mock shortcuts are strictly disabled.
-                </span>
-              ) : (
-                <span>
-                  <strong style={{ color: '#f59e0b' }}>Demo Evaluation Mode:</strong> Seed training data, quick 1-click role logins, and demo testing scenarios are enabled. Switch to Production mode before commercial deployment.
-                </span>
-              )}
-            </p>
+            <span className="badge badge-primary" style={{ fontSize: '0.72rem' }}>
+              {Object.values(setupStatus || {}).filter(v => v === true).length} of 10 Configured
+            </span>
           </div>
 
-          <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-              Requires Super Admin Authorization
-            </span>
-            <button
-              type="button"
-              className={`btn ${setupStatus?.systemMode === 'PRODUCTION' ? 'btn-secondary' : 'btn-primary'} btn-sm`}
-              onClick={() => {
-                const target = setupStatus?.systemMode === 'PRODUCTION' ? 'DEMO' : 'PRODUCTION';
-                if (window.confirm(`Are you sure you want to switch ERP environment to ${target} MODE?`)) {
-                  setSystemMode(target);
-                }
-              }}
-              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-            >
-              <Sliders size={14} />
-              <span>Switch to {setupStatus?.systemMode === 'PRODUCTION' ? 'DEMO' : 'PRODUCTION'} Mode</span>
-            </button>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.5rem', marginBottom: '1rem' }}>
+            {[
+              { title: 'Company Identity', ok: setupStatus?.isCompanyConfigured },
+              { title: 'Super Admin Account', ok: setupStatus?.isSuperAdminConfigured },
+              { title: 'Main Operating Branch', ok: setupStatus?.isMainBranchConfigured },
+              { title: 'Central Tech Warehouse', ok: setupStatus?.isWarehouseConfigured },
+              { title: 'Financial Accounts', ok: setupStatus?.isFinancialAccountsConfigured },
+              { title: 'Payment Tender Methods', ok: setupStatus?.isPaymentMethodsConfigured },
+              { title: 'EMI Installment Plans', ok: setupStatus?.isEmiPlansConfigured },
+              { title: 'Invoice Prefix / Terms', ok: setupStatus?.isInvoiceSettingsConfigured },
+              { title: 'Notification Gateways', ok: setupStatus?.isNotificationConfigured },
+              { title: 'Opening Balance Ledger', ok: setupStatus?.isOpeningBalancesConfigured },
+            ].map((item, idx) => (
+              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem' }}>
+                {item.ok ? <Check size={14} color="#10b981" /> : <AlertTriangle size={14} color="#f59e0b" />}
+                <span style={{ color: item.ok ? '#ffffff' : '#94a3b8' }}>{item.title}</span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Setup Status Checklist Card */}
-        <div className="erp-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <CheckCircle2 size={20} color="#38bdf8" />
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
-                  System Setup Status (Req 66)
-                </h3>
-              </div>
-              <span className="badge badge-primary" style={{ fontSize: '0.72rem' }}>
-                {Object.values(setupStatus || {}).filter(v => v === true).length} of 10 Configured
-              </span>
-            </div>
+        <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '1rem', display: 'flex', gap: '0.75rem' }}>
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={() => setIsSetupWizardOpen(true)}
+            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+          >
+            <Sparkles size={14} />
+            <span>Launch 8-Step Setup Wizard</span>
+          </button>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1rem' }}>
-              {[
-                { title: 'Company Identity', ok: setupStatus?.isCompanyConfigured },
-                { title: 'Super Admin Account', ok: setupStatus?.isSuperAdminConfigured },
-                { title: 'Main Operating Branch', ok: setupStatus?.isMainBranchConfigured },
-                { title: 'Central Tech Warehouse', ok: setupStatus?.isWarehouseConfigured },
-                { title: 'Financial Accounts', ok: setupStatus?.isFinancialAccountsConfigured },
-                { title: 'Payment Tender Methods', ok: setupStatus?.isPaymentMethodsConfigured },
-                { title: 'EMI Installment Plans', ok: setupStatus?.isEmiPlansConfigured },
-                { title: 'Invoice Prefix / Terms', ok: setupStatus?.isInvoiceSettingsConfigured },
-                { title: 'Notification Gateways', ok: setupStatus?.isNotificationConfigured },
-                { title: 'Opening Balance Ledger', ok: setupStatus?.isOpeningBalancesConfigured },
-              ].map((item, idx) => (
-                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem' }}>
-                  {item.ok ? <Check size={14} color="#10b981" /> : <AlertTriangle size={14} color="#f59e0b" />}
-                  <span style={{ color: item.ok ? '#ffffff' : '#94a3b8' }}>{item.title}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '1rem', display: 'flex', gap: '0.75rem' }}>
-            <button
-              type="button"
-              className="btn btn-primary btn-sm"
-              onClick={() => setIsSetupWizardOpen(true)}
-              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-            >
-              <Sparkles size={14} />
-              <span>Launch 8-Step Setup Wizard</span>
-            </button>
-
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => setIsOpeningBalancesOpen(true)}
-              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-            >
-              <DollarSign size={14} />
-              <span>Authorize Opening Balances</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() => setIsOpeningBalancesOpen(true)}
+            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+          >
+            <DollarSign size={14} />
+            <span>Authorize Opening Balances</span>
+          </button>
         </div>
       </div>
 

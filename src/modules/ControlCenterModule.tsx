@@ -4,7 +4,7 @@ import {
   Sliders, ShieldCheck, Building, Package, DollarSign, Receipt, 
   CreditCard, Layers, Wrench, Shield, Bell, Lock, Activity, 
   Save, Plus, Edit2, Trash2, CheckCircle2, AlertTriangle, AlertCircle, 
-  RefreshCw, Download, Upload, Search, Filter, Eye, Users, 
+  Download, Upload, Search, Filter, Eye, Users, 
   ArrowRight, Check, X, Smartphone, Globe, Mail, Phone, Calendar, 
   Hash, Tag, FileText, ChevronRight, Laptop, Monitor, Wifi, Zap,
   Key, Database, UserCheck, Moon, Sun, ArrowLeftRight
@@ -48,7 +48,7 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
     priceAuditLog, updateProductPrice, customerMergeAudit, mergeCustomers,
     posSettings, updatePosSettings, inventoryRules, updateInventoryRules,
     emiPlans, saveEMIPlanWithVersioning, currentUser, addToast,
-    exportDatabase, importDatabase, resetToDemoData, setupStatus
+    exportDatabase, importDatabase, setupStatus
   } = useERP();
 
   const [activeTab, setActiveTab] = useState<ControlCenterTab>('business');
@@ -2315,19 +2315,6 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
                   style={{ display: 'none' }}
                 />
               </label>
-
-              <button 
-                className="btn btn-danger"
-                onClick={() => {
-                  if (window.confirm('Resetting demo data will clear custom entries and restore realistic seed state. Proceed?')) {
-                    resetToDemoData();
-                  }
-                }}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.5rem' }}
-              >
-                <RefreshCw size={16} />
-                Reset ERP to Demo Seed State
-              </button>
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useERP } from '../services/erpStore';
 import { 
   Search, Sun, Moon, Bell, User, Building, 
-  ShoppingCart, AlertTriangle, Clock, Wrench, ChevronDown, Check, Zap,
+  ShoppingCart, AlertTriangle, Clock, Wrench, ChevronDown, Zap,
   Lock, LogOut, KeyRound, ShieldAlert
 } from 'lucide-react';
 import { NeedElectroLogo } from './NeedElectroLogo';
@@ -17,8 +17,8 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule, toggleSidebar }) => {
   const { 
     settings, updateSettings, branches, selectedBranch, setSelectedBranchId, 
-    currentUser, users, setCurrentUserId, emiAccounts, products, services,
-    lockSession, logout, setupStatus 
+    currentUser, emiAccounts, products, services,
+    lockSession, logout 
   } = useERP();
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -97,19 +97,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
 
       {/* Right Controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-        {/* Mode Badge (DEMO / PRODUCTION) */}
-        {setupStatus?.systemMode === 'PRODUCTION' ? (
-          <span className="badge badge-success" style={{ fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '5px', padding: '4px 8px' }}>
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }} />
-            PRODUCTION
-          </span>
-        ) : (
-          <span className="badge badge-warning" style={{ fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '5px', padding: '4px 8px' }}>
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#f59e0b' }} />
-            DEMO
-          </span>
-        )}
-
         {/* Branch Selector */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'var(--bg-card-muted)', padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
           <Building size={14} color="var(--brand-primary)" />
@@ -390,38 +377,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
                   <LogOut size={15} color="#ef4444" />
                   <span style={{ fontWeight: 'bold' }}>Sign Out / Logout</span>
                 </button>
-              </div>
-
-              <div style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
-                Fast Role Switcher:
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                {users.map(u => (
-                  <button
-                    key={u.id}
-                    onClick={() => { setCurrentUserId(u.id); setShowUserMenu(false); }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '0.35rem 0.5rem',
-                      borderRadius: 'var(--radius-sm)',
-                      background: u.id === currentUser.id ? 'var(--bg-active)' : 'transparent',
-                      border: 'none',
-                      color: 'var(--text-primary)',
-                      cursor: 'pointer',
-                      fontSize: '0.78rem',
-                      textAlign: 'left'
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontWeight: u.id === currentUser.id ? '700' : '500' }}>{u.name}</div>
-                      <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>{u.role}</div>
-                    </div>
-                    {u.id === currentUser.id && <Check size={14} color="var(--brand-primary)" />}
-                  </button>
-                ))}
               </div>
             </div>
           )}
