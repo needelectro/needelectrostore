@@ -10,7 +10,7 @@ export const LoginScreen: React.FC = () => {
   const { login, branches, selectedBranch, settings } = useERP();
 
   const [email, setEmail] = useState('contact.amdadur@gmail.com');
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState('NeedElectro@Admin2026');
   const [branchId, setBranchId] = useState(selectedBranch?.id || 'branch-1');
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -332,6 +332,30 @@ export const LoginScreen: React.FC = () => {
                     }}
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmail('contact.amdadur@gmail.com');
+                      setPassword('NeedElectro@Admin2026');
+                    }}
+                    style={{
+                      background: 'rgba(0, 140, 255, 0.12)',
+                      border: '1px solid rgba(0, 140, 255, 0.3)',
+                      color: '#38bdf8',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <UserCheck size={12} /> Auto-Fill Super Admin
                   </button>
                 </div>
               </div>
