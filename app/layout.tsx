@@ -1,5 +1,9 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
+
+export const viewport: Viewport = {
+  themeColor: '#008CFF',
+};
 
 export const metadata: Metadata = {
   title: 'NEED ELECTRO ERP — Trusted Electrical & Technological Solutions',
@@ -16,8 +20,15 @@ export const metadata: Metadata = {
     'Bangladesh',
   ],
   authors: [{ name: 'Amdadur Rahman' }],
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'NEED ELECTRO ERP',
+  },
   icons: {
-    icon: '/favicon.ico',
+    icon: '/logo-icon.png',
+    apple: '/logo-icon.png',
   },
 };
 
@@ -29,6 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="dark">
       <head>
+        <link rel="manifest" href="/manifest.json" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -38,6 +50,21 @@ export default function RootLayout({
       </head>
       <body>
         {children}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator && window.location.protocol === 'https:' || window.location.hostname === 'localhost') {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                    console.log('NEED ELECTRO Service Worker active:', reg.scope);
+                  }).catch(function(err) {
+                    console.warn('Service Worker registration skipped:', err);
+                  });
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );

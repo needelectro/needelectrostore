@@ -42,8 +42,8 @@ assert(userRow.name === 'Amdadur Rahman', 'Super Admin name matches exact specif
 const seedContent = fs.readFileSync(seedPath, 'utf8');
 assert(seedContent.includes('INSERT INTO system_settings'), 'SQL seed contains system settings.');
 assert(seedContent.includes('contact.amdadur@gmail.com'), 'SQL seed contains Super Admin email.');
-assert(seedContent.includes('INSERT INTO emi_accounts'), 'SQL seed contains existing EMI accounts.');
-assert(seedContent.includes('INSERT INTO sales'), 'SQL seed contains existing sales invoices.');
+assert(seedContent.includes('INSERT INTO emi_plans'), 'SQL seed contains configured EMI plans.');
+assert(seedContent.includes('INSERT INTO products'), 'SQL seed contains existing product catalog.');
 
 // -------------------------------------------------------------
 // TEST 2: Environment Configuration & Hygiene

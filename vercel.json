@@ -10,6 +10,12 @@
       "memory": 1024
     }
   },
+  "crons": [
+    {
+      "path": "/api/emi/evaluate-overdue",
+      "schedule": "0 0 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
