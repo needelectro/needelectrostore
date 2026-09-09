@@ -9,19 +9,54 @@ interface A4InvoicePrintProps {
   onClose: () => void;
 }
 
+const safeArray = <T,>(val: any): T[] => {
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'string') {
+    try {
+      const parsed = JSON.parse(val);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
 export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, onClose }) => {
+  if (!sale) return null;
+
   const handlePrint = () => {
     window.print();
   };
 
-  const formattedDate = new Date(sale.createdAt || sale.date).toLocaleString('en-GB', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
+  const rawDate = sale.createdAt || sale.date || new Date();
+  const parsedDate = new Date(rawDate);
+  const formattedDate = isNaN(parsedDate.getTime())
+    ? new Date().toLocaleString('en-GB')
+    : parsedDate.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+
+  const safeSettings = settings || ({} as Partial<SystemSettings>);
+  const items = safeArray<any>(sale.items);
+  const payments = safeArray<any>(sale.payments);
+
+  const subtotal = Number(sale.subtotal || 0);
+  const overallDiscount = Number(sale.overallDiscount || 0);
+  const vatAmount = Number(sale.vatAmount || 0);
+  const vatPercent = Number(sale.vatPercent || 0);
+  const grandTotal = Number(sale.grandTotal || 0);
+  const paidAmount = Number(sale.paidAmount || 0);
+  const dueAmount = Number(sale.dueAmount || 0);
+
+  const paymentMethodsText = payments.length > 0
+    ? payments.map((p: any) => `${p.method || 'CASH'} (৳${Number(p.amount || 0).toLocaleString()})`).join(', ')
+    : 'Direct Cash';
 
   return (
     <div className="modal-overlay print-active-modal" style={{ zIndex: 9999 }}>
@@ -29,7 +64,7 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
         <div className="modal-header no-print">
           <div className="modal-title" style={{ fontWeight: 700, fontSize: '1.1rem' }}>
             <Printer size={20} className="text-primary" />
-            Official A4 Invoice Preview — {sale.invoiceNumber}
+            Official A4 Invoice Preview — {sale.invoiceNumber || 'INV-DRAFT'}
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button className="btn btn-primary btn-sm" onClick={handlePrint} style={{ fontWeight: 600 }}>
@@ -59,9 +94,9 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
                 </div>
 
                 <div className="a4-company-details">
-                  <p><strong>Main Branch Moulvibazar:</strong> {settings.address || 'Shop#5, MR Plaza, Kusumbag, Moulvibazar, Sylhet, Bangladesh'}</p>
-                  <p>Hotline: <strong>{settings.phone || '+880 1733-983752'}</strong> | Email: <strong>{settings.email || 'contact.amdadur@gmail.com'}</strong></p>
-                  <p>Website: <strong>{settings.website || 'https://needelectroerp.vercel.app'}</strong> | VAT Reg: <strong>{settings.vatRegistrationNo || 'VAT-NEED-2026-BD'}</strong></p>
+                  <p><strong>Main Branch Moulvibazar:</strong> {safeSettings.address || 'Shop#5, MR Plaza, Kusumbag, Moulvibazar, Sylhet, Bangladesh'}</p>
+                  <p>Hotline: <strong>{safeSettings.phone || '+880 1733-983752'}</strong> | Email: <strong>{safeSettings.email || 'contact.amdadur@gmail.com'}</strong></p>
+                  <p>Website: <strong>{safeSettings.website || 'https://needelectroerp.vercel.app'}</strong> | VAT Reg: <strong>{safeSettings.vatRegistrationNo || 'VAT-NEED-2026-BD'}</strong></p>
                 </div>
               </div>
 
@@ -82,15 +117,15 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
             <div className="a4-party-details">
               <div className="a4-bill-to">
                 <h4>Customer Information (ক্রেতার বিবরণ)</h4>
-                <p style={{ fontSize: '13px', fontWeight: 800, color: '#000000', margin: '2px 0' }}>{sale.customerName}</p>
+                <p style={{ fontSize: '13px', fontWeight: 800, color: '#000000', margin: '2px 0' }}>{sale.customerName || 'Walking Customer'}</p>
                 <p>Phone: <strong>{sale.customerPhone || 'N/A'}</strong></p>
                 <p>Account Status: <strong>Registered Commercial Customer</strong></p>
               </div>
               <div className="a4-bill-to" style={{ maxWidth: '300px' }}>
                 <h4>Payment Mode & Status</h4>
                 <p>Sale Type: <strong>{sale.saleType || 'REGULAR'} SALE</strong></p>
-                <p>Payment Method: <strong>{sale.payments && sale.payments.length > 0 ? sale.payments.map(p => `${p.method} (৳${Number(p.amount).toLocaleString()})`).join(', ') : 'Direct Cash'}</strong></p>
-                <p>Payment Status: <strong style={{ color: sale.dueAmount === 0 ? '#16a34a' : '#c2410c' }}>{sale.dueAmount === 0 ? 'FULLY PAID' : `DUE: ৳${Number(sale.dueAmount).toLocaleString()}`}</strong></p>
+                <p>Payment Method: <strong>{paymentMethodsText}</strong></p>
+                <p>Payment Status: <strong style={{ color: dueAmount === 0 ? '#16a34a' : '#c2410c' }}>{dueAmount === 0 ? 'FULLY PAID' : `DUE: ৳${dueAmount.toLocaleString()}`}</strong></p>
               </div>
             </div>
 
@@ -107,28 +142,42 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
                 </tr>
               </thead>
               <tbody>
-                {sale.items.map((item, idx) => (
-                  <tr key={idx}>
-                    <td style={{ textAlign: 'center', fontWeight: 700 }}>{idx + 1}</td>
-                    <td>
-                      <div style={{ fontWeight: 700, color: '#000000' }}>{item.productName}</div>
-                      <div style={{ fontSize: '10.5px', color: '#1e293b', marginTop: '1px' }}>
-                        SKU: <strong>{item.sku}</strong> | Category: {item.category}
-                      </div>
-                      {item.isSerialized && item.serialNumbers && item.serialNumbers.length > 0 && (
-                        <div style={{ marginTop: '2px', fontSize: '10.5px', color: '#002b5b' }}>
-                          <strong>S/N:</strong> {item.serialNumbers.join(', ')}
-                        </div>
-                      )}
+                {items.length > 0 ? (
+                  items.map((item: any, idx: number) => {
+                    const itemSerials = safeArray<string>(item.serialNumbers);
+                    const itemPrice = Number(item.unitPrice || 0);
+                    const itemTotal = Number(item.total || (itemPrice * (item.quantity || 1)));
+
+                    return (
+                      <tr key={item.id || idx}>
+                        <td style={{ textAlign: 'center', fontWeight: 700 }}>{idx + 1}</td>
+                        <td>
+                          <div style={{ fontWeight: 700, color: '#000000' }}>{item.productName || 'Unnamed Product'}</div>
+                          <div style={{ fontSize: '10.5px', color: '#1e293b', marginTop: '1px' }}>
+                            SKU: <strong>{item.sku || 'N/A'}</strong> | Category: {item.category || 'General'}
+                          </div>
+                          {item.isSerialized && itemSerials.length > 0 && (
+                            <div style={{ marginTop: '2px', fontSize: '10.5px', color: '#002b5b' }}>
+                              <strong>S/N:</strong> {itemSerials.join(', ')}
+                            </div>
+                          )}
+                        </td>
+                        <td style={{ textAlign: 'center', fontWeight: 600 }}>
+                          {item.warrantyMonths && item.warrantyMonths > 0 ? `${item.warrantyMonths} Months` : 'Official Warranty'}
+                        </td>
+                        <td style={{ textAlign: 'center', fontWeight: 700 }}>{item.quantity || 1}</td>
+                        <td style={{ textAlign: 'right', fontWeight: 600 }}>৳{itemPrice.toLocaleString()}</td>
+                        <td style={{ textAlign: 'right', fontWeight: 700 }}>৳{itemTotal.toLocaleString()}</td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: 'center', padding: '16px', color: '#64748b' }}>
+                      Invoice details recorded. No line items attached.
                     </td>
-                    <td style={{ textAlign: 'center', fontWeight: 600 }}>
-                      {item.warrantyMonths && item.warrantyMonths > 0 ? `${item.warrantyMonths} Months` : 'Official Warranty'}
-                    </td>
-                    <td style={{ textAlign: 'center', fontWeight: 700 }}>{item.quantity}</td>
-                    <td style={{ textAlign: 'right', fontWeight: 600 }}>৳{Number(item.unitPrice).toLocaleString()}</td>
-                    <td style={{ textAlign: 'right', fontWeight: 700 }}>৳{Number(item.total).toLocaleString()}</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
 
@@ -147,32 +196,32 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
               <div style={{ width: '250px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', borderBottom: '1px solid #cbd5e1' }}>
                   <span>Subtotal:</span>
-                  <strong>৳{Number(sale.subtotal).toLocaleString()}</strong>
+                  <strong>৳{subtotal.toLocaleString()}</strong>
                 </div>
-                {sale.overallDiscount > 0 && (
+                {overallDiscount > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', borderBottom: '1px solid #cbd5e1' }}>
                     <span>Discount:</span>
-                    <strong style={{ color: '#dc2626' }}>-৳{Number(sale.overallDiscount).toLocaleString()}</strong>
+                    <strong style={{ color: '#dc2626' }}>-৳{overallDiscount.toLocaleString()}</strong>
                   </div>
                 )}
-                {sale.vatAmount > 0 && (
+                {vatAmount > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', borderBottom: '1px solid #cbd5e1' }}>
-                    <span>VAT ({sale.vatPercent}%):</span>
-                    <span>৳{Number(sale.vatAmount).toLocaleString()}</span>
+                    <span>VAT ({vatPercent}%):</span>
+                    <span>৳{vatAmount.toLocaleString()}</span>
                   </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderTop: '2px solid #000000', borderBottom: '2px solid #000000', fontSize: '14px', fontWeight: 800 }}>
                   <span>Grand Total:</span>
-                  <span>৳{Number(sale.grandTotal).toLocaleString()}</span>
+                  <span>৳{grandTotal.toLocaleString()}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}>
                   <span>Paid Amount:</span>
-                  <strong>৳{Number(sale.paidAmount).toLocaleString()}</strong>
+                  <strong>৳{paidAmount.toLocaleString()}</strong>
                 </div>
-                {sale.dueAmount > 0 && (
+                {dueAmount > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', color: '#c2410c', fontWeight: 800 }}>
                     <span>Due Balance:</span>
-                    <strong>৳{Number(sale.dueAmount).toLocaleString()}</strong>
+                    <strong>৳{dueAmount.toLocaleString()}</strong>
                   </div>
                 )}
               </div>

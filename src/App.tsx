@@ -10,6 +10,7 @@ import { EMIAgreementPrint } from './components/print/EMIAgreementPrint';
 import { BarcodeLabelPrint } from './components/print/BarcodeLabelPrint';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { LockScreenModal } from './components/auth/LockScreenModal';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { ShieldAlert } from 'lucide-react';
 
 // Modules
@@ -228,7 +229,9 @@ const MainAppLayout: React.FC = () => {
         />
 
         <main className="content-scrollable">
-          {renderActiveModule()}
+          <ErrorBoundary fallbackTitle="Module Error">
+            {renderActiveModule()}
+          </ErrorBoundary>
         </main>
       </div>
 
@@ -247,37 +250,45 @@ const MainAppLayout: React.FC = () => {
 
       {/* Active Print Overlays */}
       {activeInvoiceToPrint && (
-        <A4InvoicePrint
-          sale={activeInvoiceToPrint}
-          settings={settings}
-          onClose={() => setActiveInvoiceToPrint(null)}
-        />
+        <ErrorBoundary onReset={() => setActiveInvoiceToPrint(null)}>
+          <A4InvoicePrint
+            sale={activeInvoiceToPrint}
+            settings={settings}
+            onClose={() => setActiveInvoiceToPrint(null)}
+          />
+        </ErrorBoundary>
       )}
 
       {activeThermalReceiptToPrint && (
-        <ThermalReceiptPrint
-          sale={activeThermalReceiptToPrint}
-          settings={settings}
-          onClose={() => setActiveThermalReceiptToPrint(null)}
-        />
+        <ErrorBoundary onReset={() => setActiveThermalReceiptToPrint(null)}>
+          <ThermalReceiptPrint
+            sale={activeThermalReceiptToPrint}
+            settings={settings}
+            onClose={() => setActiveThermalReceiptToPrint(null)}
+          />
+        </ErrorBoundary>
       )}
 
       {activeEmiAgreementToPrint && (
-        <EMIAgreementPrint
-          account={activeEmiAgreementToPrint}
-          settings={settings}
-          onClose={() => setActiveEmiAgreementToPrint(null)}
-        />
+        <ErrorBoundary onReset={() => setActiveEmiAgreementToPrint(null)}>
+          <EMIAgreementPrint
+            account={activeEmiAgreementToPrint}
+            settings={settings}
+            onClose={() => setActiveEmiAgreementToPrint(null)}
+          />
+        </ErrorBoundary>
       )}
 
       {/* Barcode & Serial Label Print Overlay */}
       {activeBarcodeToPrint && (
-        <BarcodeLabelPrint
-          product={activeBarcodeToPrint.product}
-          serials={activeBarcodeToPrint.serials}
-          settings={settings}
-          onClose={() => setActiveBarcodeToPrint(null)}
-        />
+        <ErrorBoundary onReset={() => setActiveBarcodeToPrint(null)}>
+          <BarcodeLabelPrint
+            product={activeBarcodeToPrint.product}
+            serials={activeBarcodeToPrint.serials}
+            settings={settings}
+            onClose={() => setActiveBarcodeToPrint(null)}
+          />
+        </ErrorBoundary>
       )}
     </div>
   );

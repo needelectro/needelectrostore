@@ -901,10 +901,24 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return { success: false, error: err };
       }
 
-      const completedSale: Sale = res.sale;
+      let completedSale: Sale = res.sale;
+      if (!completedSale.items || !Array.isArray(completedSale.items) || completedSale.items.length === 0) {
+        completedSale = {
+          ...completedSale,
+          items: (saleData.items as any[]) || [],
+        };
+      }
+      if (!completedSale.payments) {
+        completedSale = {
+          ...completedSale,
+          payments: (saleData.payments as any) || [],
+        };
+      }
+
       await refreshFromDatabase();
 
-      logAction('POS', 'CREATE_SALE', completedSale.invoiceNumber, `Created invoice ${completedSale.invoiceNumber} total ৳${completedSale.grandTotal.toLocaleString()} for ${completedSale.customerName}`);
+      const displayTotal = Number(completedSale.grandTotal || 0).toLocaleString();
+      logAction('POS', 'CREATE_SALE', completedSale.invoiceNumber, `Created invoice ${completedSale.invoiceNumber} total ৳${displayTotal} for ${completedSale.customerName}`);
       addToast('success', 'Sale Completed!', `Invoice ${completedSale.invoiceNumber} generated successfully.`);
 
       return { success: true, sale: completedSale };

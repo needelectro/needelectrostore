@@ -357,7 +357,13 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      return sale;
+      // Fetch complete sale with its newly created items
+      const fullSale = await tx.sale.findUnique({
+        where: { id: sale.id },
+        include: { items: true },
+      });
+
+      return fullSale || sale;
     });
 
     // Asynchronously trigger customer SMS / WhatsApp digital receipt

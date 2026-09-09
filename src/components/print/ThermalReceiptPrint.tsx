@@ -9,10 +9,47 @@ interface ThermalReceiptPrintProps {
   onClose: () => void;
 }
 
+const safeArray = <T,>(val: any): T[] => {
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'string') {
+    try {
+      const parsed = JSON.parse(val);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
 export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, settings, onClose }) => {
+  if (!sale) return null;
+
   const handlePrint = () => {
     window.print();
   };
+
+  const safeSettings = settings || ({} as Partial<SystemSettings>);
+  const items = safeArray<any>(sale.items);
+  const payments = safeArray<any>(sale.payments);
+
+  const rawDate = sale.createdAt || sale.date || new Date();
+  const parsedDate = new Date(rawDate);
+  const formattedDate = isNaN(parsedDate.getTime()) 
+    ? new Date().toLocaleString('en-GB') 
+    : parsedDate.toLocaleString('en-GB');
+
+  const subtotal = Number(sale.subtotal || 0);
+  const overallDiscount = Number(sale.overallDiscount || 0);
+  const vatAmount = Number(sale.vatAmount || 0);
+  const vatPercent = Number(sale.vatPercent || 0);
+  const grandTotal = Number(sale.grandTotal || 0);
+  const paidAmount = Number(sale.paidAmount || 0);
+  const dueAmount = Number(sale.dueAmount || 0);
+
+  const paidMethodsText = payments.length > 0 
+    ? payments.map((p: any) => p.method || 'CASH').join('/') 
+    : 'CASH';
 
   return (
     <div className="modal-overlay print-active-modal" style={{ zIndex: 9999 }}>
@@ -20,7 +57,7 @@ export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, 
         <div className="modal-header no-print">
           <div className="modal-title">
             <Printer size={18} />
-            80mm Thermal Receipt
+            80mm Thermal Receipt — {sale.invoiceNumber || 'REC-DRAFT'}
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button className="btn btn-primary btn-sm" onClick={handlePrint}>
@@ -39,45 +76,57 @@ export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, 
                 <NeedElectroLogo size="sm" variant="master-image" theme="light" />
               </div>
               <div style={{ fontSize: '10px', fontWeight: 'bold', color: '#0284C7' }}>
-                {settings.companyTagline}
+                {safeSettings.companyTagline || 'Trusted Electrical & Technological Solutions'}
               </div>
               <div style={{ fontSize: '8.5px', color: '#64748b', marginTop: '2px', fontWeight: 'bold' }}>
                 A sister Concern Of AMDADS GROUP
               </div>
               <div style={{ fontSize: '8.5px', marginTop: '2px' }}>
-                Main Branch: {settings.address}
+                Main Branch: {safeSettings.address || 'Shop#5, MR Plaza, Kusumbag, Moulvibazar'}
               </div>
               <div style={{ fontSize: '8.5px' }}>
-                Hotline: <strong>{settings.phone}</strong> | {settings.website}
+                Hotline: <strong>{safeSettings.phone || '01733-983752'}</strong> | {safeSettings.website || 'needelectroerp.vercel.app'}
               </div>
               <div style={{ fontSize: '8.5px', color: '#475569' }}>
-                {settings.vatRegistrationNo}
+                {safeSettings.vatRegistrationNo || 'VAT-NEED-2026-BD'}
               </div>
             </div>
 
             <div style={{ fontSize: '10px', marginBottom: '6px' }}>
               <div><strong>Invoice:</strong> {sale.invoiceNumber}</div>
-              <div><strong>Date:</strong> {new Date(sale.createdAt).toLocaleString('en-GB')}</div>
-              <div><strong>Customer:</strong> {sale.customerName}</div>
-              <div><strong>Phone:</strong> {sale.customerPhone}</div>
-              <div><strong>Cashier:</strong> {sale.salespersonName}</div>
+              <div><strong>Date:</strong> {formattedDate}</div>
+              <div><strong>Customer:</strong> {sale.customerName || 'Walking Customer'}</div>
+              <div><strong>Phone:</strong> {sale.customerPhone || 'N/A'}</div>
+              <div><strong>Cashier:</strong> {sale.salespersonName || 'Amdadur Rahman'}</div>
             </div>
 
             <div className="thermal-line" />
 
             <div style={{ fontSize: '10px' }}>
-              {sale.items.map((item, idx) => (
-                <div key={idx} style={{ marginBottom: '6px' }}>
-                  <div style={{ fontWeight: 'bold' }}>{item.productName}</div>
-                  {item.isSerialized && item.serialNumbers.length > 0 && (
-                    <div style={{ fontSize: '9px' }}>SN: {item.serialNumbers.join(', ')}</div>
-                  )}
-                  <div className="thermal-item-row">
-                    <span>{item.quantity} x ৳{item.unitPrice.toLocaleString()}</span>
-                    <span>৳{item.total.toLocaleString()}</span>
-                  </div>
+              {items.length > 0 ? (
+                items.map((item: any, idx: number) => {
+                  const itemSerials = safeArray<string>(item.serialNumbers);
+                  const itemPrice = Number(item.unitPrice || 0);
+                  const itemTotal = Number(item.total || (itemPrice * (item.quantity || 1)));
+
+                  return (
+                    <div key={item.id || idx} style={{ marginBottom: '6px' }}>
+                      <div style={{ fontWeight: 'bold' }}>{item.productName || 'Unnamed Item'}</div>
+                      {item.isSerialized && itemSerials.length > 0 && (
+                        <div style={{ fontSize: '9px' }}>SN: {itemSerials.join(', ')}</div>
+                      )}
+                      <div className="thermal-item-row">
+                        <span>{item.quantity || 1} x ৳{itemPrice.toLocaleString()}</span>
+                        <span>৳{itemTotal.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div style={{ textAlign: 'center', padding: '6px 0', color: '#64748b' }}>
+                  No items listed
                 </div>
-              ))}
+              )}
             </div>
 
             <div className="thermal-line" />
@@ -85,32 +134,32 @@ export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, 
             <div style={{ fontSize: '11px', lineHeight: '1.4' }}>
               <div className="thermal-item-row">
                 <span>Subtotal:</span>
-                <span>৳{sale.subtotal.toLocaleString()}</span>
+                <span>৳{subtotal.toLocaleString()}</span>
               </div>
-              {sale.overallDiscount > 0 && (
+              {overallDiscount > 0 && (
                 <div className="thermal-item-row">
                   <span>Discount:</span>
-                  <span>-৳{sale.overallDiscount.toLocaleString()}</span>
+                  <span>-৳{overallDiscount.toLocaleString()}</span>
                 </div>
               )}
-              {sale.vatAmount > 0 && (
+              {vatAmount > 0 && (
                 <div className="thermal-item-row">
-                  <span>VAT ({sale.vatPercent}%):</span>
-                  <span>৳{sale.vatAmount.toLocaleString()}</span>
+                  <span>VAT ({vatPercent}%):</span>
+                  <span>৳{vatAmount.toLocaleString()}</span>
                 </div>
               )}
               <div className="thermal-item-row" style={{ fontWeight: 'bold', fontSize: '12px' }}>
                 <span>Total:</span>
-                <span>৳{sale.grandTotal.toLocaleString()}</span>
+                <span>৳{grandTotal.toLocaleString()}</span>
               </div>
               <div className="thermal-item-row">
-                <span>Paid ({sale.payments.map(p => p.method).join('/')}):</span>
-                <span>৳{sale.paidAmount.toLocaleString()}</span>
+                <span>Paid ({paidMethodsText}):</span>
+                <span>৳{paidAmount.toLocaleString()}</span>
               </div>
-              {sale.dueAmount > 0 && (
+              {dueAmount > 0 && (
                 <div className="thermal-item-row" style={{ fontWeight: 'bold' }}>
                   <span>Due:</span>
-                  <span>৳{sale.dueAmount.toLocaleString()}</span>
+                  <span>৳{dueAmount.toLocaleString()}</span>
                 </div>
               )}
             </div>
@@ -121,6 +170,18 @@ export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, 
               <div>Goods once sold cannot be returned.</div>
               <div>Warranty valid with matching Serial No.</div>
               <div style={{ fontWeight: 'bold', marginTop: '4px' }}>Thank you for visiting NEED ELECTRO!</div>
+              
+              <div style={{ 
+                marginTop: '6px', 
+                paddingTop: '4px', 
+                borderTop: '1px solid #000000', 
+                fontWeight: 'bold', 
+                fontSize: '8.5px',
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase'
+              }}>
+                Software Development By AMDADS GROUP
+              </div>
             </div>
           </div>
         </div>
