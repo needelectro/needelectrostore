@@ -29,6 +29,17 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
     window.print();
   };
 
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        window.print();
+      } catch (err) {
+        console.warn('Auto print trigger notice:', err);
+      }
+    }, 450);
+    return () => clearTimeout(timer);
+  }, []);
+
   const rawDate = sale.createdAt || sale.date || new Date();
   const parsedDate = new Date(rawDate);
   const formattedDate = isNaN(parsedDate.getTime())

@@ -53,10 +53,11 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              if ('serviceWorker' in navigator && window.location.protocol === 'https:' || window.location.hostname === 'localhost') {
+              if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/sw.js').then(function(reg) {
                     console.log('NEED ELECTRO Service Worker active:', reg.scope);
+                    reg.update().catch(function() {});
                   }).catch(function(err) {
                     console.warn('Service Worker registration skipped:', err);
                   });

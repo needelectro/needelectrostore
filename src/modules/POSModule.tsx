@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useERP } from '../services/erpStore';
-import { Product, ProductCategory, Customer, SaleItem, PaymentMethod, PaymentBreakdown } from '../types';
+import { Sale, Product, ProductCategory, Customer, SaleItem, PaymentMethod, PaymentBreakdown } from '../types';
 import { 
   ShoppingCart, Search, Plus, Trash2, CreditCard, 
   Printer, UserPlus, Hash, Percent, Tag, Check, X, 
@@ -253,16 +253,45 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
 
     if (saleResult.success && saleResult.sale) {
       setShowPaymentModal(false);
+      
+      const cartItemsSnapshot = [...cart];
+      const paymentsSnapshot = [...payments];
+
       setCart([]);
       setOverallDiscount(0);
       setSaleNotes('');
 
+      // Build guaranteed complete sale object for instant printing
+      const completeSale: Sale = {
+        ...saleResult.sale,
+        items: (saleResult.sale.items && Array.isArray(saleResult.sale.items) && saleResult.sale.items.length > 0)
+          ? saleResult.sale.items
+          : cartItemsSnapshot.map(c => ({
+              id: 'si-' + c.productId,
+              saleId: saleResult.sale?.id || '',
+              productId: c.productId,
+              productName: c.productName,
+              sku: c.sku,
+              category: c.category,
+              quantity: c.quantity,
+              unitPrice: c.unitPrice,
+              discount: c.discount,
+              total: c.total,
+              warrantyMonths: c.warrantyMonths,
+              isSerialized: c.isSerialized,
+              serialNumbers: c.serialNumbers || []
+            })),
+        payments: (saleResult.sale.payments && Array.isArray(saleResult.sale.payments) && saleResult.sale.payments.length > 0)
+          ? saleResult.sale.payments
+          : paymentsSnapshot
+      };
+
       // Prompt print choice
-      const printChoice = window.confirm(`Sale ${saleResult.sale.invoiceNumber} recorded successfully! Would you like to view/print the official A4 Tax Invoice now? (Click Cancel for 80mm Thermal receipt)`);
+      const printChoice = window.confirm(`Sale ${completeSale.invoiceNumber} recorded successfully!\n\nClick [OK] to view & print official A4 Tax Invoice.\nClick [Cancel] for 80mm Thermal Receipt.`);
       if (printChoice) {
-        setActiveInvoiceToPrint(saleResult.sale);
+        setActiveInvoiceToPrint(completeSale);
       } else {
-        setActiveThermalReceiptToPrint(saleResult.sale);
+        setActiveThermalReceiptToPrint(completeSale);
       }
     } else {
       alert(`Error creating sale: ${saleResult.error}`);

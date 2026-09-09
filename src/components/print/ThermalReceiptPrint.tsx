@@ -29,6 +29,17 @@ export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, 
     window.print();
   };
 
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        window.print();
+      } catch (err) {
+        console.warn('Auto print trigger notice:', err);
+      }
+    }, 450);
+    return () => clearTimeout(timer);
+  }, []);
+
   const safeSettings = settings || ({} as Partial<SystemSettings>);
   const items = safeArray<any>(sale.items);
   const payments = safeArray<any>(sale.payments);
