@@ -42,7 +42,18 @@ export const INITIAL_SETTINGS: SystemSettings = {
   accentColor: '#008CFF'
 };
 
-export const INITIAL_BRANCHES: Branch[] = [];
+export const INITIAL_BRANCHES: Branch[] = [
+  {
+    id: 'branch-1',
+    name: 'Main Branch Moulvibazar',
+    code: 'MB-MAIN',
+    address: 'Shop#5, MR Plaza, Kusumbag, Moulvibazar',
+    phone: '01733-983752',
+    email: 'contact.amdadur@gmail.com',
+    isWarehouse: false,
+    active: true
+  }
+];
 
 export const INITIAL_USERS: User[] = [
   {
@@ -53,7 +64,7 @@ export const INITIAL_USERS: User[] = [
     role: 'SUPER_ADMIN',
     roleId: 'role-superadmin',
     branchId: 'branch-1',
-    allowedBranchIds: ['branch-1', 'branch-2', 'branch-3'],
+    allowedBranchIds: ['branch-1'],
     phone: '01733-983752',
     active: true,
     status: 'ACTIVE',
