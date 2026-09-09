@@ -1,12 +1,13 @@
 import React from 'react';
 import { Sale, SystemSettings } from '../../types';
-import { Printer, X } from 'lucide-react';
+import { Printer, X, Receipt } from 'lucide-react';
 import { NeedElectroLogo } from '../NeedElectroLogo';
 
 interface A4InvoicePrintProps {
   sale: Sale;
   settings: SystemSettings;
   onClose: () => void;
+  onSwitchToThermal?: () => void;
 }
 
 const safeArray = <T,>(val: any): T[] => {
@@ -22,7 +23,7 @@ const safeArray = <T,>(val: any): T[] => {
   return [];
 };
 
-export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, onClose }) => {
+export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, onClose, onSwitchToThermal }) => {
   if (!sale) return null;
 
   const handlePrint = () => {
@@ -77,10 +78,19 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
             <Printer size={20} className="text-primary" />
             Official A4 Invoice Preview — {sale.invoiceNumber || 'INV-DRAFT'}
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <button className="btn btn-primary btn-sm" onClick={handlePrint} style={{ fontWeight: 600 }}>
               <Printer size={16} /> Print / Save PDF
             </button>
+            {onSwitchToThermal && (
+              <button 
+                className="btn btn-secondary btn-sm" 
+                onClick={onSwitchToThermal}
+                title="Switch to 80mm Thermal Receipt format"
+              >
+                <Receipt size={15} /> 80mm Receipt
+              </button>
+            )}
             <button className="btn btn-secondary btn-sm" onClick={onClose}>
               <X size={16} /> Close
             </button>

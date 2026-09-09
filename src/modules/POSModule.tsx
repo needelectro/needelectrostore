@@ -286,13 +286,8 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
           : paymentsSnapshot
       };
 
-      // Prompt print choice
-      const printChoice = window.confirm(`Sale ${completeSale.invoiceNumber} recorded successfully!\n\nClick [OK] to view & print official A4 Tax Invoice.\nClick [Cancel] for 80mm Thermal Receipt.`);
-      if (printChoice) {
-        setActiveInvoiceToPrint(completeSale);
-      } else {
-        setActiveThermalReceiptToPrint(completeSale);
-      }
+      // Directly launch the official invoice preview & print
+      setActiveInvoiceToPrint(completeSale);
     } else {
       alert(`Error creating sale: ${saleResult.error}`);
     }

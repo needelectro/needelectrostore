@@ -255,6 +255,11 @@ const MainAppLayout: React.FC = () => {
             sale={activeInvoiceToPrint}
             settings={settings}
             onClose={() => setActiveInvoiceToPrint(null)}
+            onSwitchToThermal={() => {
+              const currentSale = activeInvoiceToPrint;
+              setActiveInvoiceToPrint(null);
+              setActiveThermalReceiptToPrint(currentSale);
+            }}
           />
         </ErrorBoundary>
       )}
@@ -265,6 +270,11 @@ const MainAppLayout: React.FC = () => {
             sale={activeThermalReceiptToPrint}
             settings={settings}
             onClose={() => setActiveThermalReceiptToPrint(null)}
+            onSwitchToA4={() => {
+              const currentSale = activeThermalReceiptToPrint;
+              setActiveThermalReceiptToPrint(null);
+              setActiveInvoiceToPrint(currentSale);
+            }}
           />
         </ErrorBoundary>
       )}
