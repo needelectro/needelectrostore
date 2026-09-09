@@ -16,11 +16,10 @@ import {
   PosSettings, InventoryRules
 } from '../types';
 
-interface ControlCenterModuleProps {
-  onNavigate: (module: string, targetId?: string) => void;
-}
+import { MasterEntityHub } from '../components/admin/MasterEntityHub';
 
 type ControlCenterTab = 
+  | 'master_crud'
   | 'business'
   | 'catalog'
   | 'pricing'
@@ -34,7 +33,12 @@ type ControlCenterTab =
   | 'security'
   | 'maintenance';
 
-export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavigate }) => {
+interface ControlCenterModuleProps {
+  onNavigate: (module: string, targetId?: string) => void;
+  initialTab?: ControlCenterTab;
+}
+
+export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavigate, initialTab }) => {
   const {
     settings, updateSettings, branches, addBranch, updateBranch, deleteBranch, users, roles,
     products, customers, financialAccounts, auditLogs,
@@ -51,7 +55,9 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
     exportDatabase, importDatabase, setupStatus
   } = useERP();
 
-  const [activeTab, setActiveTab] = useState<ControlCenterTab>('business');
+  const [activeTab, setActiveTab] = useState<ControlCenterTab>(
+    initialTab || (currentUser.role === 'SUPER_ADMIN' ? 'master_crud' : 'business')
+  );
 
   // -------------------------------------------------------------
   // TAB 1: BUSINESS PROFILE & BRANCHES
@@ -671,6 +677,7 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
         borderBottom: '1px solid var(--border-color)'
       }}>
         {[
+          { id: 'master_crud', label: '👑 Master Entity Hub', icon: ShieldCheck },
           { id: 'business', label: 'Company & Branches', icon: Building },
           { id: 'catalog', label: 'Catalog & Attributes', icon: Package },
           { id: 'pricing', label: 'Pricing & Audits', icon: DollarSign },
@@ -715,6 +722,13 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
       </div>
 
       {/* TAB CONTENT AREAS */}
+
+      {/* ========================================================================= */}
+      {/* 0. SUPER ADMIN UNIVERSAL MASTER ENTITY HUB */}
+      {/* ========================================================================= */}
+      {activeTab === 'master_crud' && (
+        <MasterEntityHub />
+      )}
 
       {/* ========================================================================= */}
       {/* 1. BUSINESS PROFILE & BRANCHES */}

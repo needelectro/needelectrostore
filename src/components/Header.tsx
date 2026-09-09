@@ -121,6 +121,28 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
           </select>
         </div>
 
+        {/* Super Admin Master Mode Quick Access */}
+        {currentUser?.role === 'SUPER_ADMIN' && (
+          <button
+            className="btn btn-sm"
+            onClick={() => onNavigateToModule('control_center', 'master_crud')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
+              color: '#ffffff',
+              border: '1px solid rgba(255,255,255,0.2)',
+              fontWeight: '700',
+              boxShadow: '0 2px 8px rgba(124, 58, 237, 0.35)',
+            }}
+            title="Super Admin Master Hub — Manage & Edit Everything Across All 20 Modules"
+          >
+            <ShieldAlert size={14} />
+            <span>👑 Master Hub</span>
+          </button>
+        )}
+
         {/* Quick New Sale POS Shortcut */}
         <button 
           className="btn btn-primary btn-sm"

@@ -100,6 +100,9 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ newPassword })
       }),
+    deleteUser: (id: string) => request<{ success: boolean; message: string }>(`/api/auth/users/${id}`, {
+      method: 'DELETE'
+    }),
     getRoles: () => request<{ success: boolean; data: any[] }>('/api/auth/roles'),
     createRole: (roleData: any) => request<{ success: boolean; message: string; roleId: string }>('/api/auth/roles', {
       method: 'POST',
@@ -128,6 +131,15 @@ export const api = {
       request<{ success: boolean; message: string; sale: any }>('/api/sales', {
         method: 'POST',
         body: JSON.stringify({ saleData, emiPlanConfig, paymentAccountId })
+      }),
+    updateSale: (id: string, updates: any) =>
+      request<{ success: boolean; data: any }>(`/api/sales/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates)
+      }),
+    deleteSale: (id: string) =>
+      request<{ success: boolean; message: string }>(`/api/sales/${id}`, {
+        method: 'DELETE'
       })
   },
 
@@ -137,6 +149,15 @@ export const api = {
       const q = params ? '?' + new URLSearchParams(params).toString() : '';
       return request<{ success: boolean; data: any[] }>(`/api/emi/accounts${q}`);
     },
+    updateAccount: (id: string, updates: any) =>
+      request<{ success: boolean; data: any }>(`/api/emi/accounts/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates)
+      }),
+    deleteAccount: (id: string) =>
+      request<{ success: boolean; message: string }>(`/api/emi/accounts/${id}`, {
+        method: 'DELETE'
+      }),
     collectPayment: (payload: {
       emiAccountId: string;
       installmentId: string;
@@ -173,6 +194,10 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify(productData)
       }),
+    deleteProduct: (id: string) =>
+      request<{ success: boolean; message: string }>(`/api/products/${id}`, {
+        method: 'DELETE'
+      }),
     updatePrice: (id: string, updates: any, reason: string) =>
       request<{ success: boolean; message: string }>(`/api/products/${id}/price`, {
         method: 'POST',
@@ -206,6 +231,10 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify(customerData)
       }),
+    deleteCustomer: (id: string) =>
+      request<{ success: boolean; message: string }>(`/api/customers/${id}`, {
+        method: 'DELETE'
+      }),
     getLedger: (id: string) =>
       request<{ success: boolean; customer: any; ledger: any[] }>(`/api/customers/${id}/ledger`),
     mergeCustomers: (sourceCustomerId: string, targetCustomerId: string, reason: string) =>
@@ -223,6 +252,15 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(supplierData)
       }),
+    updateSupplier: (id: string, updates: any) =>
+      request<{ success: boolean; data: any }>(`/api/suppliers/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates)
+      }),
+    deleteSupplier: (id: string) =>
+      request<{ success: boolean; message: string }>(`/api/suppliers/${id}`, {
+        method: 'DELETE'
+      }),
     recordPayment: (id: string, payload: any) =>
       request<{ success: boolean; message: string; data: any }>(`/api/suppliers/${id}/payment`, {
         method: 'POST',
@@ -237,6 +275,15 @@ export const api = {
       request<{ success: boolean; message: string; purchase: any }>('/api/purchases', {
         method: 'POST',
         body: JSON.stringify(payload)
+      }),
+    updatePurchase: (id: string, updates: any) =>
+      request<{ success: boolean; data: any }>(`/api/purchases/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates)
+      }),
+    deletePurchase: (id: string) =>
+      request<{ success: boolean; message: string }>(`/api/purchases/${id}`, {
+        method: 'DELETE'
       })
   },
 
@@ -247,6 +294,15 @@ export const api = {
       request<{ success: boolean; message: string; data: any }>('/api/returns', {
         method: 'POST',
         body: JSON.stringify(returnData)
+      }),
+    updateReturn: (id: string, updates: any) =>
+      request<{ success: boolean; data: any }>(`/api/returns/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates)
+      }),
+    deleteReturn: (id: string) =>
+      request<{ success: boolean; message: string }>(`/api/returns/${id}`, {
+        method: 'DELETE'
       })
   },
 
@@ -257,6 +313,15 @@ export const api = {
       request<{ success: boolean; message: string; data: any }>('/api/expenses', {
         method: 'POST',
         body: JSON.stringify(expenseData)
+      }),
+    updateExpense: (id: string, updates: any) =>
+      request<{ success: boolean; data: any }>(`/api/expenses/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates)
+      }),
+    deleteExpense: (id: string) =>
+      request<{ success: boolean; message: string }>(`/api/expenses/${id}`, {
+        method: 'DELETE'
       })
   },
 
@@ -272,6 +337,10 @@ export const api = {
       request<{ success: boolean; message: string }>(`/api/services/${id}`, {
         method: 'PUT',
         body: JSON.stringify(updates)
+      }),
+    deleteService: (id: string) =>
+      request<{ success: boolean; message: string }>(`/api/services/${id}`, {
+        method: 'DELETE'
       })
   },
 
@@ -287,6 +356,10 @@ export const api = {
       request<{ success: boolean; message: string }>(`/api/warranty/claims/${id}`, {
         method: 'PUT',
         body: JSON.stringify(updates)
+      }),
+    deleteClaim: (id: string) =>
+      request<{ success: boolean; message: string }>(`/api/warranty/claims/${id}`, {
+        method: 'DELETE'
       })
   },
 

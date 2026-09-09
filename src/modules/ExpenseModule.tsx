@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
 import { useERP } from '../services/erpStore';
-import { ExpenseCategory, PaymentMethod } from '../types';
-import { Wallet, Plus, Search, Calendar, Tag, DollarSign, X } from 'lucide-react';
+import { ExpenseCategory, PaymentMethod, Expense } from '../types';
+import { Wallet, Plus, Search, Calendar, Tag, DollarSign, X, Edit2, Trash2, Save, ShieldCheck } from 'lucide-react';
 
 interface ExpenseModuleProps {
   onNavigate: (module: string, targetId?: string) => void;
 }
 
 export const ExpenseModule: React.FC<ExpenseModuleProps> = ({ onNavigate }) => {
-  const { expenses, createExpense, selectedBranch, currentUser } = useERP();
+  const { expenses, createExpense, updateExpense, deleteExpense, selectedBranch, currentUser } = useERP();
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [editForm, setEditForm] = useState<any>({});
+  const [isSaving, setIsSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
+
+  const isSuperAdmin = currentUser.role === 'SUPER_ADMIN';
 
   // Form State
   const [category, setCategory] = useState<ExpenseCategory>('Office Supplies & Snacks');
@@ -55,6 +60,26 @@ export const ExpenseModule: React.FC<ExpenseModuleProps> = ({ onNavigate }) => {
     setShowAddModal(false);
     setDescription('');
     setAmount(1000);
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingExpense) return;
+    setIsSaving(true);
+    try {
+      await updateExpense(editingExpense.id, {
+        category: editForm.category,
+        amount: Number(editForm.amount) || 0,
+        date: editForm.date,
+        paymentMethod: editForm.paymentMethod,
+        description: editForm.description,
+      });
+      setEditingExpense(null);
+    } catch (err: any) {
+      alert('Failed to update expense: ' + (err.message || err));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -128,6 +153,7 @@ export const ExpenseModule: React.FC<ExpenseModuleProps> = ({ onNavigate }) => {
                 <th>Payment Mode</th>
                 <th>Recorded By</th>
                 <th style={{ textAlign: 'right' }}>Amount (৳)</th>
+                <th style={{ textAlign: 'center', width: '110px' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -141,6 +167,33 @@ export const ExpenseModule: React.FC<ExpenseModuleProps> = ({ onNavigate }) => {
                   <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{exp.createdBy}</td>
                   <td style={{ textAlign: 'right', fontWeight: '800', color: '#ef4444' }}>
                     ৳{exp.amount.toLocaleString()}
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
+                    <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center' }}>
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => {
+                          setEditingExpense(exp);
+                          setEditForm({ ...exp });
+                        }}
+                        title="Edit Expense"
+                        style={{ padding: '0.2rem 0.45rem' }}
+                      >
+                        <Edit2 size={13} />
+                      </button>
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={async () => {
+                          if (window.confirm(`⚠️ Are you sure you want to delete expense voucher ${exp.voucherNumber} (${exp.category} - ৳${exp.amount})?`)) {
+                            await deleteExpense(exp.id);
+                          }
+                        }}
+                        title="Delete Expense"
+                        style={{ padding: '0.2rem 0.45rem', color: '#ef4444' }}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -234,6 +287,97 @@ export const ExpenseModule: React.FC<ExpenseModuleProps> = ({ onNavigate }) => {
                 </button>
                 <button type="submit" className="btn btn-danger btn-sm">
                   Record Expense
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Edit Expense (Super Admin / Manager) */}
+      {editingExpense && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content">
+            <div className="modal-header">
+              <div className="modal-title">
+                <ShieldCheck size={20} color="var(--brand-primary)" />
+                Edit Expense Voucher ({editingExpense.voucherNumber})
+              </div>
+              <button className="btn btn-ghost btn-sm" onClick={() => setEditingExpense(null)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit}>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Expense Category *</label>
+                  <select
+                    className="form-select"
+                    value={editForm.category || ''}
+                    onChange={e => setEditForm({ ...editForm, category: e.target.value })}
+                  >
+                    {categories.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.75rem' }}>
+                  <div className="form-group">
+                    <label className="form-label">Amount (৳) *</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={editForm.amount || 0}
+                      onChange={e => setEditForm({ ...editForm, amount: Number(e.target.value) || 0 })}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Payment Channel</label>
+                    <select
+                      className="form-select"
+                      value={editForm.paymentMethod || 'Cash'}
+                      onChange={e => setEditForm({ ...editForm, paymentMethod: e.target.value })}
+                    >
+                      <option value="Cash">Cash in Hand</option>
+                      <option value="bKash">bKash Merchant</option>
+                      <option value="Nagad">Nagad Merchant</option>
+                      <option value="Bank Transfer">Bank Transfer</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Date</label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={editForm.date || ''}
+                    onChange={e => setEditForm({ ...editForm, date: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Description / Purpose *</label>
+                  <textarea
+                    className="form-textarea"
+                    rows={2}
+                    value={editForm.description || ''}
+                    onChange={e => setEditForm({ ...editForm, description: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setEditingExpense(null)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary btn-sm" disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Update Voucher'}
                 </button>
               </div>
             </form>

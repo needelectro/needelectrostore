@@ -204,7 +204,7 @@ const MainAppLayout: React.FC = () => {
       case 'settings':
         return <SettingsModule onNavigate={handleNavigate} />;
       case 'control_center':
-        return <ControlCenterModule onNavigate={handleNavigate} />;
+        return <ControlCenterModule onNavigate={handleNavigate} initialTab={moduleInitialParam as any} />;
       default:
         return <DashboardModule onNavigate={handleNavigate} />;
     }

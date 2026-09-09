@@ -179,6 +179,27 @@ interface ERPContextType {
   inventoryRules: InventoryRules;
   updateInventoryRules: (updates: Partial<InventoryRules>) => Promise<void>;
 
+  // Super Admin Master Omnipotent Controls
+  updateSale: (saleId: string, updates: Partial<Sale>) => Promise<{ success: boolean; error?: string }>;
+  deleteSale: (saleId: string) => Promise<{ success: boolean; error?: string }>;
+  updateEMIAccount: (accountId: string, updates: Partial<EMIAccount>) => Promise<{ success: boolean; error?: string }>;
+  deleteEMIAccount: (accountId: string) => Promise<{ success: boolean; error?: string }>;
+  deleteProduct: (productId: string) => Promise<{ success: boolean; error?: string }>;
+  deleteCustomer: (customerId: string) => Promise<{ success: boolean; error?: string }>;
+  updateSupplier: (supplierId: string, updates: Partial<Supplier>) => Promise<{ success: boolean; error?: string }>;
+  deleteSupplier: (supplierId: string) => Promise<{ success: boolean; error?: string }>;
+  updatePurchase: (purchaseId: string, updates: Partial<Purchase>) => Promise<{ success: boolean; error?: string }>;
+  deletePurchase: (purchaseId: string) => Promise<{ success: boolean; error?: string }>;
+  updateReturn: (returnId: string, updates: Partial<ProductReturn>) => Promise<{ success: boolean; error?: string }>;
+  deleteReturn: (returnId: string) => Promise<{ success: boolean; error?: string }>;
+  updateExpense: (expenseId: string, updates: Partial<Expense>) => Promise<{ success: boolean; error?: string }>;
+  deleteExpense: (expenseId: string) => Promise<{ success: boolean; error?: string }>;
+  updateServiceJob: (jobId: string, updates: Partial<ServiceJob>) => Promise<{ success: boolean; error?: string }>;
+  deleteServiceJob: (jobId: string) => Promise<{ success: boolean; error?: string }>;
+  updateWarrantyClaim: (claimId: string, updates: Partial<WarrantyClaim>) => Promise<{ success: boolean; error?: string }>;
+  deleteWarrantyClaim: (claimId: string) => Promise<{ success: boolean; error?: string }>;
+  deleteEmployee: (employeeId: string) => Promise<{ success: boolean; error?: string }>;
+
   // Utilities
   exportDatabase: () => string;
   importDatabase: (json: string) => boolean;
@@ -1826,6 +1847,289 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  // -------------------------------------------------------------
+  // SUPER ADMIN MASTER CRUD & OMNIPOTENT OVERRIDE HANDLERS
+  // -------------------------------------------------------------
+  const updateSale = async (saleId: string, updates: Partial<Sale>): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.sales.updateSale(saleId, updates);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to update sale.');
+      await refreshFromDatabase();
+      logAction('POS', 'SUPER_ADMIN_UPDATE_SALE', saleId, `Updated sale ${updates.invoiceNumber || saleId}`);
+      addToast('success', 'Sale Updated', `Sale ${updates.invoiceNumber || ''} updated successfully.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Update Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteSale = async (saleId: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const s = sales.find(x => x.id === saleId);
+      const res = await api.sales.deleteSale(saleId);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to delete sale.');
+      await refreshFromDatabase();
+      logAction('POS', 'SUPER_ADMIN_DELETE_SALE', saleId, `Deleted sale ${s?.invoiceNumber || saleId}`);
+      addToast('info', 'Sale Deleted', `Sale ${s?.invoiceNumber || saleId} permanently removed.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Delete Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const updateEMIAccount = async (accountId: string, updates: Partial<EMIAccount>): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.emi.updateAccount(accountId, updates);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to update EMI account.');
+      await refreshFromDatabase();
+      const emiNum = updates.emiNumber || accountId;
+      logAction('EMI', 'SUPER_ADMIN_UPDATE_EMI', accountId, `Updated EMI Account ${emiNum}`);
+      addToast('success', 'EMI Account Updated', `EMI Account ${emiNum} updated.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Update Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteEMIAccount = async (accountId: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const a = emiAccounts.find(x => x.id === accountId);
+      const res = await api.emi.deleteAccount(accountId);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to delete EMI account.');
+      await refreshFromDatabase();
+      const emiNum = a?.emiNumber || accountId;
+      logAction('EMI', 'SUPER_ADMIN_DELETE_EMI', accountId, `Deleted EMI Account ${emiNum}`);
+      addToast('info', 'EMI Account Deleted', `EMI Account ${emiNum} removed.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Delete Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteProduct = async (productId: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const p = products.find(x => x.id === productId);
+      const res = await api.products.deleteProduct(productId);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to delete product.');
+      await refreshFromDatabase();
+      logAction('INVENTORY', 'SUPER_ADMIN_DELETE_PRODUCT', productId, `Deleted product ${p?.name || productId}`);
+      addToast('info', 'Product Deleted', `Product ${p?.name || productId} removed.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Delete Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteCustomer = async (customerId: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const c = customers.find(x => x.id === customerId);
+      const res = await api.customers.deleteCustomer(customerId);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to delete customer.');
+      await refreshFromDatabase();
+      logAction('CUSTOMER', 'SUPER_ADMIN_DELETE_CUSTOMER', customerId, `Deleted customer ${c?.name || customerId}`);
+      addToast('info', 'Customer Deleted', `Customer ${c?.name || customerId} removed.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Delete Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const updateSupplier = async (supplierId: string, updates: Partial<Supplier>): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.suppliers.updateSupplier(supplierId, updates);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to update supplier.');
+      await refreshFromDatabase();
+      logAction('PURCHASE', 'SUPER_ADMIN_UPDATE_SUPPLIER', supplierId, `Updated supplier ${updates.name || supplierId}`);
+      addToast('success', 'Supplier Updated', `Supplier ${updates.name || ''} updated.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Update Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteSupplier = async (supplierId: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const s = suppliers.find(x => x.id === supplierId);
+      const res = await api.suppliers.deleteSupplier(supplierId);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to delete supplier.');
+      await refreshFromDatabase();
+      logAction('PURCHASE', 'SUPER_ADMIN_DELETE_SUPPLIER', supplierId, `Deleted supplier ${s?.name || supplierId}`);
+      addToast('info', 'Supplier Deleted', `Supplier ${s?.name || supplierId} removed.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Delete Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const updatePurchase = async (purchaseId: string, updates: Partial<Purchase>): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.purchases.updatePurchase(purchaseId, updates);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to update purchase.');
+      await refreshFromDatabase();
+      logAction('PURCHASE', 'SUPER_ADMIN_UPDATE_PURCHASE', purchaseId, `Updated purchase ${updates.invoiceNumber || purchaseId}`);
+      addToast('success', 'Purchase Updated', `Purchase order updated.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Update Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deletePurchase = async (purchaseId: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const p = purchases.find(x => x.id === purchaseId);
+      const res = await api.purchases.deletePurchase(purchaseId);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to delete purchase.');
+      await refreshFromDatabase();
+      logAction('PURCHASE', 'SUPER_ADMIN_DELETE_PURCHASE', purchaseId, `Deleted purchase ${p?.invoiceNumber || purchaseId}`);
+      addToast('info', 'Purchase Deleted', `Purchase order removed.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Delete Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const updateReturn = async (returnId: string, updates: Partial<ProductReturn>): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.returns.updateReturn(returnId, updates);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to update return.');
+      await refreshFromDatabase();
+      logAction('POS', 'SUPER_ADMIN_UPDATE_RETURN', returnId, `Updated return ${updates.returnNumber || returnId}`);
+      addToast('success', 'Return Updated', `Return record updated.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Update Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteReturn = async (returnId: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const r = returns.find(x => x.id === returnId);
+      const res = await api.returns.deleteReturn(returnId);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to delete return.');
+      await refreshFromDatabase();
+      logAction('POS', 'SUPER_ADMIN_DELETE_RETURN', returnId, `Deleted return ${r?.returnNumber || returnId}`);
+      addToast('info', 'Return Deleted', `Return record removed.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Delete Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const updateExpense = async (expenseId: string, updates: Partial<Expense>): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.expenses.updateExpense(expenseId, updates);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to update expense.');
+      await refreshFromDatabase();
+      logAction('ACCOUNTING', 'SUPER_ADMIN_UPDATE_EXPENSE', expenseId, `Updated expense ${updates.voucherNumber || expenseId}`);
+      addToast('success', 'Expense Updated', `Expense voucher updated.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Update Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteExpense = async (expenseId: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const e = expenses.find(x => x.id === expenseId);
+      const res = await api.expenses.deleteExpense(expenseId);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to delete expense.');
+      await refreshFromDatabase();
+      logAction('ACCOUNTING', 'SUPER_ADMIN_DELETE_EXPENSE', expenseId, `Deleted expense ${e?.voucherNumber || expenseId}`);
+      addToast('info', 'Expense Deleted', `Expense voucher removed.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Delete Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const updateServiceJob = async (jobId: string, updates: Partial<ServiceJob>): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.services.updateService(jobId, updates);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to update service job.');
+      await refreshFromDatabase();
+      logAction('SERVICE', 'SUPER_ADMIN_UPDATE_SERVICE', jobId, `Updated service job ${updates.jobCardNumber || jobId}`);
+      addToast('success', 'Service Job Updated', `Service job updated.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Update Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteServiceJob = async (jobId: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const j = services.find(x => x.id === jobId);
+      const res = await api.services.deleteService(jobId);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to delete service job.');
+      await refreshFromDatabase();
+      logAction('SERVICE', 'SUPER_ADMIN_DELETE_SERVICE', jobId, `Deleted service job ${j?.jobCardNumber || jobId}`);
+      addToast('info', 'Service Job Deleted', `Service job removed.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Delete Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const updateWarrantyClaim = async (claimId: string, updates: Partial<WarrantyClaim>): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.warranty.resolveClaim(claimId, updates);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to update warranty claim.');
+      await refreshFromDatabase();
+      logAction('SERVICE', 'SUPER_ADMIN_UPDATE_WARRANTY', claimId, `Updated warranty claim ${updates.claimNumber || claimId}`);
+      addToast('success', 'Claim Updated', `Warranty claim updated.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Update Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteWarrantyClaim = async (claimId: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const c = warrantyClaims.find(x => x.id === claimId);
+      const res = await api.warranty.deleteClaim(claimId);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to delete warranty claim.');
+      await refreshFromDatabase();
+      logAction('SERVICE', 'SUPER_ADMIN_DELETE_WARRANTY', claimId, `Deleted warranty claim ${c?.claimNumber || claimId}`);
+      addToast('info', 'Claim Deleted', `Warranty claim removed.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Delete Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteEmployee = async (employeeId: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const u = users.find(x => x.id === employeeId || x.employeeId === employeeId);
+      const targetId = u ? u.id : employeeId;
+      const res = await api.auth.deleteUser(targetId);
+      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to delete user.');
+      await refreshFromDatabase();
+      logAction('SETTINGS', 'SUPER_ADMIN_DELETE_USER', targetId, `Deleted user ${u?.name || targetId}`);
+      addToast('info', 'User Deleted', `User ${u?.name || targetId} removed.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Delete Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
   const exportDatabase = () => exportAllDataJSON();
 
   const importDatabase = (json: string) => {
@@ -1962,6 +2266,25 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updatePosSettings,
         inventoryRules,
         updateInventoryRules,
+        updateSale,
+        deleteSale,
+        updateEMIAccount,
+        deleteEMIAccount,
+        deleteProduct,
+        deleteCustomer,
+        updateSupplier,
+        deleteSupplier,
+        updatePurchase,
+        deletePurchase,
+        updateReturn,
+        deleteReturn,
+        updateExpense,
+        deleteExpense,
+        updateServiceJob,
+        deleteServiceJob,
+        updateWarrantyClaim,
+        deleteWarrantyClaim,
+        deleteEmployee,
         exportDatabase,
         importDatabase
       }}

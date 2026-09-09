@@ -10,7 +10,7 @@ export async function PUT(
   const user = await requireAuth(req);
   if (user instanceof NextResponse) return user;
 
-  if (!hasPermission(user, 'users', 'edit') && user.role !== 'SUPER_ADMIN') {
+  if (!hasPermission(user, 'users', 'edit') && user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') {
     return NextResponse.json({ success: false, error: 'Access denied' }, { status: 403 });
   }
 
@@ -24,7 +24,7 @@ export async function PUT(
     }
 
     // Protect Super Admin account from role demotion by non-superadmins
-    if (targetUser.role === 'SUPER_ADMIN' && user.role !== 'SUPER_ADMIN') {
+    if (targetUser.role === 'SUPER_ADMIN' && user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') {
       return NextResponse.json({ success: false, error: 'Cannot modify Super Admin account' }, { status: 403 });
     }
 
@@ -55,6 +55,51 @@ export async function PUT(
 
     return NextResponse.json({ success: true, message: 'User updated successfully' });
   } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const user = await requireAuth(req);
+  if (user instanceof NextResponse) return user;
+
+  if (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') {
+    return NextResponse.json({ success: false, error: 'Access denied. Only Super Admin or Admin can delete users.' }, { status: 403 });
+  }
+
+  if (user.id === params.id) {
+    return NextResponse.json({ success: false, error: 'Cannot delete your own active Super Admin account.' }, { status: 400 });
+  }
+
+  try {
+    const targetUser = await prisma.user.findUnique({ where: { id: params.id } });
+    if (!targetUser) {
+      return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.session.deleteMany({ where: { userId: targetUser.id } });
+      await tx.user.delete({ where: { id: params.id } });
+
+      await tx.auditLog.create({
+        data: {
+          id: 'audit-' + Date.now(),
+          userId: user.id,
+          userName: user.name,
+          action: 'SUPER_ADMIN_USER_DELETE',
+          module: 'USERS',
+          recordId: targetUser.id,
+          details: `Super Admin ${user.name} deleted user ${targetUser.name} (${targetUser.email})`,
+        },
+      });
+    });
+
+    return NextResponse.json({ success: true, message: `User ${targetUser.name} deleted successfully.` });
+  } catch (err: any) {
+    console.error('User deletion error:', err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }

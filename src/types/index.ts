@@ -107,6 +107,7 @@ export interface AuthSession {
 
 export type ProductCategory = 
   | 'Laptop'
+  | 'Laptops'
   | 'Desktop'
   | 'Monitor'
   | 'Smartphone'
@@ -121,7 +122,8 @@ export type ProductCategory =
   | 'Cables'
   | 'Chargers'
   | 'Adapters'
-  | 'Other Gadgets';
+  | 'Other Gadgets'
+  | (string & {});
 
 export interface LaptopSpecifications {
   processor: string;
@@ -172,12 +174,12 @@ export interface Product {
   emiPrice: number;
   currentStock: number;
   minStock: number;
-  supplierId: string;
+  supplierId?: string;
   warrantyPeriodMonths: number;
   isSerialized: boolean;
-  status: 'ACTIVE' | 'DISCONTINUED' | 'OUT_OF_STOCK';
+  status?: 'ACTIVE' | 'DISCONTINUED' | 'OUT_OF_STOCK';
   specs?: LaptopSpecifications | ElectricalSpecifications | CCTVSpecifications | Record<string, string>;
-  createdAt: string;
+  createdAt?: string;
 }
 
 export type SerialStatus = 'AVAILABLE' | 'SOLD' | 'RESERVED' | 'DEFECTIVE' | 'RETURNED';
@@ -247,12 +249,14 @@ export interface Supplier {
   name: string;
   company: string;
   phone: string;
-  email: string;
+  email?: string;
   address: string;
   category: string;
   openingBalance: number;
   currentPayable: number;
-  createdAt: string;
+  createdAt?: string;
+  code?: string;
+  representative?: string;
 }
 
 export interface PurchaseItem {
@@ -317,7 +321,8 @@ export type PaymentMethod =
   | 'Bank Transfer'
   | 'Card'
   | 'Mixed Payment'
-  | 'EMI';
+  | 'EMI'
+  | string;
 
 export interface PaymentBreakdown {
   method: PaymentMethod;
@@ -341,13 +346,13 @@ export interface SaleItem {
 
 export interface Sale {
   id: string;
-  invoiceNumber: string; // e.g. "INV-2026-0001"
+  invoiceNumber: string;
   customerId: string;
   customerName: string;
   customerPhone: string;
   branchId: string;
   date: string;
-  items: SaleItem[];
+  items?: SaleItem[];
   subtotal: number;
   overallDiscount: number;
   vatAmount: number;
@@ -355,14 +360,14 @@ export interface Sale {
   grandTotal: number;
   paidAmount: number;
   dueAmount: number;
-  payments: PaymentBreakdown[];
+  payments?: PaymentBreakdown[];
   saleType: 'REGULAR' | 'EMI';
   emiAccountId?: string;
-  status: 'COMPLETED' | 'RETURNED' | 'VOID';
-  salespersonId: string;
-  salespersonName: string;
+  status?: 'COMPLETED' | 'RETURNED' | 'VOID';
+  salespersonId?: string;
+  salespersonName?: string;
   notes?: string;
-  createdAt: string;
+  createdAt?: string;
 }
 
 // EMI Subsystem Types
@@ -538,14 +543,19 @@ export interface Technician {
 
 export type ExpenseCategory = 
   | 'Office Rent'
+  | 'Shop Rent'
+  | 'Shop Overhead'
   | 'Electricity'
   | 'Transport'
+  | 'Sourcing Travel & Fare'
   | 'Salary'
   | 'Marketing'
   | 'Purchase Expenses'
   | 'Service Expenses'
   | 'Office Supplies & Snacks'
-  | 'Other';
+  | 'Couriers & Logistics'
+  | 'Other'
+  | string;
 
 export interface Expense {
   id: string;
@@ -558,7 +568,7 @@ export interface Expense {
   description: string;
   attachmentName?: string;
   createdBy: string;
-  createdAt: string;
+  createdAt?: string;
 }
 
 export interface LedgerEntry {
@@ -658,14 +668,16 @@ export interface Investment {
   investorName: string;
   amount: number;
   date: string;
-  investmentType: InvestmentType;
+  investmentType?: InvestmentType;
+  type?: string;  // alias used in legacy/imported data
+  expectedReturnPercent?: number;
   depositAccountId: string;
   paymentMethod: PaymentMethod;
   reference?: string;
   status: 'ACTIVE' | 'RETURNED' | 'CONVERTED';
   notes?: string;
   createdBy: string;
-  createdAt: string;
+  createdAt?: string;
 }
 
 export type AccountType = 'CASH' | 'BANK' | 'MOBILE_BANKING';

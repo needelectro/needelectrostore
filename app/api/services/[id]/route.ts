@@ -11,7 +11,7 @@ export async function PUT(
   const user = await requireAuth(req);
   if (user instanceof NextResponse) return user;
 
-  if (!hasPermission(user, 'service', 'edit') && user.role !== 'SUPER_ADMIN') {
+  if (!hasPermission(user, 'service', 'edit') && user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') {
     return NextResponse.json({ success: false, error: 'Access denied' }, { status: 403 });
   }
 
@@ -39,4 +39,44 @@ export async function PUT(
   });
 
   return NextResponse.json({ success: true, message: 'Service job updated successfully.' });
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const user = await requireAuth(req);
+  if (user instanceof NextResponse) return user;
+
+  if (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') {
+    return NextResponse.json({ success: false, error: 'Access denied. Only Super Admin or Admin can delete service jobs.' }, { status: 403 });
+  }
+
+  try {
+    const job = await prisma.serviceJob.findUnique({ where: { id: params.id } });
+    if (!job) {
+      return NextResponse.json({ success: false, error: 'Service job not found' }, { status: 404 });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.serviceJob.delete({ where: { id: params.id } });
+
+      await tx.auditLog.create({
+        data: {
+          id: 'audit-' + Date.now(),
+          userId: user.id,
+          userName: user.name,
+          action: 'SUPER_ADMIN_SERVICE_DELETE',
+          module: 'SERVICES',
+          recordId: job.id,
+          details: `Super Admin ${user.name} deleted Service Job ${job.jobCardNumber} (Customer: ${job.customerName}, Device: ${job.deviceOrSite})`,
+        },
+      });
+    });
+
+    return NextResponse.json({ success: true, message: `Service Job ${job.jobCardNumber} deleted successfully.` });
+  } catch (err: any) {
+    console.error('Service job deletion error:', err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
 }

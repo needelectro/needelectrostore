@@ -3,7 +3,7 @@ import { useERP } from '../services/erpStore';
 import { Product, ProductCategory, LaptopSpecifications } from '../types';
 import { 
   PackageSearch, Plus, Search, Edit2, Laptop, 
-  Tag, Layers, Hash, Check, X, ShieldAlert 
+  Tag, Layers, Hash, Check, X, ShieldAlert, Trash2 
 } from 'lucide-react';
 
 interface ProductsModuleProps {
@@ -11,7 +11,7 @@ interface ProductsModuleProps {
 }
 
 export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) => {
-  const { products, createProduct, updateProduct, suppliers, serials, setActiveBarcodeToPrint } = useERP();
+  const { products, createProduct, updateProduct, deleteProduct, suppliers, serials, setActiveBarcodeToPrint, currentUser } = useERP();
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -322,6 +322,23 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                       >
                         <Edit2 size={12} /> Edit
                       </button>
+                      {currentUser?.role === 'SUPER_ADMIN' && (
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', color: '#ef4444' }}
+                          title="Super Admin Delete Product"
+                          onClick={async () => {
+                            if (window.confirm(`⚠️ SUPER ADMIN ACTION:\nAre you sure you want to permanently delete "${p.name}" (${p.sku})?\n\nThis will remove the product, its serial entries, and stock records.`)) {
+                              const res = await deleteProduct(p.id);
+                              if (!res.success) {
+                                alert('Delete failed: ' + (res.error || 'Unknown error'));
+                              }
+                            }
+                          }}
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

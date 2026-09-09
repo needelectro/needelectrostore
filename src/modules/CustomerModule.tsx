@@ -4,7 +4,8 @@ import { Customer } from '../types';
 import { 
   Users, Search, Plus, Phone, Mail, MapPin, 
   CreditCard, Calendar, Wrench, ShieldCheck, 
-  FileText, ArrowRight, X, Check, Printer 
+  FileText, ArrowRight, X, Check, Printer,
+  Edit2, Trash2
 } from 'lucide-react';
 
 interface CustomerModuleProps {
@@ -12,10 +13,14 @@ interface CustomerModuleProps {
 }
 
 export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate }) => {
-  const { customers, sales, emiAccounts, services, createCustomer, updateCustomer, ledgerEntries, settings } = useERP();
+  const { customers, sales, emiAccounts, services, createCustomer, updateCustomer, deleteCustomer, ledgerEntries, settings, currentUser } = useERP();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(customers[0]?.id || null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [editForm, setEditForm] = useState<any>({});
+  const [isSaving, setIsSaving] = useState(false);
+  const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
 
   // Add form fields
   const [name, setName] = useState('');
@@ -81,6 +86,41 @@ export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate }) =>
     }
   };
 
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCustomer) return;
+    setIsSaving(true);
+    try {
+      const res = await updateCustomer({
+        ...editingCustomer,
+        ...editForm
+      });
+      if (res.success) {
+        setEditingCustomer(null);
+      } else {
+        alert(res.error || 'Failed to update customer');
+      }
+    } catch (err: any) {
+      alert('Update failed: ' + (err.message || err));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteCustomer = async (c: Customer) => {
+    if (!window.confirm(`⚠️ Are you sure you want to delete customer "${c.name}" (${c.phone})?\n\nThis will remove their profile.`)) {
+      return;
+    }
+    const res = await deleteCustomer(c.id);
+    if (!res.success) {
+      alert('Delete failed: ' + (res.error || 'Unknown error'));
+    } else {
+      if (selectedCustomerId === c.id) {
+        setSelectedCustomerId(customers.find(item => item.id !== c.id)?.id || null);
+      }
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Header */}
@@ -141,11 +181,26 @@ export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate }) =>
                       {c.phone} • {c.customerId}
                     </div>
                   </div>
-                  {hasEmi && (
-                    <span className="badge badge-warning" style={{ fontSize: '0.65rem' }}>
-                      EMI Client
-                    </span>
-                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    {hasEmi && (
+                      <span className="badge badge-warning" style={{ fontSize: '0.65rem' }}>
+                        EMI
+                      </span>
+                    )}
+                    {isSuperAdmin && (
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteCustomer(c);
+                        }}
+                        title="Super Admin Delete"
+                        style={{ color: '#ef4444', padding: '0.2rem 0.35rem' }}
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -181,12 +236,33 @@ export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate }) =>
                   </div>
                 </div>
 
-                <button 
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => alert(`Customer financial statement printed for ${selectedCustomer.name}`)}
-                >
-                  <Printer size={15} /> Print Ledger Statement
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <button 
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => {
+                      setEditingCustomer(selectedCustomer);
+                      setEditForm({ ...selectedCustomer });
+                    }}
+                  >
+                    <Edit2 size={14} /> Edit Customer
+                  </button>
+                  <button 
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => alert(`Customer financial statement printed for ${selectedCustomer.name}`)}
+                  >
+                    <Printer size={15} /> Print Statement
+                  </button>
+                  {isSuperAdmin && (
+                    <button 
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => handleDeleteCustomer(selectedCustomer)}
+                      title="Super Admin Permanent Delete"
+                      style={{ color: '#ef4444', padding: '0.4rem 0.6rem' }}
+                    >
+                      <Trash2 size={15} /> Delete
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Bio Grid */}
@@ -432,6 +508,108 @@ export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate }) =>
                 </button>
                 <button type="submit" className="btn btn-primary btn-sm">
                   Save Customer Record
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Edit Customer (Super Admin / Manager) */}
+      {editingCustomer && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content" style={{ maxWidth: '640px' }}>
+            <div className="modal-header">
+              <div className="modal-title">
+                <ShieldCheck size={20} color="var(--brand-primary)" />
+                Edit Customer Record ({editingCustomer.customerId})
+              </div>
+              <button className="btn btn-ghost btn-sm" onClick={() => setEditingCustomer(null)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit}>
+              <div className="modal-body" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                  <label className="form-label">Full Name *</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={editForm.name || ''}
+                    onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Mobile Number *</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={editForm.phone || ''}
+                    onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">National ID (NID)</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={editForm.nid || ''}
+                    onChange={e => setEditForm({ ...editForm, nid: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Email Address</label>
+                  <input
+                    type="email"
+                    className="form-input"
+                    value={editForm.email || ''}
+                    onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Credit Limit (৳)</label>
+                  <input
+                    type="number"
+                    className="form-input"
+                    value={editForm.creditLimit || 0}
+                    onChange={e => setEditForm({ ...editForm, creditLimit: Number(e.target.value) || 0 })}
+                  />
+                </div>
+
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                  <label className="form-label">Address</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={editForm.address || ''}
+                    onChange={e => setEditForm({ ...editForm, address: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                  <label className="form-label">Internal Admin Notes</label>
+                  <textarea
+                    className="form-textarea"
+                    rows={2}
+                    value={editForm.notes || ''}
+                    onChange={e => setEditForm({ ...editForm, notes: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setEditingCustomer(null)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary btn-sm" disabled={isSaving}>
+                  {isSaving ? 'Saving Changes...' : 'Update Customer Record'}
                 </button>
               </div>
             </form>

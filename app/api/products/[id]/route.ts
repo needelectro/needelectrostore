@@ -11,7 +11,7 @@ export async function PUT(
   const user = await requireAuth(req);
   if (user instanceof NextResponse) return user;
 
-  if (!hasPermission(user, 'products', 'edit') && user.role !== 'SUPER_ADMIN') {
+  if (!hasPermission(user, 'products', 'edit') && user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') {
     return NextResponse.json({ success: false, error: 'Access denied' }, { status: 403 });
   }
 
@@ -43,4 +43,46 @@ export async function PUT(
   });
 
   return NextResponse.json({ success: true, message: 'Product updated successfully' });
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const user = await requireAuth(req);
+  if (user instanceof NextResponse) return user;
+
+  if (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') {
+    return NextResponse.json({ success: false, error: 'Access denied. Only Super Admin or Admin can delete products.' }, { status: 403 });
+  }
+
+  try {
+    const product = await prisma.product.findUnique({ where: { id: params.id } });
+    if (!product) {
+      return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // Clean up serial numbers and stock
+      await tx.productSerial.deleteMany({ where: { productId: product.id } });
+      await tx.product.delete({ where: { id: params.id } });
+
+      await tx.auditLog.create({
+        data: {
+          id: 'audit-' + Date.now(),
+          userId: user.id,
+          userName: user.name,
+          action: 'SUPER_ADMIN_PRODUCT_DELETE',
+          module: 'PRODUCTS',
+          recordId: product.id,
+          details: `Super Admin ${user.name} deleted Product ${product.name} (SKU: ${product.sku})`,
+        },
+      });
+    });
+
+    return NextResponse.json({ success: true, message: `Product ${product.name} deleted successfully.` });
+  } catch (err: any) {
+    console.error('Product deletion error:', err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
 }
