@@ -223,6 +223,7 @@ export function generateInvoiceHTML(data: InvoiceData, settings?: any): string {
     <div class="footer-note">
       <p>Thank you for choosing NEED ELECTRO! Goods once sold can be exchanged within 7 days with original receipt.</p>
       <p>For technical support and warranty claims, visit our service center or contact ${companyPhone}.</p>
+      <p style="margin-top: 8px; font-weight: 800; font-size: 11px; color: #000; letter-spacing: 0.05em; text-transform: uppercase;">Software Development By AMDADS GROUP</p>
     </div>
   </div>
 </body>

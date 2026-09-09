@@ -32,8 +32,8 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
           </div>
         </div>
 
-        <div className="modal-body" style={{ background: '#f8fafc', padding: '1.5rem' }}>
-          <div className="a4-print-document" style={{ boxShadow: '0 4px 25px rgba(0,0,0,0.1)' }}>
+        <div className="modal-body a4-preview-body">
+          <div className="a4-print-document">
             {/* Header */}
             <div className="a4-header" style={{ borderBottom: '3px double #0284c7', paddingBottom: '1rem' }}>
               <div className="a4-logo-group">
@@ -201,6 +201,24 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
                 <div>{account.approvedBy}</div>
                 <div style={{ fontSize: '9px', color: '#64748b' }}>For NEED ELECTRO</div>
               </div>
+            </div>
+
+            {/* Mandatory Software Development Credit */}
+            <div 
+              className="a4-software-dev-credit"
+              style={{
+                marginTop: '16px',
+                paddingTop: '6px',
+                borderTop: '1.5px solid #000000',
+                textAlign: 'center',
+                fontSize: '11px',
+                fontWeight: 800,
+                color: '#000000',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase'
+              }}
+            >
+              Software Development By AMDADS GROUP
             </div>
           </div>
         </div>
