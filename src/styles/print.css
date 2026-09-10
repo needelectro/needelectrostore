@@ -32,12 +32,12 @@
 
 .a4-watermark-overlay {
   position: absolute;
-  top: 42%;
+  top: 48%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 480px;
   max-width: 82%;
-  opacity: 0.085;
+  opacity: 0.16;
   pointer-events: none;
   z-index: 0;
   display: flex;
@@ -139,10 +139,15 @@
   border-collapse: collapse;
   margin-bottom: 12px;
   border: 1.5px solid #000000;
+  background: transparent !important;
+}
+
+.a4-items-table tbody tr {
+  background: transparent !important;
 }
 
 .a4-items-table th {
-  background: #f1f5f9;
+  background: rgba(241, 245, 249, 0.85);
   color: #000000;
   border: 1px solid #000000;
   border-bottom: 2px solid #000000;
@@ -159,6 +164,7 @@
   font-size: 11.5px;
   vertical-align: top;
   color: #000000;
+  background: transparent !important;
 }
 
 .a4-totals-section {
@@ -314,12 +320,12 @@
 
   .a4-watermark-overlay {
     position: absolute !important;
-    top: 42% !important;
+    top: 48% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     width: 480px !important;
     max-width: 82% !important;
-    opacity: 0.085 !important;
+    opacity: 0.16 !important;
     pointer-events: none !important;
     z-index: 0 !important;
     display: flex !important;
@@ -333,7 +339,7 @@
     width: 100% !important;
     height: auto !important;
     display: block !important;
-    opacity: 0.085 !important;
+    opacity: 0.16 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
@@ -419,6 +425,11 @@
     border-collapse: collapse !important;
     margin-bottom: 12px !important;
     border: 1.5px solid #000000 !important;
+    background: transparent !important;
+  }
+
+  .a4-items-table tbody tr {
+    background: transparent !important;
   }
 
   .a4-items-table th {
@@ -439,6 +450,7 @@
     font-size: 11.5px !important;
     vertical-align: top !important;
     color: #000000 !important;
+    background: transparent !important;
   }
 
   .a4-totals-section {

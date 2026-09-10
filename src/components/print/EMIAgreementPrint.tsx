@@ -35,8 +35,30 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
         <div className="modal-body a4-preview-body">
           <div className="a4-print-document">
             {/* Watermark Background from Official Previous Memo */}
-            <div className="a4-watermark-overlay" aria-hidden="true">
-              <img src="/logo-transparent.png" alt="NEED ELECTRO Watermark" />
+            <div 
+              className="a4-watermark-overlay" 
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                top: '48%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '480px',
+                maxWidth: '82%',
+                opacity: 0.16,
+                pointerEvents: 'none',
+                zIndex: 0,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                userSelect: 'none'
+              }}
+            >
+              <img 
+                src="/logo-transparent.png" 
+                alt="NEED ELECTRO Watermark" 
+                style={{ width: '100%', height: 'auto', display: 'block' }}
+              />
             </div>
 
             {/* Header */}

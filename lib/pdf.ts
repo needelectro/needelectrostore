@@ -115,12 +115,12 @@ export function generateInvoiceHTML(data: InvoiceData, settings?: any): string {
     }
     .watermark {
       position: absolute;
-      top: 42%;
+      top: 48%;
       left: 50%;
       transform: translate(-50%, -50%);
       width: 480px;
       max-width: 85%;
-      opacity: 0.085;
+      opacity: 0.16;
       pointer-events: none;
       z-index: 0;
     }
@@ -128,11 +128,12 @@ export function generateInvoiceHTML(data: InvoiceData, settings?: any): string {
     .brand-title { font-size: 26px; font-weight: 800; color: #002B5B; margin: 0; }
     .brand-sub { font-size: 13px; color: #008CFF; font-weight: 600; margin: 2px 0 0 0; }
     .inv-title { font-size: 22px; font-weight: 800; color: #008CFF; text-align: right; }
-    .info-table { width: 100%; margin-bottom: 25px; }
+    .info-table { width: 100%; margin-bottom: 25px; position: relative; z-index: 1; }
     .info-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; }
-    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
+    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; position: relative; z-index: 1; background: transparent; }
     .items-table th { background: #002B5B; color: #fff; padding: 10px; text-align: left; font-size: 13px; }
-    .summary-table { width: 320px; float: right; margin-bottom: 25px; }
+    .items-table td { background: transparent; }
+    .summary-table { width: 320px; float: right; margin-bottom: 25px; position: relative; z-index: 1; }
     .summary-table td { padding: 6px 10px; }
     .grand-total { font-size: 16px; font-weight: 800; color: #002B5B; background: #f1f5f9; border-top: 2px solid #008CFF; }
     .footer-note { clear: both; margin-top: 40px; padding-top: 15px; border-top: 1px dashed #cbd5e1; font-size: 11px; color: #64748b; text-align: center; }
