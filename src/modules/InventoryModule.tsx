@@ -164,13 +164,8 @@ interface DeleteProductModalProps {
 const DeleteProductModal: React.FC<DeleteProductModalProps> = ({ product, onClose, onDeleted }) => {
   const { addToast, fetchProducts } = useERP() as any;
   const [deleting, setDeleting] = useState(false);
-  const [confirm, setConfirm] = useState('');
 
   const handleDelete = async () => {
-    if (confirm !== product.sku) {
-      addToast('error', 'Confirmation Required', `Type the SKU "${product.sku}" to confirm.`);
-      return;
-    }
     setDeleting(true);
     try {
       const res = await api.products.deleteProduct(product.id);
@@ -191,7 +186,7 @@ const DeleteProductModal: React.FC<DeleteProductModalProps> = ({ product, onClos
 
   return (
     <div className="modal-overlay" style={{ zIndex: 10001 }}>
-      <div className="modal-content" style={{ maxWidth: '480px' }}>
+      <div className="modal-content" style={{ maxWidth: '440px' }}>
         <div className="modal-header">
           <div className="modal-title">
             <Trash2 size={18} color="#ef4444" />
@@ -203,26 +198,14 @@ const DeleteProductModal: React.FC<DeleteProductModalProps> = ({ product, onClos
           <div style={{ background: 'rgba(239,68,68,0.08)', border: '1.5px solid rgba(239,68,68,0.25)', borderRadius: 'var(--radius-md)', padding: '1rem', marginBottom: '1rem' }}>
             <div style={{ fontWeight: 700, color: '#ef4444', marginBottom: '4px' }}>⚠️ Permanent Action</div>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              This will permanently delete <strong>{product.name}</strong> (SKU: <strong>{product.sku}</strong>), including all its serial records and inventory history. This cannot be undone.
+              This will permanently delete <strong>{product.name}</strong> (SKU: <strong>{product.sku}</strong>), including all serial records and inventory history.
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.8rem', marginBottom: '1rem', background: 'var(--bg-card-muted)', padding: '0.75rem', borderRadius: 'var(--radius-md)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.8rem', background: 'var(--bg-card-muted)', padding: '0.75rem', borderRadius: 'var(--radius-md)' }}>
             <div><span style={{ color: 'var(--text-muted)' }}>Category:</span> <strong>{product.category}</strong></div>
             <div><span style={{ color: 'var(--text-muted)' }}>Stock:</span> <strong>{product.currentStock} units</strong></div>
             <div><span style={{ color: 'var(--text-muted)' }}>Retail Price:</span> <strong>৳{product.retailPrice.toLocaleString()}</strong></div>
             <div><span style={{ color: 'var(--text-muted)' }}>Valuation:</span> <strong>৳{(product.currentStock * product.costPrice).toLocaleString()}</strong></div>
-          </div>
-          <div className="form-group">
-            <label className="form-label" style={{ color: '#ef4444' }}>
-              Type the SKU <strong>{product.sku}</strong> to confirm deletion:
-            </label>
-            <input
-              className="form-input"
-              placeholder={`Type: ${product.sku}`}
-              value={confirm}
-              onChange={e => setConfirm(e.target.value)}
-              style={{ borderColor: confirm === product.sku ? '#10b981' : undefined }}
-            />
           </div>
         </div>
         <div className="modal-footer">
@@ -231,10 +214,10 @@ const DeleteProductModal: React.FC<DeleteProductModalProps> = ({ product, onClos
             className="btn btn-sm"
             style={{ background: '#ef4444', color: '#fff', borderColor: '#ef4444' }}
             onClick={handleDelete}
-            disabled={deleting || confirm !== product.sku}
+            disabled={deleting}
           >
             {deleting ? <RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Trash2 size={14} />}
-            {deleting ? 'Deleting...' : 'Permanently Delete'}
+            {deleting ? 'Deleting...' : 'Delete Product'}
           </button>
         </div>
       </div>
