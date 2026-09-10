@@ -3,7 +3,7 @@ import { useERP } from '../../services/erpStore';
 import { NeedElectroLogo } from '../NeedElectroLogo';
 import { 
   Lock, Mail, Eye, EyeOff, ShieldCheck, ArrowRight, 
-  Building, CheckCircle2, UserCheck, AlertCircle, Phone, Globe, MapPin 
+  Building, CheckCircle2, AlertCircle, Phone, Globe, MapPin 
 } from 'lucide-react';
 
 export const LoginScreen: React.FC = () => {
@@ -332,30 +332,6 @@ export const LoginScreen: React.FC = () => {
                     }}
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmail('contact.amdadur@gmail.com');
-                      setPassword('NeedElectro@Admin2026');
-                    }}
-                    style={{
-                      background: 'rgba(0, 140, 255, 0.12)',
-                      border: '1px solid rgba(0, 140, 255, 0.3)',
-                      color: '#38bdf8',
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      padding: '4px 10px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    <UserCheck size={12} /> Auto-Fill Super Admin
                   </button>
                 </div>
               </div>
