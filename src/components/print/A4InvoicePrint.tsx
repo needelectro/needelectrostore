@@ -136,15 +136,10 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
                   theme="light" 
                   showSisterConcern={false} 
                 />
-                
-                <div style={{ marginTop: '5px', fontSize: '11px', color: '#0284c7', fontWeight: 800, letterSpacing: '0.04em' }}>
-                  — A sister Concern Of AMDADS GROUP —
-                </div>
 
                 <div className="a4-company-details">
                   <p><strong>Main Branch Moulvibazar:</strong> {safeSettings.address || 'Shop#5, MR Plaza, Kusumbag, Moulvibazar, Sylhet, Bangladesh'}</p>
-                  <p>Hotline: <strong>{safeSettings.phone || '+880 1733-983752'}</strong> | Email: <strong>{safeSettings.email || 'contact.amdadur@gmail.com'}</strong></p>
-                  <p>Website: <strong>{safeSettings.website || 'https://needelectroerp.vercel.app'}</strong> | VAT Reg: <strong>{safeSettings.vatRegistrationNo || 'VAT-NEED-2026-BD'}</strong></p>
+                  <p>Hotline: <strong>{safeSettings.phone || '+880 1733-983752'}</strong> | Email: <strong>{safeSettings.email || 'info.needelectro@gmail.com'}</strong></p>
                 </div>
               </div>
 
@@ -167,7 +162,7 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
                 <h4>Customer Information (ক্রেতার বিবরণ)</h4>
                 <p style={{ fontSize: '13px', fontWeight: 800, color: '#000000', margin: '2px 0' }}>{sale.customerName || 'Walking Customer'}</p>
                 <p>Phone: <strong>{sale.customerPhone || 'N/A'}</strong></p>
-                {sale.customerAddress && <p>Address: <strong>{sale.customerAddress}</strong></p>}
+                <p>Address: <strong>{sale.customerAddress || 'N/A'}</strong></p>
                 <p>Account Status: <strong>Registered Commercial Customer</strong></p>
               </div>
               <div className="a4-bill-to" style={{ maxWidth: '300px' }}>
@@ -329,7 +324,7 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
                   textTransform: 'uppercase'
                 }}
               >
-                Software Development By AMDADS GROUP
+                Software Developed By AMDADS GROUP
               </div>
             </div>
           </div>
