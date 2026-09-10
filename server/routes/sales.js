@@ -106,14 +106,20 @@ salesRouter.post('/', requireAuth, requirePermission('sales.create'), (req, res)
     }
 
     const result = transaction(() => {
-      // 1. Generate Sequential Invoice Number from POS Settings
+      // 1. Generate Sequential Guaranteed-Unique Invoice Number from POS Settings
       const posSettings = db.prepare('SELECT invoice_prefix, next_invoice_number FROM pos_settings WHERE id = ?').get('main');
       const prefix = posSettings?.invoice_prefix || 'INV-2026-';
-      const nextNum = posSettings?.next_invoice_number || 1001;
-      const invoiceNumber = `${prefix}${String(nextNum).padStart(4, '0')}`;
+      let nextNum = posSettings?.next_invoice_number || 1001;
+
+      let candidate = `${prefix}${nextNum}`;
+      while (db.prepare('SELECT id FROM sales WHERE invoice_number = ?').get(candidate)) {
+        nextNum++;
+        candidate = `${prefix}${nextNum}`;
+      }
+      const invoiceNumber = candidate;
 
       // Increment next invoice number
-      db.prepare('UPDATE pos_settings SET next_invoice_number = next_invoice_number + 1 WHERE id = ?').run('main');
+      db.prepare('UPDATE pos_settings SET next_invoice_number = ? WHERE id = ?').run(nextNum + 1, 'main');
 
       const saleId = 'sale-' + Date.now();
       const today = saleData.date || new Date().toISOString().split('T')[0];

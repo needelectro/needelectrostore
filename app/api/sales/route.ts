@@ -57,13 +57,39 @@ export async function POST(req: NextRequest) {
 
     // Execute within an ACID PostgreSQL transaction
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Generate unique invoice number if not provided
+      // 1. Generate guaranteed-unique invoice number with collision prevention
       let invoiceNumber = saleData.invoiceNumber;
-      if (!invoiceNumber) {
-        const pos = await tx.posSettings.findUnique({ where: { id: 'main' } });
-        const prefix = pos?.invoicePrefix || 'INV-2026-';
-        const nextNum = pos?.nextInvoiceNumber || 1001;
-        invoiceNumber = `${prefix}${nextNum}`;
+      const pos = await tx.posSettings.findUnique({ where: { id: 'main' } });
+      const prefix = pos?.invoicePrefix || 'INV-2026-';
+      let nextNum = pos?.nextInvoiceNumber || 1001;
+
+      if (!invoiceNumber || (await tx.sale.findUnique({ where: { invoiceNumber } }))) {
+        // Query recent sales to calculate true highest numeric sequence
+        const recentSales = await tx.sale.findMany({
+          where: { invoiceNumber: { startsWith: prefix } },
+          select: { invoiceNumber: true },
+          take: 500,
+          orderBy: { date: 'desc' },
+        });
+
+        let highestNum = nextNum - 1;
+        for (const s of recentSales) {
+          const numPart = s.invoiceNumber.replace(prefix, '');
+          const parsedNum = parseInt(numPart, 10);
+          if (!isNaN(parsedNum) && parsedNum > highestNum) {
+            highestNum = parsedNum;
+          }
+        }
+
+        nextNum = Math.max(nextNum, highestNum + 1);
+
+        let candidate = `${prefix}${nextNum}`;
+        while (await tx.sale.findUnique({ where: { invoiceNumber: candidate } })) {
+          nextNum++;
+          candidate = `${prefix}${nextNum}`;
+        }
+
+        invoiceNumber = candidate;
 
         await tx.posSettings.update({
           where: { id: 'main' },
