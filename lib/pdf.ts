@@ -105,13 +105,26 @@ export function generateInvoiceHTML(data: InvoiceData, settings?: any): string {
       background: #fff;
     }
     .invoice-card {
+      position: relative;
       max-width: 800px;
       margin: 0 auto;
       border: 1px solid #cbd5e1;
       padding: 35px;
       border-radius: 8px;
+      overflow: hidden;
     }
-    .header-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
+    .watermark {
+      position: absolute;
+      top: 42%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 480px;
+      max-width: 85%;
+      opacity: 0.085;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .header-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; position: relative; z-index: 1; }
     .brand-title { font-size: 26px; font-weight: 800; color: #002B5B; margin: 0; }
     .brand-sub { font-size: 13px; color: #008CFF; font-weight: 600; margin: 2px 0 0 0; }
     .inv-title { font-size: 22px; font-weight: 800; color: #008CFF; text-align: right; }
@@ -127,6 +140,9 @@ export function generateInvoiceHTML(data: InvoiceData, settings?: any): string {
 </head>
 <body>
   <div class="invoice-card">
+    <div class="watermark">
+      <img src="/logo-transparent.png" alt="NEED ELECTRO Watermark" style="width: 100%; display: block;" />
+    </div>
     <table class="header-table">
       <tr>
         <td style="vertical-align: top;">
@@ -220,10 +236,28 @@ export function generateInvoiceHTML(data: InvoiceData, settings?: any): string {
       }
     </table>
 
-    <div class="footer-note">
-      <p>Thank you for choosing NEED ELECTRO! Goods once sold can be exchanged within 7 days with original receipt.</p>
-      <p>For technical support and warranty claims, visit our service center or contact ${companyPhone}.</p>
-      <p style="margin-top: 8px; font-weight: 800; font-size: 11px; color: #000; letter-spacing: 0.05em; text-transform: uppercase;">Software Development By AMDADS GROUP</p>
+    <div style="clear: both; margin-top: 25px; padding-top: 14px; border-top: 1.5px solid #0f172a; position: relative; z-index: 1;">
+      <div style="font-weight: 800; text-transform: uppercase; font-size: 11px; margin-bottom: 6px; color: #000000; letter-spacing: 0.02em;">
+        NEED ELECTRO WARRANTY TERMS
+      </div>
+      <ol style="padding-left: 18px; margin: 0; font-size: 10px; line-height: 1.45; color: #1e293b;">
+        <li>Warranty is valid only with the original invoice.</li>
+        <li>Warranty covers manufacturing defects only.</li>
+        <li>Physical damage, liquid damage, burn damage, and accidental damage are not covered.</li>
+        <li>Warranty will be void if the product is repaired or modified by unauthorized persons.</li>
+        <li>Broken or removed warranty stickers/seals will void the warranty.</li>
+        <li>Software issues, viruses, and data loss are not covered.</li>
+        <li>Warranty service may include repair or replacement subject to product inspection.</li>
+        <li>NEED ELECTRO reserves the right to accept or reject any warranty claim after technical assessment.</li>
+        <li>Customer will pay delivery fee of warrenty support.</li>
+      </ol>
+      <div style="margin-top: 8px; font-weight: 800; font-size: 11px; color: #000000;">
+        Thank you for choosing NEED ELECTRO.
+      </div>
+    </div>
+
+    <div class="footer-note" style="position: relative; z-index: 1;">
+      <p style="margin-top: 6px; font-weight: 800; font-size: 11px; color: #000; letter-spacing: 0.05em; text-transform: uppercase;">Software Development By AMDADS GROUP</p>
     </div>
   </div>
 </body>

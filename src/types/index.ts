@@ -350,6 +350,7 @@ export interface Sale {
   customerId: string;
   customerName: string;
   customerPhone: string;
+  customerAddress?: string;
   branchId: string;
   date: string;
   items?: SaleItem[];

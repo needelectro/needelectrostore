@@ -13,6 +13,7 @@
 }
 
 .a4-print-document {
+  position: relative;
   width: 100%;
   max-width: 190mm;
   min-height: auto;
@@ -26,6 +27,29 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 11px;
   line-height: 1.35;
+  overflow: hidden;
+}
+
+.a4-watermark-overlay {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 480px;
+  max-width: 82%;
+  opacity: 0.085;
+  pointer-events: none;
+  z-index: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+}
+
+.a4-watermark-overlay img {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 .a4-print-document * {
@@ -269,6 +293,7 @@
   }
 
   .a4-print-document {
+    position: relative !important;
     display: block !important;
     width: 100% !important;
     max-width: 190mm !important;
@@ -284,6 +309,33 @@
     page-break-inside: avoid !important;
     font-size: 11px !important;
     line-height: 1.35 !important;
+    overflow: hidden !important;
+  }
+
+  .a4-watermark-overlay {
+    position: absolute !important;
+    top: 42% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 480px !important;
+    max-width: 82% !important;
+    opacity: 0.085 !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .a4-watermark-overlay img {
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+    opacity: 0.085 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   .a4-print-document * {

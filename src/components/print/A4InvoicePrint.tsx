@@ -100,8 +100,13 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
         <div className="modal-body a4-preview-body">
           {/* Printable Sheet */}
           <div className="a4-print-document" id="printable-a4-invoice">
+            {/* Watermark Background from Official Previous Memo */}
+            <div className="a4-watermark-overlay" aria-hidden="true">
+              <img src="/logo-transparent.png" alt="NEED ELECTRO Watermark" />
+            </div>
+
             {/* Header */}
-            <div className="a4-header">
+            <div className="a4-header" style={{ position: 'relative', zIndex: 1 }}>
               <div className="a4-logo-group">
                 <NeedElectroLogo 
                   variant="master-image"
@@ -135,11 +140,12 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
             </div>
 
             {/* Bill To Info */}
-            <div className="a4-party-details">
+            <div className="a4-party-details" style={{ position: 'relative', zIndex: 1 }}>
               <div className="a4-bill-to">
                 <h4>Customer Information (ক্রেতার বিবরণ)</h4>
                 <p style={{ fontSize: '13px', fontWeight: 800, color: '#000000', margin: '2px 0' }}>{sale.customerName || 'Walking Customer'}</p>
                 <p>Phone: <strong>{sale.customerPhone || 'N/A'}</strong></p>
+                {sale.customerAddress && <p>Address: <strong>{sale.customerAddress}</strong></p>}
                 <p>Account Status: <strong>Registered Commercial Customer</strong></p>
               </div>
               <div className="a4-bill-to" style={{ maxWidth: '300px' }}>
@@ -151,7 +157,7 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
             </div>
 
             {/* Products Table */}
-            <table className="a4-items-table">
+            <table className="a4-items-table" style={{ position: 'relative', zIndex: 1 }}>
               <thead>
                 <tr>
                   <th style={{ width: '5%', textAlign: 'center' }}>#</th>
@@ -203,15 +209,25 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
             </table>
 
             {/* Summary & Totals */}
-            <div className="a4-totals-section">
-              <div style={{ flex: 1, fontSize: '10.5px', color: '#1e293b', lineHeight: '1.45' }}>
-                <h5 style={{ fontWeight: 800, textTransform: 'uppercase', marginBottom: '3px', color: '#000000' }}>Terms & Conditions:</h5>
-                <ol style={{ paddingLeft: '14px', margin: 0 }}>
-                  <li>Warranty is valid only with original invoice and matching hardware serial number.</li>
-                  <li>Burned, physical damage, liquid damage, or unauthorized servicing voids warranty.</li>
-                  <li>No cash refund once product is sold. Exchange eligible within 3 days for defective units.</li>
-                  <li>For EMI sales, equipment remains company asset until 100% installments are liquidated.</li>
+            <div className="a4-totals-section" style={{ position: 'relative', zIndex: 1 }}>
+              <div style={{ flex: 1, fontSize: '10px', color: '#1e293b', lineHeight: '1.4', paddingRight: '12px' }}>
+                <h5 style={{ fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px', color: '#000000', fontSize: '10.5px', letterSpacing: '0.02em' }}>
+                  NEED ELECTRO WARRANTY TERMS
+                </h5>
+                <ol style={{ paddingLeft: '14px', margin: 0, fontSize: '9px', lineHeight: '1.38', color: '#0f172a' }}>
+                  <li>Warranty is valid only with the original invoice.</li>
+                  <li>Warranty covers manufacturing defects only.</li>
+                  <li>Physical damage, liquid damage, burn damage, and accidental damage are not covered.</li>
+                  <li>Warranty will be void if the product is repaired or modified by unauthorized persons.</li>
+                  <li>Broken or removed warranty stickers/seals will void the warranty.</li>
+                  <li>Software issues, viruses, and data loss are not covered.</li>
+                  <li>Warranty service may include repair or replacement subject to product inspection.</li>
+                  <li>NEED ELECTRO reserves the right to accept or reject any warranty claim after technical assessment.</li>
+                  <li>Customer will pay delivery fee of warrenty support.</li>
                 </ol>
+                <div style={{ marginTop: '5px', fontWeight: 800, fontSize: '10px', color: '#000000' }}>
+                  Thank you for choosing NEED ELECTRO.
+                </div>
               </div>
 
               <div style={{ width: '250px' }}>
@@ -249,7 +265,7 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
             </div>
 
             {/* Signature Blocks */}
-            <div className="a4-signatures">
+            <div className="a4-signatures" style={{ position: 'relative', zIndex: 1 }}>
               <div className="a4-signature-box">
                 Customer Signature
               </div>
@@ -262,7 +278,7 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
             </div>
 
             {/* Thank you footnote & Services List from Business Card */}
-            <div style={{ marginTop: '18px', paddingTop: '8px', borderTop: '1px dashed #94a3b8', textAlign: 'center', fontSize: '10px', color: '#1e293b' }}>
+            <div style={{ position: 'relative', zIndex: 1, marginTop: '18px', paddingTop: '8px', borderTop: '1px dashed #94a3b8', textAlign: 'center', fontSize: '10px', color: '#1e293b' }}>
               <div style={{ fontWeight: 800, color: '#0284c7', marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Our Core Services (আমাদের সেবাসমূহ)
               </div>
