@@ -9,10 +9,10 @@ import {
 export const LoginScreen: React.FC = () => {
   const { login, branches, selectedBranch, settings } = useERP();
 
-  const [email, setEmail] = useState('contact.amdadur@gmail.com');
-  const [password, setPassword] = useState('NeedElectro@Admin2026');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [branchId, setBranchId] = useState(selectedBranch?.id || 'branch-1');
-  const [rememberMe, setRememberMe] = useState(true);
+  const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
