@@ -100,18 +100,18 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
         <div className="modal-body a4-preview-body">
           {/* Printable Sheet */}
           <div className="a4-print-document" id="printable-a4-invoice">
-            {/* Watermark Background from Official Previous Memo */}
+            {/* Watermark Background — Full Page Logo */}
             <div 
               className="a4-watermark-overlay" 
               aria-hidden="true"
               style={{
                 position: 'absolute',
-                top: '48%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '480px',
-                maxWidth: '82%',
-                opacity: 0.16,
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                width: '100%',
+                height: '100%',
                 pointerEvents: 'none',
                 zIndex: 0,
                 display: 'flex',
@@ -123,7 +123,7 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
               <img 
                 src="/logo-transparent.png" 
                 alt="NEED ELECTRO Watermark" 
-                style={{ width: '100%', height: 'auto', display: 'block' }}
+                style={{ width: '55%', height: 'auto', display: 'block', opacity: 0.10 }}
               />
             </div>
 
