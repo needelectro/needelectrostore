@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useERP } from '../services/erpStore';
 import { Sale } from '../types';
 import { 
   ReceiptText, Search, Printer, FileText, Eye, 
   RotateCcw, Calendar, Check, X, ArrowUpRight,
-  Edit2, Trash2, Save, ShieldCheck, RefreshCw, Database
+  Edit2, Trash2, Save, ShieldCheck, RefreshCw, Database, AlertCircle
 } from 'lucide-react';
 
 interface SalesModuleProps {
@@ -17,7 +17,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
     currentUser, updateSale, deleteSale, refreshSales, refreshFromDatabase, addToast 
   } = useERP();
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState<'ALL' | 'REGULAR' | 'EMI'>('ALL');
+  const [typeFilter, setTypeFilter] = useState<'ALL' | 'DUE' | 'REGULAR' | 'EMI'>('ALL');
   const [viewingSale, setViewingSale] = useState<Sale | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -55,8 +55,26 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
 
+  // Count total due sales
+  const dueSalesCount = useMemo(() => {
+    return sales.filter(s => {
+      const due = Number(s.dueAmount) || 0;
+      const total = Number(s.grandTotal) || 0;
+      const paid = Number(s.paidAmount) || 0;
+      return due > 0 || (total - paid) > 0.01;
+    }).length;
+  }, [sales]);
+
   const filteredSales = sales.filter(s => {
-    const matchesType = typeFilter === 'ALL' || s.saleType === typeFilter;
+    let matchesType = true;
+    if (typeFilter === 'DUE') {
+      const due = Number(s.dueAmount) || 0;
+      const total = Number(s.grandTotal) || 0;
+      const paid = Number(s.paidAmount) || 0;
+      matchesType = due > 0 || (total - paid) > 0.01;
+    } else if (typeFilter !== 'ALL') {
+      matchesType = s.saleType === typeFilter;
+    }
     const q = searchQuery.toLowerCase();
     const matchesQuery = s.invoiceNumber.toLowerCase().includes(q) ||
                          s.customerName.toLowerCase().includes(q) ||
@@ -173,16 +191,63 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '0.4rem' }}>
-            {(['ALL', 'REGULAR', 'EMI'] as const).map(t => (
-              <button
-                key={t}
-                className={`btn btn-sm ${typeFilter === t ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => setTypeFilter(t)}
-              >
-                {t} Sales
-              </button>
-            ))}
+          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+            <button
+              className={`btn btn-sm ${typeFilter === 'ALL' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setTypeFilter('ALL')}
+            >
+              ALL Sales
+            </button>
+
+            <button
+              className={`btn btn-sm ${typeFilter === 'DUE' ? 'btn-warning' : 'btn-secondary'}`}
+              onClick={() => setTypeFilter('DUE')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontWeight: 600,
+                ...(typeFilter === 'DUE' ? {
+                  background: '#f59e0b',
+                  borderColor: '#d97706',
+                  color: '#ffffff',
+                  boxShadow: '0 2px 8px rgba(245, 158, 11, 0.35)'
+                } : {
+                  color: dueSalesCount > 0 ? '#d97706' : undefined
+                })
+              }}
+              title="Filter and show all sales with unpaid due amount"
+            >
+              <AlertCircle size={14} />
+              <span>DUE Sales</span>
+              {dueSalesCount > 0 && (
+                <span style={{
+                  background: typeFilter === 'DUE' ? '#ffffff' : '#f59e0b',
+                  color: typeFilter === 'DUE' ? '#d97706' : '#ffffff',
+                  fontSize: '0.72rem',
+                  fontWeight: 800,
+                  padding: '1px 6px',
+                  borderRadius: '10px',
+                  lineHeight: '1.2'
+                }}>
+                  {dueSalesCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              className={`btn btn-sm ${typeFilter === 'REGULAR' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setTypeFilter('REGULAR')}
+            >
+              REGULAR Sales
+            </button>
+
+            <button
+              className={`btn btn-sm ${typeFilter === 'EMI' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setTypeFilter('EMI')}
+            >
+              EMI Sales
+            </button>
           </div>
         </div>
 
@@ -196,6 +261,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
                 <th>Items Summary</th>
                 <th style={{ textAlign: 'right' }}>Total (৳)</th>
                 <th style={{ textAlign: 'right' }}>Paid (৳)</th>
+                <th style={{ textAlign: 'right' }}>Due (৳)</th>
                 <th style={{ textAlign: 'center' }}>Type</th>
                 <th style={{ textAlign: 'center' }}>Status</th>
                 <th style={{ textAlign: 'center' }}>Print & View</th>
@@ -224,6 +290,14 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
                   </td>
                   <td style={{ textAlign: 'right', fontWeight: '700' }}>৳{(Number(sale.grandTotal) || 0).toLocaleString()}</td>
                   <td style={{ textAlign: 'right', color: '#10b981', fontWeight: '600' }}>৳{(Number(sale.paidAmount) || 0).toLocaleString()}</td>
+                  <td style={{ 
+                    textAlign: 'right', 
+                    color: (Number(sale.dueAmount) || 0) > 0 ? '#d97706' : 'var(--text-muted)', 
+                    fontWeight: (Number(sale.dueAmount) || 0) > 0 ? '700' : 'normal',
+                    backgroundColor: (Number(sale.dueAmount) || 0) > 0 ? 'rgba(245, 158, 11, 0.08)' : 'transparent'
+                  }}>
+                    {(Number(sale.dueAmount) || 0) > 0 ? `৳${(Number(sale.dueAmount) || 0).toLocaleString()}` : '৳0'}
+                  </td>
                   <td style={{ textAlign: 'center' }}>
                     <span className={`badge ${sale.saleType === 'EMI' ? 'badge-warning' : 'badge-neutral'}`}>
                       {sale.saleType}
@@ -281,6 +355,15 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
                   </td>
                 </tr>
               ))}
+              {filteredSales.length === 0 && (
+                <tr>
+                  <td colSpan={10} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-muted)' }}>
+                    {typeFilter === 'DUE' 
+                      ? '🎉 No outstanding due sales found! All customer invoices are fully paid.'
+                      : 'No sales records found matching the search or filter criteria.'}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
