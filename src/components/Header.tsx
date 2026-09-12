@@ -200,6 +200,19 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
           <span>POS Terminal</span>
         </button>
 
+        {/* View Public Customer Website */}
+        {onViewLanding && (
+          <button 
+            className="btn btn-secondary btn-sm"
+            onClick={onViewLanding}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+            title="View Public Customer Website"
+          >
+            <Globe size={14} color="var(--brand-primary)" />
+            <span>Customer Website</span>
+          </button>
+        )}
+
         {/* Theme Toggle */}
         <button 
           className="btn btn-ghost btn-sm"
