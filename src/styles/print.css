@@ -226,9 +226,12 @@
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     box-sizing: border-box !important;
+    animation: none !important;
+    transition: none !important;
   }
 
-  html, body, #root {
+  /* Reset all outer containers */
+  html, body, #root, .app-container {
     background: #ffffff !important;
     color: #000000 !important;
     height: auto !important;
@@ -238,14 +241,22 @@
     margin: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
+    position: static !important;
+    display: block !important;
   }
 
-  .no-print,
+  /* Completely eliminate background ERP application from print */
+  .main-viewport,
+  .content-scrollable,
+  .mobile-bottom-nav,
   .sidebar,
   .header,
+  .no-print,
+  .modal-header,
   .btn,
-  .modal-overlay:not(.print-active-modal),
-  .toast-container {
+  button,
+  .toast-container,
+  .modal-overlay:not(.print-active-modal) {
     display: none !important;
   }
 
@@ -253,6 +264,7 @@
     display: block !important;
   }
 
+  /* Make print modal overlay take over the entire printed sheet */
   .modal-overlay.print-active-modal {
     position: static !important;
     inset: auto !important;
@@ -271,7 +283,8 @@
     box-shadow: none !important;
   }
 
-  .modal-overlay.print-active-modal .modal-content {
+  .modal-overlay.print-active-modal .modal-content,
+  .modal-overlay.print-active-modal .modal-content-xl {
     position: static !important;
     display: block !important;
     background: transparent !important;
@@ -287,7 +300,8 @@
     overflow: visible !important;
   }
 
-  .modal-overlay.print-active-modal .modal-body {
+  .modal-overlay.print-active-modal .modal-body,
+  .a4-preview-body {
     display: block !important;
     background: transparent !important;
     padding: 0 !important;
@@ -312,7 +326,7 @@
     border-radius: 0 !important;
     box-shadow: none !important;
     page-break-after: avoid !important;
-    page-break-inside: avoid !important;
+    page-break-inside: auto !important;
     font-size: 11px !important;
     line-height: 1.35 !important;
     overflow: visible !important;
@@ -493,16 +507,25 @@
     text-transform: uppercase !important;
   }
 
-  /* 80mm Thermal Receipt */
+  /* 80mm Thermal Receipt Rules */
+  body.is-printing-thermal .modal-overlay.print-active-modal .modal-content {
+    max-width: 80mm !important;
+    width: 80mm !important;
+  }
+
+  body.is-printing-thermal .thermal-receipt-document,
   .thermal-receipt-document {
-    width: 78mm !important;
+    width: 72mm !important;
+    max-width: 72mm !important;
     margin: 0 auto !important;
-    padding: 6mm 4mm !important;
+    padding: 3mm 2mm !important;
     font-family: 'Courier New', Courier, monospace !important;
     font-size: 11px !important;
     line-height: 1.3 !important;
     color: #000000 !important;
     background: #ffffff !important;
+    box-shadow: none !important;
+    border: none !important;
   }
 
   .thermal-header {

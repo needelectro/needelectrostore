@@ -31,14 +31,10 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
   };
 
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        window.print();
-      } catch (err) {
-        console.warn('Auto print trigger notice:', err);
-      }
-    }, 450);
-    return () => clearTimeout(timer);
+    document.body.classList.add('is-printing-invoice');
+    return () => {
+      document.body.classList.remove('is-printing-invoice');
+    };
   }, []);
 
   const rawDate = sale.createdAt || sale.date || new Date();
@@ -62,9 +58,9 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
   const overallDiscount = Number(sale.overallDiscount || 0);
   const vatAmount = Number(sale.vatAmount || 0);
   const vatPercent = Number(sale.vatPercent || 0);
-  const grandTotal = Number(sale.grandTotal || 0);
+  const grandTotal = Number(sale.grandTotal || (subtotal - overallDiscount + vatAmount));
   const paidAmount = Number(sale.paidAmount || 0);
-  const dueAmount = Number(sale.dueAmount || 0);
+  const dueAmount = Number(sale.dueAmount !== undefined ? sale.dueAmount : Math.max(0, grandTotal - paidAmount));
 
   const paymentMethodsText = payments.length > 0
     ? payments.map((p: any) => `${p.method || 'CASH'} (৳${Number(p.amount || 0).toLocaleString()})`).join(', ')
@@ -188,28 +184,34 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
               <tbody>
                 {items.length > 0 ? (
                   items.map((item: any, idx: number) => {
-                    const itemSerials = safeArray<string>(item.serialNumbers);
-                    const itemPrice = Number(item.unitPrice || 0);
-                    const itemTotal = Number(item.total || (itemPrice * (item.quantity || 1)));
+                    const itemSerials = Array.isArray(item.serialNumbers)
+                      ? item.serialNumbers
+                      : typeof item.serialNumbers === 'string'
+                        ? item.serialNumbers.split(',').map((s: string) => s.trim()).filter(Boolean)
+                        : safeArray<string>(item.serials);
+                    const itemPrice = Number(item.unitPrice || item.price || item.rate || 0);
+                    const itemQty = Number(item.quantity || item.qty || 1);
+                    const itemTotal = Number(item.total || (itemPrice * itemQty) - Number(item.discount || 0));
+                    const itemName = item.productName || item.name || item.title || 'Product Item';
 
                     return (
                       <tr key={item.id || idx}>
                         <td style={{ textAlign: 'center', fontWeight: 700 }}>{idx + 1}</td>
                         <td>
-                          <div style={{ fontWeight: 700, color: '#000000' }}>{item.productName || 'Unnamed Product'}</div>
+                          <div style={{ fontWeight: 700, color: '#000000' }}>{itemName}</div>
                           <div style={{ fontSize: '10.5px', color: '#1e293b', marginTop: '1px' }}>
                             SKU: <strong>{item.sku || 'N/A'}</strong> | Category: {item.category || 'General'}
                           </div>
-                          {item.isSerialized && itemSerials.length > 0 && (
+                          {(item.isSerialized || itemSerials.length > 0) && itemSerials.length > 0 && (
                             <div style={{ marginTop: '2px', fontSize: '10.5px', color: '#002b5b' }}>
                               <strong>S/N:</strong> {itemSerials.join(', ')}
                             </div>
                           )}
                         </td>
                         <td style={{ textAlign: 'center', fontWeight: 600 }}>
-                          {item.warrantyMonths && item.warrantyMonths > 0 ? `${item.warrantyMonths} Months` : 'Official Warranty'}
+                          {item.warrantyMonths && Number(item.warrantyMonths) > 0 ? `${item.warrantyMonths} Months` : 'Official Warranty'}
                         </td>
-                        <td style={{ textAlign: 'center', fontWeight: 700 }}>{item.quantity || 1}</td>
+                        <td style={{ textAlign: 'center', fontWeight: 700 }}>{itemQty}</td>
                         <td style={{ textAlign: 'right', fontWeight: 600 }}>৳{itemPrice.toLocaleString()}</td>
                         <td style={{ textAlign: 'right', fontWeight: 700 }}>৳{itemTotal.toLocaleString()}</td>
                       </tr>

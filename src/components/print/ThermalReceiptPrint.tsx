@@ -31,14 +31,10 @@ export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, 
   };
 
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        window.print();
-      } catch (err) {
-        console.warn('Auto print trigger notice:', err);
-      }
-    }, 450);
-    return () => clearTimeout(timer);
+    document.body.classList.add('is-printing-thermal');
+    return () => {
+      document.body.classList.remove('is-printing-thermal');
+    };
   }, []);
 
   const safeSettings = settings || ({} as Partial<SystemSettings>);
@@ -55,9 +51,9 @@ export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, 
   const overallDiscount = Number(sale.overallDiscount || 0);
   const vatAmount = Number(sale.vatAmount || 0);
   const vatPercent = Number(sale.vatPercent || 0);
-  const grandTotal = Number(sale.grandTotal || 0);
+  const grandTotal = Number(sale.grandTotal || (subtotal - overallDiscount + vatAmount));
   const paidAmount = Number(sale.paidAmount || 0);
-  const dueAmount = Number(sale.dueAmount || 0);
+  const dueAmount = Number(sale.dueAmount !== undefined ? sale.dueAmount : Math.max(0, grandTotal - paidAmount));
 
   const paidMethodsText = payments.length > 0 
     ? payments.map((p: any) => p.method || 'CASH').join('/') 
@@ -126,18 +122,24 @@ export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, 
             <div style={{ fontSize: '10px' }}>
               {items.length > 0 ? (
                 items.map((item: any, idx: number) => {
-                  const itemSerials = safeArray<string>(item.serialNumbers);
-                  const itemPrice = Number(item.unitPrice || 0);
-                  const itemTotal = Number(item.total || (itemPrice * (item.quantity || 1)));
+                  const itemSerials = Array.isArray(item.serialNumbers)
+                    ? item.serialNumbers
+                    : typeof item.serialNumbers === 'string'
+                      ? item.serialNumbers.split(',').map((s: string) => s.trim()).filter(Boolean)
+                      : safeArray<string>(item.serials);
+                  const itemPrice = Number(item.unitPrice || item.price || item.rate || 0);
+                  const itemQty = Number(item.quantity || item.qty || 1);
+                  const itemTotal = Number(item.total || (itemPrice * itemQty) - Number(item.discount || 0));
+                  const itemName = item.productName || item.name || item.title || 'Product Item';
 
                   return (
                     <div key={item.id || idx} style={{ marginBottom: '6px' }}>
-                      <div style={{ fontWeight: 'bold' }}>{item.productName || 'Unnamed Item'}</div>
-                      {item.isSerialized && itemSerials.length > 0 && (
+                      <div style={{ fontWeight: 'bold' }}>{itemName}</div>
+                      {(item.isSerialized || itemSerials.length > 0) && itemSerials.length > 0 && (
                         <div style={{ fontSize: '9px' }}>SN: {itemSerials.join(', ')}</div>
                       )}
                       <div className="thermal-item-row">
-                        <span>{item.quantity || 1} x ৳{itemPrice.toLocaleString()}</span>
+                        <span>{itemQty} x ৳{itemPrice.toLocaleString()}</span>
                         <span>৳{itemTotal.toLocaleString()}</span>
                       </div>
                     </div>
