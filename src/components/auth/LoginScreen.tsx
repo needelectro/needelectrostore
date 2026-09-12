@@ -6,7 +6,11 @@ import {
   Building, CheckCircle2, AlertCircle, Phone, Globe, MapPin 
 } from 'lucide-react';
 
-export const LoginScreen: React.FC = () => {
+interface LoginScreenProps {
+  onBackToHome?: () => void;
+}
+
+export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome }) => {
   const { login, branches, selectedBranch, settings } = useERP();
 
   const [email, setEmail] = useState('');
@@ -52,6 +56,37 @@ export const LoginScreen: React.FC = () => {
       position: 'relative',
       overflow: 'hidden'
     }}>
+      {onBackToHome && (
+        <button
+          onClick={onBackToHome}
+          type="button"
+          style={{
+            position: 'absolute',
+            top: '1.25rem',
+            left: '1.5rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            background: 'rgba(15, 23, 42, 0.75)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            borderRadius: '9999px',
+            padding: '0.45rem 1rem',
+            color: '#f8fafc',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            zIndex: 20,
+            backdropFilter: 'blur(12px)',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+          }}
+          onMouseOver={e => e.currentTarget.style.backgroundColor = 'rgba(0, 140, 255, 0.25)'}
+          onMouseOut={e => e.currentTarget.style.backgroundColor = 'rgba(15, 23, 42, 0.75)'}
+        >
+          ← Back to Homepage
+        </button>
+      )}
+
       {/* Background ambient decorative shapes */}
       <div style={{
         position: 'absolute',

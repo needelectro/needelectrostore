@@ -39,6 +39,7 @@ import { ReturnsModule } from './modules/ReturnsModule';
 import { ControlCenterModule } from './modules/ControlCenterModule';
 
 import { InitialSetupModal } from './components/auth/InitialSetupModal';
+import { LandingPage } from './components/landing/LandingPage';
 
 const MainAppLayout: React.FC = () => {
   const { 
@@ -48,6 +49,17 @@ const MainAppLayout: React.FC = () => {
     activeBarcodeToPrint, setActiveBarcodeToPrint,
     isAuthenticated, isLocked, currentUser, hasPermission, setupStatus
   } = useERP();
+
+  // Controls display of public landing page vs staff portal login
+  const [showLanding, setShowLanding] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('portal') === 'true' || window.location.hash === '#login') {
+        return false;
+      }
+    }
+    return true;
+  });
 
   const [activeModule, setActiveModule] = useState<string>('dashboard');
   const [moduleInitialParam, setModuleInitialParam] = useState<string | undefined>(undefined);
@@ -82,11 +94,55 @@ const MainAppLayout: React.FC = () => {
     );
   }
 
-  // If not authenticated, present the enterprise branded Login Screen
-  if (!isAuthenticated) {
+  // If user explicitly chose to view public landing page while authenticated
+  if (showLanding && isAuthenticated) {
     return (
       <>
-        <LoginScreen />
+        <div style={{
+          position: 'fixed',
+          top: '1rem',
+          right: '1.5rem',
+          zIndex: 99999,
+        }}>
+          <button
+            onClick={() => setShowLanding(false)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              background: 'linear-gradient(135deg, #0072FF 0%, #00C6FF 100%)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '0.55rem 1.15rem',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 4px 16px rgba(0, 114, 255, 0.45)'
+            }}
+          >
+            ← Return to ERP Dashboard
+          </button>
+        </div>
+        <LandingPage onOpenLogin={() => setShowLanding(false)} />
+        <ToastContainer />
+      </>
+    );
+  }
+
+  // If not authenticated: show Landing Page by default, or Login Screen when requested
+  if (!isAuthenticated) {
+    if (showLanding) {
+      return (
+        <>
+          <LandingPage onOpenLogin={() => setShowLanding(false)} />
+          <ToastContainer />
+        </>
+      );
+    }
+    return (
+      <>
+        <LoginScreen onBackToHome={() => setShowLanding(true)} />
         <ToastContainer />
       </>
     );
@@ -229,6 +285,7 @@ const MainAppLayout: React.FC = () => {
           onOpenSearch={() => setIsSearchOpen(true)}
           onNavigateToModule={handleNavigate}
           toggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+          onViewLanding={() => setShowLanding(true)}
         />
 
         <main className="content-scrollable">

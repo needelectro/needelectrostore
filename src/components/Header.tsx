@@ -3,7 +3,7 @@ import { useERP } from '../services/erpStore';
 import { 
   Search, Sun, Moon, Bell, User, Building, 
   ShoppingCart, AlertTriangle, Clock, Wrench, ChevronDown, Zap,
-  Lock, LogOut, KeyRound, ShieldAlert
+  Lock, LogOut, KeyRound, ShieldAlert, Globe
 } from 'lucide-react';
 import { NeedElectroLogo } from './NeedElectroLogo';
 import { ChangePasswordModal } from './auth/ChangePasswordModal';
@@ -12,9 +12,10 @@ interface HeaderProps {
   onOpenSearch: () => void;
   onNavigateToModule: (moduleName: string, targetId?: string) => void;
   toggleSidebar: () => void;
+  onViewLanding?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule, toggleSidebar }) => {
+export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule, toggleSidebar, onViewLanding }) => {
   const { 
     settings, updateSettings, branches, selectedBranch, setSelectedBranchId, 
     currentUser, emiAccounts, products, services,
@@ -373,6 +374,34 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
                   <KeyRound size={15} color="#10b981" />
                   <span>Change Password</span>
                 </button>
+
+                {onViewLanding && (
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      onViewLanding();
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '0.45rem 0.6rem',
+                      borderRadius: 'var(--radius-sm)',
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--text-primary)',
+                      cursor: 'pointer',
+                      fontSize: '0.8125rem',
+                      width: '100%',
+                      textAlign: 'left'
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-active)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    <Globe size={15} color="#008CFF" />
+                    <span>View Public Landing Page</span>
+                  </button>
+                )}
 
                 <button
                   onClick={() => {
