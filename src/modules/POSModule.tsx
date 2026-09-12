@@ -715,8 +715,8 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
               {!isSplitPayment ? (
                 <div>
                   <label className="form-label">Select Payment Method</label>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', marginBottom: '1rem' }}>
-                    {(['Cash', 'bKash', 'Nagad', 'Rocket', 'Bank Transfer', 'Card'] as PaymentMethod[]).map(method => (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', marginBottom: '1rem' }}>
+                    {(['Cash', 'bKash (01884599271)', 'Eastern Bank (Amdadur)', 'Pubali Bank (Amdadur)', 'Pubali Bank (Fulori)', 'Card (POS)'] as PaymentMethod[]).map(method => (
                       <button
                         key={method}
                         onClick={() => setPrimaryPaymentMethod(method)}
@@ -776,7 +776,7 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
                           setSplitPayments(updated);
                         }}
                       >
-                        {(['Cash', 'bKash', 'Nagad', 'Rocket', 'Bank Transfer', 'Card'] as PaymentMethod[]).map(m => (
+                        {(['Cash', 'bKash (01884599271)', 'Eastern Bank (Amdadur)', 'Pubali Bank (Amdadur)', 'Pubali Bank (Fulori)', 'Card (POS)'] as PaymentMethod[]).map(m => (
                           <option key={m} value={m}>{m}</option>
                         ))}
                       </select>

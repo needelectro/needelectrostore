@@ -140,50 +140,50 @@ export const INITIAL_FINANCIAL_ACCOUNTS: FinancialAccount[] = [
     "accountNumber": "CASH-MB-01",
     "bankName": "Cash in Hand Vault",
     "branchName": "Moulvibazar Main",
-    "balance": 165389,
+    "balance": 167789,
     "currency": "BDT",
     "isActive": true
   },
   {
-    "id": "acc-2",
-    "name": "Bank Asia Current Account",
+    "id": "acc-ebl-amdadur",
+    "name": "Eastern Bank - Amdadur Rahman",
     "type": "BANK",
-    "accountNumber": "03933005821",
-    "bankName": "Bank Asia PLC",
+    "accountNumber": "EBL-AMDADUR",
+    "bankName": "Eastern Bank PLC",
     "branchName": "Moulvibazar Branch",
     "balance": 0,
     "currency": "BDT",
     "isActive": true
   },
   {
-    "id": "acc-3",
-    "name": "bKash Merchant Wallet",
+    "id": "acc-pubali-amdadur",
+    "name": "Pubali Bank - Amdadur Rahman",
+    "type": "BANK",
+    "accountNumber": "PUBALI-AMDADUR",
+    "bankName": "Pubali Bank PLC",
+    "branchName": "Moulvibazar Branch",
+    "balance": 0,
+    "currency": "BDT",
+    "isActive": true
+  },
+  {
+    "id": "acc-pubali-fulori",
+    "name": "Pubali Bank - Fulori Miha",
+    "type": "BANK",
+    "accountNumber": "PUBALI-FULORI",
+    "bankName": "Pubali Bank PLC",
+    "branchName": "Moulvibazar Branch",
+    "balance": 0,
+    "currency": "BDT",
+    "isActive": true
+  },
+  {
+    "id": "acc-bkash-primary",
+    "name": "bKash Payment (01884599271)",
     "type": "MOBILE_BANKING",
-    "accountNumber": "01733-983752",
+    "accountNumber": "01884599271",
     "bankName": "bKash Limited",
-    "branchName": "Merchant Account",
-    "balance": 0,
-    "currency": "BDT",
-    "isActive": true
-  },
-  {
-    "id": "acc-4",
-    "name": "Nagad Merchant Wallet",
-    "type": "MOBILE_BANKING",
-    "accountNumber": "01733-983752",
-    "bankName": "Nagad Digital",
-    "branchName": "Merchant Account",
-    "balance": 0,
-    "currency": "BDT",
-    "isActive": true
-  },
-  {
-    "id": "acc-5",
-    "name": "Rocket Corporate Account",
-    "type": "MOBILE_BANKING",
-    "accountNumber": "01733-983752-9",
-    "bankName": "Dutch-Bangla Bank",
-    "branchName": "MFS Corporate",
+    "branchName": "Official Payment Wallet",
     "balance": 0,
     "currency": "BDT",
     "isActive": true
@@ -4530,11 +4530,11 @@ export const INITIAL_BRANDS: BrandConfig[] = [
 
 export const INITIAL_PAYMENT_METHODS_CONFIG: ConfigurablePaymentMethod[] = [
   { id: 'pm-1', name: 'Cash', code: 'CASH', type: 'CASH', linkedAccountId: 'acc-1', accountNumber: '', chargePercent: 0, instructions: 'Accepted at counter. Verify currency security strips.', isActive: true, sortOrder: 1 },
-  { id: 'pm-2', name: 'bKash Merchant', code: 'BKASH', type: 'MFS', linkedAccountId: 'acc-3', accountNumber: '01733-983752', chargePercent: 1.5, instructions: 'Scan QR code or use Merchant Pay.', isActive: true, sortOrder: 2 },
-  { id: 'pm-3', name: 'Nagad Merchant', code: 'NAGAD', type: 'MFS', linkedAccountId: 'acc-4', accountNumber: '01733-983752', chargePercent: 1.2, instructions: 'Pay using Nagad Merchant payment.', isActive: true, sortOrder: 3 },
-  { id: 'pm-4', name: 'Rocket Pay', code: 'ROCKET', type: 'MFS', linkedAccountId: 'acc-5', accountNumber: '01733-983752-9', chargePercent: 1.2, instructions: 'Use DBBL Rocket Merchant payment.', isActive: true, sortOrder: 4 },
-  { id: 'pm-5', name: 'Bank Asia Transfer', code: 'BANK_ASIA', type: 'BANK', linkedAccountId: 'acc-2', accountNumber: '03933005821', chargePercent: 0, instructions: 'BEFTN / NPSB / RTGS deposit to Need Electro.', isActive: true, sortOrder: 5 },
-  { id: 'pm-6', name: 'Credit / Debit Card (POS)', code: 'CARD_POS', type: 'CARD', linkedAccountId: 'acc-2', accountNumber: '', chargePercent: 2.0, instructions: 'Visa, MasterCard, Amex via counter POS swipe.', isActive: true, sortOrder: 6 },
+  { id: 'pm-2', name: 'bKash Payment (01884599271)', code: 'BKASH', type: 'MFS', linkedAccountId: 'acc-bkash-primary', accountNumber: '01884599271', chargePercent: 0, instructions: 'Payment / Send Money to 01884599271. Verify TrxID at billing counter.', isActive: true, sortOrder: 2 },
+  { id: 'pm-3', name: 'Eastern Bank - Amdadur Rahman', code: 'EASTERN_BANK', type: 'BANK', linkedAccountId: 'acc-ebl-amdadur', accountNumber: 'EBL-AMDADUR', chargePercent: 0, instructions: 'BEFTN / NPSB / RTGS transfer to Eastern Bank — Account: Amdadur Rahman.', isActive: true, sortOrder: 3 },
+  { id: 'pm-4', name: 'Pubali Bank - Amdadur Rahman', code: 'PUBALI_AMDADUR', type: 'BANK', linkedAccountId: 'acc-pubali-amdadur', accountNumber: 'PUBALI-AMDADUR', chargePercent: 0, instructions: 'BEFTN / NPSB / RTGS transfer to Pubali Bank — Account: Amdadur Rahman.', isActive: true, sortOrder: 4 },
+  { id: 'pm-5', name: 'Pubali Bank - Fulori Miha', code: 'PUBALI_FULORI', type: 'BANK', linkedAccountId: 'acc-pubali-fulori', accountNumber: 'PUBALI-FULORI', chargePercent: 0, instructions: 'BEFTN / NPSB / RTGS transfer to Pubali Bank — Account: Fulori Miha.', isActive: true, sortOrder: 5 },
+  { id: 'pm-6', name: 'Credit / Debit Card (POS)', code: 'CARD_POS', type: 'CARD', linkedAccountId: 'acc-ebl-amdadur', accountNumber: '', chargePercent: 1.5, instructions: 'Visa, MasterCard, Amex via counter POS swipe.', isActive: true, sortOrder: 6 },
   { id: 'pm-7', name: 'Credit / Customer Due', code: 'CREDIT_SALE', type: 'OTHER', linkedAccountId: 'acc-1', accountNumber: '', chargePercent: 0, instructions: 'Allowed only for pre-approved credit accounts.', isActive: true, sortOrder: 7 },
   { id: 'pm-8', name: 'Laptop EMI Facility', code: 'EMI_SALE', type: 'OTHER', linkedAccountId: 'acc-1', accountNumber: '', chargePercent: 0, instructions: 'Financed via Need Electro EMI installment system.', isActive: true, sortOrder: 8 }
 ];
