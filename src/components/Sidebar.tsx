@@ -126,8 +126,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
             showSisterConcern={false}
           />
 
-          <button className="btn btn-ghost btn-sm mobile-close-btn" onClick={onClose} style={{ display: 'none' }}>
-            <X size={18} />
+          <button 
+            className="btn btn-ghost btn-sm mobile-close-btn" 
+            onClick={onClose} 
+            aria-label="Close sidebar navigation"
+            style={{ padding: '0.4rem', borderRadius: '8px' }}
+          >
+            <X size={20} />
           </button>
         </div>
 
@@ -159,7 +164,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       key={item.id}
                       onClick={() => {
                         setActiveModule(item.id);
-                        if (window.innerWidth < 1024) onClose();
+                        onClose();
                       }}
                       style={{
                         display: 'flex',

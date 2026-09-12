@@ -10,7 +10,7 @@ import {
   TrendingUp, Users, RefreshCw, FileText, ArrowUpRight,
   Laptop, Tv, Camera, Wifi, Check, Star, HelpCircle,
   Clock, Calendar, MessageSquare, AlertCircle, X, Search,
-  Compass, Shield, Award, HeartHandshake, ChevronDown
+  Compass, Shield, Award, HeartHandshake, ChevronDown, Menu
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -149,7 +149,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           </a>
 
           {/* Navigation Links (Desktop) */}
-          <nav style={{
+          <nav className="desktop-nav-links" style={{
             display: 'flex',
             alignItems: 'center',
             gap: '1.4rem',
@@ -167,10 +167,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           </nav>
 
           {/* Right Action Group */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             {/* Phone Hotline Pill */}
             <a 
               href="tel:01733983752"
+              className="hotline-pill"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -188,8 +189,123 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
               <Phone size={13} />
               <span>01733-983752</span>
             </a>
+
+            {/* Mobile Hamburger Toggle Button */}
+            <button
+              className="mobile-hamburger-btn"
+              onClick={() => setMobileMenuOpen(prev => !prev)}
+              aria-label="Toggle navigation menu"
+              style={{
+                display: 'none',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                color: '#ffffff',
+                borderRadius: '8px',
+                padding: '0.45rem',
+                cursor: 'pointer'
+              }}
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Navigation Drawer Overlay */}
+        {mobileMenuOpen && (
+          <div style={{
+            backgroundColor: '#090e1a',
+            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
+            padding: '1.25rem 1.5rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.85rem'
+          }}>
+            <a 
+              href="#home" 
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ color: '#ffffff', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.3rem 0' }}
+            >
+              Home
+            </a>
+            <a 
+              href="#products" 
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.3rem 0' }}
+            >
+              Products & Inventory
+            </a>
+            <a 
+              href="#laptops" 
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.3rem 0' }}
+            >
+              Laptops & Computers
+            </a>
+            <a 
+              href="#services" 
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.3rem 0' }}
+            >
+              Services & Repair
+            </a>
+            <a 
+              href="#cctv" 
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.3rem 0' }}
+            >
+              CCTV & Security
+            </a>
+            <a 
+              href="#emi" 
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.3rem 0' }}
+            >
+              Laptop EMI Facility
+            </a>
+            <a 
+              href="#about" 
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.3rem 0' }}
+            >
+              About NEED ELECTRO
+            </a>
+            <a 
+              href="#contact" 
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.3rem 0' }}
+            >
+              Contact Showroom
+            </a>
+
+            <div style={{ paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              <a
+                href="tel:01733983752"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  background: 'linear-gradient(135deg, #008CFF 0%, #0055b3 100%)',
+                  color: '#ffffff',
+                  textDecoration: 'none',
+                  borderRadius: '10px',
+                  padding: '0.75rem',
+                  fontWeight: 700,
+                  fontSize: '0.92rem'
+                }}
+              >
+                <Phone size={16} />
+                <span>Direct Hotline: 01733-983752</span>
+              </a>
+              <div style={{ fontSize: '0.8rem', color: '#94a3b8', textAlign: 'center' }}>
+                Shop No: 5, MR Plaza, Kusumbag, Moulvibazar
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* =========================================================================

@@ -3,7 +3,7 @@ import { useERP } from '../services/erpStore';
 import { 
   Search, Sun, Moon, Bell, User, Building, 
   ShoppingCart, AlertTriangle, Clock, Wrench, ChevronDown, Zap,
-  Lock, LogOut, KeyRound, ShieldAlert, Globe
+  Lock, LogOut, KeyRound, ShieldAlert, Globe, Menu
 } from 'lucide-react';
 import { NeedElectroLogo } from './NeedElectroLogo';
 import { ChangePasswordModal } from './auth/ChangePasswordModal';
@@ -64,20 +64,31 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
       top: 0,
       zIndex: 50
     }}>
-      {/* Left: Brand Logo & Mobile Sidebar Toggle */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+      {/* Left: Hamburger Toggle & Brand Logo */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
         <button 
-          className="btn btn-ghost btn-sm" 
+          className="btn btn-ghost btn-sm mobile-hamburger-btn" 
           onClick={toggleSidebar}
-          style={{ display: 'flex', alignItems: 'center', padding: '0.25rem 0.5rem' }}
+          aria-label="Toggle Navigation Menu"
+          style={{ 
+            display: 'none', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            padding: '0.45rem', 
+            borderRadius: '8px' 
+          }}
           title="Toggle Navigation Menu"
         >
-          <NeedElectroLogo size="sm" showSisterConcern={false} />
+          <Menu size={20} />
         </button>
+
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <NeedElectroLogo size="sm" showSisterConcern={false} />
+        </div>
       </div>
 
       {/* Center: Corporate Website-Style Navigation */}
-      <nav style={{
+      <nav className="desktop-nav-only" style={{
         display: 'flex',
         alignItems: 'center',
         gap: '0.35rem',
@@ -131,10 +142,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
           title="Search anything (Ctrl+K)"
         >
           <Search size={15} />
-          <span style={{ display: 'inline-block', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span className="quick-search-text" style={{ display: 'inline-block', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             Quick Search...
           </span>
-          <kbd style={{
+          <kbd className="quick-search-kbd" style={{
             fontSize: '0.68rem',
             background: 'var(--bg-card-muted)',
             border: '1px solid var(--border-color)',
@@ -171,7 +182,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
         {/* Super Admin Master Mode Quick Access */}
         {currentUser?.role === 'SUPER_ADMIN' && (
           <button
-            className="btn btn-sm"
+            className="btn btn-sm desktop-only"
             onClick={() => onNavigateToModule('control_center', 'master_crud')}
             style={{
               display: 'flex',
@@ -197,13 +208,13 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
           style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
         >
           <ShoppingCart size={15} />
-          <span>POS Terminal</span>
+          <span className="pos-btn-text">POS Terminal</span>
         </button>
 
         {/* View Public Customer Website */}
         {onViewLanding && (
           <button 
-            className="btn btn-secondary btn-sm"
+            className="btn btn-secondary btn-sm desktop-only"
             onClick={onViewLanding}
             style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
             title="View Public Customer Website"

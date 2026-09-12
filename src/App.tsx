@@ -11,7 +11,7 @@ import { BarcodeLabelPrint } from './components/print/BarcodeLabelPrint';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { LockScreenModal } from './components/auth/LockScreenModal';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
-import { ShieldAlert } from 'lucide-react';
+import { ShieldAlert, LayoutDashboard, ShoppingCart, ReceiptText, Wrench, Menu } from 'lucide-react';
 
 // Modules
 import { DashboardModule } from './modules/DashboardModule';
@@ -388,6 +388,55 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
           />
         </ErrorBoundary>
       )}
+
+      {/* Mobile Bottom Quick Navigation Dock (<= 768px) */}
+      <nav className="mobile-bottom-nav no-print">
+        <button
+          type="button"
+          className={`mobile-bottom-nav-item ${activeModule === 'dashboard' ? 'active' : ''}`}
+          onClick={() => handleNavigate('dashboard')}
+          title="Dashboard"
+        >
+          <LayoutDashboard size={18} />
+          <span>Home</span>
+        </button>
+        <button
+          type="button"
+          className={`mobile-bottom-nav-item pos-highlight`}
+          onClick={() => handleNavigate('pos')}
+          title="New POS Sale"
+        >
+          <ShoppingCart size={20} />
+          <span>POS</span>
+        </button>
+        <button
+          type="button"
+          className={`mobile-bottom-nav-item ${activeModule === 'sales' ? 'active' : ''}`}
+          onClick={() => handleNavigate('sales')}
+          title="Sales History"
+        >
+          <ReceiptText size={18} />
+          <span>Sales</span>
+        </button>
+        <button
+          type="button"
+          className={`mobile-bottom-nav-item ${activeModule === 'service' ? 'active' : ''}`}
+          onClick={() => handleNavigate('service')}
+          title="Service & Repair"
+        >
+          <Wrench size={18} />
+          <span>Service</span>
+        </button>
+        <button
+          type="button"
+          className={`mobile-bottom-nav-item`}
+          onClick={() => setIsSidebarOpen(true)}
+          title="All ERP Modules"
+        >
+          <Menu size={18} />
+          <span>Menu</span>
+        </button>
+      </nav>
     </div>
   );
 };
