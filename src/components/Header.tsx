@@ -19,12 +19,23 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
   const { 
     settings, updateSettings, branches, selectedBranch, setSelectedBranchId, 
     currentUser, emiAccounts, products, services,
-    lockSession, logout 
+    lockSession, logout, hasPermission
   } = useERP();
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+
+  // Corporate Website-style Top Nav Modules
+  const topNavItems = [
+    { label: 'Home', module: 'dashboard' },
+    { label: 'Business', module: 'control_center' },
+    { label: 'Sales', module: 'sales' },
+    { label: 'Products', module: 'products' },
+    { label: 'Services', module: 'service' },
+    { label: 'EMI', module: 'emi' },
+    { label: 'Reports', module: 'reports' }
+  ].filter(item => hasPermission ? hasPermission(item.module) : true);
 
   // Compute live notifications
   const overdueEmi = emiAccounts.filter(e => e.installments.some(i => i.status === 'OVERDUE'));
@@ -53,51 +64,86 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
       top: 0,
       zIndex: 50
     }}>
-      {/* Left: Mobile Toggle & Global Search Trigger */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, maxWidth: '500px' }}>
+      {/* Left: Brand Logo & Mobile Sidebar Toggle */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <button 
           className="btn btn-ghost btn-sm" 
           onClick={toggleSidebar}
-          style={{ display: 'flex', alignItems: 'center', padding: '0.2rem' }}
-          title="Toggle Navigation"
+          style={{ display: 'flex', alignItems: 'center', padding: '0.25rem 0.5rem' }}
+          title="Toggle Navigation Menu"
         >
-          <NeedElectroLogo size="sm" variant="icon-only" />
+          <NeedElectroLogo size="sm" showSisterConcern={false} />
         </button>
+      </div>
 
+      {/* Center: Corporate Website-Style Navigation */}
+      <nav style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.35rem',
+        flexWrap: 'wrap'
+      }}>
+        {topNavItems.map(item => (
+          <button
+            key={item.module}
+            onClick={() => onNavigateToModule(item.module)}
+            className="btn btn-ghost btn-sm"
+            style={{
+              fontSize: '0.84rem',
+              fontWeight: 600,
+              padding: '0.35rem 0.75rem',
+              borderRadius: '8px',
+              color: 'var(--text-secondary)',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseOver={e => {
+              e.currentTarget.style.color = 'var(--brand-primary)';
+              e.currentTarget.style.background = 'var(--bg-hover)';
+            }}
+            onMouseOut={e => {
+              e.currentTarget.style.color = 'var(--text-secondary)';
+              e.currentTarget.style.background = 'transparent';
+            }}
+          >
+            {item.label}
+          </button>
+        ))}
+      </nav>
+
+      {/* Right: Search Trigger & Enterprise Controls */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         {/* Global Search Bar */}
         <div 
           onClick={onOpenSearch}
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.6rem',
+            gap: '0.5rem',
             background: 'var(--bg-input)',
             border: '1px solid var(--border-color)',
             borderRadius: 'var(--radius-md)',
-            padding: '0.45rem 0.85rem',
-            width: '100%',
+            padding: '0.4rem 0.75rem',
             cursor: 'pointer',
             color: 'var(--text-muted)',
-            fontSize: '0.875rem',
+            fontSize: '0.8125rem',
             transition: 'all var(--transition-fast)'
           }}
+          title="Search anything (Ctrl+K)"
         >
-          <Search size={16} />
-          <span style={{ flex: 1 }}>Search Products, Serials, Invoices, EMI...</span>
+          <Search size={15} />
+          <span style={{ display: 'inline-block', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            Quick Search...
+          </span>
           <kbd style={{
-            fontSize: '0.7rem',
+            fontSize: '0.68rem',
             background: 'var(--bg-card-muted)',
             border: '1px solid var(--border-color)',
-            padding: '1px 5px',
+            padding: '1px 4px',
             borderRadius: '4px'
           }}>
             Ctrl+K
           </kbd>
         </div>
-      </div>
-
-      {/* Right Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         {/* Branch Selector */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'var(--bg-card-muted)', padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
           <Building size={14} color="var(--brand-primary)" />

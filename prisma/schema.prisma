@@ -176,6 +176,7 @@ model User {
   branch  Branch?   @relation(fields: [branchId], references: [id], onDelete: SetNull)
   roleRel Role?     @relation(fields: [roleId], references: [id])
   sessions Session[]
+  investor Investor?
 
   @@map("users")
 }
@@ -822,7 +823,11 @@ model Investment {
   createdBy        String   @map("created_by")
   createdAt        DateTime @default(now()) @map("created_at")
 
+  investorId       String?  @map("investor_id")
+  investor         Investor? @relation(fields: [investorId], references: [id], onDelete: SetNull)
+
   @@index([referenceNumber])
+  @@index([investorId])
   @@map("investments")
 }
 
@@ -1068,3 +1073,68 @@ model CustomerPayment {
   @@index([paymentDate])
   @@map("customer_payments")
 }
+
+// ---------------------------------------------------------
+// 22. INVESTORS & PROFIT SETTLEMENT
+// ---------------------------------------------------------
+
+model Investor {
+  id              String   @id
+  investorId      String   @unique @map("investor_id") // e.g. "INV-001"
+  name            String
+  email           String   @unique
+  phone           String?
+  userId          String   @unique @map("user_id")
+  status          String   @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED
+  notes           String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  investments     Investment[]
+  monthlyProfits  InvestorMonthlyProfit[]
+
+  @@map("investors")
+}
+
+model MonthlySettlement {
+  id                     String    @id // e.g. "settlement-2026-09"
+  year                   Int
+  month                  Int       // 1 - 12
+  periodLabel            String    @map("period_label") // e.g. "September 2026"
+  revenue                Decimal   @db.Decimal(12, 2)
+  cogs                   Decimal   @default(0) @db.Decimal(12, 2)
+  expenses               Decimal   @db.Decimal(12, 2)
+  netProfit              Decimal   @map("net_profit") @db.Decimal(12, 2)
+  investorPoolRate       Decimal   @default(25.0) @map("investor_pool_rate") @db.Decimal(5, 2)
+  investorProfitPool     Decimal   @map("investor_profit_pool") @db.Decimal(12, 2)
+  totalActiveInvestment  Decimal   @map("total_active_investment") @db.Decimal(12, 2)
+  status                 String    @default("FINALIZED") // DRAFT, FINALIZED
+  finalizedAt            DateTime? @map("finalized_at")
+  finalizedBy            String?   @map("finalized_by")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  investorProfits        InvestorMonthlyProfit[]
+
+  @@unique([year, month])
+  @@map("monthly_settlements")
+}
+
+model InvestorMonthlyProfit {
+  id               String   @id
+  settlementId     String   @map("settlement_id")
+  investorId       String   @map("investor_id")
+  investmentAmount Decimal  @map("investment_amount") @db.Decimal(12, 2)
+  sharePercentage  Decimal  @map("share_percentage") @db.Decimal(7, 4) // e.g. 50.0000%
+  profitShare      Decimal  @map("profit_share") @db.Decimal(12, 2)
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  settlement       MonthlySettlement @relation(fields: [settlementId], references: [id], onDelete: Cascade)
+  investor         Investor          @relation(fields: [investorId], references: [id], onDelete: Cascade)
+
+  @@unique([settlementId, investorId])
+  @@index([investorId])
+  @@map("investor_monthly_profits")
+}
+

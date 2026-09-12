@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useERP } from '../services/erpStore';
 import { 
   PieChart as PieChartIcon, TrendingUp, TrendingDown, 
   Wallet, DollarSign, ArrowUpRight, ArrowDownRight, 
   Receipt, BookOpen, Calendar, Printer, Plus, ArrowLeftRight,
-  Landmark, ShieldAlert, CheckCircle2, X
+  Landmark, ShieldAlert, CheckCircle2, X, Users, Percent,
+  Lock, Unlock, ShieldCheck, Sparkles, Clock
 } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
@@ -43,6 +44,186 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
   const [targetAccountId, setTargetAccountId] = useState(financialAccounts[0]?.id || '');
   const [investRef, setInvestRef] = useState('');
   const [investNotes, setInvestNotes] = useState('');
+
+  // Super Admin Investor Management State
+  const [adminInvestorData, setAdminInvestorData] = useState<any>(null);
+  const [selectedYear, setSelectedYear] = useState<number>(2026);
+  const [selectedMonth, setSelectedMonth] = useState<number>(9);
+  const [isLoadingInvestorData, setIsLoadingInvestorData] = useState<boolean>(false);
+  const [showCreateInvestorModal, setShowCreateInvestorModal] = useState<boolean>(false);
+  const [showAddCapitalToInvestorModal, setShowAddCapitalToInvestorModal] = useState<boolean>(false);
+  const [selectedInvestorForCapital, setSelectedInvestorForCapital] = useState<any>(null);
+
+  // Create Investor Form
+  const [newInvestorName, setNewInvestorName] = useState('');
+  const [newInvestorEmail, setNewInvestorEmail] = useState('');
+  const [newInvestorPhone, setNewInvestorPhone] = useState('');
+  const [newInvestorPassword, setNewInvestorPassword] = useState('');
+  const [newInvestorInitialAmount, setNewInvestorInitialAmount] = useState<number>(50000);
+  const [newInvestorAccountId, setNewInvestorAccountId] = useState(financialAccounts[0]?.id || '');
+  const [newInvestorNotes, setNewInvestorNotes] = useState('');
+
+  // Add Capital Form
+  const [addCapitalAmount, setAddCapitalAmount] = useState<number>(20000);
+  const [addCapitalAccountId, setAddCapitalAccountId] = useState(financialAccounts[0]?.id || '');
+  const [addCapitalNotes, setAddCapitalNotes] = useState('');
+
+  const [isFinalizing, setIsFinalizing] = useState(false);
+
+  const loadAdminInvestorData = async (year = selectedYear, month = selectedMonth) => {
+    try {
+      setIsLoadingInvestorData(true);
+      const res = await fetch(`/api/admin/investors?year=${year}&month=${month}`);
+      const json = await res.json();
+      if (json.success) {
+        setAdminInvestorData(json.data);
+      }
+    } catch (err) {
+      console.error('Error loading admin investor data:', err);
+    } finally {
+      setIsLoadingInvestorData(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'investments') {
+      loadAdminInvestorData(selectedYear, selectedMonth);
+    }
+  }, [activeTab, selectedYear, selectedMonth]);
+
+  const handleCreateInvestorSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newInvestorName.trim() || !newInvestorEmail.trim() || !newInvestorPassword.trim()) {
+      alert('Please fill in name, email, and password.');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/admin/investors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-investor',
+          name: newInvestorName.trim(),
+          email: newInvestorEmail.trim(),
+          phone: newInvestorPhone.trim(),
+          password: newInvestorPassword.trim(),
+          initialAmount: newInvestorInitialAmount,
+          depositAccountId: newInvestorAccountId || financialAccounts[0]?.id,
+          notes: newInvestorNotes.trim(),
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        alert(json.message);
+        setShowCreateInvestorModal(false);
+        setNewInvestorName('');
+        setNewInvestorEmail('');
+        setNewInvestorPhone('');
+        setNewInvestorPassword('');
+        setNewInvestorInitialAmount(50000);
+        setNewInvestorNotes('');
+        loadAdminInvestorData();
+      } else {
+        alert(`Error: ${json.error}`);
+      }
+    } catch (err: any) {
+      alert(`Request failed: ${err.message}`);
+    }
+  };
+
+  const handleAddCapitalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedInvestorForCapital || addCapitalAmount <= 0) {
+      alert('Please specify a valid capital amount.');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/admin/investors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add-investment',
+          investorId: selectedInvestorForCapital.id,
+          amount: addCapitalAmount,
+          depositAccountId: addCapitalAccountId || financialAccounts[0]?.id,
+          notes: addCapitalNotes.trim(),
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        alert(json.message);
+        setShowAddCapitalToInvestorModal(false);
+        setSelectedInvestorForCapital(null);
+        setAddCapitalAmount(20000);
+        setAddCapitalNotes('');
+        loadAdminInvestorData();
+      } else {
+        alert(`Error: ${json.error}`);
+      }
+    } catch (err: any) {
+      alert(`Request failed: ${err.message}`);
+    }
+  };
+
+  const handleFinalizePeriod = async () => {
+    if (!confirm(`Are you sure you want to finalize and lock the financial period for ${adminInvestorData?.currentPreview?.periodLabel}? This will freeze investor profit calculations for this month.`)) {
+      return;
+    }
+    try {
+      setIsFinalizing(true);
+      const res = await fetch('/api/admin/investors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'finalize-month',
+          year: selectedYear,
+          month: selectedMonth,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        alert(json.message);
+        loadAdminInvestorData();
+      } else {
+        alert(`Error: ${json.error}`);
+      }
+    } catch (err: any) {
+      alert(`Finalization failed: ${err.message}`);
+    } finally {
+      setIsFinalizing(false);
+    }
+  };
+
+  const handleReopenPeriod = async () => {
+    if (!confirm(`Reopening will unlock this financial period for modifications. Are you sure?`)) {
+      return;
+    }
+    try {
+      setIsFinalizing(true);
+      const res = await fetch('/api/admin/investors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'reopen-month',
+          year: selectedYear,
+          month: selectedMonth,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        alert(json.message);
+        loadAdminInvestorData();
+      } else {
+        alert(`Error: ${json.error}`);
+      }
+    } catch (err: any) {
+      alert(`Reopen failed: ${err.message}`);
+    } finally {
+      setIsFinalizing(false);
+    }
+  };
 
   // Calculations
   // Total Gross Sales Revenue
@@ -466,25 +647,362 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
 
       {/* TAB 3: CAPITAL & INVESTMENTS */}
       {activeTab === 'investments' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <div className="erp-card" style={{ padding: '1.25rem', background: 'rgba(245, 158, 11, 0.08)', borderLeft: '4px solid #f59e0b' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f59e0b' }}>
-              Capital & Business Equity Architecture
-            </h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-              Investments and partner capital additions are recorded directly into Cash/Bank accounts. They increase liquidity without inflating sales revenue or reducing operating profit.
-            </p>
-            <div style={{ marginTop: '0.75rem', fontSize: '1.25rem', fontWeight: 800 }}>
-              Total Active Capital Injected: <strong>৳{totalCapitalInvested.toLocaleString()}</strong>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Architecture Banner */}
+          <div className="erp-card" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(59, 130, 246, 0.12) 100%)', borderLeft: '4px solid #f59e0b' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#f59e0b', fontWeight: 800 }}>
+                  <ShieldCheck size={20} />
+                  <span style={{ fontSize: '1.1rem' }}>Investor Capital & 25% Net Profit Sharing Engine</span>
+                </div>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '6px', maxWidth: '650px', lineHeight: 1.6 }}>
+                  NEED ELECTRO ERP strictly maintains financial separation: investor capital is held as equity liquidity, separate from operating revenues. Monthly profit distribution is calculated strictly as <strong>25% of Net Operating Profit</strong> allocated proportionally to active investor capital.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', background: 'var(--bg-card)', padding: '0.85rem 1.25rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Total Active Investor Capital</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#10b981' }}>
+                    ৳{(adminInvestorData?.totalActiveInvestment || totalCapitalInvested).toLocaleString()}
+                  </div>
+                </div>
+                <div style={{ width: '1px', height: '32px', background: 'var(--border-color)' }} />
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Profit Pool Share</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--brand-primary)' }}>
+                    25.0%
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
+          {/* SECTION 1: INVESTOR ROSTER & EQUITY SHARES */}
+          <div className="erp-card" style={{ padding: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Users size={18} color="var(--brand-primary)" />
+                  Investor Accounts & Equity Ownership
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  Manage authorized investor logins and their respective capital stakes
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <button 
+                  className="btn btn-primary btn-sm"
+                  onClick={() => setShowCreateInvestorModal(true)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                >
+                  <Plus size={15} /> Create Investor Account
+                </button>
+                <button 
+                  className="btn btn-warning btn-sm"
+                  onClick={() => setShowInvestmentModal(true)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                >
+                  <Plus size={15} /> Add Capital
+                </button>
+              </div>
+            </div>
+
+            <div className="table-container">
+              <table className="erp-table">
+                <thead>
+                  <tr>
+                    <th>Investor ID</th>
+                    <th>Investor Name</th>
+                    <th>Login Email</th>
+                    <th>Contact Phone</th>
+                    <th style={{ textAlign: 'right' }}>Active Capital (৳)</th>
+                    <th style={{ textAlign: 'center' }}>Equity Stake (%)</th>
+                    <th style={{ textAlign: 'center' }}>Portal Status</th>
+                    <th style={{ textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {adminInvestorData?.investors && adminInvestorData.investors.length > 0 ? (
+                    adminInvestorData.investors.map((inv: any) => (
+                      <tr key={inv.id}>
+                        <td style={{ fontWeight: 800, color: 'var(--brand-primary)' }}>
+                          {inv.investorId}
+                        </td>
+                        <td style={{ fontWeight: 700 }}>
+                          {inv.name}
+                        </td>
+                        <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                          {inv.email}
+                        </td>
+                        <td style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                          {inv.phone || '—'}
+                        </td>
+                        <td style={{ textAlign: 'right', fontWeight: 800, color: '#10b981', fontSize: '0.95rem' }}>
+                          ৳{inv.totalInvestment.toLocaleString()}
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <span className="badge badge-info" style={{ fontWeight: 800, fontSize: '0.8rem' }}>
+                            {inv.sharePercentage}%
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <span className={`badge ${inv.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'}`}>
+                            {inv.status}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <button
+                            className="btn btn-ghost btn-xs"
+                            onClick={() => {
+                              setSelectedInvestorForCapital(inv);
+                              setShowAddCapitalToInvestorModal(true);
+                            }}
+                            title="Add more capital to this investor"
+                            style={{ color: 'var(--brand-primary)', fontWeight: 700 }}
+                          >
+                            + Add Capital
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={8} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                        {isLoadingInvestorData ? 'Loading investor roster...' : 'No investor profiles found. Click "Create Investor Account" above to register an investor.'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* SECTION 2: MONTHLY PROFIT SETTLEMENT & FINALIZATION */}
+          <div className="erp-card" style={{ padding: '1.5rem', border: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Calendar size={18} color="#10b981" />
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: 800 }}>
+                    Monthly Profit Settlement & Finalization (25% Investor Pool)
+                  </h3>
+                </div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  Review live monthly accounting performance, calculate 25% pool distribution, and lock the period
+                </p>
+              </div>
+
+              {/* Month Selector */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <select
+                  className="form-control"
+                  style={{ width: '130px' }}
+                  value={selectedMonth}
+                  onChange={e => setSelectedMonth(Number(e.target.value))}
+                >
+                  <option value={1}>January</option>
+                  <option value={2}>February</option>
+                  <option value={3}>March</option>
+                  <option value={4}>April</option>
+                  <option value={5}>May</option>
+                  <option value={6}>June</option>
+                  <option value={7}>July</option>
+                  <option value={8}>August</option>
+                  <option value={9}>September</option>
+                  <option value={10}>October</option>
+                  <option value={11}>November</option>
+                  <option value={12}>December</option>
+                </select>
+
+                <select
+                  className="form-control"
+                  style={{ width: '90px' }}
+                  value={selectedYear}
+                  onChange={e => setSelectedYear(Number(e.target.value))}
+                >
+                  <option value={2026}>2026</option>
+                  <option value={2025}>2025</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Financial Performance Overview for Selected Month */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gap: '1rem',
+              marginBottom: '1.5rem',
+            }}>
+              <div style={{ background: 'var(--bg-card-muted)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>1. Monthly Revenue</div>
+                <div style={{ fontSize: '1.3rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
+                  ৳{(adminInvestorData?.currentPreview?.revenue || 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Completed Sales</div>
+              </div>
+
+              <div style={{ background: 'var(--bg-card-muted)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>2. Cost of Goods (COGS)</div>
+                <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#f59e0b', marginTop: '0.25rem' }}>
+                  ৳{(adminInvestorData?.currentPreview?.cogs || 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Direct Inventory Cost</div>
+              </div>
+
+              <div style={{ background: 'var(--bg-card-muted)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>3. Operating Expenses</div>
+                <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#ef4444', marginTop: '0.25rem' }}>
+                  ৳{(adminInvestorData?.currentPreview?.expenses || 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Operational Expenses</div>
+              </div>
+
+              <div style={{ background: 'var(--bg-card-muted)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>4. Net Operating Profit</div>
+                <div style={{
+                  fontSize: '1.3rem',
+                  fontWeight: 900,
+                  color: (adminInvestorData?.currentPreview?.netProfit || 0) >= 0 ? '#10b981' : '#ef4444',
+                  marginTop: '0.25rem'
+                }}>
+                  ৳{(adminInvestorData?.currentPreview?.netProfit || 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Revenue − COGS − Expenses</div>
+              </div>
+
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)',
+                padding: '1rem',
+                borderRadius: '10px',
+                border: '1px solid rgba(16, 185, 129, 0.3)'
+              }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--brand-primary)', fontWeight: 700 }}>5. 25% Investor Pool</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#10b981', marginTop: '0.25rem' }}>
+                  ৳{(adminInvestorData?.currentPreview?.investorProfitPool || 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Distributable to Investors</div>
+              </div>
+            </div>
+
+            {/* Investor Distribution Table for Selected Month */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <div style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.75rem' }}>
+                Investor-Wise Profit Distribution ({adminInvestorData?.currentPreview?.periodLabel})
+              </div>
+
+              <div className="table-container">
+                <table className="erp-table">
+                  <thead>
+                    <tr>
+                      <th>Investor ID</th>
+                      <th>Investor Name</th>
+                      <th style={{ textAlign: 'right' }}>Active Capital (৳)</th>
+                      <th style={{ textAlign: 'center' }}>Equity Share (%)</th>
+                      <th style={{ textAlign: 'right' }}>Calculated Profit Share (৳)</th>
+                      <th style={{ textAlign: 'center' }}>Formula Validation</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {adminInvestorData?.currentPreview?.distribution && adminInvestorData.currentPreview.distribution.length > 0 ? (
+                      adminInvestorData.currentPreview.distribution.map((dist: any) => (
+                        <tr key={dist.id}>
+                          <td style={{ fontWeight: 800, color: 'var(--brand-primary)' }}>{dist.investorId}</td>
+                          <td style={{ fontWeight: 700 }}>{dist.name}</td>
+                          <td style={{ textAlign: 'right', fontWeight: 700 }}>৳{dist.investmentAmount.toLocaleString()}</td>
+                          <td style={{ textAlign: 'center' }}>
+                            <span className="badge badge-info">{dist.sharePercentage}%</span>
+                          </td>
+                          <td style={{ textAlign: 'right', fontWeight: 900, color: '#10b981', fontSize: '1rem' }}>
+                            ৳{dist.profitShare.toLocaleString()}
+                          </td>
+                          <td style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                            ৳{(adminInvestorData?.currentPreview?.investorProfitPool || 0).toLocaleString()} × {dist.sharePercentage}%
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={6} style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)' }}>
+                          No active investors to distribute profit to.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Finalization Action Bar */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              background: 'var(--bg-card-muted)',
+              padding: '1rem 1.25rem',
+              borderRadius: '12px',
+              border: '1px solid var(--border-color)',
+              flexWrap: 'wrap',
+              gap: '1rem',
+            }}>
+              <div>
+                {adminInvestorData?.currentPreview?.isFinalized ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span className="badge badge-success" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}>
+                      <CheckCircle2 size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                      Finalized & Locked
+                    </span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                      Approved by <strong>{adminInvestorData?.currentPreview?.finalizedBy || 'Super Admin'}</strong> on{' '}
+                      {adminInvestorData?.currentPreview?.finalizedAt ? new Date(adminInvestorData.currentPreview.finalizedAt).toLocaleDateString() : ''}
+                    </span>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span className="badge badge-warning" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}>
+                      <Clock size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                      Pending Finalization (Live Estimate)
+                    </span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      Investors currently view ongoing live figures. Finalize to lock numbers.
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                {adminInvestorData?.currentPreview?.isFinalized ? (
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={handleReopenPeriod}
+                    disabled={isFinalizing}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                  >
+                    <Unlock size={14} /> Reopen Financial Period
+                  </button>
+                ) : (
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={handleFinalizePeriod}
+                    disabled={isFinalizing}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                  >
+                    <Lock size={14} /> Finalize & Lock {adminInvestorData?.currentPreview?.periodLabel}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 3: ORIGINAL CAPITAL DEPOSIT REGISTRY */}
           <div className="erp-card" style={{ padding: '1.25rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>Investment Registry</h3>
-              <button className="btn btn-warning btn-sm" onClick={() => setShowInvestmentModal(true)}>
-                <Plus size={15} /> Add Capital
-              </button>
+              <div>
+                <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>Capital Injections & Investment Ledger</h3>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>All historical capital deposits recorded into business cash/bank accounts</p>
+              </div>
             </div>
 
             <div className="table-container">
@@ -724,6 +1242,226 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                 </button>
                 <button type="submit" className="btn btn-warning">
                   Deposit Capital
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: CREATE INVESTOR ACCOUNT */}
+      {showCreateInvestorModal && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content modal-content-md">
+            <div className="modal-header">
+              <div className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Users size={20} color="var(--brand-primary)" />
+                Create Authorized Investor Account
+              </div>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowCreateInvestorModal(false)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateInvestorSubmit}>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{
+                  background: 'rgba(59, 130, 246, 0.08)',
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                  borderRadius: '8px',
+                  padding: '0.75rem',
+                  fontSize: '0.8rem',
+                  color: 'var(--text-secondary)'
+                }}>
+                  💡 Creating an investor account issues a dedicated secure credential. When this user logs in, they are immediately redirected to the restricted <strong>Investor Portal</strong> without access to internal ERP records.
+                </div>
+
+                <div>
+                  <label className="form-label">Full Name *</label>
+                  <input 
+                    type="text"
+                    className="form-control"
+                    placeholder="e.g. Tariqul Islam"
+                    value={newInvestorName}
+                    onChange={e => setNewInvestorName(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div>
+                    <label className="form-label">Login Email *</label>
+                    <input 
+                      type="email"
+                      className="form-control"
+                      placeholder="tariqul@example.com"
+                      value={newInvestorEmail}
+                      onChange={e => setNewInvestorEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label">Contact Phone</label>
+                    <input 
+                      type="tel"
+                      className="form-control"
+                      placeholder="+880 1711-XXXXXX"
+                      value={newInvestorPhone}
+                      onChange={e => setNewInvestorPhone(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="form-label">Initial Password *</label>
+                  <input 
+                    type="password"
+                    className="form-control"
+                    placeholder="Secure password for investor portal"
+                    value={newInvestorPassword}
+                    onChange={e => setNewInvestorPassword(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.75rem' }}>
+                  <div>
+                    <label className="form-label">Initial Investment Amount (৳)</label>
+                    <input 
+                      type="number"
+                      className="form-control"
+                      min="0"
+                      value={newInvestorInitialAmount}
+                      onChange={e => setNewInvestorInitialAmount(Number(e.target.value))}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Deposit Account</label>
+                    <select 
+                      className="form-control"
+                      value={newInvestorAccountId}
+                      onChange={e => setNewInvestorAccountId(e.target.value)}
+                    >
+                      {financialAccounts.map(a => (
+                        <option key={a.id} value={a.id}>
+                          {a.name} ({a.type})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="form-label">Internal Notes / Terms</label>
+                  <input 
+                    type="text"
+                    className="form-control"
+                    placeholder="e.g. Partner agreement signed 12 Sep 2026"
+                    value={newInvestorNotes}
+                    onChange={e => setNewInvestorNotes(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowCreateInvestorModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Create Investor Account
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ADD CAPITAL TO EXISTING INVESTOR */}
+      {showAddCapitalToInvestorModal && selectedInvestorForCapital && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content modal-content-md">
+            <div className="modal-header">
+              <div className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Wallet size={20} color="#10b981" />
+                Add Capital Injection for {selectedInvestorForCapital.name} ({selectedInvestorForCapital.investorId})
+              </div>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowAddCapitalToInvestorModal(false)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddCapitalSubmit}>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{
+                  background: 'var(--bg-card-muted)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '8px',
+                  padding: '0.75rem',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Current Capital Stake</div>
+                    <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#10b981' }}>
+                      ৳{selectedInvestorForCapital.totalInvestment.toLocaleString()} ({selectedInvestorForCapital.sharePercentage}%)
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Investor ID</div>
+                    <div style={{ fontWeight: 800, color: 'var(--brand-primary)' }}>
+                      {selectedInvestorForCapital.investorId}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="form-label">Additional Capital Amount (৳) *</label>
+                  <input 
+                    type="number"
+                    className="form-control"
+                    min="1"
+                    value={addCapitalAmount}
+                    onChange={e => setAddCapitalAmount(Number(e.target.value))}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="form-label">Receiving Financial Account</label>
+                  <select 
+                    className="form-control"
+                    value={addCapitalAccountId}
+                    onChange={e => setAddCapitalAccountId(e.target.value)}
+                    required
+                  >
+                    {financialAccounts.map(a => (
+                      <option key={a.id} value={a.id}>
+                        {a.name} ({a.type})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="form-label">Transaction Notes / Reference</label>
+                  <input 
+                    type="text"
+                    className="form-control"
+                    placeholder="e.g. Bank wire ref #99831"
+                    value={addCapitalNotes}
+                    onChange={e => setAddCapitalNotes(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowAddCapitalToInvestorModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-success">
+                  Confirm Capital Addition
                 </button>
               </div>
             </form>

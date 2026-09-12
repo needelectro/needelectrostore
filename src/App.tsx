@@ -40,6 +40,7 @@ import { ControlCenterModule } from './modules/ControlCenterModule';
 
 import { InitialSetupModal } from './components/auth/InitialSetupModal';
 import { LandingPage } from './components/landing/LandingPage';
+import { InvestorPortal } from './components/investor/InvestorPortal';
 
 const MainAppLayout: React.FC = () => {
   const { 
@@ -121,7 +122,7 @@ const MainAppLayout: React.FC = () => {
               boxShadow: '0 4px 16px rgba(0, 114, 255, 0.45)'
             }}
           >
-            ← Return to ERP Dashboard
+            ← {currentUser?.role === 'INVESTOR' ? 'Return to Investor Portal' : 'Return to ERP Dashboard'}
           </button>
         </div>
         <LandingPage onOpenLogin={() => setShowLanding(false)} />
@@ -143,6 +144,16 @@ const MainAppLayout: React.FC = () => {
     return (
       <>
         <LoginScreen onBackToHome={() => setShowLanding(true)} />
+        <ToastContainer />
+      </>
+    );
+  }
+
+  // DEDICATED INVESTOR PORTAL — Strict Isolation (Zero ERP Admin exposure)
+  if (currentUser?.role === 'INVESTOR') {
+    return (
+      <>
+        <InvestorPortal onBackToLanding={() => setShowLanding(true)} />
         <ToastContainer />
       </>
     );
