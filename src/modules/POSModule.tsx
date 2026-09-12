@@ -264,6 +264,7 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
       // Build guaranteed complete sale object for instant printing
       const completeSale: Sale = {
         ...saleResult.sale,
+        customerAddress: saleResult.sale.customerAddress || cust.address || '',
         items: (saleResult.sale.items && Array.isArray(saleResult.sale.items) && saleResult.sale.items.length > 0)
           ? saleResult.sale.items
           : cartItemsSnapshot.map(c => ({

@@ -95,17 +95,11 @@ export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, 
               <div style={{ fontSize: '10px', fontWeight: 'bold', color: '#0284C7' }}>
                 {safeSettings.companyTagline || 'Trusted Electrical & Technological Solutions'}
               </div>
-              <div style={{ fontSize: '8.5px', color: '#64748b', marginTop: '2px', fontWeight: 'bold' }}>
-                A sister Concern Of AMDADS GROUP
-              </div>
               <div style={{ fontSize: '8.5px', marginTop: '2px' }}>
                 Main Branch: {safeSettings.address || 'Shop#5, MR Plaza, Kusumbag, Moulvibazar'}
               </div>
               <div style={{ fontSize: '8.5px' }}>
-                Hotline: <strong>{safeSettings.phone || '01733-983752'}</strong> | {safeSettings.website || 'needelectroerp.vercel.app'}
-              </div>
-              <div style={{ fontSize: '8.5px', color: '#475569' }}>
-                {safeSettings.vatRegistrationNo || 'VAT-NEED-2026-BD'}
+                Hotline: <strong>{safeSettings.phone || '01733-983752'}</strong> | Email: <strong>info.needelectro@gmail.com</strong>
               </div>
             </div>
 
@@ -114,6 +108,7 @@ export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, 
               <div><strong>Date:</strong> {formattedDate}</div>
               <div><strong>Customer:</strong> {sale.customerName || 'Walking Customer'}</div>
               <div><strong>Phone:</strong> {sale.customerPhone || 'N/A'}</div>
+              <div><strong>Address:</strong> {sale.customerAddress || (sale as any).customer?.address || 'Moulvibazar, Sylhet'}</div>
               <div><strong>Cashier:</strong> {sale.salespersonName || 'Amdadur Rahman'}</div>
             </div>
 
@@ -203,7 +198,7 @@ export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, 
                 letterSpacing: '0.04em',
                 textTransform: 'uppercase'
               }}>
-                Software Development By AMDADS GROUP
+                Software Developed By AMDADS GROUP
               </div>
             </div>
           </div>

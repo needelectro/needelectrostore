@@ -258,7 +258,7 @@ export function generateInvoiceHTML(data: InvoiceData, settings?: any): string {
     </div>
 
     <div class="footer-note" style="position: relative; z-index: 1;">
-      <p style="margin-top: 6px; font-weight: 800; font-size: 11px; color: #000; letter-spacing: 0.05em; text-transform: uppercase;">Software Development By AMDADS GROUP</p>
+      <p style="margin-top: 6px; font-weight: 800; font-size: 11px; color: #000; letter-spacing: 0.05em; text-transform: uppercase;">Software Developed By AMDADS GROUP</p>
     </div>
   </div>
 </body>

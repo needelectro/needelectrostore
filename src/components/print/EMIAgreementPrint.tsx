@@ -14,6 +14,13 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
     window.print();
   };
 
+  React.useEffect(() => {
+    document.body.classList.add('is-printing-emi');
+    return () => {
+      document.body.classList.remove('is-printing-emi');
+    };
+  }, []);
+
   return (
     <div className="modal-overlay print-active-modal" style={{ zIndex: 9999 }}>
       <div className="modal-content modal-content-xl" style={{ maxHeight: '96vh' }}>
@@ -245,7 +252,7 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
                 textTransform: 'uppercase'
               }}
             >
-              Software Development By AMDADS GROUP
+              Software Developed By AMDADS GROUP
             </div>
           </div>
         </div>

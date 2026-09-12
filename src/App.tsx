@@ -297,8 +297,26 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
     }
   };
 
+  const isPrintModalOpen = Boolean(
+    activeInvoiceToPrint ||
+    activeThermalReceiptToPrint ||
+    activeEmiAgreementToPrint ||
+    activeBarcodeToPrint
+  );
+
+  useEffect(() => {
+    if (isPrintModalOpen) {
+      document.body.classList.add('has-active-print-modal');
+    } else {
+      document.body.classList.remove('has-active-print-modal');
+    }
+    return () => {
+      document.body.classList.remove('has-active-print-modal');
+    };
+  }, [isPrintModalOpen]);
+
   return (
-    <div className="app-container">
+    <div className={`app-container ${isPrintModalOpen ? 'has-print-modal' : ''}`}>
       {/* Sidebar Navigation */}
       <Sidebar
         activeModule={activeModule}
@@ -308,7 +326,7 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
       />
 
       {/* Main Viewport */}
-      <div className="main-viewport">
+      <div className={`main-viewport ${isPrintModalOpen ? 'no-print' : ''}`}>
         <Header
           onOpenSearch={() => setIsSearchOpen(true)}
           onNavigateToModule={handleNavigate}
@@ -316,7 +334,7 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
           onViewLanding={() => setShowLanding(true)}
         />
 
-        <main className="content-scrollable">
+        <main className={`content-scrollable ${isPrintModalOpen ? 'no-print' : ''}`}>
           <ErrorBoundary fallbackTitle="Module Error">
             {renderActiveModule()}
           </ErrorBoundary>

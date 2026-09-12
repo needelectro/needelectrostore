@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
 
   const sales = await prisma.sale.findMany({
     where,
-    include: { items: true },
+    include: { items: true, customer: true },
     orderBy: { date: 'desc' },
     take: 500,
   });
@@ -47,6 +47,7 @@ export async function GET(req: NextRequest) {
     customerId: s.customerId,
     customerName: s.customerName,
     customerPhone: s.customerPhone,
+    customerAddress: s.customer?.address || '',
     branchId: s.branchId,
     date: s.date ? s.date.toISOString().split('T')[0] : '',
     createdAt: s.createdAt ? s.createdAt.toISOString() : (s.date ? s.date.toISOString() : ''),
@@ -428,13 +429,20 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // Fetch complete sale with its newly created items
+      // Fetch complete sale with its newly created items and customer details
       const fullSale = await tx.sale.findUnique({
         where: { id: sale.id },
-        include: { items: true },
+        include: { items: true, customer: true },
       });
 
-      return fullSale || sale;
+      if (fullSale) {
+        return {
+          ...fullSale,
+          customerAddress: fullSale.customer?.address || '',
+        };
+      }
+
+      return sale;
     });
 
     // Asynchronously trigger customer SMS / WhatsApp digital receipt

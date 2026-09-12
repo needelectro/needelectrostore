@@ -158,7 +158,7 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
                 <h4>Customer Information (ক্রেতার বিবরণ)</h4>
                 <p style={{ fontSize: '13px', fontWeight: 800, color: '#000000', margin: '2px 0' }}>{sale.customerName || 'Walking Customer'}</p>
                 <p>Phone: <strong>{sale.customerPhone || 'N/A'}</strong></p>
-                <p>Address: <strong>{sale.customerAddress || 'N/A'}</strong></p>
+                <p>Address: <strong>{sale.customerAddress || (sale as any).customer?.address || 'Moulvibazar, Sylhet'}</strong></p>
                 <p>Account Status: <strong>Registered Commercial Customer</strong></p>
               </div>
               <div className="a4-bill-to" style={{ maxWidth: '300px' }}>
@@ -308,7 +308,7 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
                 <span>📹 CCTV camera installation and setup services</span>
               </div>
               <div style={{ marginTop: '5px', color: '#334155', fontSize: '9.5px', fontWeight: 600 }}>
-                Shop#5, MR Plaza, Kusumbag, Moulvibazar • Hotline: 01733-983752 • www.needelectro.com • A sister Concern Of AMDADS GROUP
+                Shop#5, MR Plaza, Kusumbag, Moulvibazar • Hotline: 01733-983752 • Email: info.needelectro@gmail.com
               </div>
               
               {/* Mandatory Software Development Credit */}

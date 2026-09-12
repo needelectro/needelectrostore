@@ -218,8 +218,26 @@
    ------------------------------------------------------------- */
 @media print {
   @page {
+    size: auto;
+    margin: 4mm 6mm;
+  }
+
+  @page a4-invoice {
     size: A4 portrait;
-    margin: 8mm 10mm 8mm 10mm;
+    margin: 8mm 10mm;
+  }
+
+  @page thermal-receipt {
+    size: 80mm auto;
+    margin: 1mm 2mm;
+  }
+
+  .a4-print-document {
+    page: a4-invoice;
+  }
+
+  .thermal-receipt-document {
+    page: thermal-receipt;
   }
 
   *, *::before, *::after {
@@ -231,7 +249,7 @@
   }
 
   /* Reset all outer containers */
-  html, body, #root, .app-container {
+  html, body, #root {
     background: #ffffff !important;
     color: #000000 !important;
     height: auto !important;
@@ -245,9 +263,32 @@
     display: block !important;
   }
 
-  /* Completely eliminate background ERP application from print */
+  .app-container {
+    background: #ffffff !important;
+    color: #000000 !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    position: static !important;
+  }
+
+  /* Completely eliminate background ERP application from print whenever any print modal is active */
+  body.is-printing-invoice .app-container,
+  body.is-printing-thermal .app-container,
+  body.is-printing-emi .app-container,
+  body.is-printing-barcode .app-container,
+  body.has-active-print-modal .app-container,
+  body:has(.print-active-modal) .app-container,
+  .app-container.has-print-modal,
   .main-viewport,
   .content-scrollable,
+  .page-header,
+  .kpi-grid,
+  .erp-card,
   .mobile-bottom-nav,
   .sidebar,
   .header,
@@ -508,17 +549,35 @@
   }
 
   /* 80mm Thermal Receipt Rules */
+  body.is-printing-thermal,
+  body.is-printing-thermal html,
+  body.is-printing-thermal #root {
+    width: 80mm !important;
+    max-width: 80mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+
+  body.is-printing-thermal .modal-overlay.print-active-modal {
+    width: 80mm !important;
+    max-width: 80mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+
   body.is-printing-thermal .modal-overlay.print-active-modal .modal-content {
     max-width: 80mm !important;
     width: 80mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
   }
 
   body.is-printing-thermal .thermal-receipt-document,
   .thermal-receipt-document {
-    width: 72mm !important;
-    max-width: 72mm !important;
+    width: 76mm !important;
+    max-width: 76mm !important;
     margin: 0 auto !important;
-    padding: 3mm 2mm !important;
+    padding: 2mm 1mm !important;
     font-family: 'Courier New', Courier, monospace !important;
     font-size: 11px !important;
     line-height: 1.3 !important;

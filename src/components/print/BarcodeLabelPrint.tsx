@@ -82,6 +82,13 @@ export const BarcodeLabelPrint: React.FC<BarcodePrintProps> = ({
     window.print();
   };
 
+  React.useEffect(() => {
+    document.body.classList.add('is-printing-barcode');
+    return () => {
+      document.body.classList.remove('is-printing-barcode');
+    };
+  }, []);
+
   const labelsToRender = [];
   if (serials.length > 0 && selectedSerialIndex === -1) {
     // Print each serial individually
@@ -96,7 +103,7 @@ export const BarcodeLabelPrint: React.FC<BarcodePrintProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto modal-overlay print-active-modal">
       <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl text-slate-100 overflow-hidden">
         {/* Header Controls (Hidden on Print) */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/80 no-print">
