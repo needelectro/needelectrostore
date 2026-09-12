@@ -332,8 +332,9 @@ model Customer {
   notes          String?
   createdAt      DateTime @default(now()) @map("created_at")
 
-  sales       Sale[]
-  emiAccounts EMIAccount[]
+  sales            Sale[]
+  emiAccounts      EMIAccount[]
+  customerPayments CustomerPayment[]
 
   @@index([customerId])
   @@index([phone])
@@ -442,7 +443,7 @@ model Sale {
 model SaleItem {
   id             String  @id
   saleId         String  @map("sale_id")
-  productId      String  @map("product_id")
+  productId      String?  @map("product_id")
   productName    String  @map("product_name")
   sku            String
   category       String
@@ -454,8 +455,8 @@ model SaleItem {
   isSerialized   Boolean @default(false) @map("is_serialized")
   serialNumbers  Json?   @map("serial_numbers") // String array of serials
 
-  sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
+  sale    Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 
   @@index([saleId])
   @@index([productId])
@@ -604,7 +605,7 @@ model Purchase {
 model PurchaseItem {
   id            String  @id
   purchaseId    String  @map("purchase_id")
-  productId     String  @map("product_id")
+  productId     String?  @map("product_id")
   productName   String  @map("product_name")
   quantity      Int
   costPrice     Decimal @map("cost_price") @db.Decimal(12, 2)
@@ -612,7 +613,7 @@ model PurchaseItem {
   serialNumbers Json?   @map("serial_numbers") // String array
 
   purchase Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
-  product  Product  @relation(fields: [productId], references: [id])
+  product  Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 
   @@index([purchaseId])
   @@index([productId])
@@ -1020,4 +1021,50 @@ model DatabaseBackup {
   description String?
 
   @@map("database_backups")
+}
+
+// ---------------------------------------------------------
+// 21. CASH MANAGEMENT & ADJUSTMENTS
+// ---------------------------------------------------------
+
+model CashAdjustment {
+  id               String   @id
+  adjustmentNumber String   @unique @map("adjustment_number")
+  date             DateTime @default(now())
+  type             String   // INFLOW, OUTFLOW
+  reason           String   // OPENING_BALANCE_CORRECTION, CASH_SHORTAGE, CASH_EXCESS, MANUAL_DEPOSIT, MANUAL_WITHDRAWAL, OTHER
+  amount           Decimal  @db.Decimal(12, 2)
+  accountId        String   @map("account_id")
+  paymentMethod    String   @default("Cash") @map("payment_method")
+  reference        String?
+  notes            String?
+  branchId         String?  @map("branch_id")
+  performedBy      String   @map("performed_by")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@index([adjustmentNumber])
+  @@index([date])
+  @@map("cash_adjustments")
+}
+
+model CustomerPayment {
+  id            String   @id
+  receiptNumber String   @unique @map("receipt_number")
+  customerId    String   @map("customer_id")
+  customerName  String   @map("customer_name")
+  amount        Decimal  @db.Decimal(12, 2)
+  paymentDate   DateTime @default(now()) @map("payment_date")
+  paymentMethod String   @map("payment_method")
+  accountId     String?  @map("account_id")
+  reference     String?
+  notes         String?
+  collectedBy   String   @map("collected_by")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  @@index([receiptNumber])
+  @@index([customerId])
+  @@index([paymentDate])
+  @@map("customer_payments")
 }

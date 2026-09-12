@@ -63,7 +63,17 @@ export async function DELETE(
     }
 
     await prisma.$transaction(async (tx) => {
-      // Clean up serial numbers and stock
+      // Unlink sale items and purchase items so historical invoices & receipts retain snapshot data without FK violation
+      await tx.saleItem.updateMany({
+        where: { productId: product.id },
+        data: { productId: null },
+      });
+      await tx.purchaseItem.updateMany({
+        where: { productId: product.id },
+        data: { productId: null },
+      });
+
+      // Clean up serial numbers
       await tx.productSerial.deleteMany({ where: { productId: product.id } });
       await tx.product.delete({ where: { id: params.id } });
 
