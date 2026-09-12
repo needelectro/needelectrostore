@@ -132,7 +132,13 @@ interface ERPContextType {
   recordReturn: (returnData: Omit<ProductReturn, 'id' | 'returnNumber' | 'createdAt' | 'handledBy'>) => Promise<{ success: boolean; error?: string; returnRecord?: ProductReturn }>;
   collectCustomerDue: (customerId: string, amount: number, paymentMethod: PaymentMethod, accountId?: string, reference?: string, notes?: string) => Promise<{ success: boolean; error?: string; receiptNumber?: string }>;
   recordCashAdjustment: (adjustmentData: { amount: number; type: 'INFLOW' | 'OUTFLOW'; reason: string; accountId?: string; paymentMethod?: string; reference?: string; notes?: string; branchId?: string }) => Promise<{ success: boolean; error?: string; adjustment?: CashAdjustment }>;
-  recordInvestment: (investmentData: Omit<Investment, 'id' | 'referenceNumber' | 'createdAt' | 'createdBy'>) => Promise<{ success: boolean; error?: string }>;
+  recordInvestment: (investmentData: Omit<Investment, 'id' | 'referenceNumber' | 'createdAt' | 'createdBy'> & {
+    investorPhone?: string;
+    investorEmail?: string;
+    investorNid?: string;
+    investorAddress?: string;
+    sharePercentage?: number;
+  }) => Promise<{ success: boolean; error?: string }>;
   transferFunds: (fromAccountId: string, toAccountId: string, amount: number, fee?: number, notes?: string) => Promise<{ success: boolean; error?: string }>;
   recordAttendance: (employeeId: string, status: AttendanceStatus, notes?: string) => Promise<{ success: boolean; error?: string }>;
   disburseSalary: (employeeId: string, month: string, paymentMethod: PaymentMethod, accountId?: string) => Promise<{ success: boolean; error?: string }>;
@@ -1191,7 +1197,13 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // INVESTMENT & CAPITAL INFLOW (NON-REVENUE)
   // -------------------------------------------------------------
   const recordInvestment = async (
-    investmentData: Omit<Investment, 'id' | 'referenceNumber' | 'createdAt' | 'createdBy'>
+    investmentData: Omit<Investment, 'id' | 'referenceNumber' | 'createdAt' | 'createdBy'> & {
+      investorPhone?: string;
+      investorEmail?: string;
+      investorNid?: string;
+      investorAddress?: string;
+      sharePercentage?: number;
+    }
   ): Promise<{ success: boolean; error?: string }> => {
     try {
       const res = await api.accounting.recordInvestment(investmentData);
@@ -1203,7 +1215,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       await refreshFromDatabase();
       logAction('ACCOUNTING', 'RECORD_INVESTMENT', investmentData.depositAccountId, `Recorded ৳${investmentData.amount.toLocaleString()} investment from ${investmentData.investorName}`);
-      addToast('success', 'Capital Inflow Recorded', `Investment of ৳${investmentData.amount.toLocaleString()} deposited.`);
+      addToast('success', 'Capital Inflow Recorded', `Investment of ৳${investmentData.amount.toLocaleString()} from ${investmentData.investorName} deposited.`);
       return { success: true };
     } catch (err: any) {
       const errMsg = err.message || 'Error recording investment.';

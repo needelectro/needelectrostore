@@ -4,7 +4,8 @@ import {
   Landmark, ArrowUpRight, ArrowDownRight, Wallet, DollarSign,
   TrendingUp, Calendar, Filter, Plus, RefreshCw, Search,
   Download, Printer, AlertTriangle, ShieldCheck, CheckCircle2,
-  FileSpreadsheet, ArrowLeftRight, HelpCircle, Layers, X, CreditCard
+  FileSpreadsheet, ArrowLeftRight, HelpCircle, Layers, X, CreditCard,
+  Briefcase, UserPlus
 } from 'lucide-react';
 import { 
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
@@ -20,7 +21,7 @@ interface CashManagementModuleProps {
 export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNavigate }) => {
   const { 
     currentUser, financialAccounts, customers, recordCashAdjustment,
-    collectCustomerDue, addToast, settings, selectedBranch
+    collectCustomerDue, addToast, settings, selectedBranch, recordInvestment
   } = useERP();
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN';
@@ -40,6 +41,25 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
   // Modals
   const [showAdjustmentModal, setShowAdjustmentModal] = useState(false);
   const [showDueModal, setShowDueModal] = useState(false);
+  const [showInvestmentModal, setShowInvestmentModal] = useState(false);
+
+  // Investment Form State
+  const [invAmount, setInvAmount] = useState<number>(50000);
+  const [invType, setInvType] = useState<string>('CAPITAL_INVESTMENT');
+  const [invAccountId, setInvAccountId] = useState(financialAccounts[0]?.id || 'acc-1');
+  const [invPaymentMethod, setInvPaymentMethod] = useState<PaymentMethod>('Cash');
+  const [invDate, setInvDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [invReference, setInvReference] = useState('');
+  const [invNotes, setInvNotes] = useState('');
+
+  // Investor Info
+  const [investorName, setInvestorName] = useState('');
+  const [investorPhone, setInvestorPhone] = useState('');
+  const [investorEmail, setInvestorEmail] = useState('');
+  const [investorNid, setInvestorNid] = useState('');
+  const [investorAddress, setInvestorAddress] = useState('');
+  const [sharePercentage, setSharePercentage] = useState<string>('');
+  const [isSubmittingInv, setIsSubmittingInv] = useState(false);
 
   // Adjustment Form State
   const [adjAmount, setAdjAmount] = useState<number>(1000);
@@ -200,6 +220,65 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
     }
   };
 
+  // Handle Investment Submit
+  const handleInvestmentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isSuperAdmin) {
+      alert('Only Super Admin or Admin can record capital investments.');
+      return;
+    }
+    if (!investorName.trim()) {
+      alert('Investor full name is required.');
+      return;
+    }
+    if (invAmount <= 0) {
+      alert('Investment amount must be greater than 0.');
+      return;
+    }
+    if (!invAccountId) {
+      alert('Please select a target deposit account.');
+      return;
+    }
+
+    setIsSubmittingInv(true);
+    try {
+      const res = await recordInvestment({
+        investorName: investorName.trim(),
+        amount: invAmount,
+        date: invDate,
+        investmentType: invType as any,
+        depositAccountId: invAccountId,
+        paymentMethod: invPaymentMethod,
+        reference: invReference.trim() || undefined,
+        status: 'ACTIVE',
+        notes: invNotes.trim() || undefined,
+        investorPhone: investorPhone.trim() || undefined,
+        investorEmail: investorEmail.trim() || undefined,
+        investorNid: investorNid.trim() || undefined,
+        investorAddress: investorAddress.trim() || undefined,
+        sharePercentage: sharePercentage ? Number(sharePercentage) : undefined,
+      });
+
+      if (res.success) {
+        setShowInvestmentModal(false);
+        setInvestorName('');
+        setInvestorPhone('');
+        setInvestorEmail('');
+        setInvestorNid('');
+        setInvestorAddress('');
+        setSharePercentage('');
+        setInvAmount(50000);
+        setInvReference('');
+        setInvNotes('');
+        await fetchCashData();
+      }
+    } catch (err: any) {
+      console.error('Investment submit error:', err);
+    } finally {
+      setIsSubmittingInv(false);
+    }
+  };
+
   // CSV Export for Ledger
   const handleExportCSV = () => {
     if (!filteredLedger.length) {
@@ -291,13 +370,33 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
           </button>
 
           {isSuperAdmin && (
-            <button 
-              className="btn btn-primary"
-              onClick={() => setShowAdjustmentModal(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-            >
-              <ArrowLeftRight size={15} /> Cash Adjustment
-            </button>
+            <>
+              <button 
+                className="btn btn-primary"
+                onClick={() => setShowAdjustmentModal(true)}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <ArrowLeftRight size={15} /> Cash Adjustment
+              </button>
+
+              <button 
+                className="btn"
+                onClick={() => setShowInvestmentModal(true)}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.4rem',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  fontWeight: 600,
+                  boxShadow: '0 2px 8px rgba(16, 185, 129, 0.35)',
+                  cursor: 'pointer'
+                }}
+              >
+                <Plus size={15} /> Add Investment
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -1230,6 +1329,294 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                   </div>
                 </>
               )}
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* -------------------------------------------------------------
+          MODAL 3: ADD CAPITAL INVESTMENT & INVESTOR INFO
+          ------------------------------------------------------------- */}
+      {showInvestmentModal && (
+        <div className="modal-overlay" onClick={() => setShowInvestmentModal(false)}>
+          <div className="modal-container" onClick={e => e.stopPropagation()} style={{ maxWidth: '680px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <TrendingUp size={20} style={{ color: '#10b981' }} />
+                <h3 className="modal-title">Add Capital Investment & Investor Info</h3>
+              </div>
+              <button className="btn-close" onClick={() => setShowInvestmentModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleInvestmentSubmit} className="modal-body" style={{ overflowY: 'auto', padding: '1.25rem 1.5rem' }}>
+              <div style={{
+                background: 'rgba(16, 185, 129, 0.08)',
+                border: '1px solid rgba(16, 185, 129, 0.25)',
+                borderRadius: 'var(--radius-md)',
+                padding: '0.75rem 1rem',
+                fontSize: '0.8rem',
+                color: '#10b981',
+                marginBottom: '1.25rem',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.6rem'
+              }}>
+                <ShieldCheck size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
+                <div>
+                  <strong>Non-Revenue Capital Inflow:</strong> Recording an investment directly increases business cash/bank liquidity without counting as taxable sales revenue. All investor records are permanently archived in the accounting registry.
+                </div>
+              </div>
+
+              {/* SECTION 1: INVESTMENT DETAILS */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.02)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '1.1rem',
+                marginBottom: '1.25rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.85rem', color: 'var(--text-primary)' }}>
+                  <DollarSign size={16} color="#10b981" /> 1. Investment & Capital Inflow
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.85rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Investment Amount (৳ BDT) *</span>
+                      <span style={{ color: '#10b981', fontWeight: 700 }}>৳ {invAmount ? invAmount.toLocaleString('en-IN') : '0'}</span>
+                    </label>
+                    <input 
+                      type="number"
+                      className="form-control"
+                      value={invAmount || ''}
+                      onChange={e => setInvAmount(Math.max(0, Number(e.target.value)))}
+                      min={1}
+                      step="any"
+                      required
+                      placeholder="e.g. 100000"
+                      style={{ fontSize: '1.15rem', fontWeight: 700, borderColor: 'rgba(16, 185, 129, 0.4)' }}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Investment Type *</label>
+                    <select 
+                      className="form-control"
+                      value={invType}
+                      onChange={e => setInvType(e.target.value)}
+                      required
+                    >
+                      <option value="CAPITAL_INVESTMENT">Partner / Founder Capital</option>
+                      <option value="SEED_FUNDING">Seed Funding / Working Capital</option>
+                      <option value="EQUITY">Equity Stake (Strategic Investor)</option>
+                      <option value="DIRECTOR_LOAN">Director / Founder Loan (Repayable)</option>
+                      <option value="OTHER">Other Capital Injection</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Deposit Target Account *</label>
+                    <select 
+                      className="form-control"
+                      value={invAccountId}
+                      onChange={e => setInvAccountId(e.target.value)}
+                      required
+                    >
+                      {financialAccounts.map(a => (
+                        <option key={a.id} value={a.id}>
+                          {a.name} ({a.type}) — Current: ৳{Number(a.balance).toLocaleString('en-IN')}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Payment Channel *</label>
+                    <select 
+                      className="form-control"
+                      value={invPaymentMethod}
+                      onChange={e => setInvPaymentMethod(e.target.value as any)}
+                      required
+                    >
+                      <option value="Cash">Cash in Hand / Showroom Vault</option>
+                      <option value="Bank">Bank Deposit / Transfer</option>
+                      <option value="bKash">bKash Business / Personal</option>
+                      <option value="Nagad">Nagad</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Investment Date *</label>
+                    <input 
+                      type="date"
+                      className="form-control"
+                      value={invDate}
+                      onChange={e => setInvDate(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Transaction Reference / Cheque #</label>
+                    <input 
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Cheque #5021 or Trx ID"
+                      value={invReference}
+                      onChange={e => setInvReference(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 2: INVESTOR PROFILE */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.02)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '1.1rem',
+                marginBottom: '1rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.85rem', color: 'var(--text-primary)' }}>
+                  <UserPlus size={16} color="#008CFF" /> 2. Investor Information & Terms
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.85rem' }}>
+                  <div className="form-group">
+                    <label className="form-label">Investor Full Name *</label>
+                    <input 
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Kohes Ahmed or Mr. Kamal"
+                      value={investorName}
+                      onChange={e => setInvestorName(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Investor Phone Number</label>
+                    <input 
+                      type="tel"
+                      className="form-control"
+                      placeholder="e.g. 017XXXXXXXX"
+                      value={investorPhone}
+                      onChange={e => setInvestorPhone(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Investor Email</label>
+                    <input 
+                      type="email"
+                      className="form-control"
+                      placeholder="e.g. investor@gmail.com"
+                      value={investorEmail}
+                      onChange={e => setInvestorEmail(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">National ID (NID) / Passport</label>
+                    <input 
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. NID # 1993827482"
+                      value={investorNid}
+                      onChange={e => setInvestorNid(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Investor Address / City</label>
+                    <input 
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Gulshan, Dhaka"
+                      value={investorAddress}
+                      onChange={e => setInvestorAddress(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Equity / Share Ownership (%)</label>
+                    <input 
+                      type="number"
+                      className="form-control"
+                      placeholder="e.g. 20 (optional)"
+                      value={sharePercentage}
+                      onChange={e => setSharePercentage(e.target.value)}
+                      min={0}
+                      max={100}
+                      step="any"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginTop: '0.85rem' }}>
+                  <label className="form-label">Investment Terms, ROI & Agreement Notes</label>
+                  <textarea 
+                    className="form-control"
+                    rows={2}
+                    placeholder="e.g. 25% profit share on hardware sales, quarterly dividends, or capital return terms..."
+                    value={invNotes}
+                    onChange={e => setInvNotes(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* LIVE RECONCILIATION SUMMARY PREVIEW */}
+              <div style={{
+                background: 'rgba(16, 185, 129, 0.05)',
+                border: '1px dashed rgba(16, 185, 129, 0.3)',
+                borderRadius: 'var(--radius-md)',
+                padding: '0.75rem 1rem',
+                fontSize: '0.8rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '0.5rem'
+              }}>
+                <div>
+                  <span style={{ color: 'var(--text-muted)' }}>Depositing: </span>
+                  <strong style={{ color: '#10b981' }}>৳{invAmount ? invAmount.toLocaleString('en-IN') : '0'}</strong>
+                  <span style={{ color: 'var(--text-muted)' }}> into </span>
+                  <strong>{financialAccounts.find(a => a.id === invAccountId)?.name || 'Account'}</strong>
+                </div>
+                <div>
+                  <span style={{ color: 'var(--text-muted)' }}>Investor: </span>
+                  <strong>{investorName || 'New Investor'}</strong>
+                  {sharePercentage && <span style={{ color: '#008CFF', fontWeight: 600 }}> ({sharePercentage}% equity)</span>}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.25rem' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-outline" 
+                  onClick={() => setShowInvestmentModal(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn"
+                  disabled={isSubmittingInv}
+                  style={{
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontWeight: 600,
+                    boxShadow: '0 2px 8px rgba(16, 185, 129, 0.35)',
+                    padding: '0.6rem 1.4rem'
+                  }}
+                >
+                  {isSubmittingInv ? 'Recording Investment...' : '+ Record Investment'}
+                </button>
+              </div>
             </form>
           </div>
         </div>

@@ -381,6 +381,8 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(payload)
       }),
+    getInvestments: () =>
+      request<{ success: boolean; data: any[] }>('/api/accounting/investments'),
     recordOpeningBalance: (payload: any) =>
       request<{ success: boolean; message: string }>('/api/accounting/opening-balances', {
         method: 'POST',
