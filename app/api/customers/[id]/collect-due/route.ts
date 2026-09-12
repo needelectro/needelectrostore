@@ -41,7 +41,8 @@ export async function POST(
 
     const result = await prisma.$transaction(async (tx) => {
       // 1. Create CustomerPayment record
-      const payment = await tx.customerPayment.create({
+      const db = tx as any;
+      const payment = await db.customerPayment.create({
         data: {
           id: 'cpay-' + Date.now(),
           receiptNumber,

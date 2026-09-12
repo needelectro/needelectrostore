@@ -134,7 +134,8 @@ export async function GET(req: NextRequest) {
     });
 
     // D. Customer Due Collections (CustomerPayment)
-    const customerPayments = await prisma.customerPayment.findMany({
+    const db = prisma as any;
+    const customerPayments = await db.customerPayment.findMany({
       select: {
         id: true,
         receiptNumber: true,
@@ -261,7 +262,7 @@ export async function GET(req: NextRequest) {
     });
 
     // K. Cash Adjustments (Inflow or Outflow authorized by Super Admin)
-    const adjustments = await prisma.cashAdjustment.findMany({
+    const adjustments = await db.cashAdjustment.findMany({
       where: {
         ...(branchId ? { branchId } : {}),
       },

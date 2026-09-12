@@ -42,7 +42,8 @@ export async function POST(req: NextRequest) {
 
     const adjustment = await prisma.$transaction(async (tx) => {
       // 1. Create CashAdjustment record
-      const adj = await tx.cashAdjustment.create({
+      const db = tx as any;
+      const adj = await db.cashAdjustment.create({
         data: {
           id: 'adj-' + Date.now(),
           adjustmentNumber,
