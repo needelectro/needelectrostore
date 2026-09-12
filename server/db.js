@@ -856,7 +856,7 @@ export function seedBaselineData() {
         ) VALUES (
           'main', 'NEED ELECTRO', 'Trusted Electrical & Technological Solutions',
           'A sister Concern Of AMDADS GROUP', 'Main Branch Moulvibazar',
-          '01733-983752', 'needelectro23@gmail.com', 'www.needelectro.com',
+          '01733-983752', 'info.needelectro@gmail.com', 'www.needelectro.com',
           'Shop#5, MR Plaza, Kusumbag, Moulvibazar', 'BIN: 002948123-0102',
           'INV-2026-', 'EMI-2026-', 5, '৳', 'BDT', 1, 1,
           'Dear {CUSTOMER_NAME}, your NEED ELECTRO EMI installment of ৳{AMOUNT} for {PRODUCT_NAME} (Serial: {SERIAL}) is due on {DUE_DATE}. Pay via bKash/Nagad or visit our showroom at Shop#5, MR Plaza, Kusumbag, Moulvibazar. Hotline: 01733-983752.',
@@ -864,7 +864,7 @@ export function seedBaselineData() {
           'URGENT: Dear {CUSTOMER_NAME}, your NEED ELECTRO EMI payment of ৳{AMOUNT} is OVERDUE by {DAYS_OVERDUE} days. Please pay immediately. NEED ELECTRO (A sister Concern Of AMDADS GROUP), Kusumbag, Moulvibazar. Hotline: 01733-983752.',
           'জরুরি নোটিশ: সম্মানিত {CUSTOMER_NAME}, আপনার {PRODUCT_NAME}-এর কিস্তি ৳{AMOUNT} বিগত {DAYS_OVERDUE} দিন যাবত বকেয়া রয়েছে। জরিমানা এড়াতে অবিলম্বে পরিশোধ করুন। নিড ইলেক্ট্রো, কুসুমবাগ, মৌলভীবাজার। ফোন: 01733-983752।',
           'dark', '', '', 'https://facebook.com/needelectro', 'https://youtube.com/@needelectro',
-          'https://linkedin.com/company/needelectro', '+8801733983752', 'contact.amdadur@gmail.com',
+          'https://linkedin.com/company/needelectro', '+8801733983752', 'info.needelectro@gmail.com',
           'NEED ELECTRO — Trusted Electrical & Technological Solutions. Moulvibazar, Bangladesh.',
           '#008CFF', datetime('now')
         )
@@ -878,7 +878,7 @@ export function seedBaselineData() {
         INSERT INTO branches (id, name, code, address, phone, email, is_warehouse, active, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
       `);
-      insBranch.run('branch-1', 'Main Branch Moulvibazar', 'MB-MAIN', 'Shop#5, MR Plaza, Kusumbag, Moulvibazar', '01733-983752', 'needelectro23@gmail.com', 0, 1);
+      insBranch.run('branch-1', 'Main Branch Moulvibazar', 'MB-MAIN', 'Shop#5, MR Plaza, Kusumbag, Moulvibazar', '01733-983752', 'info.needelectro@gmail.com', 0, 1);
       insBranch.run('branch-2', 'Kusumbag Tech & CCTV Hub', 'MB-TECH', 'MR Plaza Level 1, Kusumbag, Moulvibazar', '01733-983752', 'sales@needelectro.com', 0, 1);
       insBranch.run('branch-3', 'Central Warehouse & Service Hub', 'CENTRAL-WH', 'Sreemangal Road Industrial Area, Moulvibazar', '01733-983752', 'service@needelectro.com', 1, 1);
     }

@@ -62,9 +62,22 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
   const paidAmount = Number(sale.paidAmount || 0);
   const dueAmount = Number(sale.dueAmount !== undefined ? sale.dueAmount : Math.max(0, grandTotal - paidAmount));
 
-  const paymentMethodsText = payments.length > 0
-    ? payments.map((p: any) => `${p.method || 'CASH'} (৳${Number(p.amount || 0).toLocaleString()})`).join(', ')
-    : 'Direct Cash';
+  // Ensure payment breakdown amounts accurately reflect the actual paidAmount
+  let paymentMethodsText = 'Direct Cash';
+  if (payments.length === 1) {
+    const singleMethod = payments[0].method || 'Cash';
+    const effectiveAmount = paidAmount > 0 ? paidAmount : Number(payments[0].amount || 0);
+    paymentMethodsText = `${singleMethod} (৳${effectiveAmount.toLocaleString()})`;
+  } else if (payments.length > 1) {
+    const paymentsSum = payments.reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0);
+    const diff = paidAmount - paymentsSum;
+    paymentMethodsText = payments.map((p: any, idx: number) => {
+      const adjustedAmount = idx === 0 ? Number(p.amount || 0) + diff : Number(p.amount || 0);
+      return `${p.method || 'Payment'} (৳${adjustedAmount.toLocaleString()})`;
+    }).join(', ');
+  } else if (paidAmount > 0) {
+    paymentMethodsText = `Cash (৳${paidAmount.toLocaleString()})`;
+  }
 
   return (
     <div className="modal-overlay print-active-modal" style={{ zIndex: 9999 }}>

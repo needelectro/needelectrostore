@@ -17,7 +17,7 @@ export const INITIAL_SETTINGS: SystemSettings = {
   sisterConcern: 'A sister Concern Of AMDADS GROUP',
   mainBranchName: 'Main Branch Moulvibazar',
   phone: '01733-983752',
-  email: 'needelectro23@gmail.com',
+  email: 'info.needelectro@gmail.com',
   website: 'www.needelectro.com',
   address: 'Shop#5, MR Plaza, Kusumbag, Moulvibazar',
   vatRegistrationNo: 'BIN: 002948123-0102',
@@ -37,7 +37,7 @@ export const INITIAL_SETTINGS: SystemSettings = {
   youtubeUrl: 'https://youtube.com/@needelectro',
   linkedinUrl: 'https://linkedin.com/company/needelectro',
   whatsappNumber: '+8801733983752',
-  supportEmail: 'contact.amdadur@gmail.com',
+  supportEmail: 'info.needelectro@gmail.com',
   footerText: 'NEED ELECTRO — Trusted Electrical & Technological Solutions. Moulvibazar, Bangladesh.',
   accentColor: '#008CFF'
 };
@@ -49,7 +49,7 @@ export const INITIAL_BRANCHES: Branch[] = [
     code: 'MB-MAIN',
     address: 'Shop#5, MR Plaza, Kusumbag, Moulvibazar',
     phone: '01733-983752',
-    email: 'contact.amdadur@gmail.com',
+    email: 'info.needelectro@gmail.com',
     isWarehouse: false,
     active: true
   }

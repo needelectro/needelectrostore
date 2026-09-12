@@ -77,13 +77,9 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
                   theme="light" 
                   showSisterConcern={false} 
                 />
-                <div style={{ marginTop: '6px', fontSize: '11px', color: '#0284C7', fontWeight: 'bold', letterSpacing: '0.04em' }}>
-                  — A sister Concern Of AMDADS GROUP —
-                </div>
-                <div className="a4-company-details" style={{ marginTop: '4px', fontSize: '11px', color: '#475569', lineHeight: '1.45' }}>
-                  <p><strong>Main Branch Moulvibazar:</strong> {settings.address}</p>
-                  <p>Hotline: <strong>{settings.phone}</strong> | Email: {settings.email} | Web: {settings.website}</p>
-                  <p>{settings.vatRegistrationNo}</p>
+                <div className="a4-company-details" style={{ marginTop: '6px', fontSize: '11px', color: '#475569', lineHeight: '1.45' }}>
+                  <p><strong>Main Branch Moulvibazar:</strong> {settings.address || 'Shop#5, MR Plaza, Kusumbag, Moulvibazar, Sylhet, Bangladesh'}</p>
+                  <p>Hotline: <strong>{settings.phone || '+880 1733-983752'}</strong> | Email: <strong>info.needelectro@gmail.com</strong></p>
                 </div>
               </div>
 

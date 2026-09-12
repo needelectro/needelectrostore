@@ -28,7 +28,7 @@ async function syncAll() {
     sisterConcern: 'A sister Concern Of AMDADS GROUP',
     mainBranchName: 'Main Branch Moulvibazar',
     phone: '+880 1733-983752',
-    email: 'contact.amdadur@gmail.com',
+    email: 'info.needelectro@gmail.com',
     website: 'https://needelectroerp.vercel.app',
     address: 'Shop#5, MR Plaza, Kusumbag, Moulvibazar, Sylhet, Bangladesh',
     vatRegistrationNo: 'BIN: 002948123-0102',
@@ -46,7 +46,7 @@ async function syncAll() {
     notificationTemplateOverdueBn: 'জরুরি নোটিশ: সম্মানিত {CUSTOMER_NAME}, আপনার {PRODUCT_NAME}-এর কিস্তি ৳{AMOUNT} বিগত {DAYS_OVERDUE} দিন যাবত বকেয়া রয়েছে। বিলম্ব ফি এড়াতে দ্রুত পরিশোধের জন্য অনুরোধ করা যাচ্ছে। নীড ইলেক্ট্রো, মৌলভীবাজার। ফোন: 01733-983752।',
     theme: 'dark',
     whatsappNumber: '01733-983752',
-    supportEmail: 'contact.amdadur@gmail.com',
+    supportEmail: 'info.needelectro@gmail.com',
     footerText: 'NEED ELECTRO — Trusted Electrical & Technological Solutions. Moulvibazar, Bangladesh.',
     accentColor: '#008CFF',
   };
@@ -65,19 +65,32 @@ async function syncAll() {
       theme, whatsapp_number, support_email, footer_text, accent_color
     ) VALUES (
       'main', 'NEED ELECTRO', 'Trusted Electrical & Technological Solutions', 'A sister Concern Of AMDADS GROUP',
-      'Main Branch Moulvibazar', '+880 1733-983752', 'contact.amdadur@gmail.com', 'https://needelectroerp.vercel.app',
+      'Main Branch Moulvibazar', '+880 1733-983752', 'info.needelectro@gmail.com', 'https://needelectroerp.vercel.app',
       'Shop#5, MR Plaza, Kusumbag, Moulvibazar, Sylhet, Bangladesh', 'BIN: 002948123-0102', 'INV-2026-', 'EMI-2026-',
-      5.0, '৳', 'BDT', 1, 1, 'dark', '01733-983752', 'contact.amdadur@gmail.com',
+      5.0, '৳', 'BDT', 1, 1, 'dark', '01733-983752', 'info.needelectro@gmail.com',
       'NEED ELECTRO — Trusted Electrical & Technological Solutions. Moulvibazar, Bangladesh.', '#008CFF'
     ) ON CONFLICT(id) DO UPDATE SET
       company_name = excluded.company_name,
       company_tagline = excluded.company_tagline,
       sister_concern = excluded.sister_concern,
+      main_branch_name = excluded.main_branch_name,
       phone = excluded.phone,
       email = excluded.email,
       website = excluded.website,
       address = excluded.address,
-      vat_registration_no = excluded.vat_registration_no;
+      vat_registration_no = excluded.vat_registration_no,
+      invoice_prefix = excluded.invoice_prefix,
+      emi_prefix = excluded.emi_prefix,
+      default_vat_percent = excluded.default_vat_percent,
+      currency_symbol = excluded.currency_symbol,
+      currency_code = excluded.currency_code,
+      enable_sms_notifications = excluded.enable_sms_notifications,
+      enable_whatsapp_notifications = excluded.enable_whatsapp_notifications,
+      theme = excluded.theme,
+      whatsapp_number = excluded.whatsapp_number,
+      support_email = excluded.support_email,
+      footer_text = excluded.footer_text,
+      accent_color = excluded.accent_color;
   `);
 
   await prisma.setupStatus.upsert({
@@ -103,7 +116,7 @@ async function syncAll() {
       code: 'MB-MAIN',
       address: 'Shop#5, MR Plaza, Kusumbag, Moulvibazar',
       phone: '01733-983752',
-      email: 'contact.amdadur@gmail.com',
+      email: 'info.needelectro@gmail.com',
       isWarehouse: false,
       active: true,
     },

@@ -68,7 +68,7 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
     sisterConcern: settings.sisterConcern,
     phone: settings.phone,
     email: settings.email,
-    supportEmail: settings.supportEmail || 'contact.amdadur@gmail.com',
+    supportEmail: settings.supportEmail || 'info.needelectro@gmail.com',
     website: settings.website,
     address: settings.address,
     vatRegistrationNo: settings.vatRegistrationNo,

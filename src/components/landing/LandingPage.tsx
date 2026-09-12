@@ -92,7 +92,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
     "name": "NEED ELECTRO",
     "description": "Trusted Electrical and Technological Solutions in Moulvibazar. Laptops, Computers, CCTV & Security, Electrical Service, and Laptop EMI.",
     "telephone": "+8801733983752",
-    "email": "needelectro23@gmail.com",
+    "email": "info.needelectro@gmail.com",
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "Shop No: 5, MR Plaza, Kusumbag",
@@ -1559,7 +1559,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
               },
               {
                 q: 'How can I contact NEED ELECTRO for emergency support?',
-                a: 'You can call our direct customer hotline at 01733-983752 or email us at needelectro23@gmail.com. We respond promptly.'
+                a: 'You can call our direct customer hotline at 01733-983752 or email us at info.needelectro@gmail.com. We respond promptly.'
               }
             ].map((faq, i) => (
               <div
@@ -1668,8 +1668,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                   </div>
                   <div>
                     <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '1rem' }}>Official Email</div>
-                    <a href="mailto:needelectro23@gmail.com" style={{ color: '#38bdf8', fontSize: '0.92rem', textDecoration: 'none', display: 'block', marginTop: '2px' }}>
-                      needelectro23@gmail.com
+                    <a href="mailto:info.needelectro@gmail.com" style={{ color: '#38bdf8', fontSize: '0.92rem', textDecoration: 'none', display: 'block', marginTop: '2px' }}>
+                      info.needelectro@gmail.com
                     </a>
                   </div>
                 </div>
