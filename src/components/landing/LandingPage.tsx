@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 interface LandingPageProps {
-  onOpenLogin: () => void;
+  onOpenLogin?: () => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
@@ -188,30 +188,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
               <Phone size={13} />
               <span>01733-983752</span>
             </a>
-
-            {/* Clearly Separated Staff / Admin Login Button */}
-            <button
-              onClick={onOpenLogin}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.45rem',
-                background: 'linear-gradient(135deg, #002B5B 0%, #008CFF 100%)',
-                color: '#ffffff',
-                border: '1px solid rgba(255, 255, 255, 0.25)',
-                borderRadius: '10px',
-                padding: '0.55rem 1.1rem',
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 4px 14px rgba(0, 140, 255, 0.35)',
-                transition: 'all 0.2s ease'
-              }}
-              title="Restricted Staff & Admin Management Portal"
-            >
-              <Lock size={14} />
-              <span>Employee / Admin Login</span>
-            </button>
           </div>
         </div>
       </header>
@@ -1776,33 +1752,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
               </div>
             </div>
 
-            {/* Col 4: Company & Staff */}
+            {/* Col 4: Company & Info */}
             <div>
               <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.95rem', marginBottom: '1rem' }}>
-                Company & Portal
+                Company & Info
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#94a3b8', fontSize: '0.85rem' }}>
                 <a href="#about" style={{ color: 'inherit', textDecoration: 'none' }}>About NEED ELECTRO</a>
                 <a href="#emi" style={{ color: 'inherit', textDecoration: 'none' }}>Laptop EMI Guidelines</a>
+                <a href="#faq" style={{ color: 'inherit', textDecoration: 'none' }}>Customer FAQs</a>
                 <a href="#contact" style={{ color: 'inherit', textDecoration: 'none' }}>Contact Showroom</a>
-                <button
-                  onClick={onOpenLogin}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#38bdf8',
-                    fontWeight: 700,
-                    textAlign: 'left',
-                    padding: 0,
-                    cursor: 'pointer',
-                    marginTop: '0.5rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  <Lock size={12} /> Employee / Admin Login
-                </button>
               </div>
             </div>
           </div>

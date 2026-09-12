@@ -42,7 +42,15 @@ import { InitialSetupModal } from './components/auth/InitialSetupModal';
 import { LandingPage } from './components/landing/LandingPage';
 import { InvestorPortal } from './components/investor/InvestorPortal';
 
-const MainAppLayout: React.FC = () => {
+interface AppProps {
+  initialMode?: 'landing' | 'admin';
+}
+
+interface MainAppLayoutProps {
+  initialMode?: 'landing' | 'admin';
+}
+
+const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
   const { 
     settings, activeInvoiceToPrint, setActiveInvoiceToPrint,
     activeThermalReceiptToPrint, setActiveThermalReceiptToPrint,
@@ -53,9 +61,14 @@ const MainAppLayout: React.FC = () => {
 
   // Controls display of public landing page vs staff portal login
   const [showLanding, setShowLanding] = useState<boolean>(() => {
+    if (initialMode === 'admin') return false;
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('portal') === 'true' || window.location.hash === '#login') {
+      if (
+        urlParams.get('portal') === 'true' || 
+        window.location.hash === '#login' ||
+        window.location.pathname.startsWith('/admin')
+      ) {
         return false;
       }
     }
@@ -136,14 +149,18 @@ const MainAppLayout: React.FC = () => {
     if (showLanding) {
       return (
         <>
-          <LandingPage onOpenLogin={() => setShowLanding(false)} />
+          <LandingPage />
           <ToastContainer />
         </>
       );
     }
     return (
       <>
-        <LoginScreen onBackToHome={() => setShowLanding(true)} />
+        <LoginScreen onBackToHome={() => {
+          if (typeof window !== 'undefined') {
+            window.location.href = '/';
+          }
+        }} />
         <ToastContainer />
       </>
     );
@@ -375,10 +392,10 @@ const MainAppLayout: React.FC = () => {
   );
 };
 
-export function App() {
+export function App({ initialMode }: AppProps = {}) {
   return (
     <ERPProvider>
-      <MainAppLayout />
+      <MainAppLayout initialMode={initialMode} />
     </ERPProvider>
   );
 }
