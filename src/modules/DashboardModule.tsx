@@ -4,7 +4,7 @@ import {
   TrendingUp, Wallet, ShoppingCart, AlertTriangle, CalendarClock,
   Boxes, Users, Wrench, ArrowUpRight, ArrowDownRight, Plus,
   DollarSign, CheckCircle2, PackageCheck, Zap, Receipt, RotateCcw,
-  Building, ShieldCheck
+  Building, ShieldCheck, Landmark
 } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -18,7 +18,8 @@ interface DashboardModuleProps {
 export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) => {
   const { 
     sales, emiAccounts, emiPayments, products, customers, suppliers,
-    expenses, services, settings, branches, selectedBranch 
+    expenses, services, settings, branches, selectedBranch,
+    financialAccounts, investments, purchases
   } = useERP();
 
   const todayStr = new Date().toISOString().split('T')[0];
@@ -76,6 +77,13 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) 
   const totalPendingEmi = activeEmiAccounts.reduce((sum, e) => sum + e.remainingBalance, 0);
   const totalReceivables = customerDirectDue + totalPendingEmi;
   const totalPayables = suppliers.reduce((sum, s) => sum + (s.currentPayable || 0), 0);
+
+  // Available Cash & Capital metrics
+  const totalCashBalance = financialAccounts.reduce((sum, a) => sum + Number(a.balance), 0);
+  const physicalCashBalance = financialAccounts.filter(a => a.type === 'CASH').reduce((sum, a) => sum + Number(a.balance), 0);
+  const digitalBankBalance = financialAccounts.filter(a => a.type !== 'CASH').reduce((sum, a) => sum + Number(a.balance), 0);
+  const totalInvestments = investments.filter(i => i.investmentType !== 'SEED_FUNDING').reduce((sum, i) => sum + Number(i.amount), 0);
+  const totalSeedFunding = investments.filter(i => i.investmentType === 'SEED_FUNDING').reduce((sum, i) => sum + Number(i.amount), 0);
 
   // EMI stats
   const todayEmiDueAmount = emiAccounts.reduce((sum, e) => {
@@ -174,6 +182,77 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) 
           <button className="btn btn-secondary btn-sm" onClick={() => onNavigate('service')}>
             <Wrench size={15} /> New Service Job
           </button>
+        </div>
+      </div>
+
+      {/* Executive Liquidity & Cash Position Header (Requirement #18) */}
+      <div 
+        className="erp-card-interactive"
+        onClick={() => onNavigate('cash_management')}
+        style={{
+          background: 'linear-gradient(135deg, rgba(9, 17, 34, 0.95) 0%, rgba(13, 27, 42, 0.95) 100%)',
+          border: '1px solid rgba(0, 140, 255, 0.35)',
+          borderRadius: 'var(--radius-xl)',
+          padding: '1.25rem 1.75rem',
+          marginBottom: '1.25rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1rem',
+          cursor: 'pointer',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{
+            width: '46px',
+            height: '46px',
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg, rgba(0, 140, 255, 0.25), rgba(16, 185, 129, 0.25))',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#008CFF',
+            border: '1px solid rgba(0, 140, 255, 0.4)'
+          }}>
+            <Landmark size={24} />
+          </div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#10b981', fontWeight: 700 }}>
+                ● Current Cash Balance
+              </span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                (Click to open Cash Management)
+              </span>
+            </div>
+            <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#f8fafc', lineHeight: 1.1 }}>
+              ৳{totalCashBalance.toLocaleString('en-IN')}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>PHYSICAL CASH</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#10b981' }}>৳{physicalCashBalance.toLocaleString('en-IN')}</div>
+          </div>
+          <div style={{ width: '1px', height: '32px', background: 'rgba(255, 255, 255, 0.1)' }} />
+          <div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>DIGITAL & BANK</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#38bdf8' }}>৳{digitalBankBalance.toLocaleString('en-IN')}</div>
+          </div>
+          <div style={{ width: '1px', height: '32px', background: 'rgba(255, 255, 255, 0.1)' }} />
+          <div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>INVESTMENTS</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc' }}>৳{totalInvestments.toLocaleString('en-IN')}</div>
+          </div>
+          <div style={{ width: '1px', height: '32px', background: 'rgba(255, 255, 255, 0.1)' }} />
+          <div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>SEED FUNDING</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#a78bfa' }}>৳{totalSeedFunding.toLocaleString('en-IN')}</div>
+          </div>
         </div>
       </div>
 

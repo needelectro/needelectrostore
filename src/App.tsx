@@ -26,6 +26,7 @@ import { SupplierModule } from './modules/SupplierModule';
 import { ServiceModule } from './modules/ServiceModule';
 import { WarrantyModule } from './modules/WarrantyModule';
 import { AccountingModule } from './modules/AccountingModule';
+import { CashManagementModule } from './modules/CashManagementModule';
 import { LedgersModule } from './modules/LedgersModule';
 import { ExpenseModule } from './modules/ExpenseModule';
 import { ReportsModule } from './modules/ReportsModule';
@@ -187,6 +188,8 @@ const MainAppLayout: React.FC = () => {
         return <WarrantyModule onNavigate={handleNavigate} />;
       case 'accounting':
         return <AccountingModule onNavigate={handleNavigate} />;
+      case 'cash_management':
+        return <CashManagementModule onNavigate={handleNavigate} />;
       case 'ledgers':
         return <LedgersModule onNavigate={handleNavigate} />;
       case 'expenses':

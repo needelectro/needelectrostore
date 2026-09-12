@@ -180,7 +180,39 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // 4. Audit Log
+      // 4. Deduct Financial Account if paid amount was provided upfront
+      if (paidAmount && paidAmount > 0) {
+        const targetAccountId = (payload as any).accountId || (payload as any).depositAccountId || 'acc-1';
+        const account = await tx.financialAccount.findFirst({
+          where: { id: targetAccountId },
+        });
+
+        if (account) {
+          await tx.financialAccount.update({
+            where: { id: account.id },
+            data: {
+              balance: { decrement: new Prisma.Decimal(paidAmount) },
+            },
+          });
+
+          await tx.ledgerEntry.create({
+            data: {
+              id: 'led-' + Date.now() + '-pur-cash',
+              date: new Date(),
+              partyType: 'ACCOUNT',
+              partyId: account.id,
+              referenceType: 'PURCHASE',
+              referenceNumber: invoiceNumber,
+              description: `Payment disbursed for purchase ${invoiceNumber} (${supplierName})`,
+              debit: new Prisma.Decimal(0),
+              credit: new Prisma.Decimal(paidAmount),
+              runningBalance: new Prisma.Decimal(Number(account.balance) - Number(paidAmount)),
+            },
+          });
+        }
+      }
+
+      // 5. Audit Log
       await tx.auditLog.create({
         data: {
           id: 'audit-' + Date.now(),

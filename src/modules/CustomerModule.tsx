@@ -13,10 +13,20 @@ interface CustomerModuleProps {
 }
 
 export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate }) => {
-  const { customers, sales, emiAccounts, services, createCustomer, updateCustomer, deleteCustomer, ledgerEntries, settings, currentUser } = useERP();
+  const { 
+    customers, sales, emiAccounts, services, createCustomer, updateCustomer, 
+    deleteCustomer, ledgerEntries, settings, currentUser, financialAccounts, collectCustomerDue 
+  } = useERP();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(customers[0]?.id || null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showDueModal, setShowDueModal] = useState(false);
+  const [dueAmount, setDueAmount] = useState<number>(0);
+  const [dueMethod, setDueMethod] = useState<any>('Cash');
+  const [dueAccount, setDueAccount] = useState(financialAccounts[0]?.id || 'acc-1');
+  const [dueRef, setDueRef] = useState('');
+  const [dueNotes, setDueNotes] = useState('');
+  const [isSubmittingDue, setIsSubmittingDue] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [editForm, setEditForm] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -237,6 +247,18 @@ export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate }) =>
                 </div>
 
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  {Number(selectedCustomer.currentBalance) > 0 && (
+                    <button 
+                      className="btn btn-primary btn-sm"
+                      onClick={() => {
+                        setDueAmount(Number(selectedCustomer.currentBalance));
+                        setShowDueModal(true);
+                      }}
+                      style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none' }}
+                    >
+                      <CreditCard size={14} /> Collect Due (৳{Number(selectedCustomer.currentBalance).toLocaleString('en-IN')})
+                    </button>
+                  )}
                   <button 
                     className="btn btn-secondary btn-sm"
                     onClick={() => {
@@ -610,6 +632,148 @@ export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate }) =>
                 </button>
                 <button type="submit" className="btn btn-primary btn-sm" disabled={isSaving}>
                   {isSaving ? 'Saving Changes...' : 'Update Customer Record'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Due Collection Modal */}
+      {showDueModal && selectedCustomer && (
+        <div className="modal-overlay" onClick={() => setShowDueModal(false)}>
+          <div className="modal-container" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title">Collect Customer Due</h3>
+              <button className="btn-close" onClick={() => setShowDueModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (dueAmount <= 0) {
+                  alert('Please enter a valid payment amount.');
+                  return;
+                }
+                setIsSubmittingDue(true);
+                try {
+                  const res = await collectCustomerDue(
+                    selectedCustomer.id,
+                    dueAmount,
+                    dueMethod,
+                    dueAccount,
+                    dueRef || undefined,
+                    dueNotes || undefined
+                  );
+                  if (res.success) {
+                    setShowDueModal(false);
+                    setDueRef('');
+                    setDueNotes('');
+                  }
+                } finally {
+                  setIsSubmittingDue(false);
+                }
+              }}
+              className="modal-body"
+            >
+              <div style={{
+                background: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid rgba(16, 185, 129, 0.25)',
+                borderRadius: 'var(--radius-md)',
+                padding: '0.85rem 1rem',
+                marginBottom: '1rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{selectedCustomer.name}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{selectedCustomer.phone}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Total Due Balance</div>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#ef4444' }}>
+                    ৳{Number(selectedCustomer.currentBalance).toLocaleString('en-IN')}
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label className="form-label">Payment Amount Collected (৳ BDT) *</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={dueAmount}
+                  onChange={e => setDueAmount(Number(e.target.value))}
+                  min={1}
+                  max={Number(selectedCustomer.currentBalance)}
+                  step="any"
+                  required
+                  style={{ fontSize: '1.25rem', fontWeight: 800, color: '#10b981' }}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label className="form-label">Payment Channel *</label>
+                <select
+                  className="form-control"
+                  value={dueMethod}
+                  onChange={e => setDueMethod(e.target.value as any)}
+                  required
+                >
+                  <option value="Cash">Cash Drawer</option>
+                  <option value="bKash">bKash</option>
+                  <option value="Nagad">Nagad</option>
+                  <option value="Bank">Bank Transfer</option>
+                </select>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label className="form-label">Target Financial Account *</label>
+                <select
+                  className="form-control"
+                  value={dueAccount}
+                  onChange={e => setDueAccount(e.target.value)}
+                  required
+                >
+                  {financialAccounts.map(a => (
+                    <option key={a.id} value={a.id}>
+                      {a.name} ({a.type})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label className="form-label">Reference / TrxID</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="e.g. bKash TrxID or receipt ref"
+                  value={dueRef}
+                  onChange={e => setDueRef(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label">Collection Notes</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Optional notes"
+                  value={dueNotes}
+                  onChange={e => setDueNotes(e.target.value)}
+                />
+              </div>
+
+              <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowDueModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary btn-sm" disabled={isSubmittingDue}>
+                  {isSubmittingDue ? 'Processing...' : 'Record Payment & Reconcile'}
                 </button>
               </div>
             </form>

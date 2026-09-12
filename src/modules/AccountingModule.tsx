@@ -659,6 +659,7 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                       onChange={e => setInvestType(e.target.value as InvestmentType)}
                     >
                       <option value="EQUITY">Equity (Owner Capital)</option>
+                      <option value="SEED_FUNDING">Seed Funding (Startup Capital)</option>
                       <option value="LOAN">Director Loan</option>
                       <option value="PARTNER">Partner Contribution</option>
                       <option value="RETAINED_EARNING">Retained Earning</option>

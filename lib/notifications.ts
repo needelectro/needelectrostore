@@ -10,7 +10,7 @@ export interface NotificationPayload {
   customMessage?: string;
   variables?: Record<string, string | number>;
   metadata?: {
-    referenceType?: 'SALE' | 'EMI_PAYMENT' | 'EMI_OVERDUE' | 'SERVICE';
+    referenceType?: 'SALE' | 'EMI_PAYMENT' | 'EMI_OVERDUE' | 'SERVICE' | 'DUE_PAYMENT';
     referenceId?: string;
   };
 }

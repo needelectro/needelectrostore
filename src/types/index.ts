@@ -661,7 +661,7 @@ export interface ProductReturn {
   createdAt: string;
 }
 
-export type InvestmentType = 'EQUITY' | 'DIRECTOR_LOAN' | 'WORKING_CAPITAL' | 'OTHER';
+export type InvestmentType = 'EQUITY' | 'DIRECTOR_LOAN' | 'WORKING_CAPITAL' | 'SEED_FUNDING' | 'OTHER';
 
 export interface Investment {
   id: string;
@@ -898,4 +898,123 @@ export interface InventoryRules {
   barcodePrefix: string;
   requireApprovalForInterBranchTransfer: boolean;
 }
+
+// ---------------------------------------------------------
+// CASH BALANCE & POSITION MANAGEMENT
+// ---------------------------------------------------------
+
+export type CashAdjustmentType = 'INFLOW' | 'OUTFLOW';
+
+export type CashAdjustmentReason =
+  | 'OPENING_BALANCE_CORRECTION'
+  | 'CASH_SHORTAGE'
+  | 'CASH_EXCESS'
+  | 'MANUAL_DEPOSIT'
+  | 'MANUAL_WITHDRAWAL'
+  | 'OTHER';
+
+export interface CashAdjustment {
+  id: string;
+  adjustmentNumber: string;
+  date: string;
+  type: CashAdjustmentType;
+  reason: CashAdjustmentReason | string;
+  amount: number;
+  accountId: string;
+  paymentMethod: string;
+  reference?: string;
+  notes?: string;
+  branchId?: string;
+  performedBy: string;
+  createdAt?: string;
+}
+
+export interface CustomerPayment {
+  id: string;
+  receiptNumber: string;
+  customerId: string;
+  customerName: string;
+  amount: number;
+  paymentDate: string;
+  paymentMethod: string;
+  accountId?: string;
+  reference?: string;
+  notes?: string;
+  collectedBy: string;
+  createdAt?: string;
+}
+
+export interface CashMovementRecord {
+  id: string;
+  date: string;
+  transactionId: string;
+  type: string;
+  typeLabel: string;
+  direction: 'INFLOW' | 'OUTFLOW';
+  description: string;
+  reference: string;
+  cashIn: number;
+  cashOut: number;
+  runningBalance: number;
+  paymentMethod: string;
+  accountName?: string;
+  accountType?: string;
+  user: string;
+  branch: string;
+}
+
+export interface CashSummary {
+  currentCash: number;
+  physicalCash: number;
+  digitalBankCash: number;
+  openingCash: number;
+  totalInflow: number;
+  totalOutflow: number;
+  netCashFlow: number;
+  todayInflow: number;
+  todayOutflow: number;
+  thisMonthInflow: number;
+  thisMonthOutflow: number;
+  inflowBreakdown: {
+    investments: number;
+    seedFunding: number;
+    salesCollections: number;
+    customerDueCollections: number;
+    emiCollections: number;
+    serviceIncome: number;
+    adjustmentsInflow: number;
+    otherIncome: number;
+  };
+  outflowBreakdown: {
+    purchasePayments: number;
+    supplierPayments: number;
+    operatingExpenses: number;
+    salaryPayments: number;
+    refunds: number;
+    adjustmentsOutflow: number;
+    otherOutflows: number;
+  };
+  accountBalances: Array<{
+    id: string;
+    name: string;
+    type: string;
+    accountNumber: string | null;
+    balance: number;
+    currency: string;
+  }>;
+  cashVsProfit: {
+    currentCashBalance: number;
+    totalRevenue: number;
+    totalCOGS: number;
+    grossProfit: number;
+    totalOperatingExpenses: number;
+    netOperatingProfit: number;
+    uncollectedSalesDue: number;
+    unpaidPurchasesPayable: number;
+    capitalInvestments: number;
+    seedFunding: number;
+  };
+  movements: CashMovementRecord[];
+}
+
 

@@ -4,7 +4,7 @@ import {
   LayoutDashboard, ShoppingCart, ReceiptText, CalendarClock, Boxes,
   Truck, Users, PackageSearch, ShieldCheck, Wrench, Wallet,
   PieChart, BookOpen, UserCheck, GitFork, BarChart3,
-  Lock, ScrollText, Settings, X, ChevronRight, Zap, RotateCcw, Sliders
+  Lock, ScrollText, Settings, X, ChevronRight, Zap, RotateCcw, Sliders, Landmark
 } from 'lucide-react';
 import { NeedElectroLogo } from './NeedElectroLogo';
 
@@ -68,6 +68,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       group: 'Finance & Accounts',
       items: [
+        { id: 'cash_management', label: 'Cash & Liquidity', icon: Landmark, highlight: true },
         { id: 'accounting', label: 'Accounting & P&L', icon: PieChart },
         { id: 'ledgers', label: 'Customer & Supplier Ledgers', icon: BookOpen },
         { id: 'expenses', label: 'Expense Manager', icon: Wallet },

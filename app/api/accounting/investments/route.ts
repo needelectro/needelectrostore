@@ -18,7 +18,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: 'Investor name, amount, and deposit account required' }, { status: 400 });
   }
 
-  const referenceNumber = 'INV-CAP-' + Date.now().toString().slice(-6);
+  const isSeed = investmentType === 'SEED_FUNDING';
+  const referenceNumber = (isSeed ? 'SEED-' : 'INV-CAP-') + Date.now().toString().slice(-6);
 
   try {
     const investment = await prisma.$transaction(async (tx) => {
@@ -53,9 +54,11 @@ export async function POST(req: NextRequest) {
           date: new Date(),
           partyType: 'ACCOUNT',
           partyId: depositAccountId,
-          referenceType: 'CAPITAL_INVESTMENT',
+          referenceType: isSeed ? 'SEED_FUNDING' : 'CAPITAL_INVESTMENT',
           referenceNumber,
-          description: `Capital Investment from ${investorName} (${investmentType || 'CAPITAL_INJECTION'})`,
+          description: isSeed
+            ? `Seed Funding received from ${investorName}`
+            : `Capital Investment from ${investorName} (${investmentType || 'CAPITAL_INJECTION'})`,
           debit: new Prisma.Decimal(amount),
           credit: new Prisma.Decimal(0),
           runningBalance: new Prisma.Decimal(amount),

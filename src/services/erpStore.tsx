@@ -9,7 +9,8 @@ import {
   Role, Permission, SetupStatus, OpeningBalanceEntry, AccountStatus,
   ProductCategoryConfig, BrandConfig, ConfigurablePaymentMethod, ExpenseCategoryConfig,
   ServiceCategoryConfig, WarrantyRuleConfig, DynamicNotificationTemplate,
-  PriceChangeAudit, CustomerMergeAudit, PosSettings, InventoryRules
+  PriceChangeAudit, CustomerMergeAudit, PosSettings, InventoryRules,
+  CashAdjustment, CustomerPayment
 } from '../types';
 import {
   INITIAL_SETTINGS, INITIAL_BRANCHES, INITIAL_USERS, INITIAL_EMI_PLANS,
@@ -128,6 +129,8 @@ interface ERPContextType {
   createPurchase: (purchaseData: { supplierId: string; branchId: string; items: { productId: string; quantity: number; costPrice: number; serials: string[] }[]; paymentMethod: string; paidAmount: number; notes?: string; depositAccountId?: string }) => Promise<{ success: boolean; error?: string; purchase?: Purchase }>;
   recordSupplierPayment: (supplierId: string, amount: number, paymentMethod: PaymentMethod, accountId?: string, reference?: string, notes?: string) => Promise<{ success: boolean; error?: string }>;
   recordReturn: (returnData: Omit<ProductReturn, 'id' | 'returnNumber' | 'createdAt' | 'handledBy'>) => Promise<{ success: boolean; error?: string; returnRecord?: ProductReturn }>;
+  collectCustomerDue: (customerId: string, amount: number, paymentMethod: PaymentMethod, accountId?: string, reference?: string, notes?: string) => Promise<{ success: boolean; error?: string; receiptNumber?: string }>;
+  recordCashAdjustment: (adjustmentData: { amount: number; type: 'INFLOW' | 'OUTFLOW'; reason: string; accountId?: string; paymentMethod?: string; reference?: string; notes?: string; branchId?: string }) => Promise<{ success: boolean; error?: string; adjustment?: CashAdjustment }>;
   recordInvestment: (investmentData: Omit<Investment, 'id' | 'referenceNumber' | 'createdAt' | 'createdBy'>) => Promise<{ success: boolean; error?: string }>;
   transferFunds: (fromAccountId: string, toAccountId: string, amount: number, fee?: number, notes?: string) => Promise<{ success: boolean; error?: string }>;
   recordAttendance: (employeeId: string, status: AttendanceStatus, notes?: string) => Promise<{ success: boolean; error?: string }>;
@@ -1086,6 +1089,74 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (err: any) {
       const errMsg = err.message || 'Error processing return on database.';
       addToast('error', 'Return Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // -------------------------------------------------------------
+  // CUSTOMER DUE COLLECTION (CASH INFLOW)
+  // -------------------------------------------------------------
+  const collectCustomerDue = async (
+    customerId: string,
+    amount: number,
+    paymentMethod: PaymentMethod,
+    accountId?: string,
+    reference?: string,
+    notes?: string
+  ): Promise<{ success: boolean; error?: string; receiptNumber?: string }> => {
+    if (amount <= 0) return { success: false, error: 'Payment amount must be greater than 0' };
+
+    try {
+      const res = await api.customers.collectDue(customerId, { amount, paymentMethod, accountId, reference, notes });
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Customer due collection failed.';
+        addToast('error', 'Collection Failed', err);
+        return { success: false, error: err };
+      }
+
+      await refreshFromDatabase();
+      const receiptNumber = (res as any)?.data?.receiptNumber || '';
+      logAction('CUSTOMER', 'DUE_COLLECTED', customerId, `Collected ৳${amount.toLocaleString()} due via ${paymentMethod}. Receipt: ${receiptNumber}`);
+      addToast('success', 'Due Payment Collected', `Received ৳${amount.toLocaleString()} from customer. Receipt #${receiptNumber}`);
+      return { success: true, receiptNumber };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error collecting customer due.';
+      addToast('error', 'Collection Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // -------------------------------------------------------------
+  // SUPER ADMIN CASH ADJUSTMENTS
+  // -------------------------------------------------------------
+  const recordCashAdjustment = async (
+    adjustmentData: {
+      amount: number;
+      type: 'INFLOW' | 'OUTFLOW';
+      reason: string;
+      accountId?: string;
+      paymentMethod?: string;
+      reference?: string;
+      notes?: string;
+      branchId?: string;
+    }
+  ): Promise<{ success: boolean; error?: string; adjustment?: CashAdjustment }> => {
+    try {
+      const res = await api.cashManagement.createAdjustment(adjustmentData);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Cash adjustment failed.';
+        addToast('error', 'Adjustment Failed', err);
+        return { success: false, error: err };
+      }
+
+      await refreshFromDatabase();
+      const adj = (res as any)?.data;
+      logAction('ACCOUNTING', 'CASH_ADJUSTMENT', adj?.id || 'main', `Adjusted cash: ${adjustmentData.type} ৳${adjustmentData.amount.toLocaleString()} (${adjustmentData.reason})`);
+      addToast('success', 'Cash Adjustment Applied', `Adjusted ৳${adjustmentData.amount.toLocaleString()} [${adjustmentData.type}] successfully.`);
+      return { success: true, adjustment: adj };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error executing cash adjustment.';
+      addToast('error', 'Adjustment Failed', errMsg);
       return { success: false, error: errMsg };
     }
   };
@@ -2218,6 +2289,8 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         createPurchase,
         recordSupplierPayment,
         recordReturn,
+        collectCustomerDue,
+        recordCashAdjustment,
         recordInvestment,
         transferFunds,
         recordAttendance,

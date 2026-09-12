@@ -241,6 +241,11 @@ export const api = {
       request<{ success: boolean; message: string; data: any }>('/api/customers/merge', {
         method: 'POST',
         body: JSON.stringify({ sourceCustomerId, targetCustomerId, reason })
+      }),
+    collectDue: (id: string, payload: { amount: number; paymentMethod?: string; accountId?: string; reference?: string; notes?: string }) =>
+      request<{ success: boolean; message: string; data: any }>(`/api/customers/${id}/collect-due`, {
+        method: 'POST',
+        body: JSON.stringify(payload)
       })
   },
 
@@ -378,6 +383,19 @@ export const api = {
       }),
     recordOpeningBalance: (payload: any) =>
       request<{ success: boolean; message: string }>('/api/accounting/opening-balances', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+  },
+
+  // 12.1 Cash Management
+  cashManagement: {
+    getCashSummary: (params?: Record<string, string>) => {
+      const q = params ? '?' + new URLSearchParams(params).toString() : '';
+      return request<{ success: boolean; data: any }>(`/api/cash-management${q}`);
+    },
+    createAdjustment: (payload: { amount: number; type: 'INFLOW' | 'OUTFLOW'; reason: string; accountId?: string; paymentMethod?: string; reference?: string; notes?: string; branchId?: string }) =>
+      request<{ success: boolean; message: string; data: any }>('/api/cash-management/adjustments', {
         method: 'POST',
         body: JSON.stringify(payload)
       })

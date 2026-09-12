@@ -71,12 +71,19 @@ export async function GET(req: NextRequest) {
     });
     const totalLiquidAssets = accounts.reduce((sum, a) => sum + Number(a.balance), 0);
 
-    // 9. Total Capital Investments (Kept separate from operating revenue)
-    const investmentAggregate = await prisma.investment.aggregate({
-      where: { status: 'ACTIVE' },
+    // 9. Total Capital Investments & Seed Funding (Kept separate from operating revenue)
+    const capitalAggregate = await prisma.investment.aggregate({
+      where: { status: 'ACTIVE', investmentType: { not: 'SEED_FUNDING' } },
       _sum: { amount: true },
     });
-    const totalInvestments = Number(investmentAggregate._sum.amount || 0);
+    const paidInCapital = Number(capitalAggregate._sum.amount || 0);
+
+    const seedAggregate = await prisma.investment.aggregate({
+      where: { status: 'ACTIVE', investmentType: 'SEED_FUNDING' },
+      _sum: { amount: true },
+    });
+    const seedFunding = Number(seedAggregate._sum.amount || 0);
+    const totalInvestments = paidInCapital + seedFunding;
 
     return NextResponse.json({
       success: true,
@@ -104,7 +111,9 @@ export async function GET(req: NextRequest) {
             totalLiabilities: accountsPayable,
           },
           equity: {
-            paidInCapital: totalInvestments,
+            paidInCapital,
+            seedFunding,
+            totalInvestedCapital: totalInvestments,
             retainedEarnings: netProfit,
             totalEquity: totalInvestments + netProfit,
           },
