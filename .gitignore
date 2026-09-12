@@ -26,6 +26,8 @@ data/*.db-wal
 data/*.db-shm
 backups/
 _backup_before_real_db/
+scripts/backups/
+scripts/sheet_data/
 *.sqlite
 *.sqlite3
 
