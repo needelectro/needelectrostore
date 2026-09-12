@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
       }),
       prisma.saleItem.findMany({
         where: { sale: { status: 'COMPLETED' } },
-        select: { saleId: true, quantity: true, product: { select: { costPrice: true } } },
+        select: { saleId: true, quantity: true, unitPrice: true, product: { select: { costPrice: true } } },
       }),
       prisma.expense.findMany({
         select: { date: true, amount: true },
@@ -102,7 +102,10 @@ export async function GET(req: NextRequest) {
     // Build COGS map per sale
     const saleCogsMap = new Map<string, number>();
     for (const item of saleItems) {
-      const cost = Number(item.product?.costPrice || 0) * item.quantity;
+      const costPrice = Number(item.product?.costPrice || 0);
+      const unitPrice = Number(item.unitPrice || 0);
+      const itemUnitCost = (costPrice > 0 && costPrice <= unitPrice) ? costPrice : (unitPrice * 0.78);
+      const cost = itemUnitCost * item.quantity;
       saleCogsMap.set(item.saleId, (saleCogsMap.get(item.saleId) || 0) + cost);
     }
 

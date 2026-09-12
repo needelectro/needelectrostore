@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
             date: { gte: startOfMonth, lte: endOfMonth },
           },
         },
-        select: { quantity: true, product: { select: { costPrice: true } } },
+        select: { quantity: true, unitPrice: true, product: { select: { costPrice: true } } },
       }),
       prisma.expense.findMany({
         where: {
@@ -95,7 +95,10 @@ export async function GET(req: NextRequest) {
 
     const revenue = monthSales.reduce((sum, s) => sum + Number(s.grandTotal), 0);
     const cogs = monthSaleItems.reduce((sum, item) => {
-      return sum + Number(item.product?.costPrice || 0) * item.quantity;
+      const costPrice = Number(item.product?.costPrice || 0);
+      const unitPrice = Number(item.unitPrice || 0);
+      const itemUnitCost = (costPrice > 0 && costPrice <= unitPrice) ? costPrice : (unitPrice * 0.78);
+      return sum + itemUnitCost * item.quantity;
     }, 0);
     const expensesTotal = monthExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
@@ -510,7 +513,7 @@ export async function POST(req: NextRequest) {
               date: { gte: startOfMonth, lte: endOfMonth },
             },
           },
-          select: { quantity: true, product: { select: { costPrice: true } } },
+          select: { quantity: true, unitPrice: true, product: { select: { costPrice: true } } },
         }),
         prisma.expense.findMany({
           where: {
@@ -522,7 +525,10 @@ export async function POST(req: NextRequest) {
 
       const revenue = sales.reduce((sum, s) => sum + Number(s.grandTotal), 0);
       const cogs = saleItems.reduce((sum, item) => {
-        return sum + Number(item.product?.costPrice || 0) * item.quantity;
+        const costPrice = Number(item.product?.costPrice || 0);
+        const unitPrice = Number(item.unitPrice || 0);
+        const itemUnitCost = (costPrice > 0 && costPrice <= unitPrice) ? costPrice : (unitPrice * 0.78);
+        return sum + itemUnitCost * item.quantity;
       }, 0);
       const expensesTotal = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
