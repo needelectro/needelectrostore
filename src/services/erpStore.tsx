@@ -48,6 +48,7 @@ interface ERPContextType {
   changePassword: (oldPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
   hasPermission: (moduleOrPermission: string) => boolean;
   refreshFromDatabase: () => Promise<boolean>;
+  refreshSales: () => Promise<Sale[]>;
 
   // Master State
   settings: SystemSettings;
@@ -319,6 +320,20 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => { setStoredData('pos_settings', posSettings); }, [posSettings]);
   useEffect(() => { setStoredData('inventory_rules', inventoryRules); }, [inventoryRules]);
 
+  const refreshSales = async (): Promise<Sale[]> => {
+    try {
+      const res = await api.sales.getSales();
+      if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+        setSales(res.data);
+        setStoredData('sales', res.data);
+        return res.data;
+      }
+    } catch (e: any) {
+      console.warn('Direct sales fetch notice:', e.message);
+    }
+    return [];
+  };
+
   const refreshFromDatabase = async (): Promise<boolean> => {
     try {
       const res = await api.bootstrap.getAll();
@@ -341,19 +356,19 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (Array.isArray(d.permissionsList) && d.permissionsList.length > 0) setPermissionsList(d.permissionsList);
         if (Array.isArray(d.users) && d.users.length > 0) setUsers(d.users);
 
-        if (Array.isArray(d.products)) setProducts(d.products);
+        if (Array.isArray(d.products) && d.products.length > 0) setProducts(d.products);
         if (Array.isArray(d.serials)) setSerials(d.serials);
-        if (Array.isArray(d.customers)) setCustomers(d.customers);
-        if (Array.isArray(d.suppliers)) setSuppliers(d.suppliers);
-        if (Array.isArray(d.sales)) setSales(d.sales);
+        if (Array.isArray(d.customers) && d.customers.length > 0) setCustomers(d.customers);
+        if (Array.isArray(d.suppliers) && d.suppliers.length > 0) setSuppliers(d.suppliers);
+        if (Array.isArray(d.sales) && d.sales.length > 0) setSales(d.sales);
         if (Array.isArray(d.purchases)) setPurchases(d.purchases);
         if (Array.isArray(d.returns)) setReturns(d.returns);
-        if (Array.isArray(d.expenses)) setExpenses(d.expenses);
+        if (Array.isArray(d.expenses) && d.expenses.length > 0) setExpenses(d.expenses);
         if (Array.isArray(d.services)) setServices(d.services);
         if (Array.isArray(d.technicians)) setTechnicians(d.technicians);
         if (Array.isArray(d.warrantyClaims)) setWarrantyClaims(d.warrantyClaims);
-        if (Array.isArray(d.investments)) setInvestments(d.investments);
-        if (Array.isArray(d.financialAccounts)) setFinancialAccounts(d.financialAccounts);
+        if (Array.isArray(d.investments) && d.investments.length > 0) setInvestments(d.investments);
+        if (Array.isArray(d.financialAccounts) && d.financialAccounts.length > 0) setFinancialAccounts(d.financialAccounts);
         if (Array.isArray(d.employees)) setEmployees(d.employees);
         if (Array.isArray(d.attendance)) setAttendance(d.attendance);
         if (Array.isArray(d.emiPlans)) setEmiPlans(d.emiPlans);
@@ -365,15 +380,21 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (Array.isArray(d.priceAuditLog)) setPriceAuditLog(d.priceAuditLog);
         if (Array.isArray(d.customerMergeAudit)) setCustomerMergeAudit(d.customerMergeAudit);
         if (Array.isArray(d.openingBalances)) setOpeningBalances(d.openingBalances);
+
+        // If sales wasn't in bootstrap payload or was empty, also pull from direct sales endpoint
+        if (!Array.isArray(d.sales) || d.sales.length === 0) {
+          await refreshSales();
+        }
         return true;
       }
     } catch (err: any) {
       console.warn('Database sync notice:', err.message);
+      await refreshSales();
     }
     return false;
   };
 
-  // Hydrate from SQLite database on mount & verify session
+  // Hydrate from database on mount & verify session
   useEffect(() => {
     let isMounted = true;
     const initDatabaseState = async () => {
@@ -401,6 +422,11 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             if (isMounted) {
               setAuthSession({ isAuthenticated: false, userId: '', isLocked: false });
             }
+          }
+        } else {
+          // If no token exists, ensure local session reflects unauthenticated state so fresh login is requested
+          if (authSession.isAuthenticated && isMounted) {
+            setAuthSession({ isAuthenticated: false, userId: '', isLocked: false });
           }
         }
 
@@ -2224,6 +2250,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         changePassword,
         hasPermission,
         refreshFromDatabase,
+        refreshSales,
         settings,
         updateSettings,
         branches,

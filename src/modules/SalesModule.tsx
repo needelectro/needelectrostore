@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useERP } from '../services/erpStore';
 import { Sale } from '../types';
 import { 
   ReceiptText, Search, Printer, FileText, Eye, 
   RotateCcw, Calendar, Check, X, ArrowUpRight,
-  Edit2, Trash2, Save, ShieldCheck
+  Edit2, Trash2, Save, ShieldCheck, RefreshCw, Database
 } from 'lucide-react';
 
 interface SalesModuleProps {
@@ -14,18 +14,46 @@ interface SalesModuleProps {
 export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
   const { 
     sales, setActiveInvoiceToPrint, setActiveThermalReceiptToPrint,
-    currentUser, updateSale, deleteSale 
+    currentUser, updateSale, deleteSale, refreshSales, refreshFromDatabase, addToast 
   } = useERP();
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'ALL' | 'REGULAR' | 'EMI'>('ALL');
   const [viewingSale, setViewingSale] = useState<Sale | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // Auto-fetch latest database sales on mount
+  useEffect(() => {
+    let isMounted = true;
+    const loadLatestSales = async () => {
+      try {
+        await refreshSales();
+      } catch (e) {
+        console.warn('Auto sales sync notice:', e);
+      }
+    };
+    loadLatestSales();
+    return () => { isMounted = false; };
+  }, []);
+
+  const handleManualSync = async () => {
+    setIsSyncing(true);
+    try {
+      const updatedSales = await refreshSales();
+      await refreshFromDatabase();
+      addToast('success', 'Database Synchronized', `Successfully synced ${updatedSales.length || sales.length} invoices with central database.`);
+    } catch (e: any) {
+      addToast('error', 'Sync Notice', e.message || 'Failed to sync with database.');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   // Super Admin Edit Sale Modal State
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
   const [editForm, setEditForm] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
 
-  const isSuperAdmin = currentUser.role === 'SUPER_ADMIN';
+  const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
 
   const filteredSales = sales.filter(s => {
     const matchesType = typeFilter === 'ALL' || s.saleType === typeFilter;
@@ -36,27 +64,56 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
     return matchesType && matchesQuery;
   });
 
-  const totalSalesVolume = filteredSales.reduce((sum, s) => sum + s.grandTotal, 0);
-  const totalPaidVolume = filteredSales.reduce((sum, s) => sum + s.paidAmount, 0);
-  const totalDueVolume = filteredSales.reduce((sum, s) => sum + s.dueAmount, 0);
+  const totalSalesVolume = filteredSales.reduce((sum, s) => sum + (Number(s.grandTotal) || 0), 0);
+  const totalPaidVolume = filteredSales.reduce((sum, s) => sum + (Number(s.paidAmount) || 0), 0);
+  const totalDueVolume = filteredSales.reduce((sum, s) => sum + (Number(s.dueAmount) || 0), 0);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Header */}
       <div className="page-header" style={{ marginBottom: '0.25rem' }}>
         <div className="page-title-group">
-          <h1>
-            <ReceiptText size={28} color="var(--brand-primary)" />
-            Sales & Invoice Management
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <h1>
+              <ReceiptText size={28} color="var(--brand-primary)" />
+              Sales & Invoice Management
+            </h1>
+            <span 
+              className="badge badge-success" 
+              style={{ 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: '5px', 
+                padding: '0.25rem 0.65rem', 
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                borderRadius: '6px'
+              }}
+            >
+              <Database size={13} /> {sales.length} Invoices in Database
+            </span>
+          </div>
           <p>
             Complete commercial sales record, tax invoice reprint (A4 & 80mm POS Thermal), and return reconciliation.
           </p>
         </div>
 
-        <button className="btn btn-primary btn-sm" onClick={() => onNavigate('pos')}>
-          + Open POS Billing Terminal
-        </button>
+        <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+          <button 
+            className="btn btn-secondary btn-sm" 
+            onClick={handleManualSync}
+            disabled={isSyncing}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            title="Force refresh and synchronize sales with SQLite / PostgreSQL"
+          >
+            <RefreshCw size={14} className={isSyncing ? 'spin' : ''} />
+            {isSyncing ? 'Syncing...' : 'Sync with Database'}
+          </button>
+
+          <button className="btn btn-primary btn-sm" onClick={() => onNavigate('pos')}>
+            + Open POS Billing Terminal
+          </button>
+        </div>
       </div>
 
       {/* Summary KPI Strip */}
@@ -157,16 +214,16 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
                   </td>
                   <td>
                     <div style={{ fontSize: '0.85rem' }}>
-                      {sale.items.map(i => i.productName).join(', ')}
+                      {(sale.items || []).map(i => i.productName).join(', ') || 'Commercial Electronic Item'}
                     </div>
-                    {sale.items.some(i => i.isSerialized) && (
+                    {sale.items && sale.items.some(i => i.isSerialized) && (
                       <div style={{ fontSize: '0.7rem', color: '#2563eb' }}>
-                        SN: {sale.items.flatMap(i => i.serialNumbers).join(', ')}
+                        SN: {sale.items.flatMap(i => i.serialNumbers || []).join(', ')}
                       </div>
                     )}
                   </td>
-                  <td style={{ textAlign: 'right', fontWeight: '700' }}>৳{sale.grandTotal.toLocaleString()}</td>
-                  <td style={{ textAlign: 'right', color: '#10b981', fontWeight: '600' }}>৳{sale.paidAmount.toLocaleString()}</td>
+                  <td style={{ textAlign: 'right', fontWeight: '700' }}>৳{(Number(sale.grandTotal) || 0).toLocaleString()}</td>
+                  <td style={{ textAlign: 'right', color: '#10b981', fontWeight: '600' }}>৳{(Number(sale.paidAmount) || 0).toLocaleString()}</td>
                   <td style={{ textAlign: 'center' }}>
                     <span className={`badge ${sale.saleType === 'EMI' ? 'badge-warning' : 'badge-neutral'}`}>
                       {sale.saleType}
