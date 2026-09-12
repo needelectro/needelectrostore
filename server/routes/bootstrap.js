@@ -490,6 +490,7 @@ bootstrapRouter.get('/', authenticate, (req, res) => {
         })),
         products: products.map(p => ({
           ...p,
+          supplierId: p.supplier_id || p.supplierId || '',
           purchasePrice: p.purchase_price,
           costPrice: p.cost_price,
           retailPrice: p.retail_price,

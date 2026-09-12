@@ -201,6 +201,7 @@ productsRouter.put('/:id', requireAuth, requirePermission('products.edit'), (req
     }
 
     transaction(() => {
+      const targetSupplierId = p.supplierId !== undefined ? p.supplierId : (p.supplier_id !== undefined ? p.supplier_id : existing.supplier_id);
       db.prepare(`
         UPDATE products
         SET name = COALESCE(?, name),
@@ -211,12 +212,13 @@ productsRouter.put('/:id', requireAuth, requirePermission('products.edit'), (req
             image_url = COALESCE(?, image_url),
             min_stock = COALESCE(?, min_stock),
             warranty_period_months = COALESCE(?, warranty_period_months),
+            supplier_id = ?,
             status = COALESCE(?, status),
             specs = COALESCE(?, specs)
         WHERE id = ?
       `).run(
         p.name, p.category, p.brand, p.model, p.description, p.imageUrl,
-        p.minStock, p.warrantyPeriodMonths, p.status,
+        p.minStock, p.warrantyPeriodMonths, targetSupplierId || '', p.status,
         p.specs ? JSON.stringify(p.specs) : existing.specs, id
       );
 

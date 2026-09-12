@@ -310,6 +310,8 @@
     position: static !important;
     inset: auto !important;
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     background: transparent !important;
     backdrop-filter: none !important;
     padding: 0 !important;
@@ -328,6 +330,8 @@
   .modal-overlay.print-active-modal .modal-content-xl {
     position: static !important;
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     background: transparent !important;
     border: none !important;
     border-radius: 0 !important;
@@ -344,6 +348,8 @@
   .modal-overlay.print-active-modal .modal-body,
   .a4-preview-body {
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     background: transparent !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -356,6 +362,8 @@
   .a4-print-document {
     position: relative !important;
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     width: 100% !important;
     max-width: 190mm !important;
     min-height: auto !important;

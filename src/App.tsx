@@ -316,7 +316,8 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
   }, [isPrintModalOpen]);
 
   return (
-    <div className={`app-container ${isPrintModalOpen ? 'has-print-modal' : ''}`}>
+    <>
+      <div className={`app-container ${isPrintModalOpen ? 'has-print-modal' : ''}`}>
       {/* Sidebar Navigation */}
       <Sidebar
         activeModule={activeModule}
@@ -353,59 +354,6 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
 
       {/* Lock Screen Security Overlay */}
       {isLocked && <LockScreenModal />}
-
-      {/* Active Print Overlays */}
-      {activeInvoiceToPrint && (
-        <ErrorBoundary onReset={() => setActiveInvoiceToPrint(null)}>
-          <A4InvoicePrint
-            sale={activeInvoiceToPrint}
-            settings={settings}
-            onClose={() => setActiveInvoiceToPrint(null)}
-            onSwitchToThermal={() => {
-              const currentSale = activeInvoiceToPrint;
-              setActiveInvoiceToPrint(null);
-              setActiveThermalReceiptToPrint(currentSale);
-            }}
-          />
-        </ErrorBoundary>
-      )}
-
-      {activeThermalReceiptToPrint && (
-        <ErrorBoundary onReset={() => setActiveThermalReceiptToPrint(null)}>
-          <ThermalReceiptPrint
-            sale={activeThermalReceiptToPrint}
-            settings={settings}
-            onClose={() => setActiveThermalReceiptToPrint(null)}
-            onSwitchToA4={() => {
-              const currentSale = activeThermalReceiptToPrint;
-              setActiveThermalReceiptToPrint(null);
-              setActiveInvoiceToPrint(currentSale);
-            }}
-          />
-        </ErrorBoundary>
-      )}
-
-      {activeEmiAgreementToPrint && (
-        <ErrorBoundary onReset={() => setActiveEmiAgreementToPrint(null)}>
-          <EMIAgreementPrint
-            account={activeEmiAgreementToPrint}
-            settings={settings}
-            onClose={() => setActiveEmiAgreementToPrint(null)}
-          />
-        </ErrorBoundary>
-      )}
-
-      {/* Barcode & Serial Label Print Overlay */}
-      {activeBarcodeToPrint && (
-        <ErrorBoundary onReset={() => setActiveBarcodeToPrint(null)}>
-          <BarcodeLabelPrint
-            product={activeBarcodeToPrint.product}
-            serials={activeBarcodeToPrint.serials}
-            settings={settings}
-            onClose={() => setActiveBarcodeToPrint(null)}
-          />
-        </ErrorBoundary>
-      )}
 
       {/* Mobile Bottom Quick Navigation Dock (<= 768px) */}
       <nav className="mobile-bottom-nav no-print">
@@ -456,6 +404,60 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
         </button>
       </nav>
     </div>
+
+    {/* Active Print Overlays (Rendered outside app-container for isolated paper print output) */}
+    {activeInvoiceToPrint && (
+      <ErrorBoundary onReset={() => setActiveInvoiceToPrint(null)}>
+        <A4InvoicePrint
+          sale={activeInvoiceToPrint}
+          settings={settings}
+          onClose={() => setActiveInvoiceToPrint(null)}
+          onSwitchToThermal={() => {
+            const currentSale = activeInvoiceToPrint;
+            setActiveInvoiceToPrint(null);
+            setActiveThermalReceiptToPrint(currentSale);
+          }}
+        />
+      </ErrorBoundary>
+    )}
+
+    {activeThermalReceiptToPrint && (
+      <ErrorBoundary onReset={() => setActiveThermalReceiptToPrint(null)}>
+        <ThermalReceiptPrint
+          sale={activeThermalReceiptToPrint}
+          settings={settings}
+          onClose={() => setActiveThermalReceiptToPrint(null)}
+          onSwitchToA4={() => {
+            const currentSale = activeThermalReceiptToPrint;
+            setActiveThermalReceiptToPrint(null);
+            setActiveInvoiceToPrint(currentSale);
+          }}
+        />
+      </ErrorBoundary>
+    )}
+
+    {activeEmiAgreementToPrint && (
+      <ErrorBoundary onReset={() => setActiveEmiAgreementToPrint(null)}>
+        <EMIAgreementPrint
+          account={activeEmiAgreementToPrint}
+          settings={settings}
+          onClose={() => setActiveEmiAgreementToPrint(null)}
+        />
+      </ErrorBoundary>
+    )}
+
+    {/* Barcode & Serial Label Print Overlay */}
+    {activeBarcodeToPrint && (
+      <ErrorBoundary onReset={() => setActiveBarcodeToPrint(null)}>
+        <BarcodeLabelPrint
+          product={activeBarcodeToPrint.product}
+          serials={activeBarcodeToPrint.serials}
+          settings={settings}
+          onClose={() => setActiveBarcodeToPrint(null)}
+        />
+      </ErrorBoundary>
+    )}
+    </>
   );
 };
 

@@ -22,7 +22,7 @@ interface EditProductModalProps {
 }
 
 const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, onSaved }) => {
-  const { addToast, fetchProducts } = useERP() as any;
+  const { addToast, fetchProducts, suppliers } = useERP() as any;
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     name: product.name,
@@ -36,6 +36,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
     emiPrice: product.emiPrice,
     minStock: product.minStock,
     warrantyPeriodMonths: product.warrantyPeriodMonths,
+    supplierId: product.supplierId || '',
     status: product.status || 'ACTIVE',
   });
 
@@ -93,7 +94,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
           </div>
 
           {/* Row 2 */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))', gap: '1rem' }}>
             <div className="form-group">
               <label className="form-label">Category</label>
               <select className="form-select" {...field('category')}>
@@ -107,6 +108,17 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
             <div className="form-group">
               <label className="form-label">Model</label>
               <input className="form-input" {...field('model')} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Supplier</label>
+              <select className="form-select" {...field('supplierId')}>
+                <option value="">-- Select Supplier --</option>
+                {suppliers?.map((s: any) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} {s.company && s.company !== s.name ? `(${s.company})` : ''}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -617,6 +629,7 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({ onNavigate }) 
               <tbody>
                 {filteredProducts.map((p: Product) => {
                   const isLow = p.currentStock <= p.minStock;
+                  const supplier = suppliers?.find((s: any) => s.id === p.supplierId);
                   return (
                     <tr key={p.id}>
                       <td>
@@ -624,11 +637,18 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({ onNavigate }) 
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                           SKU: <strong>{p.sku}</strong> • Brand: {p.brand} {p.model}
                         </div>
-                        {p.warrantyPeriodMonths > 0 && (
-                          <div style={{ fontSize: '0.68rem', color: '#0284c7' }}>
-                            Warranty: {p.warrantyPeriodMonths} months
-                          </div>
-                        )}
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginTop: '2px', fontSize: '0.72rem' }}>
+                          {supplier && (
+                            <span style={{ color: 'var(--brand-primary)', fontWeight: 600 }}>
+                              Supplier: {supplier.name}
+                            </span>
+                          )}
+                          {p.warrantyPeriodMonths > 0 && (
+                            <span style={{ color: '#0284c7' }}>
+                              Warranty: {p.warrantyPeriodMonths} months
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td>
                         <span className="badge badge-neutral">{p.category}</span>

@@ -14,6 +14,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
   const { products, createProduct, updateProduct, deleteProduct, suppliers, serials, setActiveBarcodeToPrint, currentUser } = useERP();
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
+  const [supplierFilter, setSupplierFilter] = useState('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
@@ -51,11 +52,14 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
 
   const filteredProducts = products.filter(p => {
     const matchesCat = categoryFilter === 'ALL' || p.category === categoryFilter;
+    const matchesSup = supplierFilter === 'ALL' || p.supplierId === supplierFilter;
     const q = searchQuery.toLowerCase();
+    const sup = suppliers.find(s => s.id === p.supplierId);
     const matchesQuery = p.name.toLowerCase().includes(q) || 
                          p.sku.toLowerCase().includes(q) || 
-                         p.brand.toLowerCase().includes(q);
-    return matchesCat && matchesQuery;
+                         p.brand.toLowerCase().includes(q) ||
+                         (sup && (sup.name.toLowerCase().includes(q) || (sup.company && sup.company.toLowerCase().includes(q))));
+    return matchesCat && matchesSup && matchesQuery;
   });
 
   const handleOpenAdd = () => {
@@ -195,17 +199,34 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
 
       {/* Catalog Table Card */}
       <div className="erp-card" style={{ padding: '1.25rem' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.25rem' }}>
-          <div style={{ position: 'relative', width: '320px' }}>
-            <Search size={16} style={{ position: 'absolute', left: '10px', top: '11px', color: 'var(--text-muted)' }} />
-            <input
-              type="text"
-              placeholder="Search by Name, SKU, Brand..."
-              className="form-input"
-              style={{ paddingLeft: '32px' }}
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-            />
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ position: 'relative', width: '280px' }}>
+              <Search size={16} style={{ position: 'absolute', left: '10px', top: '11px', color: 'var(--text-muted)' }} />
+              <input
+                type="text"
+                placeholder="Search by Name, SKU, Brand, Supplier..."
+                className="form-input"
+                style={{ paddingLeft: '32px' }}
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            <select
+              className="form-select form-select-sm"
+              style={{ width: '200px', height: '36px', fontSize: '0.82rem' }}
+              value={supplierFilter}
+              onChange={e => setSupplierFilter(e.target.value)}
+              title="Filter catalog by Supplier"
+            >
+              <option value="ALL">All Suppliers ({suppliers.length})</option>
+              {suppliers.map(s => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div style={{ display: 'flex', gap: '0.4rem', overflowX: 'auto' }}>
@@ -227,6 +248,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
               <tr>
                 <th>Product & Specifications</th>
                 <th>Category</th>
+                <th>Supplier (সরবরাহকারী)</th>
                 <th style={{ textAlign: 'right' }}>Cost</th>
                 <th style={{ textAlign: 'right' }}>Retail (৳)</th>
                 <th style={{ textAlign: 'right' }}>EMI Price (৳)</th>
@@ -237,20 +259,45 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
               </tr>
             </thead>
             <tbody>
-              {filteredProducts.map(p => (
-                <tr key={p.id}>
-                  <td>
-                    <div style={{ fontWeight: '700', fontSize: '0.9rem' }}>{p.name}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                      SKU: {p.sku} • Brand: {p.brand}
-                    </div>
-                    {p.specs && 'processor' in p.specs && (
-                      <div style={{ fontSize: '0.7rem', color: '#2563eb', marginTop: '2px' }}>
-                        {(p.specs as LaptopSpecifications).processor} | {(p.specs as LaptopSpecifications).ram} | {(p.specs as LaptopSpecifications).storage}
+              {filteredProducts.map(p => {
+                const matchedSupplier = suppliers.find(s => s.id === p.supplierId);
+                return (
+                  <tr key={p.id}>
+                    <td>
+                      <div style={{ fontWeight: '700', fontSize: '0.9rem' }}>{p.name}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                        SKU: {p.sku} • Brand: {p.brand}
                       </div>
-                    )}
-                  </td>
-                  <td><span className="badge badge-neutral">{p.category}</span></td>
+                      {p.specs && 'processor' in p.specs && (
+                        <div style={{ fontSize: '0.7rem', color: '#2563eb', marginTop: '2px' }}>
+                          {(p.specs as LaptopSpecifications).processor} | {(p.specs as LaptopSpecifications).ram} | {(p.specs as LaptopSpecifications).storage}
+                        </div>
+                      )}
+                    </td>
+                    <td><span className="badge badge-neutral">{p.category}</span></td>
+                    <td>
+                      {matchedSupplier ? (
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                            {matchedSupplier.name}
+                          </div>
+                          {matchedSupplier.company && matchedSupplier.company !== matchedSupplier.name && (
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                              {matchedSupplier.company}
+                            </div>
+                          )}
+                          {matchedSupplier.phone && (
+                            <div style={{ fontSize: '0.7rem', color: 'var(--brand-primary)', marginTop: '1px' }}>
+                              📞 {matchedSupplier.phone}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                          — Direct / None —
+                        </span>
+                      )}
+                    </td>
                   <td style={{ textAlign: 'right' }}>৳{p.costPrice.toLocaleString()}</td>
                   <td style={{ textAlign: 'right', fontWeight: 'bold' }}>৳{p.retailPrice.toLocaleString()}</td>
                   <td style={{ textAlign: 'right', color: '#f59e0b', fontWeight: 'bold' }}>
@@ -342,7 +389,8 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                     </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -402,7 +450,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
                   <div className="form-group">
                     <label className="form-label">Brand</label>
                     <input
@@ -422,6 +470,21 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                       value={model}
                       onChange={e => setModel(e.target.value)}
                     />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Supplier (সরবরাহকারী)</label>
+                    <select
+                      className="form-select"
+                      value={supplierId}
+                      onChange={e => setSupplierId(e.target.value)}
+                    >
+                      <option value="">-- Select Supplier (Optional) --</option>
+                      {suppliers.map(s => (
+                        <option key={s.id} value={s.id}>
+                          {s.name} {s.company && s.company !== s.name ? `(${s.company})` : ''}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div className="form-group">
                     <label className="form-label">Warranty Period (Months)</label>
