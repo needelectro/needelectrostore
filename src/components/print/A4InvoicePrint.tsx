@@ -135,7 +135,7 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
 
                 <div className="a4-company-details">
                   <p><strong>Main Branch Moulvibazar:</strong> {safeSettings.address || 'Shop#5, MR Plaza, Kusumbag, Moulvibazar, Sylhet, Bangladesh'}</p>
-                  <p>Hotline: <strong>{safeSettings.phone || '+880 1733-983752'}</strong> | Email: <strong>{safeSettings.email || 'info.needelectro@gmail.com'}</strong></p>
+                  <p>Hotline: <strong>{safeSettings.phone || '+880 1733-983752'}</strong> | Email: <strong>info.needelectro@gmail.com</strong></p>
                 </div>
               </div>
 
