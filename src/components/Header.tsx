@@ -359,11 +359,11 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.35rem 0.6rem', borderRadius: 'var(--radius-md)' }}
           >
             <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'linear-gradient(135deg, #2563eb, #38bdf8)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.8rem' }}>
-              {currentUser.name.charAt(0)}
+              {currentUser?.name?.charAt(0) || 'A'}
             </div>
             <div style={{ textAlign: 'left', lineHeight: '1.2', display: 'none' }} className="user-text-lg">
-              <div style={{ fontSize: '0.8125rem', fontWeight: '700' }}>{currentUser.name.split(' ')[0]}</div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{currentUser.role}</div>
+              <div style={{ fontSize: '0.8125rem', fontWeight: '700' }}>{currentUser?.name?.split(' ')?.[0] || currentUser?.name || 'Admin'}</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{currentUser?.role || 'SUPER_ADMIN'}</div>
             </div>
             <ChevronDown size={14} />
           </button>
@@ -383,11 +383,11 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
               }}
             >
               <div style={{ paddingBottom: '0.65rem', borderBottom: '1px solid var(--border-color)', marginBottom: '0.65rem' }}>
-                <div style={{ fontWeight: '700', fontSize: '0.875rem' }}>{currentUser.name}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{currentUser.email}</div>
+                <div style={{ fontWeight: '700', fontSize: '0.875rem' }}>{currentUser?.name || 'Administrator'}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{currentUser?.email || 'admin@needelectro.com'}</div>
                 <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '6px' }}>
-                  <span className="badge badge-info" style={{ fontSize: '0.7rem' }}>{currentUser.role}</span>
-                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{selectedBranch.name.split(' ')[0]}</span>
+                  <span className="badge badge-info" style={{ fontSize: '0.7rem' }}>{currentUser?.role || 'SUPER_ADMIN'}</span>
+                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{selectedBranch?.name?.split(' ')?.[0] || 'Main'}</span>
                 </div>
               </div>
 

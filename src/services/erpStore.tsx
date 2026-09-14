@@ -475,8 +475,21 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     active: false,
   };
 
+  const DEFAULT_FALLBACK_USER: User = {
+    id: 'usr-admin-default',
+    name: 'Administrator',
+    email: 'info.needelectro@gmail.com',
+    role: 'SUPER_ADMIN',
+    branchId: 'br-main',
+    allowedBranchIds: ['br-main'],
+    active: true,
+    status: 'ACTIVE',
+    phone: '01712-345678',
+    createdAt: '2025-01-01'
+  };
+
   const selectedBranch = branches.find(b => b.id === selectedBranchId) || branches[0] || DEFAULT_FALLBACK_BRANCH;
-  const currentUser = users.find(u => u.id === currentUserId) || users[0];
+  const currentUser = users.find(u => u.id === currentUserId) || users[0] || DEFAULT_FALLBACK_USER;
 
   const logAction = (module: AuditLog['module'], action: string, recordId: string, details: string) => {
     const newLog: AuditLog = {

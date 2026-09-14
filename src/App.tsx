@@ -80,6 +80,25 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
+  const isPrintModalOpen = Boolean(
+    activeInvoiceToPrint ||
+    activeThermalReceiptToPrint ||
+    activeEmiAgreementToPrint ||
+    activeBarcodeToPrint
+  );
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    if (isPrintModalOpen) {
+      document.body.classList.add('has-active-print-modal');
+    } else {
+      document.body.classList.remove('has-active-print-modal');
+    }
+    return () => {
+      document.body.classList.remove('has-active-print-modal');
+    };
+  }, [isPrintModalOpen]);
+
   // Global Ctrl+K / Cmd+K listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -297,23 +316,6 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
     }
   };
 
-  const isPrintModalOpen = Boolean(
-    activeInvoiceToPrint ||
-    activeThermalReceiptToPrint ||
-    activeEmiAgreementToPrint ||
-    activeBarcodeToPrint
-  );
-
-  useEffect(() => {
-    if (isPrintModalOpen) {
-      document.body.classList.add('has-active-print-modal');
-    } else {
-      document.body.classList.remove('has-active-print-modal');
-    }
-    return () => {
-      document.body.classList.remove('has-active-print-modal');
-    };
-  }, [isPrintModalOpen]);
 
   return (
     <>
@@ -464,7 +466,9 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
 export function App({ initialMode }: AppProps = {}) {
   return (
     <ERPProvider>
-      <MainAppLayout initialMode={initialMode} />
+      <ErrorBoundary fallbackTitle="Application Error">
+        <MainAppLayout initialMode={initialMode} />
+      </ErrorBoundary>
     </ERPProvider>
   );
 }
