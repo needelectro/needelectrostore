@@ -162,31 +162,17 @@ export async function POST(
         );
       }
 
-      // Check account lock
-      if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()) {
-        const remainingMinutes = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000);
-        return NextResponse.json(
-          {
-            success: false,
-            error: `Account is temporarily locked. Please try again in ${remainingMinutes} minute(s).`,
-          },
-          { status: 423 }
-        );
-      }
-
-      // Verify password
+      // Verify password (accounts are never locked)
       const isValid = verifyPassword(password, user.passwordHash);
       if (!isValid) {
         const failedAttempts = (user.failedLoginAttempts || 0) + 1;
-        const updates: any = { failedLoginAttempts: failedAttempts };
-
-        if (failedAttempts >= 5) {
-          updates.lockedUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 mins lock
-        }
 
         await prisma.user.update({
           where: { id: user.id },
-          data: updates,
+          data: {
+            failedLoginAttempts: failedAttempts,
+            lockedUntil: null, // Never lock any account
+          },
         });
 
         await prisma.loginHistory.create({
@@ -194,10 +180,10 @@ export async function POST(
             id: 'log-' + Date.now(),
             userId: user.id,
             email,
-            status: failedAttempts >= 5 ? 'LOCKED' : 'FAILED',
+            status: 'FAILED',
             ipAddress: ip,
             userAgent,
-            details: `Failed attempt ${failedAttempts}/5`,
+            details: `Failed attempt ${failedAttempts}`,
           },
         });
 

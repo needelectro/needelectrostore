@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { EMIAccount, SystemSettings } from '../../types';
-import { Printer, X, FileText, ShieldCheck } from 'lucide-react';
+import { Printer, X, FileText, ShieldCheck, Download, Loader2 } from 'lucide-react';
 import { NeedElectroLogo } from '../NeedElectroLogo';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 interface EMIAgreementPrintProps {
   account: EMIAccount;
@@ -10,8 +12,75 @@ interface EMIAgreementPrintProps {
 }
 
 export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, settings, onClose }) => {
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadPDF = async () => {
+    const element = document.getElementById('printable-emi-contract');
+    if (!element) return;
+
+    setIsGeneratingPDF(true);
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        scrollX: 0,
+        scrollY: 0,
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.getElementById('printable-emi-contract');
+          if (clonedElement) {
+            clonedElement.style.boxShadow = 'none';
+            clonedElement.style.borderRadius = '0';
+            clonedElement.style.margin = '0 auto';
+            clonedElement.style.width = '210mm';
+            clonedElement.style.maxWidth = '210mm';
+          }
+        },
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true,
+      });
+
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+      const imgProps = pdf.getImageProperties(imgData);
+      const calculatedHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      if (calculatedHeight <= pdfHeight) {
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, calculatedHeight, undefined, 'FAST');
+      } else {
+        let heightLeft = calculatedHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, calculatedHeight, undefined, 'FAST');
+        heightLeft -= pdfHeight;
+
+        while (heightLeft > 1) {
+          position -= pdfHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, calculatedHeight, undefined, 'FAST');
+          heightLeft -= pdfHeight;
+        }
+      }
+
+      const safeEmiNumber = (account.emiNumber || 'EMI-AGREEMENT').replace(/[^a-zA-Z0-9-_]/g, '_');
+      pdf.save(`EMI-Agreement-${safeEmiNumber}.pdf`);
+    } catch (error) {
+      console.error('Failed to generate EMI Agreement PDF:', error);
+      alert('Failed to generate PDF directly. Please use the Print Contract / PDF option.');
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   React.useEffect(() => {
@@ -29,18 +98,35 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
             <FileText size={20} className="text-primary" />
             Official Laptop Hire-Purchase (EMI) Contract Agreement — {account.emiNumber}
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className="btn btn-primary btn-sm" onClick={handlePrint}>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <button 
+              className="btn btn-success btn-sm" 
+              onClick={handleDownloadPDF} 
+              disabled={isGeneratingPDF}
+              style={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+              title="Directly download contract as PDF"
+            >
+              {isGeneratingPDF ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" /> Generating PDF...
+                </>
+              ) : (
+                <>
+                  <Download size={16} /> Download PDF
+                </>
+              )}
+            </button>
+            <button className="btn btn-primary btn-sm" onClick={handlePrint} style={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
               <Printer size={16} /> Print Contract / PDF
             </button>
-            <button className="btn btn-secondary btn-sm" onClick={onClose}>
+            <button className="btn btn-secondary btn-sm" onClick={onClose} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
               <X size={16} /> Close
             </button>
           </div>
         </div>
 
         <div className="modal-body a4-preview-body">
-          <div className="a4-print-document">
+          <div className="a4-print-document" id="printable-emi-contract">
             {/* Watermark Background from Official Previous Memo */}
             <div 
               className="a4-watermark-overlay" 

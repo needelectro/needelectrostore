@@ -181,40 +181,21 @@ authRouter.post('/login', (req, res) => {
       });
     }
 
-    // Check lockout
-    if (user.locked_until && new Date(user.locked_until).getTime() > Date.now()) {
-      const minutesRemaining = Math.ceil((new Date(user.locked_until).getTime() - Date.now()) / 60000);
-      return res.status(429).json({
-        success: false,
-        error: `Account temporarily locked due to excessive failed attempts. Try again in ${minutesRemaining} minutes.`
-      });
-    }
-
-    // Verify password
+    // Verify password (accounts are never locked)
     const isMatch = verifyPassword(password, user.password_hash);
 
     if (!isMatch) {
       const attempts = (user.failed_login_attempts || 0) + 1;
-      let lockSql = 'failed_login_attempts = ?';
-      const params = [attempts];
-
-      if (attempts >= 5) {
-        // Lock for 15 minutes
-        lockSql += ", locked_until = datetime('now', '+15 minutes')";
-      }
-
-      db.prepare(`UPDATE users SET ${lockSql} WHERE id = ?`).run(...params, user.id);
+      db.prepare(`UPDATE users SET failed_login_attempts = ?, locked_until = NULL WHERE id = ?`).run(attempts, user.id);
 
       db.prepare(`
         INSERT INTO login_history (id, user_id, email, status, ip_address, user_agent, details, created_at)
         VALUES (?, ?, ?, 'FAILED', ?, ?, ?, datetime('now'))
-      `).run('log-' + Date.now(), user.id, user.email, clientIp, userAgent, `Incorrect password. Attempt ${attempts}/5.`);
+      `).run('log-' + Date.now(), user.id, user.email, clientIp, userAgent, `Incorrect password. Attempt ${attempts}.`);
 
       return res.status(401).json({
         success: false,
-        error: attempts >= 5
-          ? 'Account locked for 15 minutes due to multiple failed login attempts.'
-          : `Invalid password. ${5 - attempts} attempts remaining before temporary lockout.`
+        error: 'Invalid password. Please check your credentials and try again.'
       });
     }
 

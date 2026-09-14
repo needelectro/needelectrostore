@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Sale, SystemSettings } from '../../types';
-import { Printer, X, Receipt } from 'lucide-react';
+import { Printer, X, Receipt, Download, Loader2 } from 'lucide-react';
 import { NeedElectroLogo } from '../NeedElectroLogo';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 interface A4InvoicePrintProps {
   sale: Sale;
@@ -79,6 +81,73 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
     paymentMethodsText = `Cash (৳${paidAmount.toLocaleString()})`;
   }
 
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
+  const handleDownloadPDF = async () => {
+    const element = document.getElementById('printable-a4-invoice');
+    if (!element) return;
+
+    setIsGeneratingPDF(true);
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2, // Crisp 300 DPI equivalent
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        scrollX: 0,
+        scrollY: 0,
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.getElementById('printable-a4-invoice');
+          if (clonedElement) {
+            clonedElement.style.boxShadow = 'none';
+            clonedElement.style.borderRadius = '0';
+            clonedElement.style.margin = '0 auto';
+            clonedElement.style.width = '210mm';
+            clonedElement.style.maxWidth = '210mm';
+          }
+        },
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true,
+      });
+
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+      const imgProps = pdf.getImageProperties(imgData);
+      const calculatedHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      if (calculatedHeight <= pdfHeight) {
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, calculatedHeight, undefined, 'FAST');
+      } else {
+        let heightLeft = calculatedHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, calculatedHeight, undefined, 'FAST');
+        heightLeft -= pdfHeight;
+
+        while (heightLeft > 1) {
+          position -= pdfHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, calculatedHeight, undefined, 'FAST');
+          heightLeft -= pdfHeight;
+        }
+      }
+
+      const safeInvoiceNumber = (sale.invoiceNumber || 'INV-DRAFT').replace(/[^a-zA-Z0-9-_]/g, '_');
+      pdf.save(`Invoice-${safeInvoiceNumber}.pdf`);
+    } catch (error) {
+      console.error('Failed to generate PDF:', error);
+      alert('Failed to generate PDF directly. Please use the Print / Save PDF option.');
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
   return (
     <div className="modal-overlay print-active-modal" style={{ zIndex: 9999 }}>
       <div className="modal-content modal-content-xl">
@@ -88,7 +157,24 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
             Official A4 Invoice Preview — {sale.invoiceNumber || 'INV-DRAFT'}
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <button className="btn btn-primary btn-sm" onClick={handlePrint} style={{ fontWeight: 600 }}>
+            <button 
+              className="btn btn-success btn-sm" 
+              onClick={handleDownloadPDF} 
+              disabled={isGeneratingPDF}
+              style={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+              title="Directly download high-quality A4 PDF invoice"
+            >
+              {isGeneratingPDF ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" /> Generating PDF...
+                </>
+              ) : (
+                <>
+                  <Download size={16} /> Download PDF
+                </>
+              )}
+            </button>
+            <button className="btn btn-primary btn-sm" onClick={handlePrint} style={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
               <Printer size={16} /> Print / Save PDF
             </button>
             {onSwitchToThermal && (
@@ -96,11 +182,12 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
                 className="btn btn-secondary btn-sm" 
                 onClick={onSwitchToThermal}
                 title="Switch to 80mm Thermal Receipt format"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
               >
                 <Receipt size={15} /> 80mm Receipt
               </button>
             )}
-            <button className="btn btn-secondary btn-sm" onClick={onClose}>
+            <button className="btn btn-secondary btn-sm" onClick={onClose} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
               <X size={16} /> Close
             </button>
           </div>

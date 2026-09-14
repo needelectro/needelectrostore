@@ -415,6 +415,15 @@ html, body, #root {
   to { opacity: 1; transform: scale(1); }
 }
 
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
 /* KPI Metric Cards */
 .kpi-grid {
   display: grid;
