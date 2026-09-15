@@ -638,18 +638,10 @@ html, body {
   gap: 0.5rem !important;
 }
 
-/* On desktop (>= 1025px), sidebar is permanently open with brand logo, so hide duplicate header logo */
-@media (min-width: 1025px) {
-  .header-mobile-logo {
-    display: none !important;
-  }
-}
-
-/* On mobile/tablet (< 1025px), show the logo in header */
-@media (max-width: 1024px) {
-  .header-mobile-logo {
-    display: flex !important;
-  }
+/* Header brand logo is always visible */
+.header-brand-logo {
+  display: flex !important;
+  align-items: center !important;
 }
 
 .header-center-actions {

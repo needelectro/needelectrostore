@@ -85,7 +85,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
           <Menu size={20} />
         </button>
 
-        <div className="header-mobile-logo" style={{ alignItems: 'center' }}>
+        <div className="header-brand-logo" style={{ display: 'flex', alignItems: 'center' }}>
           <NeedElectroLogo size="sm" showSisterConcern={false} />
         </div>
       </div>
