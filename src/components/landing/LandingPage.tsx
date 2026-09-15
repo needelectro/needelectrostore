@@ -2,10 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { useERP } from '../../services/erpStore';
 import { NeedElectroLogo } from '../NeedElectroLogo';
 import { Product, ServiceType } from '../../types';
-import { 
-  ArrowRight, ShieldCheck, Zap, Monitor, Cpu, Receipt, 
-  CreditCard, Smartphone, Boxes, Wrench, BarChart3, Database, 
-  Lock, CheckCircle2, Building2, Phone, Mail, MapPin, 
+import {
+  ArrowRight, ShieldCheck, Zap, Monitor, Cpu, Receipt,
+  CreditCard, Smartphone, Boxes, Wrench, BarChart3, Database,
+  Lock, CheckCircle2, Building2, Phone, Mail, MapPin,
   ChevronRight, ExternalLink, Sparkles, Layers, DollarSign,
   TrendingUp, Users, RefreshCw, FileText, ArrowUpRight,
   Laptop, Tv, Camera, Wifi, Check, Star, HelpCircle,
@@ -42,9 +42,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
 
   // Real Laptops from Inventory
   const laptopsList = useMemo(() => {
-    return products.filter(p => 
-      p.category === 'Laptop' || 
-      p.category === 'Computers' || 
+    return products.filter(p =>
+      p.category === 'Laptop' ||
+      p.category === 'Computers' ||
       p.name.toLowerCase().includes('laptop') ||
       p.name.toLowerCase().includes('hp') ||
       p.name.toLowerCase().includes('dell') ||
@@ -57,7 +57,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
   const featuredProducts = useMemo(() => {
     return products.filter(p => {
       const matchesCat = productCategoryFilter === 'ALL' || p.category === productCategoryFilter;
-      const matchesSearch = !searchKeyword.trim() || 
+      const matchesSearch = !searchKeyword.trim() ||
         p.name.toLowerCase().includes(searchKeyword.toLowerCase()) ||
         p.brand.toLowerCase().includes(searchKeyword.toLowerCase()) ||
         p.category.toLowerCase().includes(searchKeyword.toLowerCase());
@@ -113,8 +113,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
       backgroundColor: '#070c18',
       color: '#f8fafc',
       fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-      overflowX: 'clip',
-      scrollPaddingTop: '80px',
+      overflowX: 'hidden',
       lineHeight: 1.6
     }}>
       {/* Inject SEO Structured Data */}
@@ -124,20 +123,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
       />
 
       {/* =========================================================================
-          1. CUSTOMER-SIDE STICKY EXECUTIVE HEADER (FIXED TO VIEWPORT)
+          1. CUSTOMER-SIDE STICKY EXECUTIVE HEADER
           ========================================================================= */}
       <header style={{
-        position: 'fixed',
+        position: 'sticky',
         top: 0,
-        left: 0,
-        right: 0,
-        width: '100%',
         zIndex: 1000,
-        backgroundColor: 'rgba(7, 12, 24, 0.95)',
+        backgroundColor: 'rgba(7, 12, 24, 0.9)',
         backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.35)',
         transition: 'all 0.3s ease'
       }}>
         <div style={{
@@ -175,7 +169,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           {/* Right Action Group */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             {/* Phone Hotline Pill */}
-            <a 
+            <a
               href="tel:01733983752"
               className="hotline-pill"
               style={{
@@ -227,61 +221,59 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             padding: '1.25rem 1.5rem',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.85rem',
-            maxHeight: 'calc(100vh - 70px)',
-            overflowY: 'auto'
+            gap: '0.85rem'
           }}>
-            <a 
-              href="#home" 
+            <a
+              href="#home"
               onClick={() => setMobileMenuOpen(false)}
               style={{ color: '#ffffff', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.3rem 0' }}
             >
               Home
             </a>
-            <a 
-              href="#products" 
+            <a
+              href="#products"
               onClick={() => setMobileMenuOpen(false)}
               style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.3rem 0' }}
             >
               Products & Inventory
             </a>
-            <a 
-              href="#laptops" 
+            <a
+              href="#laptops"
               onClick={() => setMobileMenuOpen(false)}
               style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.3rem 0' }}
             >
               Laptops & Computers
             </a>
-            <a 
-              href="#services" 
+            <a
+              href="#services"
               onClick={() => setMobileMenuOpen(false)}
               style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.3rem 0' }}
             >
               Services & Repair
             </a>
-            <a 
-              href="#cctv" 
+            <a
+              href="#cctv"
               onClick={() => setMobileMenuOpen(false)}
               style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.3rem 0' }}
             >
               CCTV & Security
             </a>
-            <a 
-              href="#emi" 
+            <a
+              href="#emi"
               onClick={() => setMobileMenuOpen(false)}
               style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.3rem 0' }}
             >
               Laptop EMI Facility
             </a>
-            <a 
-              href="#about" 
+            <a
+              href="#about"
               onClick={() => setMobileMenuOpen(false)}
               style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.3rem 0' }}
             >
               About NEED ELECTRO
             </a>
-            <a 
-              href="#contact" 
+            <a
+              href="#contact"
               onClick={() => setMobileMenuOpen(false)}
               style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.3rem 0' }}
             >
@@ -339,25 +331,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
         }} />
 
         <div style={{ maxWidth: '1180px', margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 2 }}>
-          {/* Trust Badge */}
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.55rem',
-            padding: '0.45rem 1.1rem',
-            background: 'rgba(0, 140, 255, 0.12)',
-            border: '1px solid rgba(0, 140, 255, 0.35)',
-            borderRadius: '9999px',
-            fontSize: '0.82rem',
-            fontWeight: 700,
-            color: '#38bdf8',
-            marginBottom: '1.75rem',
-            boxShadow: '0 4px 16px rgba(0, 140, 255, 0.2)'
-          }}>
-            <Sparkles size={14} />
-            <span>Kusumbag, Moulvibazar</span>
-          </div>
-
           {/* Main Heading */}
           <h1 style={{
             fontSize: 'clamp(2.4rem, 5.2vw, 4.4rem)',
@@ -668,7 +641,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
               <div style={{ position: 'relative' }}>
                 <Search size={15} style={{ position: 'absolute', left: '10px', top: '11px', color: '#64748b' }} />
-                <input 
+                <input
                   type="text"
                   placeholder="Search products..."
                   value={searchKeyword}
@@ -755,10 +728,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                       position: 'relative'
                     }}>
                       {prod.imageUrl ? (
-                        <img 
-                          src={prod.imageUrl} 
-                          alt={prod.name} 
-                          style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain' }} 
+                        <img
+                          src={prod.imageUrl}
+                          alt={prod.name}
+                          style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain' }}
                         />
                       ) : (
                         <Laptop size={54} color="#008CFF" style={{ opacity: 0.7 }} />
@@ -1597,13 +1570,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                   }}
                 >
                   <span>{faq.q}</span>
-                  <ChevronDown 
-                    size={18} 
+                  <ChevronDown
+                    size={18}
                     color="#38bdf8"
                     style={{
                       transform: openFaqIndex === i ? 'rotate(180deg)' : 'rotate(0deg)',
                       transition: 'transform 0.2s ease'
-                    }} 
+                    }}
                   />
                 </button>
 
@@ -1737,8 +1710,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                   <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
                     Your Full Name *
                   </label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     required
                     placeholder="e.g. Tanvir Ahmed"
                     value={bookingName}
@@ -1759,8 +1732,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                   <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
                     Phone Number *
                   </label>
-                  <input 
-                    type="tel" 
+                  <input
+                    type="tel"
                     required
                     placeholder="01700-000000"
                     value={bookingPhone}
@@ -1781,8 +1754,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                   <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
                     Interested Service / Product
                   </label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="e.g. HP Laptop EMI, CCTV 4-Cam package, Electrical wiring..."
                     value={bookingNotes}
                     onChange={e => setBookingNotes(e.target.value)}
@@ -1977,7 +1950,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
                   Full Name *
                 </label>
-                <input 
+                <input
                   type="text"
                   required
                   placeholder="e.g. Rafiqul Islam"
@@ -1999,7 +1972,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
                   Mobile Phone Number *
                 </label>
-                <input 
+                <input
                   type="tel"
                   required
                   placeholder="01700-000000"
@@ -2021,7 +1994,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
                   Address / Site Location in Moulvibazar
                 </label>
-                <input 
+                <input
                   type="text"
                   placeholder="e.g. Kusumbag, Court Road, Sreemangal Road..."
                   value={bookingAddress}
@@ -2042,7 +2015,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
                   Issue Description or Preferred Time
                 </label>
-                <textarea 
+                <textarea
                   rows={2}
                   placeholder="Describe your device problem or electrical issue..."
                   value={bookingNotes}
