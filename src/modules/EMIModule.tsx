@@ -285,10 +285,7 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
       return;
     }
 
-    if (!selectedSerial) {
-      alert(`No available serial number found for ${currentProduct.name}! Cannot proceed without a physical serial number.`);
-      return;
-    }
+    // Serial number is optional — skip validation if not provided
 
     let customerId = selectedCustId;
     let customerName = '';
@@ -350,8 +347,8 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
           discount: 0,
           total: laptopPrice,
           warrantyMonths: currentProduct.warrantyPeriodMonths || 12,
-          isSerialized: true,
-          serialNumbers: [selectedSerial]
+          isSerialized: !!selectedSerial,
+          serialNumbers: selectedSerial ? [selectedSerial] : []
         }
       ],
       subtotal: laptopPrice,
@@ -1203,7 +1200,7 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
             {/* Step 2: Laptop & Serial Number Selection */}
             <div style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1.25rem' }}>
               <span style={{ fontWeight: '700', fontSize: '0.9rem', textTransform: 'uppercase', color: 'var(--brand-primary)', display: 'block', marginBottom: '0.75rem' }}>
-                2. Laptop & Physical Serial Number Selection
+                2. Laptop & Serial Number (Optional)
               </span>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
@@ -1227,21 +1224,18 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Physical Serial Number *</label>
+                  <label className="form-label">Physical Serial Number (Optional)</label>
                   <select
                     className="form-select"
                     value={selectedSerial}
                     onChange={e => setSelectedSerial(e.target.value)}
                   >
-                    {availableSerials.length === 0 ? (
-                      <option value="">No Available Serial! Out of Stock</option>
-                    ) : (
-                      availableSerials.map(s => (
-                        <option key={s.id} value={s.serialNumber}>
-                          {s.serialNumber} (Available in {selectedBranch.name})
-                        </option>
-                      ))
-                    )}
+                    <option value="">— No Serial Number —</option>
+                    {availableSerials.map(s => (
+                      <option key={s.id} value={s.serialNumber}>
+                        {s.serialNumber} (Available in {selectedBranch.name})
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
