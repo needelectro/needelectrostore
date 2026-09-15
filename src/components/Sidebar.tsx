@@ -5,7 +5,7 @@ import {
   Truck, Users, PackageSearch, ShieldCheck, Wrench, Wallet,
   PieChart, BookOpen, UserCheck, GitFork, BarChart3,
   Lock, ScrollText, Settings, ChevronRight, Zap, RotateCcw, Sliders, Landmark,
-  User, KeyRound, LogOut, ChevronDown
+  User
 } from 'lucide-react';
 import { NeedElectroLogo } from './NeedElectroLogo';
 import { UserProfileModal } from './UserProfileModal';
@@ -41,8 +41,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { 
     currentUser, 
     selectedBranch, 
-    logout, 
-    lockSession, 
     settings, 
     emiAccounts, 
     products, 
@@ -50,7 +48,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     hasPermission 
   } = useERP();
 
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
@@ -149,205 +146,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           />
         </div>
 
-        {/* Mobile & Quick User Profile Card */}
-        <div style={{
-          padding: '0.65rem 0.85rem',
-          borderBottom: '1px solid var(--border-color)',
-          background: 'var(--bg-card-muted)'
-        }}>
-          <button
-            type="button"
-            onClick={() => setShowProfileMenu(prev => !prev)}
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '0.6rem',
-              padding: '0.5rem 0.65rem',
-              borderRadius: 'var(--radius-md)',
-              background: showProfileMenu ? 'var(--bg-hover)' : 'var(--bg-card)',
-              border: '1px solid var(--border-color)',
-              color: 'var(--text-primary)',
-              cursor: 'pointer',
-              textAlign: 'left',
-              transition: 'all 0.15s ease'
-            }}
-            title="User Profile & Account Settings"
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0, flex: 1 }}>
-              <div style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #2563eb, #38bdf8)',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 'bold',
-                fontSize: '0.95rem',
-                flexShrink: 0,
-                boxShadow: '0 2px 6px rgba(37, 99, 235, 0.35)'
-              }}>
-                {currentUser?.name?.charAt(0) || 'U'}
-              </div>
 
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{
-                  fontSize: '0.84rem',
-                  fontWeight: '700',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  color: 'var(--text-primary)'
-                }}>
-                  {currentUser?.name || 'User Profile'}
-                </div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  marginTop: '2px'
-                }}>
-                  <span className="badge badge-info" style={{ fontSize: '0.62rem', padding: '1px 5px', fontWeight: '700' }}>
-                    {currentUser?.role || 'SUPER_ADMIN'}
-                  </span>
-                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {selectedBranch?.name?.split(' ')?.[0] || 'Main'}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
-              <ChevronDown 
-                size={14} 
-                color="var(--text-muted)" 
-                style={{ 
-                  transform: showProfileMenu ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.2s ease'
-                }} 
-              />
-            </div>
-          </button>
-
-          {/* Expandable Quick Profile Actions in Sidebar */}
-          {showProfileMenu && (
-            <div style={{
-              marginTop: '0.5rem',
-              padding: '0.65rem',
-              borderRadius: 'var(--radius-md)',
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-color)',
-              boxShadow: 'var(--shadow-sm)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.5rem'
-            }}>
-              <div style={{
-                paddingBottom: '0.45rem',
-                borderBottom: '1px solid var(--border-color)',
-                fontSize: '0.74rem'
-              }}>
-                <div style={{ color: 'var(--text-muted)', marginBottom: '2px' }}>Signed in as:</div>
-                <div style={{ fontWeight: '700', color: 'var(--text-primary)', wordBreak: 'break-all' }}>
-                  {currentUser?.email || 'N/A'}
-                </div>
-                {currentUser?.phone && (
-                  <div style={{ color: 'var(--text-secondary)', marginTop: '2px' }}>
-                    📞 {currentUser.phone}
-                  </div>
-                )}
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowProfileModal(true);
-                  }}
-                  className="btn btn-ghost btn-sm"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    justifyContent: 'flex-start',
-                    padding: '0.4rem 0.5rem',
-                    fontSize: '0.78rem',
-                    width: '100%'
-                  }}
-                >
-                  <User size={14} color="var(--brand-primary)" />
-                  <span>View Account Profile</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsPasswordModalOpen(true);
-                  }}
-                  className="btn btn-ghost btn-sm"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    justifyContent: 'flex-start',
-                    padding: '0.4rem 0.5rem',
-                    fontSize: '0.78rem',
-                    width: '100%'
-                  }}
-                >
-                  <KeyRound size={14} color="#10b981" />
-                  <span>Change Password</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClose();
-                    lockSession();
-                  }}
-                  className="btn btn-ghost btn-sm"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    justifyContent: 'flex-start',
-                    padding: '0.4rem 0.5rem',
-                    fontSize: '0.78rem',
-                    width: '100%'
-                  }}
-                >
-                  <Lock size={14} color="var(--brand-accent)" />
-                  <span>Lock Terminal Screen</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClose();
-                    logout();
-                  }}
-                  className="btn btn-ghost btn-sm"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    justifyContent: 'flex-start',
-                    padding: '0.4rem 0.5rem',
-                    fontSize: '0.78rem',
-                    width: '100%',
-                    color: '#ef4444'
-                  }}
-                >
-                  <LogOut size={14} color="#ef4444" />
-                  <span style={{ fontWeight: 'bold' }}>Sign Out / Logout</span>
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* Navigation List */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 0.75rem' }}>
