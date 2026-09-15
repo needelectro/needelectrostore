@@ -44,20 +44,15 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
       background: 'var(--bg-header)',
       backdropFilter: 'blur(12px)',
       borderBottom: '1px solid var(--border-color)',
-      padding: '0 1.25rem',
+      padding: '0 1rem',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      gap: '1rem',
+      gap: '0.6rem',
       position: 'sticky',
       top: 0,
       zIndex: 50,
-      overflowX: 'auto',
-      overflowY: 'hidden',
-      whiteSpace: 'nowrap',
-      scrollbarWidth: 'none',
-      msOverflowStyle: 'none',
-      WebkitOverflowScrolling: 'touch'
+      overflow: 'visible'
     }}>
       {/* Invisible backdrop for popovers */}
       {(showNotifications || showUserMenu) && (
@@ -72,8 +67,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
         />
       )}
 
-      {/* Left: Hamburger Toggle & Brand Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0 }}>
+      {/* Left: Mobile Hamburger & Mobile Logo (hidden on desktop because sidebar is permanently open) */}
+      <div className="header-brand-wrap" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
         <button 
           className="btn btn-ghost btn-sm mobile-hamburger-btn" 
           onClick={toggleSidebar}
@@ -90,59 +85,89 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
           <Menu size={20} />
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div className="header-mobile-logo" style={{ alignItems: 'center' }}>
           <NeedElectroLogo size="sm" showSisterConcern={false} />
         </div>
       </div>
 
-      {/* Right: Search Trigger & Enterprise Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+      {/* Center: Search Trigger & Enterprise Controls (auto-adapts and smoothly scrolls if constrained) */}
+      <div className="header-center-actions" style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        flex: 1,
+        minWidth: 0,
+        overflowX: 'auto',
+        scrollbarWidth: 'none'
+      }}>
         {/* Global Search Bar */}
         <div 
           onClick={onOpenSearch}
+          className="header-search-bar"
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem',
+            gap: '0.4rem',
             background: 'var(--bg-input)',
             border: '1px solid var(--border-color)',
             borderRadius: 'var(--radius-md)',
-            padding: '0.4rem 0.75rem',
+            padding: '0.35rem 0.65rem',
             cursor: 'pointer',
             color: 'var(--text-muted)',
             fontSize: '0.8125rem',
+            flexShrink: 1,
+            minWidth: '110px',
+            maxWidth: '170px',
             transition: 'all var(--transition-fast)'
           }}
           title="Search anything (Ctrl+K)"
         >
-          <Search size={15} />
-          <span className="quick-search-text" style={{ display: 'inline-block', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <Search size={15} style={{ flexShrink: 0 }} />
+          <span className="quick-search-text" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             Quick Search...
           </span>
           <kbd className="quick-search-kbd" style={{
-            fontSize: '0.68rem',
+            fontSize: '0.65rem',
             background: 'var(--bg-card-muted)',
             border: '1px solid var(--border-color)',
-            padding: '1px 4px',
-            borderRadius: '4px'
+            padding: '1px 3px',
+            borderRadius: '4px',
+            marginLeft: 'auto',
+            flexShrink: 0
           }}>
             Ctrl+K
           </kbd>
         </div>
+
         {/* Branch Selector */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'var(--bg-card-muted)', padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-          <Building size={14} color="var(--brand-primary)" />
+        <div className="header-branch-pill" style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.35rem',
+          background: 'var(--bg-card-muted)',
+          padding: '0.35rem 0.65rem',
+          borderRadius: 'var(--radius-md)',
+          border: '1px solid var(--border-color)',
+          flexShrink: 0,
+          maxWidth: '180px'
+        }}>
+          <Building size={14} color="var(--brand-primary)" style={{ flexShrink: 0 }} />
           <select 
             value={selectedBranch.id} 
             onChange={e => setSelectedBranchId(e.target.value)}
+            className="header-branch-select"
             style={{
               background: 'transparent',
               border: 'none',
               outline: 'none',
               color: 'var(--text-primary)',
-              fontSize: '0.8125rem',
+              fontSize: '0.8rem',
               fontWeight: '600',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              maxWidth: '140px',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden'
             }}
           >
             {branches.map(b => (
@@ -156,53 +181,80 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
         {/* Super Admin Master Mode Quick Access */}
         {currentUser?.role === 'SUPER_ADMIN' && (
           <button
-            className="btn btn-sm desktop-only"
+            className="btn btn-sm desktop-only header-master-hub-btn"
             onClick={() => onNavigateToModule('control_center', 'master_crud')}
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.4rem',
+              gap: '0.35rem',
               background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
               color: '#ffffff',
               border: '1px solid rgba(255,255,255,0.2)',
               fontWeight: '700',
+              fontSize: '0.78rem',
+              padding: '0.35rem 0.65rem',
+              flexShrink: 0,
               boxShadow: '0 2px 8px rgba(124, 58, 237, 0.35)',
             }}
             title="Super Admin Master Hub — Manage & Edit Everything Across All 20 Modules"
           >
-            <ShieldAlert size={14} />
-            <span>👑 Master Hub</span>
+            <ShieldAlert size={14} style={{ flexShrink: 0 }} />
+            <span className="header-master-hub-text">👑 Master Hub</span>
           </button>
         )}
 
         {/* Quick New Sale POS Shortcut */}
         <button 
-          className="btn btn-primary btn-sm"
+          className="btn btn-primary btn-sm header-pos-btn"
           onClick={() => onNavigateToModule('pos')}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            padding: '0.35rem 0.65rem',
+            fontSize: '0.8rem',
+            fontWeight: '600',
+            flexShrink: 0
+          }}
         >
-          <ShoppingCart size={15} />
+          <ShoppingCart size={15} style={{ flexShrink: 0 }} />
           <span className="pos-btn-text">POS Terminal</span>
         </button>
 
         {/* View Public Customer Website */}
         {onViewLanding && (
           <button 
-            className="btn btn-secondary btn-sm desktop-only"
+            className="btn btn-secondary btn-sm desktop-xl-only header-website-btn"
             onClick={onViewLanding}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              padding: '0.35rem 0.65rem',
+              fontSize: '0.78rem',
+              flexShrink: 0
+            }}
             title="View Public Customer Website"
           >
-            <Globe size={14} color="var(--brand-primary)" />
-            <span>Customer Website</span>
+            <Globe size={14} color="var(--brand-primary)" style={{ flexShrink: 0 }} />
+            <span>Website</span>
           </button>
         )}
+      </div>
 
+      {/* Right: Dedicated Utilities Cluster (ALWAYS VISIBLE & ANCHORED RIGHT) */}
+      <div className="header-right-utilities" style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.45rem',
+        flexShrink: 0,
+        marginLeft: 'auto'
+      }}>
         {/* Theme Toggle */}
         <button 
           className="btn btn-ghost btn-sm"
           onClick={toggleTheme}
-          style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)' }}
+          style={{ padding: '0.45rem', borderRadius: 'var(--radius-md)' }}
           title={`Switch to ${settings.theme === 'dark' ? 'Light' : 'Dark'} mode`}
         >
           {settings.theme === 'dark' ? <Sun size={18} color="#f59e0b" /> : <Moon size={18} color="#3b82f6" />}
