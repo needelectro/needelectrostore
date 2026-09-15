@@ -4,7 +4,7 @@ import {
   LayoutDashboard, ShoppingCart, ReceiptText, CalendarClock, Boxes,
   Truck, Users, PackageSearch, ShieldCheck, Wrench, Wallet,
   PieChart, BookOpen, UserCheck, GitFork, BarChart3,
-  Lock, ScrollText, Settings, X, ChevronRight, Zap, RotateCcw, Sliders, Landmark,
+  Lock, ScrollText, Settings, ChevronRight, Zap, RotateCcw, Sliders, Landmark,
   User, KeyRound, LogOut, ChevronDown
 } from 'lucide-react';
 import { NeedElectroLogo } from './NeedElectroLogo';
@@ -139,7 +139,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           padding: '1rem 1.15rem',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
           borderBottom: '1px solid var(--border-color)'
         }}>
           <NeedElectroLogo 
@@ -148,15 +147,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             showDots={false}
             showSisterConcern={false}
           />
-
-          <button 
-            className="btn btn-ghost btn-sm mobile-close-btn" 
-            onClick={onClose} 
-            aria-label="Close sidebar navigation"
-            style={{ padding: '0.4rem', borderRadius: '8px' }}
-          >
-            <X size={20} />
-          </button>
         </div>
 
         {/* Mobile & Quick User Profile Card */}

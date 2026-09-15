@@ -614,10 +614,6 @@ html, body {
     transform: translateX(0) !important;
   }
 
-  .sidebar .mobile-close-btn {
-    display: flex !important;
-  }
-
   /* Header Top Navigation */
   .desktop-nav-only,
   .desktop-nav-links {
