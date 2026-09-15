@@ -6,7 +6,8 @@ import {
 import {
   CalendarClock, Search, Plus, CheckCircle2, AlertTriangle, 
   Wallet, FileText, Phone, MessageSquare, ShieldCheck, Printer, 
-  X, Check, Laptop, Clock, ArrowRight, UserCheck, AlertCircle, Share2
+  X, Check, Laptop, Clock, ArrowRight, UserCheck, AlertCircle, Share2,
+  Edit2, Trash2, RotateCcw, Sliders, DollarSign, Percent, Calculator, Power
 } from 'lucide-react';
 
 interface EMIModuleProps {
@@ -19,6 +20,7 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
     emiAccounts, emiPlans, emiPayments, customers, products, serials, 
     collectEMIPayment, createSale, createCustomer, selectedBranch, currentUser, 
     setActiveEmiAgreementToPrint, settings, updateSettings, saveEMIPlan,
+    saveEMIPlanWithVersioning, deleteEMIPlan, resetEMIPlansToDefaults,
     addToast, refreshFromDatabase
   } = useERP();
 
@@ -108,6 +110,152 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
   // -------------------------------------------------------------
   const [activeReminderAccount, setActiveReminderAccount] = useState<EMIAccount | null>(null);
   const [reminderLanguage, setReminderLanguage] = useState<'EN' | 'BN'>('BN');
+
+  // -------------------------------------------------------------
+  // EMI PLAN MANAGEMENT & CUSTOMIZATION STATE
+  // -------------------------------------------------------------
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<EMIPlan | null>(null);
+  const [planForm, setPlanForm] = useState<{
+    id: string;
+    name: string;
+    durationMonths: number;
+    minDownPaymentPercent: number;
+    interestRatePercent: number;
+    processingFee: number;
+    lateFeePerDay: number;
+    gracePeriodDays: number;
+    isActive: boolean;
+    description: string;
+    eligibilityRules: string;
+    termsText: string;
+    versionReason: string;
+  }>({
+    id: '',
+    name: '',
+    durationMonths: 6,
+    minDownPaymentPercent: 25,
+    interestRatePercent: 0,
+    processingFee: 500,
+    lateFeePerDay: 50,
+    gracePeriodDays: 5,
+    isActive: true,
+    description: '',
+    eligibilityRules: '',
+    termsText: '',
+    versionReason: ''
+  });
+  const [simLaptopPrice, setSimLaptopPrice] = useState<number>(50000);
+  const [isSavingPlan, setIsSavingPlan] = useState(false);
+  const [isResettingPlans, setIsResettingPlans] = useState(false);
+
+  const handleOpenCreatePlan = () => {
+    setEditingPlan(null);
+    setPlanForm({
+      id: `emi-plan-${Date.now()}`,
+      name: '',
+      durationMonths: 6,
+      minDownPaymentPercent: 25,
+      interestRatePercent: 0,
+      processingFee: 500,
+      lateFeePerDay: 50,
+      gracePeriodDays: 5,
+      isActive: true,
+      description: 'Standard hire-purchase installment plan for laptops and computing accessories.',
+      eligibilityRules: 'Valid National ID (NID) & 1 verified local guarantor.',
+      termsText: 'Monthly installment due within 10th of every calendar month. Grace period applies before daily late penalty is charged.',
+      versionReason: 'Initial Plan Creation'
+    });
+    setShowPlanModal(true);
+  };
+
+  const handleOpenEditPlan = (plan: EMIPlan) => {
+    setEditingPlan(plan);
+    setPlanForm({
+      id: plan.id,
+      name: plan.name,
+      durationMonths: plan.durationMonths,
+      minDownPaymentPercent: plan.minDownPaymentPercent,
+      interestRatePercent: plan.interestRatePercent,
+      processingFee: plan.processingFee,
+      lateFeePerDay: plan.lateFeePerDay,
+      gracePeriodDays: plan.gracePeriodDays,
+      isActive: plan.isActive,
+      description: plan.description || '',
+      eligibilityRules: plan.eligibilityRules || '',
+      termsText: plan.termsText || '',
+      versionReason: ''
+    });
+    setShowPlanModal(true);
+  };
+
+  const handleSavePlanSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!planForm.name.trim()) {
+      addToast('error', 'Validation Error', 'Plan Name is required.');
+      return;
+    }
+    if (planForm.durationMonths <= 0) {
+      addToast('error', 'Validation Error', 'Duration must be at least 1 month.');
+      return;
+    }
+    if (planForm.minDownPaymentPercent < 0 || planForm.minDownPaymentPercent > 100) {
+      addToast('error', 'Validation Error', 'Down payment percentage must be between 0% and 100%.');
+      return;
+    }
+
+    setIsSavingPlan(true);
+    try {
+      const planToSave: EMIPlan = {
+        id: planForm.id || `emi-plan-${Date.now()}`,
+        name: planForm.name.trim(),
+        durationMonths: Number(planForm.durationMonths),
+        minDownPaymentPercent: Number(planForm.minDownPaymentPercent),
+        interestRatePercent: Number(planForm.interestRatePercent),
+        processingFee: Number(planForm.processingFee),
+        lateFeePerDay: Number(planForm.lateFeePerDay),
+        gracePeriodDays: Number(planForm.gracePeriodDays),
+        isActive: planForm.isActive,
+        version: editingPlan?.version || 1,
+        description: planForm.description.trim(),
+        eligibilityRules: planForm.eligibilityRules.trim(),
+        termsText: planForm.termsText.trim()
+      };
+
+      const reason = planForm.versionReason.trim() || (editingPlan ? 'Plan terms updated by Admin' : 'New Plan Created');
+      const res = await saveEMIPlanWithVersioning(planToSave, reason);
+      if (res.success) {
+        setShowPlanModal(false);
+      }
+    } finally {
+      setIsSavingPlan(false);
+    }
+  };
+
+  const handleTogglePlanActive = async (plan: EMIPlan) => {
+    const updatedStatus = !plan.isActive;
+    await saveEMIPlanWithVersioning(
+      { ...plan, isActive: updatedStatus },
+      `Toggled status to ${updatedStatus ? 'ACTIVE' : 'DISABLED'}`
+    );
+  };
+
+  const handleDeletePlanSubmit = async (plan: EMIPlan) => {
+    if (window.confirm(`Are you sure you want to deactivate / archive EMI plan "${plan.name}"? Active contracts under this scheme will be preserved.`)) {
+      await deleteEMIPlan(plan.id);
+    }
+  };
+
+  const handleResetDefaultsSubmit = async () => {
+    if (window.confirm('Reset all EMI plans to system default standard schemes (3M 0%, 6M 0%, 9M 2%, 12M 4%)? Existing custom plans will be refreshed.')) {
+      setIsResettingPlans(true);
+      try {
+        await resetEMIPlansToDefaults();
+      } finally {
+        setIsResettingPlans(false);
+      }
+    }
+  };
 
   // Compute Overall Stats
   const totalEmiFinanced = emiAccounts.reduce((sum, e) => sum + e.financedAmount, 0);
@@ -1323,32 +1471,532 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* TAB 6: CONFIGURABLE EMI PLANS */}
+      {/* TAB 6: CONFIGURABLE EMI PLANS & HIRE-PURCHASE SCHEMES */}
       {/* ------------------------------------------------------------- */}
       {activeTab === 'plans' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
-          {emiPlans.map(plan => (
-            <div key={plan.id} className="erp-card" style={{ padding: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <span className="badge badge-info">{plan.durationMonths} Months Plan</span>
-                <span className={`badge ${plan.isActive ? 'badge-success' : 'badge-neutral'}`}>
-                  {plan.isActive ? 'ACTIVE' : 'DISABLED'}
-                </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Header & Controls Bar */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', background: 'var(--bg-card)', padding: '1.25rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                <Sliders size={20} color="#2563eb" />
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0 }}>
+                  Laptop EMI Schemes & Hire-Purchase Policies
+                </h3>
+                <span className="badge badge-info">{emiPlans.length} Total Schemes</span>
               </div>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                Administer tenure periods, down payment minimums, 0%-interest promotions, late penalties, and legal hire-purchase terms.
+              </p>
+            </div>
 
-              <h3 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '0.5rem' }}>
-                {plan.name}
-              </h3>
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <button 
+                className="btn btn-secondary btn-sm"
+                onClick={handleResetDefaultsSubmit}
+                disabled={isResettingPlans}
+                title="Restore standard 3M, 6M, 9M, and 12M plans"
+              >
+                <RotateCcw size={14} />
+                {isResettingPlans ? 'Restoring Defaults...' : 'Reset Default Schemes'}
+              </button>
+              <button 
+                className="btn btn-primary btn-sm"
+                onClick={handleOpenCreatePlan}
+              >
+                <Plus size={16} />
+                + Create New EMI Plan
+              </button>
+            </div>
+          </div>
 
-              <div style={{ fontSize: '0.8125rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', color: 'var(--text-secondary)' }}>
-                <div>Minimum Down Payment: <strong>{plan.minDownPaymentPercent}%</strong></div>
-                <div>Interest Markup: <strong>{plan.interestRatePercent}%</strong></div>
-                <div>Processing Fee: <strong>৳{plan.processingFee}</strong></div>
-                <div>Late Fee Per Day: <strong>৳{plan.lateFeePerDay}</strong></div>
-                <div>Grace Period: <strong>{plan.gracePeriodDays} days</strong></div>
+          {/* Quick Metrics Bar */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+            <div className="erp-card" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
+                <CheckCircle2 size={24} />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Active Schemes</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{emiPlans.filter(p => p.isActive).length} Available</div>
               </div>
             </div>
-          ))}
+
+            <div className="erp-card" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
+                <Clock size={24} />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Tenure Range</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>
+                  {emiPlans.length > 0 ? `${Math.min(...emiPlans.map(p => p.durationMonths))}M - ${Math.max(...emiPlans.map(p => p.durationMonths))}M` : 'N/A'}
+                </div>
+              </div>
+            </div>
+
+            <div className="erp-card" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b' }}>
+                <Percent size={24} />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Min Down Payment</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>
+                  {emiPlans.length > 0 ? `${Math.min(...emiPlans.map(p => p.minDownPaymentPercent))}% - ${Math.max(...emiPlans.map(p => p.minDownPaymentPercent))}%` : 'N/A'}
+                </div>
+              </div>
+            </div>
+
+            <div className="erp-card" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' }}>
+                <DollarSign size={24} />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>0% Interest Schemes</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>
+                  {emiPlans.filter(p => p.interestRatePercent === 0).length} Schemes
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Empty State when no plans exist */}
+          {emiPlans.length === 0 ? (
+            <div className="erp-card" style={{ padding: '3.5rem 1.5rem', textAlign: 'center' }}>
+              <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--bg-card-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+                <Sliders size={32} color="var(--text-secondary)" />
+              </div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem' }}>No EMI Plans Configured</h3>
+              <p style={{ color: 'var(--text-secondary)', maxWidth: '480px', margin: '0 auto 1.5rem', fontSize: '0.875rem' }}>
+                There are currently no active hire-purchase schemes in the system. You can restore the pre-configured standard schemes or create a custom plan.
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <button className="btn btn-primary btn-sm" onClick={handleResetDefaultsSubmit} disabled={isResettingPlans}>
+                  <RotateCcw size={15} /> Load Standard Default Schemes
+                </button>
+                <button className="btn btn-secondary btn-sm" onClick={handleOpenCreatePlan}>
+                  <Plus size={15} /> Create Custom Scheme
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Plans Grid */
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.25rem' }}>
+              {emiPlans.map(plan => {
+                const samplePrice = 50000;
+                const sampleDown = Math.round((samplePrice * plan.minDownPaymentPercent) / 100);
+                const sampleFinanced = samplePrice - sampleDown;
+                const sampleInterest = Math.round((sampleFinanced * plan.interestRatePercent) / 100);
+                const sampleTotal = sampleFinanced + sampleInterest;
+                const sampleMonthly = plan.durationMonths > 0 ? Math.round(sampleTotal / plan.durationMonths) : 0;
+
+                return (
+                  <div 
+                    key={plan.id} 
+                    className="erp-card" 
+                    style={{ 
+                      padding: '1.25rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      border: plan.isActive ? '1px solid var(--border-color)' : '1px dashed var(--border-color)',
+                      opacity: plan.isActive ? 1 : 0.8,
+                      transition: 'all 0.2s ease',
+                      boxShadow: 'var(--shadow-sm)'
+                    }}
+                  >
+                    <div>
+                      {/* Top Header */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <span className="badge badge-info" style={{ fontWeight: 700 }}>
+                            {plan.durationMonths} Months Tenure
+                          </span>
+                          <span style={{ fontSize: '0.7rem', padding: '0.15rem 0.4rem', borderRadius: '4px', background: 'var(--bg-card-muted)', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                            v{plan.version || 1}
+                          </span>
+                        </div>
+                        <span className={`badge ${plan.isActive ? 'badge-success' : 'badge-neutral'}`}>
+                          {plan.isActive ? 'ACTIVE' : 'DISABLED'}
+                        </span>
+                      </div>
+
+                      {/* Title & Description */}
+                      <h3 style={{ fontSize: '1.15rem', fontWeight: 800, marginBottom: '0.35rem', color: 'var(--text-primary)' }}>
+                        {plan.name}
+                      </h3>
+                      <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: '1rem', minHeight: '2.4rem', lineHeight: '1.4' }}>
+                        {plan.description || 'Flexible hire-purchase installment scheme for laptops.'}
+                      </p>
+
+                      {/* Metrics Matrix */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.6rem', background: 'var(--bg-card-muted)', padding: '0.75rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', fontSize: '0.8rem' }}>
+                        <div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Min Down Payment</div>
+                          <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{plan.minDownPaymentPercent}%</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Interest Markup</div>
+                          <div style={{ fontWeight: 700, color: plan.interestRatePercent === 0 ? '#10b981' : '#f59e0b' }}>
+                            {plan.interestRatePercent === 0 ? '0% (Interest Free)' : `${plan.interestRatePercent}% Flat`}
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Processing Fee</div>
+                          <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>৳{plan.processingFee}</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Grace Period</div>
+                          <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{plan.gracePeriodDays} Days</div>
+                        </div>
+                        <div style={{ gridColumn: 'span 2', borderTop: '1px solid var(--border-color)', paddingTop: '0.4rem' }}>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Late Penalty Rate</div>
+                          <div style={{ fontWeight: 600, color: '#ef4444', fontSize: '0.75rem' }}>
+                            ৳{plan.lateFeePerDay} / day (after grace period)
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Repayment Simulation Box */}
+                      <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(37, 99, 235, 0.05)', border: '1px solid rgba(37, 99, 235, 0.15)', marginBottom: '1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.725rem', fontWeight: 700, color: '#2563eb', marginBottom: '0.35rem' }}>
+                          <Calculator size={13} /> Simulation (৳50,000 Laptop)
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                          <span>Down: <strong>৳{sampleDown.toLocaleString()}</strong></span>
+                          <span style={{ color: '#10b981', fontWeight: 800 }}>৳{sampleMonthly.toLocaleString()}/mo</span>
+                        </div>
+                      </div>
+
+                      {/* Eligibility Rules & Legal Terms Snippet */}
+                      {(plan.eligibilityRules || plan.termsText) && (
+                        <div style={{ fontSize: '0.725rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.25rem', marginBottom: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.6rem' }}>
+                          {plan.eligibilityRules && (
+                            <div>
+                              <strong style={{ color: 'var(--text-primary)' }}>Eligibility:</strong> {plan.eligibilityRules}
+                            </div>
+                          )}
+                          {plan.termsText && (
+                            <div>
+                              <strong style={{ color: 'var(--text-primary)' }}>Terms:</strong> {plan.termsText}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Card Actions Footer */}
+                    <div style={{ display: 'flex', gap: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem', flexWrap: 'wrap' }}>
+                      <button 
+                        className="btn btn-secondary btn-sm"
+                        style={{ flex: 1 }}
+                        onClick={() => handleOpenEditPlan(plan)}
+                      >
+                        <Edit2 size={13} /> Edit / Customize
+                      </button>
+                      <button 
+                        className={`btn btn-sm ${plan.isActive ? 'btn-ghost' : 'btn-success'}`}
+                        onClick={() => handleTogglePlanActive(plan)}
+                        title={plan.isActive ? 'Disable Plan' : 'Activate Plan'}
+                      >
+                        <Power size={13} /> {plan.isActive ? 'Disable' : 'Enable'}
+                      </button>
+                      <button 
+                        className="btn btn-primary btn-sm"
+                        onClick={() => {
+                          setSelectedPlanId(plan.id);
+                          setActiveTab('new_emi');
+                        }}
+                        title="Start New EMI Sale with this Scheme"
+                      >
+                        <ArrowRight size={13} /> Use
+                      </button>
+                      <button 
+                        className="btn btn-ghost btn-sm"
+                        style={{ color: '#ef4444' }}
+                        onClick={() => handleDeletePlanSubmit(plan)}
+                        title="Archive / Remove Scheme"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* MODAL: CREATE / CUSTOMIZE EMI PLAN */}
+      {/* ------------------------------------------------------------- */}
+      {showPlanModal && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content modal-content-lg" style={{ maxWidth: '780px', maxHeight: '92vh', overflowY: 'auto' }}>
+            <div className="modal-header">
+              <div className="modal-title">
+                <Sliders size={20} color="#2563eb" />
+                <span>{editingPlan ? 'Edit & Customize EMI Scheme' : 'Create New Laptop EMI Scheme'}</span>
+                {editingPlan && (
+                  <span className="badge badge-info" style={{ fontSize: '0.7rem', marginLeft: '0.5rem' }}>
+                    Current: v{editingPlan.version || 1}
+                  </span>
+                )}
+              </div>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowPlanModal(false)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSavePlanSubmit}>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {/* Basic Details */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                    <label className="form-label">
+                      Plan Scheme Name <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      placeholder="e.g. 6 Months Standard Flexi Laptop Scheme" 
+                      value={planForm.name}
+                      onChange={e => setPlanForm(prev => ({ ...prev, name: e.target.value }))}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Duration (Months) <span style={{ color: '#ef4444' }}>*</span></label>
+                    <input 
+                      type="number" 
+                      min="1" 
+                      max="60" 
+                      className="form-input" 
+                      value={planForm.durationMonths}
+                      onChange={e => setPlanForm(prev => ({ ...prev, durationMonths: Math.max(1, parseInt(e.target.value) || 1) }))}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Active Status</label>
+                    <select 
+                      className="form-select"
+                      value={planForm.isActive ? 'ACTIVE' : 'DISABLED'}
+                      onChange={e => setPlanForm(prev => ({ ...prev, isActive: e.target.value === 'ACTIVE' }))}
+                    >
+                      <option value="ACTIVE">Active (Available in POS/Sale)</option>
+                      <option value="DISABLED">Disabled (Hidden from POS)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Financial Parameters */}
+                <div style={{ background: 'var(--bg-card-muted)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
+                  <h4 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-secondary)' }}>
+                    Financial & Pricing Markup Terms
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.85rem' }}>
+                    <div className="form-group">
+                      <label className="form-label">Min Down Payment (%)</label>
+                      <input 
+                        type="number" 
+                        min="0" 
+                        max="100" 
+                        className="form-input" 
+                        value={planForm.minDownPaymentPercent}
+                        onChange={e => setPlanForm(prev => ({ ...prev, minDownPaymentPercent: Math.max(0, Math.min(100, parseFloat(e.target.value) || 0)) }))}
+                        required
+                      />
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Standard: 20% - 30%</span>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Interest Markup (%)</label>
+                      <input 
+                        type="number" 
+                        min="0" 
+                        max="50" 
+                        step="0.5" 
+                        className="form-input" 
+                        value={planForm.interestRatePercent}
+                        onChange={e => setPlanForm(prev => ({ ...prev, interestRatePercent: Math.max(0, parseFloat(e.target.value) || 0) }))}
+                        required
+                      />
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Set 0% for Interest-Free</span>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Processing Fee (৳)</label>
+                      <input 
+                        type="number" 
+                        min="0" 
+                        className="form-input" 
+                        value={planForm.processingFee}
+                        onChange={e => setPlanForm(prev => ({ ...prev, processingFee: Math.max(0, parseFloat(e.target.value) || 0) }))}
+                      />
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>One-time admin fee</span>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Grace Period (Days)</label>
+                      <input 
+                        type="number" 
+                        min="0" 
+                        className="form-input" 
+                        value={planForm.gracePeriodDays}
+                        onChange={e => setPlanForm(prev => ({ ...prev, gracePeriodDays: Math.max(0, parseInt(e.target.value) || 0) }))}
+                      />
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Days before penalty</span>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Late Penalty (৳/Day)</label>
+                      <input 
+                        type="number" 
+                        min="0" 
+                        className="form-input" 
+                        value={planForm.lateFeePerDay}
+                        onChange={e => setPlanForm(prev => ({ ...prev, lateFeePerDay: Math.max(0, parseFloat(e.target.value) || 0) }))}
+                      />
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Accrues after grace</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Real-time Calculation Simulator inside Modal */}
+                {(() => {
+                  const down = Math.round((simLaptopPrice * planForm.minDownPaymentPercent) / 100);
+                  const financed = Math.max(0, simLaptopPrice - down);
+                  const interest = Math.round((financed * planForm.interestRatePercent) / 100);
+                  const totalFinancedWithInterest = financed + interest;
+                  const monthly = planForm.durationMonths > 0 ? Math.round(totalFinancedWithInterest / planForm.durationMonths) : 0;
+                  const initialPayment = down + planForm.processingFee;
+
+                  return (
+                    <div style={{ background: 'rgba(37, 99, 235, 0.05)', border: '1px solid rgba(37, 99, 235, 0.2)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, color: '#2563eb', fontSize: '0.85rem' }}>
+                          <Calculator size={16} /> Interactive Installment Simulator
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Sample Laptop Price:</span>
+                          <input 
+                            type="number" 
+                            step="5000" 
+                            min="10000" 
+                            style={{ width: '110px', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)', fontSize: '0.8rem', fontWeight: 700 }}
+                            value={simLaptopPrice}
+                            onChange={e => setSimLaptopPrice(Math.max(1000, parseFloat(e.target.value) || 0))}
+                          />
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.6rem', textAlign: 'center' }}>
+                        <div style={{ background: 'var(--bg-card)', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Required Down</div>
+                          <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-primary)' }}>৳{down.toLocaleString()}</div>
+                          <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>({planForm.minDownPaymentPercent}%)</div>
+                        </div>
+                        <div style={{ background: 'var(--bg-card)', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Financed Principal</div>
+                          <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-primary)' }}>৳{financed.toLocaleString()}</div>
+                        </div>
+                        <div style={{ background: 'var(--bg-card)', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Interest Added</div>
+                          <div style={{ fontWeight: 800, fontSize: '0.9rem', color: planForm.interestRatePercent === 0 ? '#10b981' : '#f59e0b' }}>
+                            ৳{interest.toLocaleString()}
+                          </div>
+                        </div>
+                        <div style={{ background: 'var(--bg-card)', padding: '0.5rem', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Monthly Installment</div>
+                          <div style={{ fontWeight: 900, fontSize: '1.05rem', color: '#10b981' }}>৳{monthly.toLocaleString()}</div>
+                          <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>× {planForm.durationMonths} Months</div>
+                        </div>
+                        <div style={{ background: 'var(--bg-card)', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Initial Outflow</div>
+                          <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-primary)' }}>৳{initialPayment.toLocaleString()}</div>
+                          <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Down + Fee</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Marketing & Policies */}
+                <div className="form-group">
+                  <label className="form-label">Marketing Description / Tagline</label>
+                  <input 
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g. 0% interest for university students and IT freelancers with low monthly commitment."
+                    value={planForm.description}
+                    onChange={e => setPlanForm(prev => ({ ...prev, description: e.target.value }))}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+                  <div className="form-group">
+                    <label className="form-label">Eligibility Requirements</label>
+                    <textarea 
+                      className="form-input"
+                      rows={2}
+                      placeholder="e.g. Original NID copy, utility bill, and one verified local guarantor."
+                      value={planForm.eligibilityRules}
+                      onChange={e => setPlanForm(prev => ({ ...prev, eligibilityRules: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Legal Contract Terms & Default Policy</label>
+                    <textarea 
+                      className="form-input"
+                      rows={2}
+                      placeholder="e.g. Ownership remains with Need Electro until full settlement. Default > 60 days results in repossession."
+                      value={planForm.termsText}
+                      onChange={e => setPlanForm(prev => ({ ...prev, termsText: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                {/* Versioning Audit Reason */}
+                <div className="form-group">
+                  <label className="form-label">
+                    Modification Reason / Version Log Note
+                  </label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder={editingPlan ? "e.g. Reduced down payment from 30% to 25% for seasonal laptop campaign" : "e.g. Initial Plan Creation"}
+                    value={planForm.versionReason}
+                    onChange={e => setPlanForm(prev => ({ ...prev, versionReason: e.target.value }))}
+                  />
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                    All changes are automatically audited. Existing contracts retain their original agreed terms.
+                  </span>
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button 
+                  type="button" 
+                  className="btn btn-secondary btn-sm" 
+                  onClick={() => setShowPlanModal(false)}
+                  disabled={isSavingPlan}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary btn-sm"
+                  disabled={isSavingPlan}
+                >
+                  {isSavingPlan ? 'Saving Plan...' : editingPlan ? 'Update & Version Plan' : 'Save New EMI Plan'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

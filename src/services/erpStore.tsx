@@ -157,6 +157,8 @@ interface ERPContextType {
   resolveWarrantyClaim: (claimId: string, status: WarrantyClaim['status'], notes: string) => Promise<{ success: boolean; error?: string }>;
   saveEMIPlan: (plan: EMIPlan) => void;
   saveEMIPlanWithVersioning: (plan: EMIPlan, reason?: string) => Promise<{ success: boolean; error?: string }>;
+  deleteEMIPlan: (id: string) => Promise<{ success: boolean; error?: string }>;
+  resetEMIPlansToDefaults: () => Promise<{ success: boolean; error?: string }>;
 
   // Control Center Master Configurations
   categoriesConfig: ProductCategoryConfig[];
@@ -376,8 +378,11 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (Array.isArray(d.investments) && d.investments.length > 0) setInvestments(d.investments);
         if (Array.isArray(d.financialAccounts) && d.financialAccounts.length > 0) setFinancialAccounts(d.financialAccounts);
         if (Array.isArray(d.employees)) setEmployees(d.employees);
-        if (Array.isArray(d.attendance)) setAttendance(d.attendance);
-        if (Array.isArray(d.emiPlans)) setEmiPlans(d.emiPlans);
+        if (Array.isArray(d.emiPlans) && d.emiPlans.length > 0) {
+          setEmiPlans(d.emiPlans);
+        } else if (!emiPlans || emiPlans.length === 0) {
+          setEmiPlans(INITIAL_EMI_PLANS);
+        }
         if (Array.isArray(d.emiAccounts)) setEmiAccounts(d.emiAccounts);
         if (Array.isArray(d.emiPayments)) setEmiPayments(d.emiPayments);
         if (Array.isArray(d.inventoryTransactions)) setInventoryTransactions(d.inventoryTransactions);
@@ -1693,6 +1698,41 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const deleteEMIPlan = async (id: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.emi.deletePlan(id);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to archive EMI plan.';
+        addToast('error', 'Plan Archive Failed', err);
+        return { success: false, error: err };
+      }
+      await refreshFromDatabase();
+      logAction('EMI', 'DELETE_EMI_PLAN', id, `Archived EMI Plan ID: ${id}`);
+      addToast('success', 'Plan Archived', 'EMI Plan has been deactivated.');
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error archiving plan.';
+      addToast('error', 'Plan Archive Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  const resetEMIPlansToDefaults = async (): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.emi.getPlans({ reset: true });
+      if (!res || !res.success) {
+        throw new Error('Failed to reset default plans');
+      }
+      await refreshFromDatabase();
+      addToast('success', 'Default Plans Restored', 'Standard 3M, 6M, 9M, and 12M plans loaded.');
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error restoring plans.';
+      addToast('error', 'Reset Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
   // -------------------------------------------------------------
   // SUPER ADMIN SYSTEM CONTROL CENTER IMPLEMENTATION
   // -------------------------------------------------------------
@@ -2366,6 +2406,8 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         resolveWarrantyClaim,
         saveEMIPlan,
         saveEMIPlanWithVersioning,
+        deleteEMIPlan,
+        resetEMIPlansToDefaults,
         categoriesConfig,
         saveCategoryConfig,
         deleteCategoryConfig,

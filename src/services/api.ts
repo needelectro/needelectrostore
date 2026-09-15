@@ -171,10 +171,16 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(payload)
     }),
-    getPlans: () => request<{ success: boolean; data: any[] }>('/api/emi/plans'),
-    savePlan: (plan: any) => request<{ success: boolean; message: string }>('/api/emi/plans', {
+    getPlans: (params?: { reset?: boolean }) => {
+      const q = params?.reset ? '?reset=true' : '';
+      return request<{ success: boolean; data: any[] }>(`/api/emi/plans${q}`);
+    },
+    savePlan: (plan: any) => request<{ success: boolean; message: string; plan?: any }>('/api/emi/plans', {
       method: 'POST',
       body: JSON.stringify(plan)
+    }),
+    deletePlan: (id: string) => request<{ success: boolean; message: string }>(`/api/emi/plans?id=${id}`, {
+      method: 'DELETE'
     })
   },
 
