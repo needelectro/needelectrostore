@@ -145,7 +145,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
         }}>
           {/* Logo */}
           <a href="#home" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-            <NeedElectroLogo size="sm" showSisterConcern={true} theme="dark" />
+            <NeedElectroLogo size="sm" showSisterConcern={false} theme="dark" />
           </a>
 
           {/* Navigation Links (Desktop) */}
@@ -347,7 +347,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             boxShadow: '0 4px 16px rgba(0, 140, 255, 0.2)'
           }}>
             <Sparkles size={14} />
-            <span>A Sister Concern of AMDADS GROUP • Kusumbag, Moulvibazar</span>
+            <span>Kusumbag, Moulvibazar</span>
           </div>
 
           {/* Main Heading */}
