@@ -158,6 +158,53 @@ productsRouter.post('/', requireAuth, requirePermission('products.create'), (req
         );
       }
 
+      // Automatically record initial procurement as an Operating Expense if unitCost > 0
+      const unitCost = Number(productData.costPrice || productData.purchasePrice || 0);
+      const effectiveStock = initialStock > 0 ? initialStock : (unitCost > 0 ? 1 : 0);
+      const totalExpenseAmount = unitCost * effectiveStock;
+
+      let recordedExpense = null;
+      if (totalExpenseAmount > 0) {
+        const expCountRow = db.prepare('SELECT COUNT(*) as count FROM expenses').get();
+        const expCount = expCountRow ? expCountRow.count : 0;
+        const voucherNumber = `EXP-PRD-${String(expCount + 101).padStart(4, '0')}`;
+        const expenseId = 'exp-' + Date.now();
+
+        // Deduct from financial account if exists
+        const account = db.prepare('SELECT id FROM financial_accounts WHERE is_active = 1 LIMIT 1').get() ||
+                        db.prepare('SELECT id FROM financial_accounts LIMIT 1').get();
+        if (account) {
+          db.prepare('UPDATE financial_accounts SET balance = balance - ? WHERE id = ?').run(totalExpenseAmount, account.id);
+        }
+
+        const expDescription = `Product Catalog Inflow: ${productData.name} (SKU: ${cleanSku}) — ${effectiveStock} unit(s) @ ৳${unitCost.toLocaleString()}`;
+
+        db.prepare(`
+          INSERT INTO expenses (
+            id, voucher_number, category, amount, date,
+            payment_method, branch_id, description, attachment_name,
+            created_by, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          expenseId, voucherNumber, 'Purchase Expenses', totalExpenseAmount, today,
+          'Cash', 'branch-1', expDescription,
+          '', req.user.name, nowIso
+        );
+
+        recordedExpense = {
+          id: expenseId,
+          voucherNumber,
+          category: 'Purchase Expenses',
+          amount: totalExpenseAmount,
+          date: today,
+          paymentMethod: 'Cash',
+          branchId: 'branch-1',
+          description: expDescription,
+          createdBy: req.user.name,
+          createdAt: nowIso
+        };
+      }
+
       // Audit Log
       db.prepare(`
         INSERT INTO audit_logs (id, timestamp, user_id, user_name, action, module, record_id, details, ip_address)
@@ -169,17 +216,21 @@ productsRouter.post('/', requireAuth, requirePermission('products.create'), (req
       );
 
       return {
-        id: newId,
-        name: productData.name,
-        sku: cleanSku,
-        currentStock: initialStock
+        product: {
+          id: newId,
+          name: productData.name,
+          sku: cleanSku,
+          currentStock: initialStock
+        },
+        expense: recordedExpense
       };
     });
 
     res.json({
       success: true,
-      message: `Product '${productData.name}' created successfully.`,
-      product: result
+      message: `Product '${productData.name}' created successfully.` + (result.expense ? ` Recorded initial purchase expense of ৳${result.expense.amount}.` : ''),
+      product: result.product,
+      expense: result.expense
     });
   } catch (err) {
     console.error('Product create error:', err);

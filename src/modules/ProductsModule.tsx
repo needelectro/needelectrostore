@@ -74,8 +74,8 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
     setRetailPrice('');
     setWholesalePrice('');
     setEmiPrice('');
-    setCurrentStock('');
-    setMinStock('');
+    setCurrentStock(1);
+    setMinStock(3);
     setSupplierId('');
     setWarrantyMonths('');
     setIsSerialized(false);
@@ -561,6 +561,38 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) =>
                       />
                     </div>
                   </div>
+
+                  {/* Automatic Procurement Expense Indicator */}
+                  {!editingProduct && Number(costPrice || purchasePrice || 0) > 0 && (
+                    <div style={{
+                      marginTop: '0.85rem',
+                      padding: '0.65rem 0.85rem',
+                      background: 'rgba(59, 130, 246, 0.08)',
+                      border: '1px solid rgba(59, 130, 246, 0.25)',
+                      borderRadius: 'var(--radius-sm)',
+                      fontSize: '0.82rem',
+                      color: 'var(--text-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '0.5rem',
+                      flexWrap: 'wrap'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '1.15rem' }}>💼</span>
+                        <span>
+                          <strong>Auto-Calculated Expense:</strong> Registering this product will automatically record{' '}
+                          <strong style={{ color: '#2563eb' }}>
+                            ৳{((Number(costPrice || purchasePrice || 0)) * (Number(currentStock) > 0 ? Number(currentStock) : 1)).toLocaleString()}
+                          </strong>{' '}
+                          as an initial procurement voucher under <em>'Purchase Expenses'</em>.
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '0.7rem', padding: '2px 8px', background: 'rgba(59, 130, 246, 0.15)', borderRadius: '4px', fontWeight: 700, color: '#2563eb' }}>
+                        AUTO EXPENSE VOUCHER
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Inventory & Tracking Settings */}

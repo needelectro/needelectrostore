@@ -125,7 +125,7 @@ interface ERPContextType {
   // Core Business Actions
   createSale: (saleData: Omit<Sale, 'id' | 'invoiceNumber' | 'createdAt'>, emiPlanConfig?: { planId: string; downPayment: number; durationMonths: number }, paymentAccountId?: string) => Promise<{ success: boolean; sale?: Sale; error?: string }>;
   collectEMIPayment: (emiAccountId: string, installmentId: string, amount: number, penaltyAmount: number, paymentMethod: PaymentMethod, ref?: string, notes?: string, accountId?: string) => Promise<{ success: boolean; error?: string; receiptNumber?: string }>;
-  createProduct: (productData: Omit<Product, 'id' | 'createdAt'>, initialSerials?: string[]) => Promise<{ success: boolean; error?: string; product?: Product }>;
+  createProduct: (productData: Omit<Product, 'id' | 'createdAt'>, initialSerials?: string[]) => Promise<{ success: boolean; error?: string; product?: Product; expense?: any }>;
   updateProduct: (productData: Product) => Promise<{ success: boolean; error?: string }>;
   createPurchase: (purchaseData: { supplierId: string; branchId: string; items: { productId: string; quantity: number; costPrice: number; serials: string[] }[]; paymentMethod: string; paidAmount: number; notes?: string; depositAccountId?: string }) => Promise<{ success: boolean; error?: string; purchase?: Purchase }>;
   recordSupplierPayment: (supplierId: string, amount: number, paymentMethod: PaymentMethod, accountId?: string, reference?: string, notes?: string) => Promise<{ success: boolean; error?: string }>;
@@ -1457,7 +1457,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Product CRUD
-  const createProduct = async (productData: Omit<Product, 'id' | 'createdAt'>, initialSerials?: string[]): Promise<{ success: boolean; error?: string; product?: Product }> => {
+  const createProduct = async (productData: Omit<Product, 'id' | 'createdAt'>, initialSerials?: string[]): Promise<{ success: boolean; error?: string; product?: Product; expense?: any }> => {
     try {
       const res = await api.products.createProduct(productData, initialSerials);
       if (!res || !res.success) {
@@ -1467,8 +1467,12 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       await refreshFromDatabase();
       logAction('INVENTORY', 'CREATE_PRODUCT', res.product?.sku || productData.sku, `Created product ${productData.name}`);
-      addToast('success', 'Product Added', `${productData.name} added successfully.`);
-      return { success: true, product: res.product };
+      if (res.expense) {
+        addToast('success', 'Product & Expense Recorded', `${productData.name} registered. ৳${Number(res.expense.amount || 0).toLocaleString()} recorded under 'Purchase Expenses'.`);
+      } else {
+        addToast('success', 'Product Added', `${productData.name} added successfully.`);
+      }
+      return { success: true, product: res.product, expense: res.expense };
     } catch (err: any) {
       const errMsg = err.message || 'Error adding product to database.';
       addToast('error', 'Product Creation Failed', errMsg);

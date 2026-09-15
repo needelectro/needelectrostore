@@ -185,7 +185,7 @@ export const api = {
       return request<{ success: boolean; data: any[] }>(`/api/products${q}`);
     },
     createProduct: (productData: any, initialSerials?: string[]) =>
-      request<{ success: boolean; message: string; product: any }>('/api/products', {
+      request<{ success: boolean; message: string; product: any; expense?: any }>('/api/products', {
         method: 'POST',
         body: JSON.stringify({ productData, initialSerials })
       }),
