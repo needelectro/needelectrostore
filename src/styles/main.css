@@ -629,6 +629,21 @@ html, body {
   }
 }
 
+/* Scrollable Header with clean hidden scrollbar */
+.header {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.header::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 /* Smartphone Breakpoint (<= 768px) */
 @media (max-width: 768px) {
   /* Prevent iOS zoom on input focus */
@@ -640,6 +655,8 @@ html, body {
     padding: 0 0.75rem !important;
     height: 56px !important;
     gap: 0.5rem !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
   }
 
   .header .desktop-only,

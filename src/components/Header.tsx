@@ -26,17 +26,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
-  // Corporate Website-style Top Nav Modules
-  const topNavItems = [
-    { label: 'Home', module: 'dashboard' },
-    { label: 'Business', module: 'control_center' },
-    { label: 'Sales', module: 'sales' },
-    { label: 'Products', module: 'products' },
-    { label: 'Services', module: 'service' },
-    { label: 'EMI', module: 'emi' },
-    { label: 'Reports', module: 'reports' }
-  ].filter(item => hasPermission ? hasPermission(item.module) : true);
-
   // Compute live notifications
   const overdueEmi = emiAccounts.filter(e => e.installments.some(i => i.status === 'OVERDUE'));
   const dueTodayEmi = emiAccounts.filter(e => e.installments.some(i => i.status === 'DUE_TODAY'));
@@ -55,17 +44,36 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
       background: 'var(--bg-header)',
       backdropFilter: 'blur(12px)',
       borderBottom: '1px solid var(--border-color)',
-      padding: '0 1.5rem',
+      padding: '0 1.25rem',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: '1rem',
       position: 'sticky',
       top: 0,
-      zIndex: 50
+      zIndex: 50,
+      overflowX: 'auto',
+      overflowY: 'hidden',
+      whiteSpace: 'nowrap',
+      scrollbarWidth: 'none',
+      msOverflowStyle: 'none',
+      WebkitOverflowScrolling: 'touch'
     }}>
+      {/* Invisible backdrop for popovers */}
+      {(showNotifications || showUserMenu) && (
+        <div 
+          onClick={() => { setShowNotifications(false); setShowUserMenu(false); }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9998,
+            background: 'transparent'
+          }}
+        />
+      )}
+
       {/* Left: Hamburger Toggle & Brand Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0 }}>
         <button 
           className="btn btn-ghost btn-sm mobile-hamburger-btn" 
           onClick={toggleSidebar}
@@ -87,42 +95,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
         </div>
       </div>
 
-      {/* Center: Corporate Website-Style Navigation */}
-      <nav className="desktop-nav-only" style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.35rem',
-        flexWrap: 'wrap'
-      }}>
-        {topNavItems.map(item => (
-          <button
-            key={item.module}
-            onClick={() => onNavigateToModule(item.module)}
-            className="btn btn-ghost btn-sm"
-            style={{
-              fontSize: '0.84rem',
-              fontWeight: 600,
-              padding: '0.35rem 0.75rem',
-              borderRadius: '8px',
-              color: 'var(--text-secondary)',
-              transition: 'all 0.15s ease'
-            }}
-            onMouseOver={e => {
-              e.currentTarget.style.color = 'var(--brand-primary)';
-              e.currentTarget.style.background = 'var(--bg-hover)';
-            }}
-            onMouseOut={e => {
-              e.currentTarget.style.color = 'var(--text-secondary)';
-              e.currentTarget.style.background = 'transparent';
-            }}
-          >
-            {item.label}
-          </button>
-        ))}
-      </nav>
-
       {/* Right: Search Trigger & Enterprise Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
         {/* Global Search Bar */}
         <div 
           onClick={onOpenSearch}
@@ -269,13 +243,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
             <div 
               className="erp-card"
               style={{
-                position: 'absolute',
-                top: '44px',
-                right: 0,
+                position: 'fixed',
+                top: 'calc(var(--header-height, 60px) + 4px)',
+                right: '16px',
                 width: '340px',
-                zIndex: 100,
+                maxWidth: 'calc(100vw - 32px)',
+                zIndex: 9999,
                 padding: '0',
-                boxShadow: 'var(--shadow-lg)',
+                boxShadow: '0 12px 32px rgba(0, 0, 0, 0.28)',
                 borderRadius: 'var(--radius-lg)'
               }}
             >
@@ -373,13 +348,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
             <div 
               className="erp-card"
               style={{
-                position: 'absolute',
-                top: '44px',
-                right: 0,
+                position: 'fixed',
+                top: 'calc(var(--header-height, 60px) + 4px)',
+                right: '16px',
                 width: '260px',
-                zIndex: 100,
+                maxWidth: 'calc(100vw - 32px)',
+                zIndex: 9999,
                 padding: '0.75rem',
-                boxShadow: 'var(--shadow-lg)'
+                boxShadow: '0 12px 32px rgba(0, 0, 0, 0.28)'
               }}
             >
               <div style={{ paddingBottom: '0.65rem', borderBottom: '1px solid var(--border-color)', marginBottom: '0.65rem' }}>
