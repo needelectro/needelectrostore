@@ -113,7 +113,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
       backgroundColor: '#070c18',
       color: '#f8fafc',
       fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-      overflowX: 'hidden',
+      overflowX: 'clip',
+      scrollPaddingTop: '80px',
       lineHeight: 1.6
     }}>
       {/* Inject SEO Structured Data */}
@@ -123,15 +124,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
       />
 
       {/* =========================================================================
-          1. CUSTOMER-SIDE STICKY EXECUTIVE HEADER
+          1. CUSTOMER-SIDE STICKY EXECUTIVE HEADER (FIXED TO VIEWPORT)
           ========================================================================= */}
       <header style={{
-        position: 'sticky',
+        position: 'fixed',
         top: 0,
+        left: 0,
+        right: 0,
+        width: '100%',
         zIndex: 1000,
-        backgroundColor: 'rgba(7, 12, 24, 0.9)',
+        backgroundColor: 'rgba(7, 12, 24, 0.95)',
         backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.35)',
         transition: 'all 0.3s ease'
       }}>
         <div style={{
@@ -221,7 +227,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             padding: '1.25rem 1.5rem',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.85rem'
+            gap: '0.85rem',
+            maxHeight: 'calc(100vh - 70px)',
+            overflowY: 'auto'
           }}>
             <a 
               href="#home" 
@@ -313,7 +321,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           ========================================================================= */}
       <section id="home" style={{
         position: 'relative',
-        padding: '5.5rem 1.5rem 5rem',
+        padding: '7rem 1.5rem 5rem',
         overflow: 'hidden',
         background: 'radial-gradient(circle at 50% -10%, rgba(0, 140, 255, 0.28) 0%, transparent 65%)'
       }}>
