@@ -315,8 +315,8 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) 
               <div style={{ fontSize: '1.9rem', fontWeight: 900, color: '#fef08a', marginTop: '0.2rem' }}>
                 ৳{totalCashBalance.toLocaleString()}
               </div>
-              <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.85)', marginTop: '0.2rem' }}>
-                Drawer: ৳{(Number(mainCashDrawer?.balance) || 0).toLocaleString()}
+              <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '0.2rem' }}>
+                Cash in hand & bank accounts
               </div>
             </div>
           </div>
@@ -804,7 +804,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) 
                 ৳{totalCashBalance.toLocaleString()}
               </div>
               <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
-                Across Cash Drawer & Bank Accounts
+                Across Cash & Bank Accounts
               </div>
             </div>
             <button
@@ -1067,7 +1067,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) 
                 ৳{totalCashBalance.toLocaleString()}
               </div>
               <p style={{ color: '#cbd5e1', fontSize: '0.9rem', margin: '0.5rem 0 1.5rem 0' }}>
-                Total liquid capital available in Moulvibazar showroom cash drawer and connected official bank accounts.
+                Total liquid capital available in Moulvibazar showroom cash and connected official bank accounts.
               </p>
             </div>
 
@@ -1080,7 +1080,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) 
               marginBottom: '1.25rem'
             }}>
               <div>
-                <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Main Cash Drawer</span>
+                <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Cash in Hand</span>
                 <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', marginTop: '2px' }}>
                   ৳{(Number(mainCashDrawer?.balance) || 0).toLocaleString()}
                 </div>
