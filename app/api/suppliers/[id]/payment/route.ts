@@ -63,6 +63,22 @@ export async function POST(
       },
     });
 
+    // Record Operating Expense under 'Purchase Expenses'
+    const expVoucher = 'EXP-SUP-' + Date.now().toString().slice(-6);
+    await tx.expense.create({
+      data: {
+        id: 'exp-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+        voucherNumber: expVoucher,
+        category: 'Purchase Expenses',
+        amount: new Prisma.Decimal(amount),
+        date: new Date(),
+        paymentMethod: paymentMethod || 'CASH',
+        branchId: user.branchId || 'branch-main-1',
+        description: `Supplier Payment for Purchases: ${supplier.name} (${supplier.company || ''}) — Ref: ${voucherNumber}`,
+        createdBy: user.name,
+      },
+    });
+
     // Create Accounting Ledger Entry
     await tx.ledgerEntry.create({
       data: {

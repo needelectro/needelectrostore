@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: parsed.error.errors[0].message }, { status: 400 });
   }
 
-  const { category, amount, date, paymentMethod, branchId, description, attachmentName } = parsed.data;
+  const { category, amount, date, paymentMethod, branchId, description, attachmentName, accountId } = parsed.data;
   const voucherNumber = 'EXP-' + Date.now().toString().slice(-6);
 
   try {
@@ -52,10 +52,16 @@ export async function POST(req: NextRequest) {
       });
 
       // Deduct financial account balance
-      const account = await tx.financialAccount.findFirst({
-        where: { isActive: true },
-        orderBy: { name: 'asc' },
-      });
+      let account = accountId 
+        ? await tx.financialAccount.findUnique({ where: { id: accountId } })
+        : null;
+
+      if (!account) {
+        account = await tx.financialAccount.findFirst({
+          where: { isActive: true },
+          orderBy: { name: 'asc' },
+        });
+      }
 
       if (account) {
         await tx.financialAccount.update({

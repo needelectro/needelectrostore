@@ -8,7 +8,12 @@ export async function POST(req: NextRequest) {
   const user = await requireAuth(req);
   if (user instanceof NextResponse) return user;
 
-  if (!hasPermission(user, 'accounting', 'transfer') && user.role !== 'SUPER_ADMIN') {
+  if (
+    !hasPermission(user, 'accounting', 'transfer') &&
+    !hasPermission(user, 'cash_management', 'create') &&
+    !hasPermission(user, 'cash_management', 'view') &&
+    !['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'ACCOUNTANT'].includes(user.role)
+  ) {
     return NextResponse.json({ success: false, error: 'Access denied' }, { status: 403 });
   }
 
@@ -16,6 +21,10 @@ export async function POST(req: NextRequest) {
 
   if (!fromAccountId || !toAccountId || !amount || Number(amount) <= 0) {
     return NextResponse.json({ success: false, error: 'Valid source, destination, and amount required' }, { status: 400 });
+  }
+
+  if (fromAccountId === toAccountId) {
+    return NextResponse.json({ success: false, error: 'Source and destination accounts must be different' }, { status: 400 });
   }
 
   const transferNumber = 'TRF-' + Date.now().toString().slice(-6);
@@ -31,7 +40,7 @@ export async function POST(req: NextRequest) {
 
       const totalDeduction = Number(amount) + Number(fee || 0);
       if (Number(fromAcc.balance) < totalDeduction) {
-        throw new Error(`Insufficient funds in ${fromAcc.name}. Balance: ৳${fromAcc.balance}`);
+        throw new Error(`Insufficient funds in ${fromAcc.name}. Balance: ৳${Number(fromAcc.balance).toLocaleString()}`);
       }
 
       // Deduct from source
@@ -62,6 +71,54 @@ export async function POST(req: NextRequest) {
         },
       });
 
+      // Double-entry Ledger entries
+      await tx.ledgerEntry.create({
+        data: {
+          id: 'led-' + Date.now() + '-trf-out',
+          date: new Date(),
+          partyType: 'ACCOUNT',
+          partyId: fromAccountId,
+          referenceType: 'TRANSFER',
+          referenceNumber: transferNumber,
+          description: `Transfer to ${toAcc.name}${fee > 0 ? ` (Fee: ৳${fee})` : ''}`,
+          debit: new Prisma.Decimal(0),
+          credit: new Prisma.Decimal(totalDeduction),
+          runningBalance: new Prisma.Decimal(Number(fromAcc.balance) - totalDeduction),
+        },
+      });
+
+      await tx.ledgerEntry.create({
+        data: {
+          id: 'led-' + Date.now() + '-trf-in',
+          date: new Date(),
+          partyType: 'ACCOUNT',
+          partyId: toAccountId,
+          referenceType: 'TRANSFER',
+          referenceNumber: transferNumber,
+          description: `Transfer received from ${fromAcc.name}`,
+          debit: new Prisma.Decimal(amount),
+          credit: new Prisma.Decimal(0),
+          runningBalance: new Prisma.Decimal(Number(toAcc.balance) + Number(amount)),
+        },
+      });
+
+      // If there is a transfer fee, log it as an Expense
+      if (fee && Number(fee) > 0) {
+        await tx.expense.create({
+          data: {
+            id: 'exp-' + Date.now() + '-fee',
+            voucherNumber: 'EXP-FEE-' + Date.now().toString().slice(-6),
+            category: 'Service Expenses',
+            amount: new Prisma.Decimal(fee),
+            date: new Date(),
+            paymentMethod: fromAcc.type === 'CASH' ? 'Cash' : fromAcc.type === 'BANK' ? 'Bank' : 'bKash',
+            branchId: user.branchId || 'branch-main-1',
+            description: `Transfer fee: ${fromAcc.name} -> ${toAcc.name} (${transferNumber})`,
+            createdBy: user.name,
+          },
+        });
+      }
+
       // Audit Log
       await tx.auditLog.create({
         data: {
@@ -71,7 +128,7 @@ export async function POST(req: NextRequest) {
           action: 'FUND_TRANSFER',
           module: 'ACCOUNTING',
           recordId: trf.id,
-          details: `Transferred ৳${amount} from ${fromAcc.name} to ${toAcc.name}`,
+          details: `Transferred ৳${amount} from ${fromAcc.name} to ${toAcc.name} (Ref: ${transferNumber})`,
         },
       });
 

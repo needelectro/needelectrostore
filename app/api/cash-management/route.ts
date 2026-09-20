@@ -464,12 +464,16 @@ export async function GET(req: NextRequest) {
 
     // Expenses
     expenses.forEach((e) => {
+      // Prevent double counting: purchases and supplier payments already provide their own event records
+      if (e.voucherNumber.startsWith('EXP-PUR-') || e.voucherNumber.startsWith('EXP-SUP-')) {
+        return;
+      }
       allEvents.push({
         id: 'exp-' + e.id,
         date: new Date(e.date),
         transactionId: e.voucherNumber,
         type: 'EXPENSE',
-        typeLabel: 'Business Expense',
+        typeLabel: e.category === 'Purchase Expenses' ? 'Purchase Expense' : 'Business Expense',
         direction: 'OUTFLOW',
         description: `Operating expense: [${e.category}] ${e.description}`,
         reference: e.voucherNumber,

@@ -170,6 +170,7 @@ export const createExpenseSchema = z.object({
   branchId: z.string().min(1, 'Branch is required'),
   description: z.string().min(2, 'Description is required'),
   attachmentName: z.string().optional(),
+  accountId: z.string().optional(),
 });
 
 // 7. Service Job Schema

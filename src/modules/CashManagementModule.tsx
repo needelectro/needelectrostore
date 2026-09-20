@@ -5,7 +5,7 @@ import {
   TrendingUp, Calendar, Filter, Plus, RefreshCw, Search,
   Download, Printer, AlertTriangle, ShieldCheck, CheckCircle2,
   FileSpreadsheet, ArrowLeftRight, HelpCircle, Layers, X, CreditCard,
-  Briefcase, UserPlus
+  Briefcase, UserPlus, Receipt, Coins, Calculator, Check, ShoppingBag, ArrowRight
 } from 'lucide-react';
 import { 
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
@@ -21,7 +21,8 @@ interface CashManagementModuleProps {
 export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNavigate }) => {
   const { 
     currentUser, financialAccounts, customers, recordCashAdjustment,
-    collectCustomerDue, addToast, settings, selectedBranch, recordInvestment
+    collectCustomerDue, addToast, settings, selectedBranch, recordInvestment,
+    transferFunds, createExpense
   } = useERP();
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN';
@@ -31,7 +32,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
   const [methodFilter, setMethodFilter] = useState('ALL');
-  const [typeFilter, setTypeFilter] = useState<'ALL' | 'INFLOW' | 'OUTFLOW'>('ALL');
+  const [typeFilter, setTypeFilter] = useState<'ALL' | 'INFLOW' | 'OUTFLOW' | 'PURCHASES'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Data Loading States
@@ -42,6 +43,39 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
   const [showAdjustmentModal, setShowAdjustmentModal] = useState(false);
   const [showDueModal, setShowDueModal] = useState(false);
   const [showInvestmentModal, setShowInvestmentModal] = useState(false);
+  const [showTransferModal, setShowTransferModal] = useState(false);
+  const [showReconcileModal, setShowReconcileModal] = useState(false);
+  const [showPettyModal, setShowPettyModal] = useState(false);
+
+  // Transfer Form State
+  const [transferFromId, setTransferFromId] = useState(financialAccounts[0]?.id || 'acc-1');
+  const [transferToId, setTransferToId] = useState(financialAccounts[1]?.id || financialAccounts[0]?.id || 'acc-2');
+  const [transferAmount, setTransferAmount] = useState<number>(5000);
+  const [transferFee, setTransferFee] = useState<number>(0);
+  const [transferReference, setTransferReference] = useState('');
+  const [transferNotes, setTransferNotes] = useState('');
+  const [isSubmittingTransfer, setIsSubmittingTransfer] = useState(false);
+
+  // Daily Cash Register & Drawer Reconciliation Form State
+  const [note1000, setNote1000] = useState<number>(0);
+  const [note500, setNote500] = useState<number>(0);
+  const [note200, setNote200] = useState<number>(0);
+  const [note100, setNote100] = useState<number>(0);
+  const [note50, setNote50] = useState<number>(0);
+  const [note20, setNote20] = useState<number>(0);
+  const [note10, setNote10] = useState<number>(0);
+  const [looseCoins, setLooseCoins] = useState<number>(0);
+  const [useDirectCount, setUseDirectCount] = useState(false);
+  const [directCountedTotal, setDirectCountedTotal] = useState<number>(0);
+  const [reconcileNotes, setReconcileNotes] = useState('');
+  const [isAutoReconciling, setIsAutoReconciling] = useState(false);
+
+  // Quick Petty Cash Form State
+  const [pettyCategory, setPettyCategory] = useState<string>('Office Supplies & Snacks');
+  const [pettyAmount, setPettyAmount] = useState<number>(150);
+  const [pettyAccountId, setPettyAccountId] = useState(financialAccounts.find(a => a.type === 'CASH')?.id || financialAccounts[0]?.id || 'acc-1');
+  const [pettyDescription, setPettyDescription] = useState('');
+  const [isSubmittingPetty, setIsSubmittingPetty] = useState(false);
 
   // Investment Form State
   const [invAmount, setInvAmount] = useState<number>(50000);
@@ -143,12 +177,162 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
         item.reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.user.toLowerCase().includes(searchQuery.toLowerCase());
 
+      const isPurchaseRelated = 
+        item.type === 'PURCHASE' || 
+        item.type === 'SUPPLIER_PAYMENT' || 
+        item.typeLabel.toLowerCase().includes('purchase') ||
+        item.description.toLowerCase().includes('purchase') ||
+        item.description.toLowerCase().includes('supplier');
+
       const matchesType = 
-        typeFilter === 'ALL' || item.direction === typeFilter;
+        typeFilter === 'ALL' 
+          ? true 
+          : typeFilter === 'PURCHASES'
+            ? isPurchaseRelated
+            : item.direction === typeFilter;
 
       return matchesSearch && matchesType;
     });
   }, [summaryData?.movements, searchQuery, typeFilter]);
+
+  // Daily Cash Reconciliation Computations
+  const primaryCashAccount = useMemo(() => {
+    return financialAccounts.find(a => a.type === 'CASH') || financialAccounts[0];
+  }, [financialAccounts]);
+
+  const expectedPhysicalCash = useMemo(() => {
+    return primaryCashAccount ? Number(primaryCashAccount.balance) : (summaryData?.currentCash || 0);
+  }, [primaryCashAccount, summaryData]);
+
+  const calculatedDenominationsTotal = useMemo(() => {
+    return (
+      (note1000 * 1000) +
+      (note500 * 500) +
+      (note200 * 200) +
+      (note100 * 100) +
+      (note50 * 50) +
+      (note20 * 20) +
+      (note10 * 10) +
+      (Number(looseCoins) || 0)
+    );
+  }, [note1000, note500, note200, note100, note50, note20, note10, looseCoins]);
+
+  const totalPhysicalCounted = useDirectCount ? directCountedTotal : calculatedDenominationsTotal;
+  const cashDiscrepancy = totalPhysicalCounted - expectedPhysicalCash;
+
+  // Handle Fund Transfer Submit
+  const handleTransferSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (transferFromId === transferToId) {
+      alert('Source and destination financial accounts must be different.');
+      return;
+    }
+    if (transferAmount <= 0) {
+      alert('Transfer amount must be greater than 0.');
+      return;
+    }
+
+    const sourceAcc = financialAccounts.find(a => a.id === transferFromId);
+    const totalRequired = transferAmount + (Number(transferFee) || 0);
+    if (sourceAcc && Number(sourceAcc.balance) < totalRequired) {
+      alert(`Insufficient funds in ${sourceAcc.name}. Current balance: ৳${Number(sourceAcc.balance).toLocaleString('en-IN')}`);
+      return;
+    }
+
+    setIsSubmittingTransfer(true);
+    try {
+      const res = await transferFunds(
+        transferFromId,
+        transferToId,
+        transferAmount,
+        transferFee,
+        `${transferReference ? `Ref: ${transferReference} - ` : ''}${transferNotes || 'Inter-account fund transfer'}`
+      );
+
+      if (res.success) {
+        setShowTransferModal(false);
+        setTransferAmount(5000);
+        setTransferFee(0);
+        setTransferReference('');
+        setTransferNotes('');
+        await fetchCashData();
+      }
+    } finally {
+      setIsSubmittingTransfer(false);
+    }
+  };
+
+  // Handle Auto-Reconciliation of Drawer Variance
+  const handleAutoReconcileDiscrepancy = async () => {
+    if (cashDiscrepancy === 0) {
+      alert('Cash drawer is perfectly balanced with zero discrepancy. No adjustment needed.');
+      return;
+    }
+
+    if (!isSuperAdmin) {
+      alert('Super Admin or Admin authorization is required to apply automatic cash discrepancy adjustments.');
+      return;
+    }
+
+    const isExcess = cashDiscrepancy > 0;
+    const diffAbs = Math.abs(cashDiscrepancy);
+
+    setIsAutoReconciling(true);
+    try {
+      const res = await recordCashAdjustment({
+        amount: diffAbs,
+        type: isExcess ? 'INFLOW' : 'OUTFLOW',
+        reason: isExcess ? 'CASH_EXCESS' : 'CASH_SHORTAGE',
+        accountId: primaryCashAccount?.id || 'acc-1',
+        paymentMethod: 'Cash',
+        reference: 'RECON-' + new Date().toISOString().split('T')[0],
+        notes: `Automated register closing reconciliation. Physical count: ৳${totalPhysicalCounted.toLocaleString()} vs System expected: ৳${expectedPhysicalCash.toLocaleString()} (${isExcess ? 'Excess' : 'Shortage'} of ৳${diffAbs.toLocaleString()}). ${reconcileNotes}`
+      });
+
+      if (res.success) {
+        addToast('success', 'Drawer Reconciled', `Cash drawer physical closing reconciled and adjusted by ৳${diffAbs.toLocaleString()}.`);
+        setShowReconcileModal(false);
+        await fetchCashData();
+      }
+    } finally {
+      setIsAutoReconciling(false);
+    }
+  };
+
+  // Handle Quick Petty Cash Submit
+  const handlePettyCashSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pettyAmount <= 0) {
+      alert('Petty cash amount must be greater than 0.');
+      return;
+    }
+    if (!pettyDescription.trim()) {
+      alert('Description/voucher reason is required.');
+      return;
+    }
+
+    setIsSubmittingPetty(true);
+    try {
+      const res = await createExpense({
+        category: pettyCategory as any,
+        amount: pettyAmount,
+        date: new Date().toISOString().split('T')[0],
+        paymentMethod: 'Cash',
+        branchId: selectedBranch.id,
+        description: `[Petty Cash] ${pettyDescription.trim()}`,
+        accountId: pettyAccountId,
+      } as any);
+
+      if (res.success) {
+        setShowPettyModal(false);
+        setPettyAmount(150);
+        setPettyDescription('');
+        await fetchCashData();
+      }
+    } finally {
+      setIsSubmittingPetty(false);
+    }
+  };
 
   // Handle Adjustment Submit
   const handleAdjustmentSubmit = async (e: React.FormEvent) => {
@@ -362,6 +546,40 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
           </button>
 
           <button 
+            className="btn"
+            onClick={() => setShowReconcileModal(true)}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.45rem',
+              background: 'linear-gradient(135deg, #10b981 0%, #0d9488 100%)',
+              color: '#ffffff',
+              border: 'none',
+              fontWeight: 700,
+              boxShadow: '0 2px 10px rgba(16, 185, 129, 0.35)',
+              cursor: 'pointer'
+            }}
+          >
+            <Calculator size={15} /> Daily Cash Closing
+          </button>
+
+          <button 
+            className="btn btn-outline"
+            onClick={() => setShowTransferModal(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', borderColor: '#38bdf8', color: '#38bdf8' }}
+          >
+            <ArrowLeftRight size={15} /> Transfer Funds
+          </button>
+
+          <button 
+            className="btn btn-outline"
+            onClick={() => setShowPettyModal(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', borderColor: '#f59e0b', color: '#f59e0b' }}
+          >
+            <Receipt size={15} /> Quick Petty Cash
+          </button>
+
+          <button 
             className="btn btn-outline"
             onClick={() => setShowDueModal(true)}
             style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', borderColor: '#008CFF', color: '#008CFF' }}
@@ -497,6 +715,140 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* -------------------------------------------------------------
+          FINANCIAL ACCOUNTS & CASH DRAWERS OVERVIEW
+          ------------------------------------------------------------- */}
+      <div style={{ marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Wallet size={16} style={{ color: 'var(--brand-primary)' }} />
+            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              Active Cash Drawers, Banks & Digital Wallets
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowTransferModal(true)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--brand-primary)',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem'
+            }}
+          >
+            Transfer Between Accounts <ArrowRight size={14} />
+          </button>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '0.85rem'
+        }}>
+          {financialAccounts.map((acc) => {
+            const isCash = acc.type === 'CASH';
+            const isBank = acc.type === 'BANK';
+            const bal = Number(acc.balance);
+
+            return (
+              <div
+                key={acc.id}
+                style={{
+                  background: 'var(--bg-card)',
+                  border: isCash ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '1rem 1.15rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: 'var(--shadow-sm)',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
+                {isCash && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    right: 0,
+                    background: '#10b981',
+                    color: '#000',
+                    fontSize: '0.625rem',
+                    fontWeight: 800,
+                    padding: '0.15rem 0.55rem',
+                    borderBottomLeftRadius: '6px',
+                    letterSpacing: '0.5px'
+                  }}>
+                    PHYSICAL CASH
+                  </div>
+                )}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                    <div style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '6px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: isCash ? 'rgba(16, 185, 129, 0.12)' : isBank ? 'rgba(56, 189, 248, 0.12)' : 'rgba(236, 72, 153, 0.12)',
+                      color: isCash ? '#10b981' : isBank ? '#38bdf8' : '#ec4899'
+                    }}>
+                      {isCash ? <Coins size={15} /> : isBank ? <Landmark size={15} /> : <CreditCard size={15} />}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        {acc.name}
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                        {acc.accountNumber || (isCash ? 'Main Showroom Counter' : 'Account')}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ margin: '0.65rem 0 0.4rem' }}>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 800, color: bal >= 0 ? '#f8fafc' : '#ef4444' }}>
+                      ৳{bal.toLocaleString('en-IN')}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '0.5rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTransferFromId(acc.id);
+                      const target = financialAccounts.find(a => a.id !== acc.id);
+                      if (target) setTransferToId(target.id);
+                      setShowTransferModal(true);
+                    }}
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.04)',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      borderRadius: '4px',
+                      color: 'var(--text-secondary)',
+                      fontSize: '0.725rem',
+                      padding: '0.25rem 0.6rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.3rem'
+                    }}
+                  >
+                    <ArrowLeftRight size={11} /> Transfer
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -921,23 +1273,30 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
               />
             </div>
 
-            {/* Inflow / Outflow Filter */}
+            {/* Inflow / Outflow / Purchases Filter */}
             <div style={{ display: 'flex', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
-              {(['ALL', 'INFLOW', 'OUTFLOW'] as const).map(t => (
+              {([
+                { key: 'ALL', label: 'All Moves' },
+                { key: 'INFLOW', label: 'Inflows Only (+)' },
+                { key: 'OUTFLOW', label: 'Outflows Only (−)' },
+                { key: 'PURCHASES', label: '🛒 Purchases & Buying' }
+              ] as const).map(t => (
                 <button
-                  key={t}
-                  onClick={() => setTypeFilter(t)}
+                  key={t.key}
+                  type="button"
+                  onClick={() => setTypeFilter(t.key)}
                   style={{
                     padding: '0.35rem 0.65rem',
                     fontSize: '0.75rem',
-                    fontWeight: typeFilter === t ? 700 : 500,
-                    background: typeFilter === t ? 'var(--brand-primary)' : 'var(--bg-card)',
-                    color: typeFilter === t ? '#fff' : 'var(--text-muted)',
+                    fontWeight: typeFilter === t.key ? 700 : 500,
+                    background: typeFilter === t.key ? (t.key === 'PURCHASES' ? '#f59e0b' : 'var(--brand-primary)') : 'var(--bg-card)',
+                    color: typeFilter === t.key ? '#fff' : 'var(--text-muted)',
                     border: 'none',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
                   }}
                 >
-                  {t === 'ALL' ? 'All Moves' : t === 'INFLOW' ? 'Inflows Only' : 'Outflows Only'}
+                  {t.label}
                 </button>
               ))}
             </div>
@@ -1615,6 +1974,539 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                   }}
                 >
                   {isSubmittingInv ? 'Recording Investment...' : '+ Record Investment'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* -------------------------------------------------------------
+          MODAL 4: INTER-ACCOUNT FUND TRANSFER
+          ------------------------------------------------------------- */}
+      {showTransferModal && (
+        <div className="modal-overlay" onClick={() => setShowTransferModal(false)}>
+          <div className="modal-container" onClick={e => e.stopPropagation()} style={{ maxWidth: '540px' }}>
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <ArrowLeftRight size={18} style={{ color: '#38bdf8' }} />
+                <h3 className="modal-title">Inter-Account Fund Transfer</h3>
+              </div>
+              <button className="btn-close" onClick={() => setShowTransferModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleTransferSubmit} className="modal-body">
+              <div style={{
+                background: 'rgba(56, 189, 248, 0.08)',
+                border: '1px solid rgba(56, 189, 248, 0.25)',
+                borderRadius: 'var(--radius-md)',
+                padding: '0.75rem 1rem',
+                fontSize: '0.78rem',
+                color: '#38bdf8',
+                marginBottom: '1rem'
+              }}>
+                <ShieldCheck size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+                <strong>Internal Liquidity Movement:</strong> Moving money between Cash Drawers, Bank Accounts, or Digital Wallets updates ledger accounts without affecting business revenue or profit.
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Source Account (From) *</label>
+                  <select 
+                    className="form-control"
+                    value={transferFromId}
+                    onChange={e => setTransferFromId(e.target.value)}
+                    required
+                  >
+                    {financialAccounts.map(a => (
+                      <option key={a.id} value={a.id}>
+                        {a.name} (৳{Number(a.balance).toLocaleString('en-IN')})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Destination Account (To) *</label>
+                  <select 
+                    className="form-control"
+                    value={transferToId}
+                    onChange={e => setTransferToId(e.target.value)}
+                    required
+                  >
+                    {financialAccounts.map(a => (
+                      <option key={a.id} value={a.id}>
+                        {a.name} (৳{Number(a.balance).toLocaleString('en-IN')})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.85rem', marginBottom: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Transfer Amount (৳ BDT) *</label>
+                  <input 
+                    type="number"
+                    className="form-control"
+                    value={transferAmount}
+                    onChange={e => setTransferAmount(Math.max(1, Number(e.target.value)))}
+                    min={1}
+                    step="any"
+                    required
+                    style={{ fontSize: '1.2rem', fontWeight: 700 }}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Fee / Charge (৳)</label>
+                  <input 
+                    type="number"
+                    className="form-control"
+                    placeholder="e.g. 15"
+                    value={transferFee || ''}
+                    onChange={e => setTransferFee(Math.max(0, Number(e.target.value)))}
+                    min={0}
+                    step="any"
+                  />
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label className="form-label">Reference / TrxID / Cheque #</label>
+                <input 
+                  type="text"
+                  className="form-control"
+                  placeholder="e.g. bKash TrxID or Cheque # 992812"
+                  value={transferReference}
+                  onChange={e => setTransferReference(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                <label className="form-label">Transfer Notes</label>
+                <input 
+                  type="text"
+                  className="form-control"
+                  placeholder="e.g. End of day cash deposit to bank"
+                  value={transferNotes}
+                  onChange={e => setTransferNotes(e.target.value)}
+                />
+              </div>
+
+              {/* LIVE BALANCE PREVIEW */}
+              {(() => {
+                const fromAcc = financialAccounts.find(a => a.id === transferFromId);
+                const toAcc = financialAccounts.find(a => a.id === transferToId);
+                const fromBal = fromAcc ? Number(fromAcc.balance) : 0;
+                const toBal = toAcc ? Number(toAcc.balance) : 0;
+                const totalDeduct = transferAmount + (Number(transferFee) || 0);
+
+                return (
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '0.85rem 1rem',
+                    fontSize: '0.8rem',
+                    marginBottom: '1.25rem'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>{fromAcc?.name} remaining:</span>
+                      <strong style={{ color: fromBal - totalDeduct >= 0 ? 'var(--text-primary)' : '#ef4444' }}>
+                        ৳{(fromBal - totalDeduct).toLocaleString('en-IN')}
+                      </strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>{toAcc?.name} new balance:</span>
+                      <strong style={{ color: '#10b981' }}>
+                        ৳{(toBal + transferAmount).toLocaleString('en-IN')}
+                      </strong>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-outline" 
+                  onClick={() => setShowTransferModal(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  disabled={isSubmittingTransfer}
+                  style={{ background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', border: 'none' }}
+                >
+                  {isSubmittingTransfer ? 'Processing...' : 'Execute Transfer'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* -------------------------------------------------------------
+          MODAL 5: DAILY CASH REGISTER CLOSING & PHYSICAL DRAWER RECONCILIATION
+          ------------------------------------------------------------- */}
+      {showReconcileModal && (
+        <div className="modal-overlay" onClick={() => setShowReconcileModal(false)}>
+          <div className="modal-container" onClick={e => e.stopPropagation()} style={{ maxWidth: '640px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Calculator size={20} style={{ color: '#10b981' }} />
+                <h3 className="modal-title">Daily Cash Register Closing & Reconciliation</h3>
+              </div>
+              <button className="btn-close" onClick={() => setShowReconcileModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="modal-body" style={{ overflowY: 'auto', padding: '1.25rem 1.5rem' }}>
+              {/* REGISTER STATUS BANNER */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.02)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '1rem',
+                marginBottom: '1.25rem',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                gap: '1rem',
+                textAlign: 'center'
+              }}>
+                <div>
+                  <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)', fontWeight: 600 }}>SYSTEM EXPECTED DRAWER CASH</div>
+                  <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#38bdf8', marginTop: '0.2rem' }}>
+                    ৳{expectedPhysicalCash.toLocaleString('en-IN')}
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>Based on cash sales & expenses</div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)', fontWeight: 600 }}>PHYSICAL COUNTED TOTAL</div>
+                  <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#10b981', marginTop: '0.2rem' }}>
+                    ৳{totalPhysicalCounted.toLocaleString('en-IN')}
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>Physical cash notes in drawer</div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)', fontWeight: 600 }}>VARIANCE / DISCREPANCY</div>
+                  <div style={{
+                    fontSize: '1.35rem',
+                    fontWeight: 800,
+                    color: cashDiscrepancy === 0 ? '#10b981' : cashDiscrepancy > 0 ? '#38bdf8' : '#ef4444',
+                    marginTop: '0.2rem'
+                  }}>
+                    {cashDiscrepancy > 0 ? '+' : ''}৳{cashDiscrepancy.toLocaleString('en-IN')}
+                  </div>
+                  <div style={{
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    color: cashDiscrepancy === 0 ? '#10b981' : cashDiscrepancy > 0 ? '#38bdf8' : '#ef4444'
+                  }}>
+                    {cashDiscrepancy === 0 ? '✓ Balanced' : cashDiscrepancy > 0 ? 'Excess Discovered' : 'Shortage Detected'}
+                  </div>
+                </div>
+              </div>
+
+              {/* INPUT MODE TOGGLE */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  Physical Cash Count Method:
+                </span>
+                <div style={{ display: 'flex', gap: '0.35rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setUseDirectCount(false)}
+                    style={{
+                      padding: '0.35rem 0.65rem',
+                      borderRadius: '5px',
+                      fontSize: '0.75rem',
+                      fontWeight: !useDirectCount ? 700 : 500,
+                      background: !useDirectCount ? 'var(--brand-primary)' : 'rgba(255, 255, 255, 0.05)',
+                      color: !useDirectCount ? '#fff' : 'var(--text-muted)',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Note Breakdown (BDT)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setUseDirectCount(true)}
+                    style={{
+                      padding: '0.35rem 0.65rem',
+                      borderRadius: '5px',
+                      fontSize: '0.75rem',
+                      fontWeight: useDirectCount ? 700 : 500,
+                      background: useDirectCount ? 'var(--brand-primary)' : 'rgba(255, 255, 255, 0.05)',
+                      color: useDirectCount ? '#fff' : 'var(--text-muted)',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Direct Lump-Sum Total
+                  </button>
+                </div>
+              </div>
+
+              {/* DENOMINATION COUNTER */}
+              {!useDirectCount ? (
+                <div style={{
+                  background: 'var(--bg-card-muted)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '1rem',
+                  marginBottom: '1.25rem'
+                }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+                    {[
+                      { note: 1000, value: note1000, setter: setNote1000 },
+                      { note: 500, value: note500, setter: setNote500 },
+                      { note: 200, value: note200, setter: setNote200 },
+                      { note: 100, value: note100, setter: setNote100 },
+                      { note: 50, value: note50, setter: setNote50 },
+                      { note: 20, value: note20, setter: setNote20 },
+                      { note: 10, value: note10, setter: setNote10 },
+                    ].map(n => (
+                      <div key={n.note} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, minWidth: '70px' }}>৳{n.note} note:</span>
+                        <input
+                          type="number"
+                          className="form-control"
+                          min={0}
+                          value={n.value || ''}
+                          onChange={e => n.setter(Math.max(0, parseInt(e.target.value) || 0))}
+                          placeholder="0 pcs"
+                          style={{ width: '85px', textAlign: 'center', padding: '0.3rem' }}
+                        />
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', minWidth: '70px', textAlign: 'right' }}>
+                          = ৳{(n.value * n.note).toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                    ))}
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 600, minWidth: '70px' }}>Coins & change:</span>
+                      <input
+                        type="number"
+                        className="form-control"
+                        min={0}
+                        value={looseCoins || ''}
+                        onChange={e => setLooseCoins(Math.max(0, Number(e.target.value) || 0))}
+                        placeholder="৳ amount"
+                        style={{ width: '85px', textAlign: 'center', padding: '0.3rem' }}
+                      />
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', minWidth: '70px', textAlign: 'right' }}>
+                        = ৳{(Number(looseCoins) || 0).toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                  <label className="form-label">Physical Cash Counted (৳ BDT) *</label>
+                  <input 
+                    type="number"
+                    className="form-control"
+                    value={directCountedTotal || ''}
+                    onChange={e => setDirectCountedTotal(Math.max(0, Number(e.target.value)))}
+                    placeholder="Enter total counted cash in drawer"
+                    style={{ fontSize: '1.3rem', fontWeight: 700 }}
+                  />
+                </div>
+              )}
+
+              {/* RECONCILIATION NOTES */}
+              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                <label className="form-label">Cashier Closing Notes & Observations</label>
+                <textarea 
+                  className="form-control"
+                  rows={2}
+                  placeholder="Optional notes regarding shift handoff, missing change, or closing remarks..."
+                  value={reconcileNotes}
+                  onChange={e => setReconcileNotes(e.target.value)}
+                />
+              </div>
+
+              {/* AUTO-ADJUSTMENT ACTION (IF DISCREPANCY) */}
+              {cashDiscrepancy !== 0 && totalPhysicalCounted > 0 && (
+                <div style={{
+                  background: cashDiscrepancy > 0 ? 'rgba(56, 189, 248, 0.08)' : 'rgba(239, 68, 68, 0.08)',
+                  border: cashDiscrepancy > 0 ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '0.85rem 1rem',
+                  marginBottom: '1rem',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '0.75rem'
+                }}>
+                  <div style={{ fontSize: '0.8rem' }}>
+                    <strong>Discrepancy Action:</strong>
+                    <div style={{ color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
+                      Automatically book an adjustment entry to match drawer balance to actual count.
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAutoReconcileDiscrepancy}
+                    disabled={isAutoReconciling}
+                    className="btn"
+                    style={{
+                      background: cashDiscrepancy > 0 ? '#0284c7' : '#dc2626',
+                      color: '#ffffff',
+                      border: 'none',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      padding: '0.4rem 0.85rem'
+                    }}
+                  >
+                    {isAutoReconciling ? 'Adjusting...' : `Auto-Reconcile (${cashDiscrepancy > 0 ? '+' : ''}৳${cashDiscrepancy.toLocaleString()})`}
+                  </button>
+                </div>
+              )}
+
+              {/* ACTIONS */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginTop: '1rem' }}>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={() => window.print()}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                >
+                  <Printer size={14} /> Print Closing Sheet
+                </button>
+
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button 
+                    type="button" 
+                    className="btn btn-outline" 
+                    onClick={() => setShowReconcileModal(false)}
+                  >
+                    Close
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn btn-primary"
+                    onClick={() => {
+                      addToast('success', 'Closing Registered', `Daily cash drawer count of ৳${totalPhysicalCounted.toLocaleString()} logged.`);
+                      setShowReconcileModal(false);
+                    }}
+                  >
+                    Save & Close Register
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* -------------------------------------------------------------
+          MODAL 6: QUICK PETTY CASH OUTFLOW
+          ------------------------------------------------------------- */}
+      {showPettyModal && (
+        <div className="modal-overlay" onClick={() => setShowPettyModal(false)}>
+          <div className="modal-container" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Receipt size={18} style={{ color: '#f59e0b' }} />
+                <h3 className="modal-title">Record Quick Petty Cash Outflow</h3>
+              </div>
+              <button className="btn-close" onClick={() => setShowPettyModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handlePettyCashSubmit} className="modal-body">
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label className="form-label">Expense Category *</label>
+                <select 
+                  className="form-control"
+                  value={pettyCategory}
+                  onChange={e => setPettyCategory(e.target.value)}
+                  required
+                >
+                  <option value="Office Supplies & Snacks">Office Supplies, Snacks & Tea</option>
+                  <option value="Logistics & Delivery">Courier & Rickshaw Delivery</option>
+                  <option value="Shop Maintenance">Shop Repairs & Cleaning</option>
+                  <option value="Utility Bills">Electricity, Water & Internet</option>
+                  <option value="Other">Other Operational Petty Cash</option>
+                </select>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label className="form-label">Disbursing Cash Drawer / Account *</label>
+                <select 
+                  className="form-control"
+                  value={pettyAccountId}
+                  onChange={e => setPettyAccountId(e.target.value)}
+                  required
+                >
+                  {financialAccounts.map(a => (
+                    <option key={a.id} value={a.id}>
+                      {a.name} ({a.type}) — Balance: ৳{Number(a.balance).toLocaleString('en-IN')}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label className="form-label">Petty Cash Amount (৳ BDT) *</label>
+                <input 
+                  type="number"
+                  className="form-control"
+                  value={pettyAmount}
+                  onChange={e => setPettyAmount(Math.max(1, Number(e.target.value)))}
+                  min={1}
+                  step="any"
+                  required
+                  style={{ fontSize: '1.25rem', fontWeight: 700 }}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                <label className="form-label">Voucher Description / Purpose *</label>
+                <textarea 
+                  className="form-control"
+                  rows={2}
+                  placeholder="e.g. Rickshaw fare for urgent courier dispatch to Sreemangal"
+                  value={pettyDescription}
+                  onChange={e => setPettyDescription(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-outline" 
+                  onClick={() => setShowPettyModal(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn"
+                  disabled={isSubmittingPetty}
+                  style={{
+                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontWeight: 700
+                  }}
+                >
+                  {isSubmittingPetty ? 'Disbursing...' : 'Disburse Petty Cash'}
                 </button>
               </div>
             </form>

@@ -180,12 +180,19 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // 4. Deduct Financial Account if paid amount was provided upfront
+      // 4. Record Expense & Deduct Financial Account if paid amount was provided upfront
       if (paidAmount && paidAmount > 0) {
         const targetAccountId = (payload as any).accountId || (payload as any).depositAccountId || 'acc-1';
-        const account = await tx.financialAccount.findFirst({
+        let account = await tx.financialAccount.findFirst({
           where: { id: targetAccountId },
         });
+
+        if (!account) {
+          account = await tx.financialAccount.findFirst({
+            where: { isActive: true },
+            orderBy: { name: 'asc' },
+          });
+        }
 
         if (account) {
           await tx.financialAccount.update({
@@ -194,22 +201,40 @@ export async function POST(req: NextRequest) {
               balance: { decrement: new Prisma.Decimal(paidAmount) },
             },
           });
-
-          await tx.ledgerEntry.create({
-            data: {
-              id: 'led-' + Date.now() + '-pur-cash',
-              date: new Date(),
-              partyType: 'ACCOUNT',
-              partyId: account.id,
-              referenceType: 'PURCHASE',
-              referenceNumber: invoiceNumber,
-              description: `Payment disbursed for purchase ${invoiceNumber} (${supplierName})`,
-              debit: new Prisma.Decimal(0),
-              credit: new Prisma.Decimal(paidAmount),
-              runningBalance: new Prisma.Decimal(Number(account.balance) - Number(paidAmount)),
-            },
-          });
         }
+
+        const expVoucher = 'EXP-PUR-' + Date.now().toString().slice(-6);
+        const itemSummary = items.map(i => `${i.productName} (x${i.quantity})`).join(', ');
+
+        // Record official Expense under 'Purchase Expenses'
+        await tx.expense.create({
+          data: {
+            id: 'exp-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+            voucherNumber: expVoucher,
+            category: 'Purchase Expenses',
+            amount: new Prisma.Decimal(paidAmount),
+            date: new Date(),
+            paymentMethod: paymentMethod || 'Cash',
+            branchId: branchId || user.branchId || 'branch-main-1',
+            description: `Product Purchase [${invoiceNumber}] from ${supplierName}: ${itemSummary.slice(0, 180)}`,
+            createdBy: user.name,
+          },
+        });
+
+        await tx.ledgerEntry.create({
+          data: {
+            id: 'led-' + Date.now() + '-pur-cash',
+            date: new Date(),
+            partyType: 'ACCOUNT',
+            partyId: account ? account.id : targetAccountId,
+            referenceType: 'EXPENSE',
+            referenceNumber: expVoucher,
+            description: `Payment disbursed for product purchase ${invoiceNumber} (${supplierName})`,
+            debit: new Prisma.Decimal(0),
+            credit: new Prisma.Decimal(paidAmount),
+            runningBalance: new Prisma.Decimal(account ? Number(account.balance) - Number(paidAmount) : 0),
+          },
+        });
       }
 
       // 5. Audit Log
