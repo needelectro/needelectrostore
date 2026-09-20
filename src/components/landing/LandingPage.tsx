@@ -10,7 +10,8 @@ import {
   TrendingUp, Users, RefreshCw, FileText, ArrowUpRight,
   Laptop, Tv, Camera, Wifi, Check, Star, HelpCircle,
   Clock, Calendar, MessageSquare, AlertCircle, X, Search,
-  Compass, Shield, Award, HeartHandshake, ChevronDown, Menu
+  Compass, Shield, Award, HeartHandshake, ChevronDown, Menu,
+  Globe, Code, Rocket, Terminal
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -81,7 +82,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
       setBookingPhone('');
       setBookingAddress('');
       setBookingNotes('');
-      addToast('success', 'Service Request Received!', `Thank you ${bookingName}. Our Moulvibazar service coordinator will call you at ${bookingPhone} within 30 minutes.`);
+      addToast('success', 'Service Request Received!', `Thank you ${bookingName}. Our Moulvibazar coordinator will call you at ${bookingPhone} within 30 minutes.`);
     }, 600);
   };
 
@@ -90,7 +91,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "name": "NEED ELECTRO",
-    "description": "Trusted Electrical and Technological Solutions in Moulvibazar. Laptops, Computers, CCTV & Security, Electrical Service, and Laptop EMI.",
+    "description": "Trusted Electrical, Technological & Software Solutions in Moulvibazar. Custom Mobile App Development, Website Development, Laptops, Computers, CCTV & Security, Electrical Service, and Laptop EMI.",
     "telephone": "+8801733983752",
     "email": "info.needelectro@gmail.com",
     "address": {
@@ -157,6 +158,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             fontWeight: 600
           }}>
             <a href="#home" style={{ color: '#ffffff', textDecoration: 'none' }}>Home</a>
+            <a href="#software" style={{
+              color: '#38bdf8',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              background: 'rgba(56, 189, 248, 0.12)',
+              padding: '0.25rem 0.65rem',
+              borderRadius: '9999px',
+              border: '1px solid rgba(56, 189, 248, 0.3)'
+            }}>
+              <Globe size={13} />
+              <span>Apps & Websites</span>
+            </a>
             <a href="#products" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Products</a>
             <a href="#laptops" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Laptops</a>
             <a href="#services" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Services</a>
@@ -229,6 +244,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
               style={{ color: '#ffffff', textDecoration: 'none', fontSize: '1rem', fontWeight: 600, padding: '0.3rem 0' }}
             >
               Home
+            </a>
+            <a
+              href="#software"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{
+                color: '#38bdf8',
+                textDecoration: 'none',
+                fontSize: '1rem',
+                fontWeight: 700,
+                padding: '0.3rem 0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <Globe size={16} />
+              <span>Mobile Apps & Websites</span>
+              <span style={{ fontSize: '0.7rem', background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', padding: '1px 6px', borderRadius: '4px', marginLeft: 'auto' }}>We Build</span>
             </a>
             <a
               href="#products"
@@ -352,12 +385,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           <p style={{
             fontSize: 'clamp(1rem, 2vw, 1.25rem)',
             color: '#94a3b8',
-            maxWidth: '820px',
+            maxWidth: '850px',
             margin: '0 auto 2.75rem',
             fontWeight: 400,
             lineHeight: 1.65
           }}>
-            From electrical services and security solutions to laptops, computers, gadgets, and smart technology — <strong>NEED ELECTRO</strong> provides reliable solutions for modern homes, offices, and businesses in Moulvibazar and across Bangladesh.
+            From electrical engineering, CCTV security, and laptop sales to <strong>custom mobile app & modern website development</strong> — <strong>NEED ELECTRO</strong> provides reliable, all-in-one technological solutions for modern homes, offices, businesses, and startups in Moulvibazar and across Bangladesh.
           </p>
 
           {/* Action CTAs */}
@@ -379,7 +412,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 color: '#ffffff',
                 textDecoration: 'none',
                 borderRadius: '12px',
-                padding: '0.9rem 2rem',
+                padding: '0.9rem 1.8rem',
                 fontSize: '1rem',
                 fontWeight: 700,
                 boxShadow: '0 8px 24px rgba(0, 140, 255, 0.45)',
@@ -388,6 +421,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             >
               <span>Explore Products</span>
               <ArrowRight size={16} />
+            </a>
+
+            <a
+              href="#software"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.55rem',
+                background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                color: '#ffffff',
+                textDecoration: 'none',
+                borderRadius: '12px',
+                padding: '0.9rem 1.8rem',
+                fontSize: '0.95rem',
+                fontWeight: 700,
+                boxShadow: '0 8px 24px rgba(2, 132, 199, 0.35)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Globe size={16} color="#38bdf8" />
+              <span>Mobile Apps & Websites</span>
             </a>
 
             <button
@@ -403,8 +457,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 color: '#ffffff',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
                 borderRadius: '12px',
-                padding: '0.9rem 2rem',
-                fontSize: '1rem',
+                padding: '0.9rem 1.8rem',
+                fontSize: '0.95rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 backdropFilter: 'blur(10px)',
@@ -439,7 +493,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           {/* Quick Value Metrics */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
             gap: '1.25rem',
             padding: '1.5rem',
             background: 'rgba(15, 23, 42, 0.7)',
@@ -448,19 +502,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             borderRadius: '20px'
           }}>
             <div>
-              <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#38bdf8' }}>100% Genuine</div>
+              <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#38bdf8' }}>100% Genuine</div>
               <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Original hardware & warranty</div>
             </div>
             <div>
-              <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#10b981' }}>Certified</div>
-              <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Skilled electrical technicians</div>
+              <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#06b6d4' }}>Apps & Websites</div>
+              <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Custom mobile apps & web</div>
             </div>
             <div>
-              <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#f59e0b' }}>Flexible EMI</div>
+              <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#10b981' }}>Certified</div>
+              <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Skilled electrical engineers</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#f59e0b' }}>Flexible EMI</div>
               <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Easy laptop installments</div>
             </div>
             <div>
-              <div style={{ fontSize: '1.75rem', fontWeight: 900, color: '#ffffff' }}>Moulvibazar</div>
+              <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#ffffff' }}>Moulvibazar</div>
               <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>MR Plaza, Kusumbag Showroom</div>
             </div>
           </div>
@@ -472,7 +530,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           ========================================================================= */}
       <section style={{ padding: '4rem 1.5rem', backgroundColor: '#090f20' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 3rem' }}>
+          <div style={{ textAlign: 'center', maxWidth: '750px', margin: '0 auto 3rem' }}>
             <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#008CFF', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               What We Offer
             </span>
@@ -480,7 +538,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
               Explore Our Solutions
             </h2>
             <p style={{ color: '#94a3b8', fontSize: '1rem', margin: 0 }}>
-              End-to-end electrical products, laptop sales, CCTV systems, and expert engineering services.
+              End-to-end electrical products, laptop sales, CCTV systems, mobile apps, and custom web development.
             </p>
           </div>
 
@@ -490,6 +548,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             gap: '1.5rem'
           }}>
             {[
+              {
+                title: 'Mobile App Development',
+                desc: 'Native & cross-platform Android & iOS apps with real-time cloud sync, sleek UI, and payment gateways.',
+                icon: Smartphone,
+                color: '#a855f7',
+                link: '#software'
+              },
+              {
+                title: 'Website Development',
+                desc: 'Modern responsive business websites, e-commerce stores, web portals, and fast Next.js & React web apps.',
+                icon: Globe,
+                color: '#06b6d4',
+                link: '#software'
+              },
               {
                 title: 'Laptops',
                 desc: 'Business, executive, and student laptops from HP, Dell, and Lenovo.',
@@ -536,14 +608,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 title: 'Electrical Services',
                 desc: 'Professional commercial and home electrical wiring and diagnostics.',
                 icon: Wrench,
-                color: '#06b6d4',
+                color: '#14b8a6',
                 link: '#services'
               },
               {
                 title: 'Smart Solutions',
                 desc: 'Smart home switches, automated lighting, and power backup solutions.',
                 icon: Sparkles,
-                color: '#a855f7',
+                color: '#f43f5e',
                 link: '#services'
               }
             ].map(cat => {
@@ -972,6 +1044,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             gap: '1.5rem'
           }}>
             {[
+              { title: 'Mobile App Development', desc: 'Native & cross-platform Android & iOS applications with cloud backend, clean UI, and push notifications.', icon: Smartphone },
+              { title: 'Website Development', desc: 'Custom business websites, high-speed landing pages, e-commerce stores, and SEO-optimized web portals.', icon: Globe },
               { title: 'Electrical Installation', desc: 'Complete building wiring, sub-station connections, and power distribution boards.', icon: Zap },
               { title: 'Electrical Maintenance', desc: 'Periodic safety audits, load balancing, short-circuit diagnostics, and switchgear upkeep.', icon: ShieldCheck },
               { title: 'Home Electrical Work', desc: 'Fast electrician dispatch for fans, lighting, circuit breakers, and inverter wiring.', icon: Building2 },
@@ -1190,7 +1264,528 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
       </section>
 
       {/* =========================================================================
-          8. CUSTOMER-FACING EMI PROMOTION
+          8. CUSTOM MOBILE APP & WEBSITE DEVELOPMENT STUDIO
+          ========================================================================= */}
+      <section id="software" style={{
+        padding: '5.5rem 1.5rem',
+        background: 'linear-gradient(180deg, #070c18 0%, #08152e 50%, #070c18 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+        borderTop: '1px solid rgba(56, 189, 248, 0.15)',
+        borderBottom: '1px solid rgba(139, 92, 246, 0.2)'
+      }}>
+        {/* Glow ambient spots */}
+        <div style={{
+          position: 'absolute',
+          top: '15%',
+          left: '5%',
+          width: '380px',
+          height: '380px',
+          background: 'radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%)',
+          filter: 'blur(50px)',
+          pointerEvents: 'none'
+        }} />
+        <div style={{
+          position: 'absolute',
+          bottom: '10%',
+          right: '5%',
+          width: '420px',
+          height: '420px',
+          background: 'radial-gradient(circle, rgba(168, 85, 247, 0.14) 0%, transparent 70%)',
+          filter: 'blur(55px)',
+          pointerEvents: 'none'
+        }} />
+
+        <div style={{ maxWidth: '1280px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
+          {/* Header */}
+          <div style={{ textAlign: 'center', maxWidth: '820px', margin: '0 auto 3.5rem' }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)',
+              border: '1px solid rgba(56, 189, 248, 0.3)',
+              borderRadius: '9999px',
+              padding: '0.4rem 1rem',
+              color: '#38bdf8',
+              fontSize: '0.82rem',
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              marginBottom: '1rem'
+            }}>
+              <Rocket size={14} color="#38bdf8" />
+              <span>Digital Engineering & Software Wing</span>
+            </div>
+
+            <h2 style={{
+              fontSize: 'clamp(2.1rem, 4vw, 3rem)',
+              fontWeight: 900,
+              letterSpacing: '-0.02em',
+              lineHeight: 1.2,
+              margin: '0 0 1rem',
+              color: '#ffffff'
+            }}>
+              We Build Modern <span style={{
+                background: 'linear-gradient(135deg, #38bdf8 0%, #a855f7 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}>Mobile Apps</span> & <span style={{
+                background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}>High-Performance Websites</span>
+            </h2>
+
+            <p style={{ color: '#94a3b8', fontSize: '1.05rem', lineHeight: 1.65, margin: 0 }}>
+              Need a modern website for your showroom or an iOS & Android mobile application for your customers? <strong>NEED ELECTRO</strong> designs, develops, and deploys high-speed, secure, and user-friendly digital products for businesses in Moulvibazar, Sylhet, and nationwide.
+            </p>
+          </div>
+
+          {/* Dual Main Cards (Web Development & Mobile App Development) */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+            gap: '2rem',
+            marginBottom: '3.5rem'
+          }}>
+            {/* Card 1: Website Development */}
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(8, 25, 48, 0.85) 100%)',
+              border: '1px solid rgba(56, 189, 248, 0.3)',
+              borderRadius: '24px',
+              padding: '2.5rem',
+              boxShadow: '0 20px 45px rgba(0, 140, 255, 0.15)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                background: 'linear-gradient(135deg, #008CFF, #06b6d4)',
+                color: '#ffffff',
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                padding: '4px 16px',
+                borderBottomLeftRadius: '14px',
+                letterSpacing: '0.05em'
+              }}>
+                CUSTOM WEB
+              </div>
+
+              <div>
+                <div style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '16px',
+                  background: 'rgba(6, 182, 212, 0.15)',
+                  color: '#06b6d4',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '1.5rem',
+                  border: '1px solid rgba(6, 182, 212, 0.3)'
+                }}>
+                  <Globe size={30} />
+                </div>
+
+                <div style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  Web Engineering Studio
+                </div>
+
+                <h3 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#ffffff', margin: '0.35rem 0 0.8rem' }}>
+                  Custom Website Development
+                </h3>
+
+                <p style={{ color: '#cbd5e1', fontSize: '0.92rem', lineHeight: 1.6, margin: '0 0 1.5rem' }}>
+                  Turn visitors into paying customers with lightning-fast, beautifully designed, and search engine optimized websites built for your brand.
+                </p>
+
+                {/* Feature Checklist */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.75rem' }}>
+                  {[
+                    'E-Commerce Stores with bKash, Nagad & Card Payment Gateways',
+                    'Corporate Showcase & Portfolio Websites (Mobile & Tablet Ready)',
+                    'Custom Web Applications, Dashboards & ERP Portals',
+                    'Top Google SEO Optimization & Superfast Loading Speeds',
+                    'Domain Registration, High-Speed SSD Cloud Hosting & SSL Included',
+                    'Bangla & English Multilingual Language Support'
+                  ].map((item, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', fontSize: '0.88rem', color: '#f1f5f9' }}>
+                      <div style={{
+                        background: '#06b6d4',
+                        color: '#070c18',
+                        borderRadius: '50%',
+                        padding: '2px',
+                        display: 'flex',
+                        marginTop: '3px',
+                        flexShrink: 0
+                      }}>
+                        <Check size={11} strokeWidth={3} />
+                      </div>
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Tech Pills */}
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '0.45rem',
+                  padding: '1rem',
+                  background: 'rgba(2, 6, 23, 0.55)',
+                  borderRadius: '12px',
+                  marginBottom: '1.75rem'
+                }}>
+                  {['Next.js', 'React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Tailwind CSS', 'SSLCommerz', 'SEO'].map(tech => (
+                    <span key={tech} style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      color: '#94a3b8',
+                      background: 'rgba(255, 255, 255, 0.06)',
+                      padding: '2px 8px',
+                      borderRadius: '6px'
+                    }}>
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Card Actions */}
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => {
+                    setSelectedServiceTitle('Website Development Consultation');
+                    setIsServiceBookingOpen(true);
+                  }}
+                  style={{
+                    flex: 1,
+                    minWidth: '150px',
+                    background: 'linear-gradient(135deg, #008CFF 0%, #0055b3 100%)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '10px',
+                    padding: '0.85rem',
+                    fontSize: '0.9rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    boxShadow: '0 4px 15px rgba(0, 140, 255, 0.35)'
+                  }}
+                >
+                  <span>Book Web Consultation</span>
+                  <ArrowRight size={14} />
+                </button>
+
+                <a
+                  href="https://wa.me/8801733983752?text=Hello%20Need%20Electro,%20I%20am%20interested%20in%20building%20a%20website%20for%20my%20business."
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    color: '#34d399',
+                    border: '1px solid rgba(16, 185, 129, 0.35)',
+                    borderRadius: '10px',
+                    padding: '0.85rem 1.1rem',
+                    fontSize: '0.88rem',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  WhatsApp Quote
+                </a>
+              </div>
+            </div>
+
+            {/* Card 2: Mobile App Development */}
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(28, 14, 52, 0.85) 100%)',
+              border: '1px solid rgba(168, 85, 247, 0.35)',
+              borderRadius: '24px',
+              padding: '2.5rem',
+              boxShadow: '0 20px 45px rgba(168, 85, 247, 0.15)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                background: 'linear-gradient(135deg, #a855f7, #ec4899)',
+                color: '#ffffff',
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                padding: '4px 16px',
+                borderBottomLeftRadius: '14px',
+                letterSpacing: '0.05em'
+              }}>
+                ANDROID & iOS
+              </div>
+
+              <div>
+                <div style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '16px',
+                  background: 'rgba(168, 85, 247, 0.15)',
+                  color: '#c084fc',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '1.5rem',
+                  border: '1px solid rgba(168, 85, 247, 0.3)'
+                }}>
+                  <Smartphone size={30} />
+                </div>
+
+                <div style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  Mobile Engineering Studio
+                </div>
+
+                <h3 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#ffffff', margin: '0.35rem 0 0.8rem' }}>
+                  Mobile Application Development
+                </h3>
+
+                <p style={{ color: '#cbd5e1', fontSize: '0.92rem', lineHeight: 1.6, margin: '0 0 1.5rem' }}>
+                  Engage your customers anytime, anywhere. We build robust, cross-platform Android & iOS apps with real-time sync, sleek UI, and enterprise performance.
+                </p>
+
+                {/* Feature Checklist */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.75rem' }}>
+                  {[
+                    'Android & iOS Native-Performance Apps (Flutter / React Native)',
+                    'Retail, POS & Inventory Management Mobile Apps',
+                    'Customer Ordering, Delivery & Appointment Booking Apps',
+                    'Real-Time Push Notifications, SMS OTP & Biometric Login',
+                    'Cloud Database Synchronization with Offline Data Support',
+                    'Google Play Store & Apple App Store Publishing Support'
+                  ].map((item, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', fontSize: '0.88rem', color: '#f1f5f9' }}>
+                      <div style={{
+                        background: '#c084fc',
+                        color: '#070c18',
+                        borderRadius: '50%',
+                        padding: '2px',
+                        display: 'flex',
+                        marginTop: '3px',
+                        flexShrink: 0
+                      }}>
+                        <Check size={11} strokeWidth={3} />
+                      </div>
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Tech Pills */}
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '0.45rem',
+                  padding: '1rem',
+                  background: 'rgba(2, 6, 23, 0.55)',
+                  borderRadius: '12px',
+                  marginBottom: '1.75rem'
+                }}>
+                  {['Flutter', 'React Native', 'Android', 'iOS', 'Firebase', 'REST APIs', 'Cloud Sync', 'Play Store'].map(tech => (
+                    <span key={tech} style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      color: '#94a3b8',
+                      background: 'rgba(255, 255, 255, 0.06)',
+                      padding: '2px 8px',
+                      borderRadius: '6px'
+                    }}>
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Card Actions */}
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => {
+                    setSelectedServiceTitle('Mobile App Development Consultation');
+                    setIsServiceBookingOpen(true);
+                  }}
+                  style={{
+                    flex: 1,
+                    minWidth: '150px',
+                    background: 'linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '10px',
+                    padding: '0.85rem',
+                    fontSize: '0.9rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    boxShadow: '0 4px 15px rgba(168, 85, 247, 0.35)'
+                  }}
+                >
+                  <span>Book App Consultation</span>
+                  <ArrowRight size={14} />
+                </button>
+
+                <a
+                  href="https://wa.me/8801733983752?text=Hello%20Need%20Electro,%20I%20am%20interested%20in%20developing%20a%20mobile%20app%20for%20iOS%20and%20Android."
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    color: '#34d399',
+                    border: '1px solid rgba(16, 185, 129, 0.35)',
+                    borderRadius: '10px',
+                    padding: '0.85rem 1.1rem',
+                    fontSize: '0.88rem',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  WhatsApp Quote
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Development Process / Why Choose Need Electro Software */}
+          <div style={{
+            background: 'rgba(15, 23, 42, 0.7)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '20px',
+            padding: '2rem 2.5rem',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '1.75rem',
+            alignItems: 'center'
+          }}>
+            <div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#38bdf8', marginBottom: '4px' }}>
+                1. Discovery & Design
+              </div>
+              <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                Wireframing, UI/UX mockups, and customer journey planning.
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#a855f7', marginBottom: '4px' }}>
+                2. Agile Coding
+              </div>
+              <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                Fast, secure engineering with frequent client feedback milestones.
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#10b981', marginBottom: '4px' }}>
+                3. Deployment & Stores
+              </div>
+              <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                Google Play Store, Apple App Store, SSL, domain & cloud server live.
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#f59e0b', marginBottom: '4px' }}>
+                4. Continuous Support
+              </div>
+              <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                Maintenance, security updates, and new feature expansions.
+              </div>
+            </div>
+          </div>
+
+          {/* Call-to-Action Banner */}
+          <div style={{
+            marginTop: '2.5rem',
+            padding: '2rem 2.5rem',
+            borderRadius: '20px',
+            background: 'linear-gradient(135deg, rgba(0, 140, 255, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)',
+            border: '1px solid rgba(56, 189, 248, 0.25)',
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '1.5rem'
+          }}>
+            <div>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#ffffff', margin: '0 0 0.35rem' }}>
+                Have an App or Website Idea? Let's Build It Together!
+              </h3>
+              <p style={{ color: '#cbd5e1', fontSize: '0.92rem', margin: 0 }}>
+                Visit our Kusumbag showroom for a direct face-to-face consultation, or talk with our software developers online.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <a
+                href="tel:01733983752"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'linear-gradient(135deg, #008CFF 0%, #0055b3 100%)',
+                  color: '#ffffff',
+                  textDecoration: 'none',
+                  borderRadius: '10px',
+                  padding: '0.75rem 1.4rem',
+                  fontSize: '0.9rem',
+                  fontWeight: 700
+                }}
+              >
+                <Phone size={15} />
+                <span>Call 01733-983752</span>
+              </a>
+
+              <a
+                href="https://wa.me/8801733983752?text=Hello%20Need%20Electro,%20I%20want%20to%20consult%20about%20a%20website%20/%20mobile%20app%20development%20project."
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#10b981',
+                  color: '#ffffff',
+                  textDecoration: 'none',
+                  borderRadius: '10px',
+                  padding: '0.75rem 1.4rem',
+                  fontSize: '0.9rem',
+                  fontWeight: 700
+                }}
+              >
+                <span>Chat on WhatsApp</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          9. CUSTOMER-FACING EMI PROMOTION
           ========================================================================= */}
       <section id="emi" style={{ padding: '5rem 1.5rem', backgroundColor: '#090f20' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', textAlign: 'center' }}>
@@ -1351,7 +1946,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 Powering Homes, Offices & Businesses
               </h2>
               <p style={{ color: '#cbd5e1', fontSize: '0.95rem', lineHeight: 1.65, margin: '0 0 1rem' }}>
-                <strong>NEED ELECTRO</strong> is a technology-driven electrical and gadget ecosystem providing electrical services, technology products, laptops, computers, CCTV, networking, smart devices and professional technical solutions.
+                <strong>NEED ELECTRO</strong> is a technology-driven electrical, computing and software ecosystem providing electrical services, technology products, laptops, computers, CCTV, <strong>custom mobile application development, modern websites</strong>, and professional technical solutions.
               </p>
               <p style={{ color: '#94a3b8', fontSize: '0.92rem', lineHeight: 1.65, margin: '0 0 1.5rem' }}>
                 As a proud sister concern of <strong>AMDADS GROUP</strong>, we combine high-quality products and verified services under one roof to make technology and electrical solutions safer, easier, and more accessible in Moulvibazar and beyond.
@@ -1367,6 +1962,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 marginBottom: '1.75rem'
               }}>
                 <div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#38bdf8' }}>Web & Apps</div>
+                  <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Android, iOS & Web</div>
+                </div>
+                <div>
                   <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#008CFF' }}>Service</div>
                   <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Certified technicians</div>
                 </div>
@@ -1377,10 +1976,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 <div>
                   <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#f59e0b' }}>Technology</div>
                   <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Modern gadgets</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#8b5cf6' }}>Support</div>
-                  <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Dedicated aftersales</div>
                 </div>
               </div>
 
@@ -1440,10 +2035,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
             gap: '1.5rem'
           }}>
             {[
+              {
+                name: 'Sylhet Mart & Logistics',
+                role: 'Web & Mobile App Client',
+                comment: 'NEED ELECTRO engineered our e-commerce web platform and Android companion app. The user experience is lightning-fast, and payment integration with bKash and cards works seamlessly.',
+                stars: 5
+              },
               {
                 name: 'Trust Computer',
                 role: 'Commercial Client',
@@ -1514,6 +2115,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
             {[
+              {
+                q: 'Do you make custom mobile apps and modern websites?',
+                a: 'Yes! In addition to computing and electrical hardware, NEED ELECTRO has a dedicated digital engineering wing. We develop custom iOS & Android mobile applications (Flutter / React Native), high-converting corporate websites, and e-commerce platforms with local payment gateway integration (bKash, Nagad, cards).'
+              },
+              {
+                q: 'What types of websites and mobile applications do you build?',
+                a: 'We build corporate business websites, online e-commerce stores, POS/inventory companion apps, customer ordering and booking apps, real-time tracking portals, and custom cloud ERP dashboards. All our digital systems come with modern UI/UX and Google SEO optimization.'
+              },
+              {
+                q: 'How can I get a quotation for a website or mobile app?',
+                a: 'You can call our direct customer hotline at 01733-983752, chat with us on WhatsApp, or book a consultation through our website. Our software developers will analyze your requirements and provide a transparent project roadmap and quote.'
+              },
               {
                 q: 'What products does NEED ELECTRO sell?',
                 a: 'We sell business and consumer laptops (HP, Dell, Lenovo, Apple), desktop computers, CCTV surveillance equipment, routers, networking cables, commercial electrical switchgear, circuit breakers, smart home switches, and essential accessories.'
@@ -1814,7 +2427,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             <div>
               <NeedElectroLogo size="sm" showSisterConcern={true} theme="dark" />
               <p style={{ color: '#94a3b8', fontSize: '0.85rem', lineHeight: 1.6, margin: '1rem 0 1.25rem' }}>
-                Trusted Electrical and Technological Solutions in Moulvibazar. Laptops, CCTV security, electrical engineering, and laptop EMI.
+                Trusted Electrical, Technological & Software Solutions in Moulvibazar. Mobile app & website development, laptops, CCTV security, and electrical engineering.
               </p>
               <div style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 700 }}>
                 A Sister Concern of AMDADS GROUP
@@ -1835,17 +2448,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
               </div>
             </div>
 
-            {/* Col 3: Services */}
+            {/* Col 3: Services & Software */}
             <div>
               <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.95rem', marginBottom: '1rem' }}>
-                Services
+                Services & Software
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#94a3b8', fontSize: '0.85rem' }}>
+                <a href="#software" style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: 700 }}>📱 Mobile App Development</a>
+                <a href="#software" style={{ color: '#06b6d4', textDecoration: 'none', fontWeight: 700 }}>🌐 Website Development</a>
                 <a href="#services" style={{ color: 'inherit', textDecoration: 'none' }}>Electrical Installation</a>
                 <a href="#services" style={{ color: 'inherit', textDecoration: 'none' }}>Home Electrical Maintenance</a>
                 <a href="#cctv" style={{ color: 'inherit', textDecoration: 'none' }}>CCTV Setup & Mobile Link</a>
                 <a href="#services" style={{ color: 'inherit', textDecoration: 'none' }}>Laptop Repair & Upgrades</a>
-                <a href="#services" style={{ color: 'inherit', textDecoration: 'none' }}>Office Network Structured Cabling</a>
               </div>
             </div>
 
@@ -1856,6 +2470,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#94a3b8', fontSize: '0.85rem' }}>
                 <a href="#about" style={{ color: 'inherit', textDecoration: 'none' }}>About NEED ELECTRO</a>
+                <a href="#software" style={{ color: 'inherit', textDecoration: 'none' }}>Software Studio</a>
                 <a href="#emi" style={{ color: 'inherit', textDecoration: 'none' }}>Laptop EMI Guidelines</a>
                 <a href="#faq" style={{ color: 'inherit', textDecoration: 'none' }}>Customer FAQs</a>
                 <a href="#contact" style={{ color: 'inherit', textDecoration: 'none' }}>Contact Showroom</a>
@@ -2013,11 +2628,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
 
               <div>
                 <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
-                  Issue Description or Preferred Time
+                  Project Details / Issue Description or Preferred Time
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="Describe your device problem or electrical issue..."
+                  placeholder="Describe your mobile app/website project, device problem, or electrical requirement..."
                   value={bookingNotes}
                   onChange={e => setBookingNotes(e.target.value)}
                   style={{

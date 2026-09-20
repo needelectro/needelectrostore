@@ -403,6 +403,7 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
               </div>
               <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '6px 14px', color: '#000000', fontWeight: 600 }}>
                 <span>💻 Laptops, Computers, CCTV, Computer Accessories</span>
+                <span>📱 Mobile App & Website Development</span>
                 <span>🏠 Complete electrical work of the house</span>
                 <span>💡 Safe and modern smart electric solutions</span>
                 <span>📹 CCTV camera installation and setup services</span>

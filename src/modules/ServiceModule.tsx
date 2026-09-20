@@ -327,6 +327,7 @@ export const ServiceModule: React.FC<ServiceModuleProps> = ({ onNavigate }) => {
                 >
                   <optgroup label="Official NEED ELECTRO Core Services">
                     <option value="Laptops, Computers, CCTV, Computer Accessories">💻 Laptops, Computers, CCTV, Computer Accessories</option>
+                    <option value="Mobile App & Website Development">📱 Mobile App & Website Development</option>
                     <option value="Complete electrical work of the house">🏠 Complete electrical work of the house</option>
                     <option value="Safe and modern smart electric solutions">💡 Safe and modern smart electric solutions</option>
                     <option value="CCTV camera installation and setup services">📹 CCTV camera installation and setup services</option>
