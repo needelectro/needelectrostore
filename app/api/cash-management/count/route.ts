@@ -38,7 +38,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Target cash account not found.' }, { status: 404 });
     }
 
-    const diff = Number(difference || 0);
+    // Calculate difference server-side (physical - system)
+    const numSystemBalance = Number(systemBalance || 0);
+    const numPhysicalBalance = Number(physicalBalance || 0);
+    const diff = numPhysicalBalance - numSystemBalance;
+
     const countNumber = 'CNT-' + Date.now().toString().slice(-6);
     let adjustmentRecord: any = null;
 
@@ -115,7 +119,7 @@ export async function POST(req: NextRequest) {
         action: 'PHYSICAL_CASH_COUNT',
         module: 'CASH_MANAGEMENT',
         recordId: countNumber,
-        details: `Physical Cash Count performed by ${user.name} on ${account.name}. System Cash: ৳${Number(systemBalance).toLocaleString('en-IN')}, Physical Count: ৳${Number(physicalBalance).toLocaleString('en-IN')}, Difference: ${diff >= 0 ? '+' : ''}৳${diff.toLocaleString('en-IN')}. ${autoAdjust ? 'Variance adjusted in ledger.' : 'Audit recorded without auto-adjustment.'} Notes: ${notes || 'None'}`,
+        details: `Physical Cash Count performed by ${user.name} on ${account.name}. System Cash: ৳${numSystemBalance.toLocaleString('en-IN')}, Physical Count: ৳${numPhysicalBalance.toLocaleString('en-IN')}, Difference: ${diff >= 0 ? '+' : ''}৳${diff.toLocaleString('en-IN')}. ${autoAdjust ? 'Variance adjusted in ledger.' : 'Audit recorded without auto-adjustment.'} Notes: ${notes || 'None'}`,
       },
     });
 

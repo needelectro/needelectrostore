@@ -808,6 +808,21 @@ export async function GET(req: NextRequest) {
 
     const todayNetMovement = todayInflow - todayOutflow;
 
+    // Monthly totals (always calculated regardless of selected date range)
+    let thisMonthInflow = 0;
+    let thisMonthOutflow = 0;
+
+    historyWithBalance.forEach((evt) => {
+      const t = new Date(evt.date).getTime();
+      if (t >= monthStart.getTime() && t <= monthEnd.getTime()) {
+        if (evt.direction === 'INFLOW') {
+          thisMonthInflow += evt.cashIn;
+        } else {
+          thisMonthOutflow += evt.cashOut;
+        }
+      }
+    });
+
     // 7. Payment Method Account Balances (Cash, bKash, Nagad, Rocket, Bank, Card)
     const paymentMethodStats: Record<string, { balance: number; inflow: number; outflow: number }> = {
       Cash: { balance: 0, inflow: 0, outflow: 0 },
@@ -942,6 +957,8 @@ export async function GET(req: NextRequest) {
         todayPhysicalInflow,
         todayPhysicalOutflow,
         todayNetMovement,
+        thisMonthInflow,
+        thisMonthOutflow,
         inflowBreakdown,
         outflowBreakdown,
         paymentMethodStats,
