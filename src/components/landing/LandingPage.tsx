@@ -129,14 +129,256 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#070c18',
-      color: '#f8fafc',
-      fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-      overflowX: 'hidden',
-      lineHeight: 1.6
-    }}>
+    <div
+      className={`landing-page-root ${theme === 'light' ? 'theme-light' : 'theme-dark'}`}
+      style={{
+        minHeight: '100vh',
+        backgroundColor: theme === 'light' ? '#f8fafc' : '#070c18',
+        color: theme === 'light' ? '#0f172a' : '#f8fafc',
+        fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+        overflowX: 'hidden',
+        lineHeight: 1.6
+      }}
+    >
+      {/* Light Theme Stylesheet for Landing Page */}
+      <style>{`
+        .landing-page-root.theme-light {
+          background-color: #f8fafc !important;
+          color: #0f172a !important;
+        }
+
+        /* 1. Header */
+        .landing-page-root.theme-light header {
+          background-color: rgba(255, 255, 255, 0.94) !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .landing-page-root.theme-light .desktop-nav-links a {
+          color: #334155 !important;
+        }
+
+        .landing-page-root.theme-light .desktop-nav-links a:hover {
+          color: #0284c7 !important;
+        }
+
+        .landing-page-root.theme-light .desktop-nav-links a[href="#home"] {
+          color: #0284c7 !important;
+        }
+
+        .landing-page-root.theme-light .desktop-nav-links a[href="#software"] {
+          color: #0284c7 !important;
+          background: #e0f2fe !important;
+          border-color: #bae6fd !important;
+        }
+
+        .landing-page-root.theme-light .hotline-pill {
+          background: #f0f9ff !important;
+          color: #0284c7 !important;
+          border: 1px solid #bae6fd !important;
+        }
+
+        .landing-page-root.theme-light .mobile-hamburger-btn {
+          background: #f1f5f9 !important;
+          border-color: #cbd5e1 !important;
+          color: #0f172a !important;
+        }
+
+        /* 2. Hero Section */
+        .landing-page-root.theme-light #home {
+          background: radial-gradient(circle at 50% -10%, rgba(2, 132, 199, 0.14) 0%, #f8fafc 70%) !important;
+        }
+
+        .landing-page-root.theme-light #home h1 {
+          color: #0f172a !important;
+        }
+
+        .landing-page-root.theme-light #home p {
+          color: #475569 !important;
+        }
+
+        .landing-page-root.theme-light #home div[style*="backgroundImage"] {
+          background-image: radial-gradient(rgba(0, 0, 0, 0.07) 1px, transparent 0) !important;
+          opacity: 0.6 !important;
+        }
+
+        /* Hero Action Buttons */
+        .landing-page-root.theme-light #home a[href="#products"] {
+          background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+          color: #ffffff !important;
+          box-shadow: 0 8px 24px rgba(2, 132, 199, 0.35) !important;
+        }
+
+        .landing-page-root.theme-light #home a[href="#software"] {
+          background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+          color: #ffffff !important;
+          box-shadow: 0 8px 24px rgba(2, 132, 199, 0.3) !important;
+        }
+
+        .landing-page-root.theme-light #home button {
+          background: #ffffff !important;
+          color: #0f172a !important;
+          border: 1px solid #cbd5e1 !important;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+        }
+
+        .landing-page-root.theme-light #home a[href="#emi"] {
+          background: #eff6ff !important;
+          color: #1d4ed8 !important;
+          border: 1px solid #bfdbfe !important;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+        }
+
+        /* Quick Value Metrics Bar under Hero */
+        .landing-page-root.theme-light #home > div > div:last-child {
+          background: #ffffff !important;
+          border: 1px solid #e2e8f0 !important;
+          box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.03) !important;
+        }
+
+        .landing-page-root.theme-light #home > div > div:last-child > div:last-child > div:first-child {
+          color: #0f172a !important;
+        }
+
+        .landing-page-root.theme-light #home > div > div:last-child > div > div:last-child {
+          color: #64748b !important;
+        }
+
+        /* 3. Content Sections */
+        .landing-page-root.theme-light section {
+          background-color: #f8fafc !important;
+        }
+
+        .landing-page-root.theme-light #products,
+        .landing-page-root.theme-light #services,
+        .landing-page-root.theme-light #software,
+        .landing-page-root.theme-light #about {
+          background-color: #ffffff !important;
+        }
+
+        .landing-page-root.theme-light #laptops,
+        .landing-page-root.theme-light #cctv,
+        .landing-page-root.theme-light #emi,
+        .landing-page-root.theme-light #contact,
+        .landing-page-root.theme-light section:nth-of-type(3) {
+          background-color: #f8fafc !important;
+        }
+
+        /* Section Titles and Descriptions */
+        .landing-page-root.theme-light h1,
+        .landing-page-root.theme-light h2,
+        .landing-page-root.theme-light h3,
+        .landing-page-root.theme-light h4 {
+          color: #0f172a !important;
+        }
+
+        .landing-page-root.theme-light p {
+          color: #475569 !important;
+        }
+
+        /* 4. Cards & Containers */
+        .landing-page-root.theme-light div[style*="background: rgba(255, 255, 255"],
+        .landing-page-root.theme-light div[style*="background: rgba(15, 23, 42"],
+        .landing-page-root.theme-light div[style*="background: #090f20"],
+        .landing-page-root.theme-light div[style*="background: #0b1329"],
+        .landing-page-root.theme-light div[style*="background: #070c18"],
+        .landing-page-root.theme-light div[style*="backgroundColor: #090f20"],
+        .landing-page-root.theme-light div[style*="backgroundColor: #0b1329"],
+        .landing-page-root.theme-light div[style*="backgroundColor: #070c18"],
+        .landing-page-root.theme-light div[style*="backgroundColor: rgba(15, 23, 42"] {
+          background-color: #ffffff !important;
+          border: 1px solid #e2e8f0 !important;
+          box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .landing-page-root.theme-light div[style*="background"]:hover {
+          border-color: #93c5fd !important;
+        }
+
+        /* 5. Typography */
+        .landing-page-root.theme-light div[style*="color: #ffffff"]:not(a[style*="linear-gradient"] *):not(button[style*="linear-gradient"] *),
+        .landing-page-root.theme-light div[style*="color: #cbd5e1"],
+        .landing-page-root.theme-light div[style*="color: #f8fafc"],
+        .landing-page-root.theme-light span[style*="color: #ffffff"]:not(a[style*="linear-gradient"] *):not(button[style*="linear-gradient"] *),
+        .landing-page-root.theme-light span[style*="color: #cbd5e1"],
+        .landing-page-root.theme-light span[style*="color: #f8fafc"] {
+          color: #0f172a !important;
+        }
+
+        .landing-page-root.theme-light div[style*="color: #94a3b8"],
+        .landing-page-root.theme-light span[style*="color: #94a3b8"],
+        .landing-page-root.theme-light p[style*="color: #94a3b8"] {
+          color: #64748b !important;
+        }
+
+        /* Preserve white text inside primary gradient buttons */
+        .landing-page-root.theme-light a[style*="linear-gradient"],
+        .landing-page-root.theme-light button[style*="linear-gradient"],
+        .landing-page-root.theme-light a[style*="linear-gradient"] *,
+        .landing-page-root.theme-light button[style*="linear-gradient"] * {
+          color: #ffffff !important;
+        }
+
+        /* 6. Filter Tabs */
+        .landing-page-root.theme-light button[style*="background: rgba(255, 255, 255, 0.05)"],
+        .landing-page-root.theme-light button[style*="background: rgba(255, 255, 255, 0.08)"] {
+          background-color: #f1f5f9 !important;
+          color: #334155 !important;
+          border: 1px solid #e2e8f0 !important;
+        }
+
+        /* 7. Inputs, Search & Selects */
+        .landing-page-root.theme-light input,
+        .landing-page-root.theme-light select,
+        .landing-page-root.theme-light textarea {
+          background-color: #ffffff !important;
+          color: #0f172a !important;
+          border: 1px solid #cbd5e1 !important;
+        }
+
+        .landing-page-root.theme-light input::placeholder,
+        .landing-page-root.theme-light textarea::placeholder {
+          color: #94a3b8 !important;
+        }
+
+        .landing-page-root.theme-light div[style*="background: rgba(15, 23, 42, 0.8)"],
+        .landing-page-root.theme-light div[style*="background: rgba(15, 23, 42, 0.6)"] {
+          background-color: #ffffff !important;
+          border: 1px solid #cbd5e1 !important;
+        }
+
+        /* 8. Modals & Drawers */
+        .landing-page-root.theme-light div[style*="position: fixed"][style*="zIndex: 9999"],
+        .landing-page-root.theme-light div[style*="position: fixed"][style*="zIndex: 2000"] {
+          background-color: rgba(15, 23, 42, 0.6) !important;
+        }
+
+        .landing-page-root.theme-light div[style*="maxHeight: 90vh"],
+        .landing-page-root.theme-light div[style*="maxHeight: 85vh"] {
+          background-color: #ffffff !important;
+          color: #0f172a !important;
+          border: 1px solid #e2e8f0 !important;
+        }
+
+        /* 9. Footer */
+        .landing-page-root.theme-light footer {
+          background-color: #0b1120 !important;
+          color: #94a3b8 !important;
+          border-top: 1px solid #1e293b !important;
+        }
+
+        .landing-page-root.theme-light footer h3,
+        .landing-page-root.theme-light footer h4,
+        .landing-page-root.theme-light footer a,
+        .landing-page-root.theme-light footer span[style*="color: #ffffff"] {
+          color: #f8fafc !important;
+        }
+
+        .landing-page-root.theme-light footer a:hover {
+          color: #38bdf8 !important;
+        }
+      `}</style>
+
       {/* Inject SEO Structured Data */}
       <script
         type="application/ld+json"
@@ -166,7 +408,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
         }}>
           {/* Logo */}
           <a href="#home" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-            <NeedElectroLogo size="sm" showSisterConcern={false} theme="dark" />
+            <NeedElectroLogo size="sm" showSisterConcern={false} theme={theme === 'light' ? 'light' : 'dark'} />
           </a>
 
           {/* Navigation Links (Desktop) */}
@@ -234,9 +476,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'rgba(255, 255, 255, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.18)',
-                color: '#ffffff',
+                background: theme === 'light' ? '#f1f5f9' : 'rgba(255, 255, 255, 0.08)',
+                border: theme === 'light' ? '1px solid #cbd5e1' : '1px solid rgba(255, 255, 255, 0.18)',
+                color: theme === 'light' ? '#0f172a' : '#ffffff',
                 borderRadius: '9999px',
                 width: '32px',
                 height: '32px',
@@ -244,7 +486,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 transition: 'all 0.2s ease'
               }}
             >
-              {theme === 'light' ? <Moon size={15} color="#38bdf8" /> : <Sun size={15} color="#f59e0b" />}
+              {theme === 'light' ? <Moon size={15} color="#0284c7" /> : <Sun size={15} color="#f59e0b" />}
             </button>
 
             {/* Mobile Hamburger Toggle Button */}
@@ -2044,7 +2286,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
               padding: '2.5rem',
               textAlign: 'center'
             }}>
-              <NeedElectroLogo size="md" showSisterConcern={true} theme="dark" />
+              <NeedElectroLogo size="md" showSisterConcern={true} theme={theme === 'light' ? 'light' : 'dark'} />
               <div style={{ margin: '1.5rem 0', fontSize: '0.9rem', color: '#cbd5e1' }}>
                 <strong>Showroom Address:</strong><br />
                 Shop No: 5, MR Plaza, Kusumbag,<br />
