@@ -282,7 +282,18 @@ export async function POST(req: NextRequest) {
       // 3. Create Initial Investment if provided
       const amount = Number(initialAmount || 0);
       if (amount > 0) {
-        const targetAccId = depositAccountId || (await prisma.financialAccount.findFirst())?.id || 'acc-cash-1';
+        let targetAccId = depositAccountId || 'acc-1';
+        let account = await prisma.financialAccount.findFirst({
+          where: { id: targetAccId },
+        });
+
+        if (!account) {
+          account = await prisma.financialAccount.findFirst({
+            where: { type: 'CASH' }
+          });
+        }
+        
+        targetAccId = account?.id || targetAccId;
         const targetAcc = await prisma.financialAccount.findUnique({ where: { id: targetAccId } });
 
         const investmentNumber = `INV-REF-${Date.now().toString().slice(-6)}`;
@@ -370,7 +381,18 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: 'Investor not found.' }, { status: 404 });
       }
 
-      const targetAccId = depositAccountId || (await prisma.financialAccount.findFirst())?.id || 'acc-cash-1';
+      let targetAccId = depositAccountId || 'acc-1';
+      let account = await prisma.financialAccount.findFirst({
+        where: { id: targetAccId },
+      });
+
+      if (!account) {
+        account = await prisma.financialAccount.findFirst({
+          where: { type: 'CASH' }
+        });
+      }
+      
+      targetAccId = account?.id || targetAccId;
       const targetAcc = await prisma.financialAccount.findUnique({ where: { id: targetAccId } });
 
       const investmentNumber = `INV-ADD-${Date.now().toString().slice(-6)}`;

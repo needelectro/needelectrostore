@@ -118,13 +118,25 @@ export async function POST(req: NextRequest) {
 
       // 3. Deduct financial account if cash refund issued
       if (Number(totalRefundAmount) > 0 && refundMethod !== 'CREDIT_NOTE') {
-        const targetAccountId = accountId || 'acc-cash-1';
-        await tx.financialAccount.updateMany({
+        const targetAccountId = accountId || 'acc-1';
+        let account = await tx.financialAccount.findFirst({
           where: { id: targetAccountId },
-          data: {
-            balance: { decrement: new Prisma.Decimal(totalRefundAmount) },
-          },
         });
+
+        if (!account) {
+          account = await tx.financialAccount.findFirst({
+            where: { type: 'CASH' },
+          });
+        }
+
+        if (account) {
+          await tx.financialAccount.updateMany({
+            where: { id: account.id },
+            data: {
+              balance: { decrement: new Prisma.Decimal(totalRefundAmount) },
+            },
+          });
+        }
       }
 
       // 4. Audit Log

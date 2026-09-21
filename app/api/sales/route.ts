@@ -386,10 +386,16 @@ export async function POST(req: NextRequest) {
 
       // 6. Update Financial Account Balance if paid amount received
       if (saleData.paidAmount > 0) {
-        const targetAccountId = paymentAccountId || 'acc-cash-1';
-        const account = await tx.financialAccount.findFirst({
+        const targetAccountId = paymentAccountId || 'acc-1';
+        let account = await tx.financialAccount.findFirst({
           where: { id: targetAccountId },
         });
+
+        if (!account) {
+          account = await tx.financialAccount.findFirst({
+            where: { type: 'CASH' }
+          });
+        }
 
         if (account) {
           await tx.financialAccount.update({

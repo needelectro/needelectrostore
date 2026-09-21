@@ -55,13 +55,25 @@ export async function POST(
     });
 
     // Deduct financial account balance
-    const targetAccountId = accountId || 'acc-cash-1';
-    await tx.financialAccount.updateMany({
+    const targetAccountId = accountId || 'acc-1';
+    let account = await tx.financialAccount.findFirst({
       where: { id: targetAccountId },
-      data: {
-        balance: { decrement: new Prisma.Decimal(amount) },
-      },
     });
+
+    if (!account) {
+      account = await tx.financialAccount.findFirst({
+        where: { type: 'CASH' }
+      });
+    }
+
+    if (account) {
+      await tx.financialAccount.update({
+        where: { id: account.id },
+        data: {
+          balance: { decrement: new Prisma.Decimal(amount) },
+        },
+      });
+    }
 
     // Record Operating Expense under 'Purchase Expenses'
     const expVoucher = 'EXP-SUP-' + Date.now().toString().slice(-6);

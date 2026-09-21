@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       name: pm.name,
       code: pm.code.toUpperCase().replace(/\s+/g, '_'),
       type: pm.type || 'CASH',
-      linkedAccountId: pm.linkedAccountId || 'acc-cash-1',
+      linkedAccountId: pm.linkedAccountId || 'acc-1',
       accountNumber: pm.accountNumber,
       chargePercent: new Prisma.Decimal(pm.chargePercent || 0),
       instructions: pm.instructions,

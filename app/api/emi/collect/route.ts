@@ -92,11 +92,20 @@ export async function POST(req: NextRequest) {
       });
 
       // 4. Update Financial Account Balance
-      const targetAccountId = accountId || 'acc-cash-1';
-      const finAccount = await tx.financialAccount.findFirst({ where: { id: targetAccountId } });
-      if (finAccount) {
+      const targetAccountId = accountId || 'acc-1';
+      let account = await tx.financialAccount.findFirst({
+        where: { id: targetAccountId },
+      });
+
+      if (!account) {
+        account = await tx.financialAccount.findFirst({
+          where: { type: 'CASH' },
+        });
+      }
+
+      if (account) {
         await tx.financialAccount.update({
-          where: { id: finAccount.id },
+          where: { id: account.id },
           data: {
             balance: { increment: new Prisma.Decimal(amount) },
           },
