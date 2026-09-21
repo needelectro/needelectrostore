@@ -159,94 +159,146 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           box-shadow: 0 2px 16px rgba(0, 140, 255, 0.07) !important;
         }
 
-        /* Desktop nav link base */
-        .landing-page-root .ne-nav-link {
-          position: relative;
-          color: #94a3b8;
-          text-decoration: none;
-          font-size: 0.875rem;
-          font-weight: 600;
-          padding: 0.3rem 0;
-          letter-spacing: 0.01em;
-          transition: color 0.22s ease;
-        }
-        .landing-page-root .ne-nav-link::after {
-          content: '';
-          position: absolute;
-          bottom: -2px;
-          left: 0;
-          width: 0;
-          height: 2px;
-          border-radius: 2px;
-          background: linear-gradient(90deg, #008CFF, #38bdf8);
-          transition: width 0.28s cubic-bezier(0.4,0,0.2,1);
-        }
-        .landing-page-root .ne-nav-link:hover {
-          color: #ffffff;
-        }
-        .landing-page-root .ne-nav-link:hover::after {
-          width: 100%;
-        }
-        /* Active/Home link */
-        .landing-page-root .ne-nav-link.ne-nav-active {
-          color: #ffffff;
-        }
-        .landing-page-root .ne-nav-link.ne-nav-active::after {
-          width: 100%;
-        }
-        /* Light theme overrides */
-        .landing-page-root.theme-light .ne-nav-link {
-          color: #475569 !important;
-        }
-        .landing-page-root.theme-light .ne-nav-link:hover {
-          color: #0284c7 !important;
-        }
-        .landing-page-root.theme-light .ne-nav-link.ne-nav-active {
-          color: #0f172a !important;
-        }
-
-        /* Apps & Websites badge */
-        .landing-page-root .ne-apps-badge {
+        /* ── Nav Pill System ───────────────────────── */
+        .landing-page-root .ne-pill {
           display: inline-flex;
           align-items: center;
           gap: 5px;
-          color: #38bdf8;
           text-decoration: none;
-          font-size: 0.82rem;
+          font-size: 0.8rem;
           font-weight: 700;
-          padding: 0.28rem 0.75rem 0.28rem 0.55rem;
+          padding: 0.3rem 0.8rem;
           border-radius: 9999px;
-          background: linear-gradient(135deg, rgba(0,140,255,0.14) 0%, rgba(56,189,248,0.10) 100%);
-          border: 1px solid rgba(56,189,248,0.35);
-          letter-spacing: 0.01em;
-          transition: all 0.25s ease;
+          letter-spacing: 0.02em;
+          transition: all 0.24s cubic-bezier(0.4,0,0.2,1);
           position: relative;
           overflow: hidden;
+          white-space: nowrap;
+          flex-shrink: 0;
         }
-        .landing-page-root .ne-apps-badge::before {
+        /* shimmer sweep on all pills */
+        .landing-page-root .ne-pill::before {
           content: '';
           position: absolute;
           inset: 0;
-          background: linear-gradient(90deg, transparent 0%, rgba(56,189,248,0.15) 50%, transparent 100%);
-          transform: translateX(-100%);
-          animation: ne-badge-shimmer 2.8s ease-in-out infinite;
+          background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%);
+          transform: translateX(-120%);
+          animation: ne-pill-shimmer 3s ease-in-out infinite;
         }
-        .landing-page-root .ne-apps-badge:hover {
-          background: linear-gradient(135deg, rgba(0,140,255,0.25) 0%, rgba(56,189,248,0.18) 100%);
-          border-color: rgba(56,189,248,0.65);
-          box-shadow: 0 0 16px rgba(56,189,248,0.25);
-          transform: translateY(-1px);
+        .landing-page-root .ne-pill:hover {
+          transform: translateY(-2px);
         }
-        .landing-page-root.theme-light .ne-apps-badge {
-          color: #0284c7 !important;
-          background: linear-gradient(135deg, rgba(0,140,255,0.1) 0%, rgba(56,189,248,0.07) 100%) !important;
-          border-color: rgba(2,132,199,0.3) !important;
+        @keyframes ne-pill-shimmer {
+          0%   { transform: translateX(-120%); }
+          55%  { transform: translateX(120%); }
+          100% { transform: translateX(120%); }
         }
-        @keyframes ne-badge-shimmer {
-          0%   { transform: translateX(-100%); }
-          50%  { transform: translateX(100%); }
-          100% { transform: translateX(100%); }
+
+        /* HOME — white/neutral */
+        .landing-page-root .ne-pill-home {
+          color: #ffffff;
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.22);
         }
+        .landing-page-root .ne-pill-home:hover {
+          background: rgba(255,255,255,0.18);
+          border-color: rgba(255,255,255,0.45);
+          box-shadow: 0 4px 16px rgba(255,255,255,0.1);
+        }
+        /* APPS & WEBSITES — sky blue (shimmer extra offset for variety) */
+        .landing-page-root .ne-pill-apps {
+          color: #38bdf8;
+          background: linear-gradient(135deg, rgba(0,140,255,0.16) 0%, rgba(56,189,248,0.11) 100%);
+          border: 1px solid rgba(56,189,248,0.38);
+        }
+        .landing-page-root .ne-pill-apps::before { animation-delay: 0.4s; }
+        .landing-page-root .ne-pill-apps:hover {
+          background: linear-gradient(135deg, rgba(0,140,255,0.28) 0%, rgba(56,189,248,0.2) 100%);
+          border-color: rgba(56,189,248,0.7);
+          box-shadow: 0 4px 18px rgba(56,189,248,0.28);
+        }
+        /* LAPTOPS — violet */
+        .landing-page-root .ne-pill-laptops {
+          color: #a78bfa;
+          background: rgba(139,92,246,0.12);
+          border: 1px solid rgba(139,92,246,0.35);
+        }
+        .landing-page-root .ne-pill-laptops::before { animation-delay: 0.8s; }
+        .landing-page-root .ne-pill-laptops:hover {
+          background: rgba(139,92,246,0.22);
+          border-color: rgba(167,139,250,0.65);
+          box-shadow: 0 4px 18px rgba(139,92,246,0.28);
+        }
+        /* SERVICES — amber */
+        .landing-page-root .ne-pill-services {
+          color: #fbbf24;
+          background: rgba(251,191,36,0.1);
+          border: 1px solid rgba(251,191,36,0.3);
+        }
+        .landing-page-root .ne-pill-services::before { animation-delay: 1.2s; }
+        .landing-page-root .ne-pill-services:hover {
+          background: rgba(251,191,36,0.2);
+          border-color: rgba(251,191,36,0.6);
+          box-shadow: 0 4px 18px rgba(251,191,36,0.25);
+        }
+        /* CCTV — rose */
+        .landing-page-root .ne-pill-cctv {
+          color: #f87171;
+          background: rgba(239,68,68,0.1);
+          border: 1px solid rgba(239,68,68,0.3);
+        }
+        .landing-page-root .ne-pill-cctv::before { animation-delay: 1.6s; }
+        .landing-page-root .ne-pill-cctv:hover {
+          background: rgba(239,68,68,0.2);
+          border-color: rgba(248,113,113,0.6);
+          box-shadow: 0 4px 18px rgba(239,68,68,0.25);
+        }
+        /* EMI — emerald */
+        .landing-page-root .ne-pill-emi {
+          color: #34d399;
+          background: rgba(52,211,153,0.1);
+          border: 1px solid rgba(52,211,153,0.3);
+        }
+        .landing-page-root .ne-pill-emi::before { animation-delay: 2s; }
+        .landing-page-root .ne-pill-emi:hover {
+          background: rgba(52,211,153,0.2);
+          border-color: rgba(52,211,153,0.6);
+          box-shadow: 0 4px 18px rgba(52,211,153,0.25);
+        }
+        /* ABOUT — orange */
+        .landing-page-root .ne-pill-about {
+          color: #fb923c;
+          background: rgba(251,146,60,0.1);
+          border: 1px solid rgba(251,146,60,0.3);
+        }
+        .landing-page-root .ne-pill-about::before { animation-delay: 2.4s; }
+        .landing-page-root .ne-pill-about:hover {
+          background: rgba(251,146,60,0.2);
+          border-color: rgba(251,146,60,0.6);
+          box-shadow: 0 4px 18px rgba(251,146,60,0.22);
+        }
+        /* CONTACT — pink */
+        .landing-page-root .ne-pill-contact {
+          color: #f472b6;
+          background: rgba(244,114,182,0.1);
+          border: 1px solid rgba(244,114,182,0.3);
+        }
+        .landing-page-root .ne-pill-contact::before { animation-delay: 2.8s; }
+        .landing-page-root .ne-pill-contact:hover {
+          background: rgba(244,114,182,0.2);
+          border-color: rgba(244,114,182,0.6);
+          box-shadow: 0 4px 18px rgba(244,114,182,0.22);
+        }
+
+        /* ── Light-theme pill overrides ─────────────── */
+        .landing-page-root.theme-light .ne-pill-home  { color:#334155!important; background:rgba(51,65,85,0.07)!important; border-color:rgba(51,65,85,0.2)!important; }
+        .landing-page-root.theme-light .ne-pill-apps  { color:#0284c7!important; background:rgba(2,132,199,0.08)!important; border-color:rgba(2,132,199,0.28)!important; }
+        .landing-page-root.theme-light .ne-pill-laptops { color:#7c3aed!important; background:rgba(124,58,237,0.07)!important; border-color:rgba(124,58,237,0.25)!important; }
+        .landing-page-root.theme-light .ne-pill-services { color:#b45309!important; background:rgba(180,83,9,0.07)!important; border-color:rgba(180,83,9,0.22)!important; }
+        .landing-page-root.theme-light .ne-pill-cctv  { color:#dc2626!important; background:rgba(220,38,38,0.07)!important; border-color:rgba(220,38,38,0.22)!important; }
+        .landing-page-root.theme-light .ne-pill-emi   { color:#059669!important; background:rgba(5,150,105,0.07)!important; border-color:rgba(5,150,105,0.22)!important; }
+        .landing-page-root.theme-light .ne-pill-about { color:#c2410c!important; background:rgba(194,65,12,0.07)!important; border-color:rgba(194,65,12,0.22)!important; }
+        .landing-page-root.theme-light .ne-pill-contact{ color:#be185d!important; background:rgba(190,24,93,0.07)!important; border-color:rgba(190,24,93,0.22)!important; }
 
         /* Hotline pill */
         .landing-page-root .ne-hotline {
@@ -907,24 +959,45 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             <NeedElectroLogo size="sm" showSisterConcern={false} theme={theme === 'light' ? 'light' : 'dark'} />
           </a>
 
-          {/* Navigation Links (Desktop) */}
+          {/* Navigation Links (Desktop) — all pill style */}
           <nav className="desktop-nav-links" style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.2rem',
+            gap: '0.45rem',
+            flexWrap: 'nowrap',
           }}>
-            <a href="#home" className="ne-nav-link ne-nav-active">Home</a>
-            <a href="#software" className="ne-apps-badge" style={{ margin: '0 0.55rem' }}>
-              <Globe size={13} />
+            <a href="#home" className="ne-pill ne-pill-home">
+              <Compass size={12} />
+              <span>Home</span>
+            </a>
+            <a href="#software" className="ne-pill ne-pill-apps">
+              <Globe size={12} />
               <span>Apps &amp; Websites</span>
             </a>
-            <a href="#products" className="ne-nav-link" style={{ marginLeft: '0.3rem' }}>Products</a>
-            <a href="#laptops" className="ne-nav-link">Laptops</a>
-            <a href="#services" className="ne-nav-link">Services</a>
-            <a href="#cctv" className="ne-nav-link">CCTV &amp; Security</a>
-            <a href="#emi" className="ne-nav-link">Laptop EMI</a>
-            <a href="#about" className="ne-nav-link">About Us</a>
-            <a href="#contact" className="ne-nav-link" style={{ marginRight: '0.3rem' }}>Contact</a>
+            <a href="#laptops" className="ne-pill ne-pill-laptops">
+              <Laptop size={12} />
+              <span>Laptops</span>
+            </a>
+            <a href="#services" className="ne-pill ne-pill-services">
+              <Wrench size={12} />
+              <span>Services</span>
+            </a>
+            <a href="#cctv" className="ne-pill ne-pill-cctv">
+              <Camera size={12} />
+              <span>CCTV &amp; Security</span>
+            </a>
+            <a href="#emi" className="ne-pill ne-pill-emi">
+              <CreditCard size={12} />
+              <span>Laptop EMI</span>
+            </a>
+            <a href="#about" className="ne-pill ne-pill-about">
+              <Building2 size={12} />
+              <span>About Us</span>
+            </a>
+            <a href="#contact" className="ne-pill ne-pill-contact">
+              <Phone size={12} />
+              <span>Contact</span>
+            </a>
           </nav>
 
           {/* Right Action Group */}
