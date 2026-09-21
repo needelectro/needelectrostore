@@ -149,6 +149,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
 
         /* 1. Header */
         .landing-page-root.theme-light header {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          width: 100% !important;
           background-color: rgba(255, 255, 255, 0.96) !important;
           border-bottom: 1px solid #e2e8f0 !important;
           box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05) !important;
@@ -750,16 +755,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
       />
 
       {/* =========================================================================
-          1. CUSTOMER-SIDE STICKY EXECUTIVE HEADER
+          1. CUSTOMER-SIDE FIXED EXECUTIVE HEADER (always visible on scroll)
           ========================================================================= */}
       <header style={{
-        position: 'sticky',
+        position: 'fixed',
         top: 0,
+        left: 0,
+        right: 0,
+        width: '100%',
         zIndex: 1000,
         backgroundColor: 'rgba(7, 12, 24, 0.9)',
         backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-        transition: 'all 0.3s ease'
+        transition: 'background-color 0.3s ease, box-shadow 0.3s ease'
       }}>
         <div style={{
           maxWidth: '1320px',
@@ -988,6 +997,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           </div>
         )}
       </header>
+
+      {/* Spacer to prevent content from hiding behind fixed header */}
+      <div aria-hidden="true" style={{ height: '68px', flexShrink: 0 }} />
 
       {/* =========================================================================
           2. HERO SECTION
