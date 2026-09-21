@@ -4296,7 +4296,16 @@ export const INITIAL_PERMISSIONS: Permission[] = [
   { id: 'perm_users_manage', module: 'users', action: 'manage', label: 'Manage User Accounts', description: 'Create staff accounts', isSensitive: true },
   { id: 'perm_audit_view', module: 'audit', action: 'view', label: 'View Audit Trails', description: 'Inspect security and financial logs', isSensitive: true },
   { id: 'perm_settings_manage', module: 'settings', action: 'manage', label: 'Modify System Settings', description: 'Master company parameters', isSensitive: true },
-  { id: 'perm_backup_manage', module: 'backup', action: 'manage', label: 'Database Backup & Restore', description: 'Manage database snapshots and restore', isSensitive: true }
+  { id: 'perm_backup_manage', module: 'backup', action: 'manage', label: 'Database Backup & Restore', description: 'Manage database snapshots and restore', isSensitive: true },
+  { id: 'perm_cash_view', module: 'cash', action: 'view', label: 'View Cash & Liquidity', description: 'Access cash management module, running balances and drawers', isSensitive: false },
+  { id: 'perm_cash_create', module: 'cash', action: 'create', label: 'Create Cash Accounts', description: 'Configure new branch or counter cash accounts', isSensitive: true },
+  { id: 'perm_cash_collect', module: 'cash', action: 'collect', label: 'Collect Cash & Dues', description: 'Receive customer dues, EMI and counter payments', isSensitive: false },
+  { id: 'perm_cash_payment', module: 'cash', action: 'payment', label: 'Disburse Cash Payments', description: 'Process cash purchases, petty cash and supplier vouchers', isSensitive: true },
+  { id: 'perm_cash_transfer', module: 'cash', action: 'transfer', label: 'Inter-Branch & Account Transfers', description: 'Transfer cash between branches or bank accounts', isSensitive: true },
+  { id: 'perm_cash_adjust', module: 'cash', action: 'adjust', label: 'Cash Adjustments', description: 'Post audited shortage, excess, or correction entries', isSensitive: true },
+  { id: 'perm_cash_count', module: 'cash', action: 'count', label: 'Physical Cash Count & Reconciliation', description: 'Perform shift end drawer counting and variance checks', isSensitive: false },
+  { id: 'perm_cash_report', module: 'cash', action: 'report', label: 'Cash Flow Reports', description: 'Access daily, monthly, and ledger cash statements', isSensitive: false },
+  { id: 'perm_cash_export', module: 'cash', action: 'export', label: 'Export Cash Ledgers', description: 'Download CSV and Excel financial ledger logs', isSensitive: true }
 ];
 
 export const INITIAL_ROLES: Role[] = [

@@ -966,10 +966,13 @@ export interface CashMovementRecord {
   cashIn: number;
   cashOut: number;
   runningBalance: number;
+  runningPhysicalBalance?: number;
   paymentMethod: string;
+  isPhysicalCash?: boolean;
   accountName?: string;
   accountType?: string;
   user: string;
+  branchId?: string;
   branch: string;
 }
 
@@ -978,11 +981,18 @@ export interface CashSummary {
   physicalCash: number;
   digitalBankCash: number;
   openingCash: number;
+  openingPhysicalCash?: number;
   totalInflow: number;
   totalOutflow: number;
+  totalPhysicalInflow?: number;
+  totalPhysicalOutflow?: number;
   netCashFlow: number;
+  closingCash?: number;
   todayInflow: number;
   todayOutflow: number;
+  todayPhysicalInflow?: number;
+  todayPhysicalOutflow?: number;
+  todayNetMovement?: number;
   thisMonthInflow: number;
   thisMonthOutflow: number;
   inflowBreakdown: {
@@ -993,17 +1003,21 @@ export interface CashSummary {
     emiCollections: number;
     serviceIncome: number;
     adjustmentsInflow: number;
+    transfersIn?: number;
     otherIncome: number;
   };
   outflowBreakdown: {
     purchasePayments: number;
     supplierPayments: number;
     operatingExpenses: number;
-    salaryPayments: number;
+    salaryPayments?: number;
     refunds: number;
+    transfersOut?: number;
     adjustmentsOutflow: number;
     otherOutflows: number;
   };
+  paymentMethodStats?: Record<string, { balance: number; inflow: number; outflow: number }>;
+  branchStats?: Array<{ name: string; balance: number; inflow: number; outflow: number }>;
   accountBalances: Array<{
     id: string;
     name: string;

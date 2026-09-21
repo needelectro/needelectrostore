@@ -396,7 +396,7 @@ export const api = {
       })
   },
 
-  // 12.1 Cash Management
+  // 12.1 Cash Management & Drawer Engine
   cashManagement: {
     getCashSummary: (params?: Record<string, string>) => {
       const q = params ? '?' + new URLSearchParams(params).toString() : '';
@@ -406,6 +406,16 @@ export const api = {
       request<{ success: boolean; message: string; data: any }>('/api/cash-management/adjustments', {
         method: 'POST',
         body: JSON.stringify(payload)
+      }),
+    recordAdjustment: (payload: { amount: number; type: 'INFLOW' | 'OUTFLOW'; reason: string; accountId?: string; paymentMethod?: string; reference?: string; notes?: string; branchId?: string }) =>
+      request<{ success: boolean; message: string; data: any }>('/api/cash-management/adjustments', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      }),
+    recordCashCount: (countData: any) =>
+      request<{ success: boolean; message: string; countNumber: string; difference: number; adjustmentApplied: boolean; error?: string }>('/api/cash-management/count', {
+        method: 'POST',
+        body: JSON.stringify(countData)
       })
   },
 

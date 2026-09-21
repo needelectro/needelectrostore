@@ -65,9 +65,41 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) 
   const monthGrossProfit = monthSales - monthCOGS;
   const monthNetProfit = monthGrossProfit - monthExpenses;
 
-  // Cash and Liquidity
+  // Cash and Liquidity (Section 31)
   const totalCashBalance = useMemo(() => financialAccounts.reduce((sum, a) => sum + (Number(a.balance) || 0), 0), [financialAccounts]);
   const mainCashDrawer = useMemo(() => financialAccounts.find(a => a.id === 'acc-1') || financialAccounts[0], [financialAccounts]);
+  const physicalCashBalance = useMemo(() => financialAccounts.filter(a => a.type === 'CASH').reduce((sum, a) => sum + (Number(a.balance) || 0), 0), [financialAccounts]);
+  const digitalBankBalance = useMemo(() => financialAccounts.filter(a => a.type !== 'CASH').reduce((sum, a) => sum + (Number(a.balance) || 0), 0), [financialAccounts]);
+
+  const todayCashInflow = useMemo(() => {
+    const salesCash = todaySalesList.reduce((sum, s) => {
+      if (Array.isArray(s.payments) && s.payments.length > 0) {
+        return sum + s.payments.filter(p => p.method?.toLowerCase() === 'cash').reduce((pSum, p) => pSum + (Number(p.amount) || 0), 0);
+      }
+      return sum + ((s as any).paymentMethod?.toLowerCase() === 'cash' ? (Number(s.paidAmount) || 0) : 0);
+    }, 0);
+    const emiCash = todayEmiPayments.filter(p => p.paymentMethod?.toLowerCase() === 'cash').reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+    return salesCash + emiCash;
+  }, [todaySalesList, todayEmiPayments]);
+
+  const todayCashOutflow = useMemo(() => {
+    return expenses.filter(e => e.date === todayStr && e.paymentMethod?.toLowerCase() === 'cash').reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+  }, [expenses, todayStr]);
+
+  const todayNetCash = todayCashInflow - todayCashOutflow;
+
+  const paymentMethodBalances = useMemo(() => [
+    { name: 'Physical Cash', amount: physicalCashBalance, color: '#10b981' },
+    { name: 'bKash Wallet', amount: Number(financialAccounts.find(a => a.name.toLowerCase().includes('bkash'))?.balance || 0), color: '#e11d48' },
+    { name: 'Nagad Wallet', amount: Number(financialAccounts.find(a => a.name.toLowerCase().includes('nagad'))?.balance || 0), color: '#ea580c' },
+    { name: 'Bank Accounts', amount: financialAccounts.filter(a => a.type === 'BANK').reduce((sum, a) => sum + Number(a.balance || 0), 0), color: '#0284c7' }
+  ], [financialAccounts, physicalCashBalance]);
+
+  const branchCashBalances = useMemo(() => branches.map(b => {
+    const bAccounts = financialAccounts.filter(a => (a as any).branchId === b.id || (!(a as any).branchId && b.id === 'branch-1'));
+    const bal = bAccounts.reduce((sum, a) => sum + (Number(a.balance) || 0), 0);
+    return { name: b.name, balance: bal };
+  }), [branches, financialAccounts]);
 
   // Stock and Inventory
   const totalStockValue = useMemo(() => products.reduce((sum, p) => sum + (Number(p.currentStock || 0) * (Number(p.costPrice) || 0)), 0), [products]);
@@ -308,15 +340,20 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) 
               </div>
             </div>
 
-            <div>
-              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Cash Position (Available)
+            <div 
+              onClick={() => onNavigate('cash_management')}
+              style={{ cursor: 'pointer', transition: 'transform 0.15s ease' }}
+              title="Open Cash Management System"
+            >
+              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span>Cash Position (Available)</span>
+                <span style={{ fontSize: '0.7rem', color: '#fef08a' }}>Ledger →</span>
               </span>
               <div style={{ fontSize: '1.9rem', fontWeight: 900, color: '#fef08a', marginTop: '0.2rem' }}>
                 ৳{totalCashBalance.toLocaleString()}
               </div>
               <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '0.2rem' }}>
-                Cash in hand & bank accounts
+                ৳{physicalCashBalance.toLocaleString()} drawer • ৳{digitalBankBalance.toLocaleString()} bank/digital
               </div>
             </div>
           </div>
@@ -844,6 +881,284 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) 
               </button>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* =========================================================================
+          SECTION 6B: CASH & LIQUIDITY COMMAND CENTER (SECTION 31 INTEGRATION)
+          ========================================================================= */}
+      <section style={{
+        background: 'linear-gradient(135deg, rgba(9, 17, 34, 0.9) 0%, rgba(13, 27, 42, 0.95) 100%)',
+        borderRadius: '20px',
+        padding: '1.75rem 2rem',
+        border: '1px solid rgba(0, 140, 255, 0.25)',
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, rgba(0, 140, 255, 0.2), rgba(16, 185, 129, 0.2))',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#008CFF',
+              border: '1px solid rgba(0, 140, 255, 0.3)'
+            }}>
+              <Wallet size={22} />
+            </div>
+            <div>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 900, margin: 0, color: '#f8fafc' }}>
+                Cash Management & Liquidity Position
+              </h2>
+              <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                Real-time transactional cash flow tracking. Click any figure to inspect underlying ledger records.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => onNavigate('cash_management')}
+            className="btn"
+            style={{
+              background: 'linear-gradient(135deg, #008CFF 0%, #0066CC 100%)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '10px',
+              padding: '0.55rem 1.15rem',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.45rem'
+            }}
+          >
+            <span>Open Cash Control Center</span>
+            <ArrowRight size={14} />
+          </button>
+        </div>
+
+        {/* 5-Card Cash Performance Strip */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '1rem',
+          marginBottom: '1.5rem'
+        }}>
+          {/* Physical Cash */}
+          <div 
+            onClick={() => onNavigate('cash_management')}
+            style={{
+              background: 'rgba(0, 0, 0, 0.3)',
+              borderRadius: '14px',
+              padding: '1.15rem',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              cursor: 'pointer',
+              transition: 'transform 0.15s ease'
+            }}
+          >
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Physical Cash in Hand
+            </span>
+            <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#10b981', marginTop: '0.2rem' }}>
+              ৳{physicalCashBalance.toLocaleString()}
+            </div>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+              Showroom counter vault
+            </span>
+          </div>
+
+          {/* Today's Cash In */}
+          <div 
+            onClick={() => onNavigate('cash_management')}
+            style={{
+              background: 'rgba(0, 0, 0, 0.3)',
+              borderRadius: '14px',
+              padding: '1.15rem',
+              border: '1px solid rgba(0, 140, 255, 0.3)',
+              cursor: 'pointer',
+              transition: 'transform 0.15s ease'
+            }}
+          >
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#008CFF', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Today's Cash Inflow
+            </span>
+            <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#008CFF', marginTop: '0.2rem' }}>
+              +৳{todayCashInflow.toLocaleString()}
+            </div>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+              Sales & dues collected today
+            </span>
+          </div>
+
+          {/* Today's Cash Out */}
+          <div 
+            onClick={() => onNavigate('cash_management')}
+            style={{
+              background: 'rgba(0, 0, 0, 0.3)',
+              borderRadius: '14px',
+              padding: '1.15rem',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              cursor: 'pointer',
+              transition: 'transform 0.15s ease'
+            }}
+          >
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Today's Cash Outflow
+            </span>
+            <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#ef4444', marginTop: '0.2rem' }}>
+              -৳{todayCashOutflow.toLocaleString()}
+            </div>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+              Cash expenses & payouts
+            </span>
+          </div>
+
+          {/* Today's Net Cash Movement */}
+          <div 
+            onClick={() => onNavigate('cash_management')}
+            style={{
+              background: 'rgba(0, 0, 0, 0.3)',
+              borderRadius: '14px',
+              padding: '1.15rem',
+              border: `1px solid ${todayNetCash >= 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+              cursor: 'pointer',
+              transition: 'transform 0.15s ease'
+            }}
+          >
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: todayNetCash >= 0 ? '#10b981' : '#ef4444', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Today's Net Movement
+            </span>
+            <div style={{ fontSize: '1.65rem', fontWeight: 900, color: todayNetCash >= 0 ? '#10b981' : '#ef4444', marginTop: '0.2rem' }}>
+              {todayNetCash >= 0 ? '+' : ''}৳{todayNetCash.toLocaleString()}
+            </div>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+              Net cash change today
+            </span>
+          </div>
+
+          {/* Total Liquid Funds */}
+          <div 
+            onClick={() => onNavigate('cash_management')}
+            style={{
+              background: 'rgba(0, 0, 0, 0.3)',
+              borderRadius: '14px',
+              padding: '1.15rem',
+              border: '1px solid rgba(254, 240, 138, 0.3)',
+              cursor: 'pointer',
+              transition: 'transform 0.15s ease'
+            }}
+          >
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fef08a', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Total Business Liquidity
+            </span>
+            <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#fef08a', marginTop: '0.2rem' }}>
+              ৳{totalCashBalance.toLocaleString()}
+            </div>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+              Physical cash + bank balances
+            </span>
+          </div>
+        </div>
+
+        {/* Breakdown Dual Cards: Payment Methods + Branch Cash */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: '1.25rem'
+        }}>
+          {/* Payment Methods */}
+          <div style={{
+            background: 'rgba(0, 0, 0, 0.25)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: '14px',
+            padding: '1.25rem'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#f8fafc' }}>
+                Cash by Payment Method
+              </span>
+              <button 
+                onClick={() => onNavigate('cash_management')} 
+                style={{ background: 'transparent', border: 'none', color: '#008CFF', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+              >
+                View Ledger →
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {paymentMethodBalances.map((m, idx) => (
+                <div 
+                  key={idx} 
+                  onClick={() => onNavigate('cash_management')}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '8px',
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    border: '1px solid rgba(255, 255, 255, 0.04)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {m.name}
+                  </span>
+                  <span style={{ fontSize: '0.92rem', fontWeight: 800, color: m.color }}>
+                    ৳{m.amount.toLocaleString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Branch Cash */}
+          <div style={{
+            background: 'rgba(0, 0, 0, 0.25)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: '14px',
+            padding: '1.25rem'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#f8fafc' }}>
+                Cash by Branch
+              </span>
+              <button 
+                onClick={() => onNavigate('cash_management')} 
+                style={{ background: 'transparent', border: 'none', color: '#008CFF', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+              >
+                Inspect Branches →
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {branchCashBalances.map((b, idx) => (
+                <div 
+                  key={idx} 
+                  onClick={() => onNavigate('cash_management')}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '8px',
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    border: '1px solid rgba(255, 255, 255, 0.04)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {b.name}
+                  </span>
+                  <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#10b981' }}>
+                    ৳{b.balance.toLocaleString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 

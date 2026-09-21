@@ -69,6 +69,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
   const [directCountedTotal, setDirectCountedTotal] = useState<number>(0);
   const [reconcileNotes, setReconcileNotes] = useState('');
   const [isAutoReconciling, setIsAutoReconciling] = useState(false);
+  const [isSubmittingCount, setIsSubmittingCount] = useState(false);
 
   // Quick Petty Cash Form State
   const [pettyCategory, setPettyCategory] = useState<string>('Office Supplies & Snacks');
@@ -262,40 +263,50 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
     }
   };
 
-  // Handle Auto-Reconciliation of Drawer Variance
-  const handleAutoReconcileDiscrepancy = async () => {
-    if (cashDiscrepancy === 0) {
-      alert('Cash drawer is perfectly balanced with zero discrepancy. No adjustment needed.');
+  // Handle Physical Drawer Count Submission & Reconciliation (Section 19)
+  const handleSaveCashCount = async (autoAdjust: boolean = false) => {
+    if (autoAdjust && !isSuperAdmin) {
+      alert('Super Admin or Admin authorization is required to apply automated variance adjustments.');
       return;
     }
 
-    if (!isSuperAdmin) {
-      alert('Super Admin or Admin authorization is required to apply automatic cash discrepancy adjustments.');
-      return;
-    }
-
-    const isExcess = cashDiscrepancy > 0;
-    const diffAbs = Math.abs(cashDiscrepancy);
-
-    setIsAutoReconciling(true);
+    setIsSubmittingCount(true);
     try {
-      const res = await recordCashAdjustment({
-        amount: diffAbs,
-        type: isExcess ? 'INFLOW' : 'OUTFLOW',
-        reason: isExcess ? 'CASH_EXCESS' : 'CASH_SHORTAGE',
+      const denominations = useDirectCount ? undefined : {
+        note1000,
+        note500,
+        note200,
+        note100,
+        note50,
+        note20,
+        note10,
+        looseCoins
+      };
+
+      const res = await api.cashManagement.recordCashCount({
         accountId: primaryCashAccount?.id || 'acc-1',
-        paymentMethod: 'Cash',
-        reference: 'RECON-' + new Date().toISOString().split('T')[0],
-        notes: `Automated register closing reconciliation. Physical count: ৳${totalPhysicalCounted.toLocaleString()} vs System expected: ৳${expectedPhysicalCash.toLocaleString()} (${isExcess ? 'Excess' : 'Shortage'} of ৳${diffAbs.toLocaleString()}). ${reconcileNotes}`
+        systemBalance: expectedPhysicalCash,
+        physicalBalance: totalPhysicalCounted,
+        denominations,
+        notes: reconcileNotes,
+        autoAdjust
       });
 
-      if (res.success) {
-        addToast('success', 'Drawer Reconciled', `Cash drawer physical closing reconciled and adjusted by ৳${diffAbs.toLocaleString()}.`);
+      if (res && res.success) {
+        if (autoAdjust) {
+          addToast('success', 'Drawer Reconciled & Adjusted', `Physical count (৳${totalPhysicalCounted.toLocaleString('en-IN')}) saved and variance adjusted by ৳${Math.abs(cashDiscrepancy).toLocaleString('en-IN')}.`);
+        } else {
+          addToast('success', 'Physical Count Logged', `Cash drawer physical count of ৳${totalPhysicalCounted.toLocaleString('en-IN')} successfully audited.`);
+        }
         setShowReconcileModal(false);
         await fetchCashData();
+      } else {
+        addToast('error', 'Reconciliation Error', (res as any)?.error || 'Failed to save cash count session.');
       }
+    } catch (err: any) {
+      addToast('error', 'Reconciliation Error', err.message || 'Unable to record drawer count.');
     } finally {
-      setIsAutoReconciling(false);
+      setIsSubmittingCount(false);
     }
   };
 
@@ -940,73 +951,277 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
       </div>
 
       {/* -------------------------------------------------------------
-          PERIOD METRICS GRID
+          8 & 9. DAILY CASH FLOW & CASH MANAGEMENT DASHBOARD METRICS
           ------------------------------------------------------------- */}
-      <div className="kpi-grid" style={{ marginBottom: '1.5rem' }}>
-        {/* Opening Cash */}
-        <div className="kpi-card">
-          <div className="kpi-top">
-            <span className="kpi-title">Opening Cash</span>
-            <div className="kpi-icon" style={{ background: 'rgba(56, 189, 248, 0.12)', color: '#38bdf8' }}>
-              <Layers size={18} />
+      <div style={{ marginBottom: '1.75rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Calendar size={16} style={{ color: 'var(--brand-primary)' }} />
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Daily Cash Flow & Position (Active Period: {dateRange.toUpperCase().replace('_', ' ')})
+            </span>
+          </div>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+            All metrics calculated dynamically from database ledger transactions
+          </span>
+        </div>
+
+        {/* Tier 1: Today's Real-Time Daily Cash Position */}
+        <div className="kpi-grid" style={{ marginBottom: '1rem' }}>
+          {/* Current Cash */}
+          <div className="kpi-card" style={{ borderLeft: '4px solid #10b981' }}>
+            <div className="kpi-top">
+              <span className="kpi-title">Current Physical Cash</span>
+              <div className="kpi-icon" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+                <Wallet size={18} />
+              </div>
+            </div>
+            <div className="kpi-value" style={{ color: '#10b981' }}>
+              ৳{summaryData ? summaryData.physicalCash.toLocaleString('en-IN') : '0'}
+            </div>
+            <div className="kpi-footer" style={{ color: 'var(--text-muted)' }}>
+              Actual physical cash notes in showroom drawer
             </div>
           </div>
-          <div className="kpi-value">
-            ৳{summaryData ? summaryData.openingCash.toLocaleString('en-IN') : '0'}
+
+          {/* Today's Cash In */}
+          <div className="kpi-card" style={{ borderLeft: '4px solid #008CFF' }}>
+            <div className="kpi-top">
+              <span className="kpi-title">Today's Cash In</span>
+              <div className="kpi-icon" style={{ background: 'rgba(0, 140, 255, 0.15)', color: '#008CFF' }}>
+                <ArrowUpRight size={18} />
+              </div>
+            </div>
+            <div className="kpi-value" style={{ color: '#008CFF' }}>
+              +৳{summaryData ? (summaryData.todayPhysicalInflow ?? summaryData.todayInflow).toLocaleString('en-IN') : '0'}
+            </div>
+            <div className="kpi-footer" style={{ color: '#008CFF' }}>
+              Cash sales, dues & collections received today
+            </div>
           </div>
-          <div className="kpi-footer" style={{ color: 'var(--text-muted)' }}>
-            Available balance prior to selected period
+
+          {/* Today's Cash Out */}
+          <div className="kpi-card" style={{ borderLeft: '4px solid #ef4444' }}>
+            <div className="kpi-top">
+              <span className="kpi-title">Today's Cash Out</span>
+              <div className="kpi-icon" style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444' }}>
+                <ArrowDownRight size={18} />
+              </div>
+            </div>
+            <div className="kpi-value" style={{ color: '#ef4444' }}>
+              -৳{summaryData ? (summaryData.todayPhysicalOutflow ?? summaryData.todayOutflow).toLocaleString('en-IN') : '0'}
+            </div>
+            <div className="kpi-footer" style={{ color: '#ef4444' }}>
+              Cash purchases, expenses & payouts today
+            </div>
+          </div>
+
+          {/* Today's Net Movement */}
+          <div className="kpi-card" style={{ borderLeft: `4px solid ${(summaryData?.todayNetMovement || 0) >= 0 ? '#10b981' : '#ef4444'}` }}>
+            <div className="kpi-top">
+              <span className="kpi-title">Today's Net Movement</span>
+              <div className="kpi-icon" style={{
+                background: (summaryData?.todayNetMovement || 0) >= 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                color: (summaryData?.todayNetMovement || 0) >= 0 ? '#10b981' : '#ef4444'
+              }}>
+                <TrendingUp size={18} />
+              </div>
+            </div>
+            <div className="kpi-value" style={{ color: (summaryData?.todayNetMovement || 0) >= 0 ? '#10b981' : '#ef4444' }}>
+              {(summaryData?.todayNetMovement || 0) >= 0 ? '+' : ''}৳{summaryData ? (summaryData.todayNetMovement ?? (summaryData.todayInflow - summaryData.todayOutflow)).toLocaleString('en-IN') : '0'}
+            </div>
+            <div className="kpi-footer" style={{ color: 'var(--text-muted)' }}>
+              Cash In minus Cash Out today
+            </div>
           </div>
         </div>
 
-        {/* Total Inflow */}
-        <div className="kpi-card">
-          <div className="kpi-top">
-            <span className="kpi-title">Total Cash Inflow</span>
-            <div className="kpi-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#10b981' }}>
-              <ArrowUpRight size={18} />
+        {/* Tier 2: Period Dynamics & Drawer Closing Expectations */}
+        <div className="kpi-grid">
+          {/* Opening Cash */}
+          <div className="kpi-card">
+            <div className="kpi-top">
+              <span className="kpi-title">Period Opening Cash</span>
+              <div className="kpi-icon" style={{ background: 'rgba(56, 189, 248, 0.12)', color: '#38bdf8' }}>
+                <Layers size={18} />
+              </div>
+            </div>
+            <div className="kpi-value">
+              ৳{summaryData ? summaryData.openingCash.toLocaleString('en-IN') : '0'}
+            </div>
+            <div className="kpi-footer" style={{ color: 'var(--text-muted)' }}>
+              Starting balance prior to selected period
             </div>
           </div>
-          <div className="kpi-value" style={{ color: '#10b981' }}>
-            +৳{summaryData ? summaryData.totalInflow.toLocaleString('en-IN') : '0'}
+
+          {/* Total Period Inflow */}
+          <div className="kpi-card">
+            <div className="kpi-top">
+              <span className="kpi-title">Period Total Cash In</span>
+              <div className="kpi-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#10b981' }}>
+                <ArrowUpRight size={18} />
+              </div>
+            </div>
+            <div className="kpi-value" style={{ color: '#10b981' }}>
+              +৳{summaryData ? summaryData.totalInflow.toLocaleString('en-IN') : '0'}
+            </div>
+            <div className="kpi-footer" style={{ color: 'var(--text-muted)' }}>
+              All cash receipts within active period
+            </div>
           </div>
-          <div className="kpi-footer" style={{ color: '#10b981' }}>
-            Today: +৳{summaryData ? summaryData.todayInflow.toLocaleString('en-IN') : '0'} | Mo: +৳{summaryData ? summaryData.thisMonthInflow.toLocaleString('en-IN') : '0'}
+
+          {/* Expected Closing Cash */}
+          <div className="kpi-card">
+            <div className="kpi-top">
+              <span className="kpi-title">Expected Closing Cash</span>
+              <div className="kpi-icon" style={{ background: 'rgba(168, 85, 247, 0.12)', color: '#a855f7' }}>
+                <Calculator size={18} />
+              </div>
+            </div>
+            <div className="kpi-value" style={{ color: '#a855f7' }}>
+              ৳{summaryData ? (summaryData.closingCash ?? (summaryData.openingCash + summaryData.totalInflow - summaryData.totalOutflow)).toLocaleString('en-IN') : '0'}
+            </div>
+            <div className="kpi-footer" style={{ color: 'var(--text-muted)' }}>
+              Opening Cash + Cash In − Cash Out
+            </div>
+          </div>
+
+          {/* Drawer Variance / Difference */}
+          <div className="kpi-card">
+            <div className="kpi-top">
+              <span className="kpi-title">Cash Variance / Difference</span>
+              <div className="kpi-icon" style={{
+                background: cashDiscrepancy === 0 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                color: cashDiscrepancy === 0 ? '#10b981' : '#ef4444'
+              }}>
+                <Coins size={18} />
+              </div>
+            </div>
+            <div className="kpi-value" style={{ color: cashDiscrepancy === 0 ? '#10b981' : cashDiscrepancy > 0 ? '#38bdf8' : '#ef4444' }}>
+              {cashDiscrepancy > 0 ? '+' : ''}৳{cashDiscrepancy.toLocaleString('en-IN')}
+            </div>
+            <div className="kpi-footer" style={{ color: cashDiscrepancy === 0 ? '#10b981' : '#ef4444' }}>
+              {cashDiscrepancy === 0 ? '✓ Physical drawer perfectly balanced' : `Expected vs Physical (${cashDiscrepancy > 0 ? 'Excess' : 'Shortage'})`}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* -------------------------------------------------------------
+          18 & 25. PAYMENT METHOD ACCOUNTS & BRANCH CASH DISTRIBUTION
+          ------------------------------------------------------------- */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+        gap: '1.25rem',
+        marginBottom: '1.5rem'
+      }}>
+        {/* Section 18: Payment Method Accounts */}
+        <div style={{
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-color)',
+          borderRadius: 'var(--radius-xl)',
+          padding: '1.25rem',
+          boxShadow: 'var(--shadow-sm)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <CreditCard size={17} style={{ color: 'var(--brand-primary)' }} />
+              <h4 style={{ margin: 0, fontWeight: 800, fontSize: '0.95rem' }}>Payment Method Accounts</h4>
+            </div>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Separate balances maintained
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+            {[
+              { id: 'Cash', label: 'Physical Cash', color: '#10b981', icon: <Wallet size={15} /> },
+              { id: 'bKash', label: 'bKash Merchant/Personal', color: '#e11d48', icon: <CreditCard size={15} /> },
+              { id: 'Nagad', label: 'Nagad Wallet', color: '#ea580c', icon: <CreditCard size={15} /> },
+              { id: 'Rocket', label: 'Rocket (DBBL)', color: '#9333ea', icon: <CreditCard size={15} /> },
+              { id: 'Bank', label: 'Bank (Islami / Bank Asia)', color: '#0284c7', icon: <Landmark size={15} /> },
+              { id: 'Card', label: 'Debit / Credit Card POS', color: '#059669', icon: <CreditCard size={15} /> }
+            ].map(m => {
+              const stat = summaryData?.paymentMethodStats?.[m.id];
+              const balance = stat?.balance ?? (m.id === 'Cash' ? (summaryData?.physicalCash || 0) : 0);
+              const inVal = stat?.inflow || 0;
+              const outVal = stat?.outflow || 0;
+
+              return (
+                <div key={m.id} style={{
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '0.75rem 0.85rem'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <span style={{ color: m.color }}>{m.icon}</span> {m.label}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '1.15rem', fontWeight: 800, color: balance >= 0 ? m.color : '#ef4444' }}>
+                    ৳{balance.toLocaleString('en-IN')}
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>In: +৳{inVal.toLocaleString('en-IN')}</span>
+                    <span>Out: -৳{outVal.toLocaleString('en-IN')}</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Total Outflow */}
-        <div className="kpi-card">
-          <div className="kpi-top">
-            <span className="kpi-title">Total Cash Outflow</span>
-            <div className="kpi-icon" style={{ background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444' }}>
-              <ArrowDownRight size={18} />
+        {/* Section 25: Branch Cash Distribution */}
+        <div style={{
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-color)',
+          borderRadius: 'var(--radius-xl)',
+          padding: '1.25rem',
+          boxShadow: 'var(--shadow-sm)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Landmark size={17} style={{ color: '#008CFF' }} />
+              <h4 style={{ margin: 0, fontWeight: 800, fontSize: '0.95rem' }}>Branch Cash Distribution</h4>
             </div>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Non-mixed branch balances
+            </span>
           </div>
-          <div className="kpi-value" style={{ color: '#ef4444' }}>
-            -৳{summaryData ? summaryData.totalOutflow.toLocaleString('en-IN') : '0'}
-          </div>
-          <div className="kpi-footer" style={{ color: '#ef4444' }}>
-            Today: -৳{summaryData ? summaryData.todayOutflow.toLocaleString('en-IN') : '0'} | Mo: -৳{summaryData ? summaryData.thisMonthOutflow.toLocaleString('en-IN') : '0'}
-          </div>
-        </div>
 
-        {/* Net Period Cash Flow */}
-        <div className="kpi-card">
-          <div className="kpi-top">
-            <span className="kpi-title">Net Cash Flow</span>
-            <div className="kpi-icon" style={{
-              background: (summaryData?.netCashFlow || 0) >= 0 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
-              color: (summaryData?.netCashFlow || 0) >= 0 ? '#10b981' : '#ef4444'
-            }}>
-              <TrendingUp size={18} />
-            </div>
-          </div>
-          <div className="kpi-value" style={{ color: (summaryData?.netCashFlow || 0) >= 0 ? '#10b981' : '#ef4444' }}>
-            {(summaryData?.netCashFlow || 0) >= 0 ? '+' : ''}৳{summaryData ? summaryData.netCashFlow.toLocaleString('en-IN') : '0'}
-          </div>
-          <div className="kpi-footer" style={{ color: 'var(--text-muted)' }}>
-            Inflow minus Outflow within period
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            {(summaryData?.branchStats && summaryData.branchStats.length > 0 ? summaryData.branchStats : [
+              { name: 'Main Showroom', balance: summaryData?.physicalCash || 0, inflow: summaryData?.totalInflow || 0, outflow: summaryData?.totalOutflow || 0 },
+              { name: 'Branch 2 (Service Center)', balance: 0, inflow: 0, outflow: 0 },
+              { name: 'Central Warehouse', balance: 0, inflow: 0, outflow: 0 }
+            ]).map((b, idx) => (
+              <div key={idx} style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '0.65rem 0.85rem',
+                borderRadius: 'var(--radius-md)',
+                background: 'rgba(255, 255, 255, 0.02)',
+                border: '1px solid rgba(255, 255, 255, 0.05)'
+              }}>
+                <div>
+                  <div style={{ fontSize: '0.825rem', fontWeight: 700 }}>{b.name}</div>
+                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                    In: +৳{b.inflow.toLocaleString('en-IN')} | Out: -৳{b.outflow.toLocaleString('en-IN')}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '1rem', fontWeight: 800, color: '#10b981' }}>
+                    ৳{b.balance.toLocaleString('en-IN')}
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                    Physical Cash
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -1159,6 +1374,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
               { label: 'Laptop EMI Collections', value: summaryData?.inflowBreakdown.emiCollections || 0, desc: 'Installment payments & down payments' },
               { label: 'Capital Investments', value: summaryData?.inflowBreakdown.investments || 0, desc: 'Partner equity & founder investments' },
               { label: 'Seed Funding', value: summaryData?.inflowBreakdown.seedFunding || 0, desc: 'Separate startup seed contributions' },
+              { label: 'Transfers Received (Inflow)', value: summaryData?.inflowBreakdown.transfersIn || 0, desc: 'Inter-branch & inter-account cash transfers in' },
               { label: 'Technical & Electrical Service', value: summaryData?.inflowBreakdown.serviceIncome || 0, desc: 'Repairs & labor charges collected' },
               { label: 'Cash Inflow Adjustments', value: summaryData?.inflowBreakdown.adjustmentsInflow || 0, desc: 'Excess, corrections, manual deposits' },
             ].map((item, idx) => (
@@ -1208,6 +1424,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
               { label: 'Operating Business Expenses', value: summaryData?.outflowBreakdown.operatingExpenses || 0, desc: 'Rent, electricity, packaging, logistics, tea' },
               { label: 'Employee & Staff Salaries', value: summaryData?.outflowBreakdown.salaryPayments || 0, desc: 'Monthly disbursements & commissions' },
               { label: 'Customer Refunds (RMA)', value: summaryData?.outflowBreakdown.refunds || 0, desc: 'Goods returned & cash disbursed' },
+              { label: 'Transfers Disbursed (Outflow)', value: summaryData?.outflowBreakdown.transfersOut || 0, desc: 'Inter-branch & inter-account cash transfers out' },
               { label: 'Cash Outflow Adjustments', value: summaryData?.outflowBreakdown.adjustmentsOutflow || 0, desc: 'Shortages, withdrawals, corrections' },
             ].map((item, idx) => (
               <div key={idx} style={{
@@ -2359,8 +2576,8 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
 
                   <button
                     type="button"
-                    onClick={handleAutoReconcileDiscrepancy}
-                    disabled={isAutoReconciling}
+                    onClick={() => handleSaveCashCount(true)}
+                    disabled={isSubmittingCount}
                     className="btn"
                     style={{
                       background: cashDiscrepancy > 0 ? '#0284c7' : '#dc2626',
@@ -2371,7 +2588,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                       padding: '0.4rem 0.85rem'
                     }}
                   >
-                    {isAutoReconciling ? 'Adjusting...' : `Auto-Reconcile (${cashDiscrepancy > 0 ? '+' : ''}৳${cashDiscrepancy.toLocaleString()})`}
+                    {isSubmittingCount ? 'Reconciling...' : `Auto-Reconcile (${cashDiscrepancy > 0 ? '+' : ''}৳${cashDiscrepancy.toLocaleString()})`}
                   </button>
                 </div>
               )}
@@ -2393,17 +2610,15 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                     className="btn btn-outline" 
                     onClick={() => setShowReconcileModal(false)}
                   >
-                    Close
+                    Cancel
                   </button>
                   <button 
                     type="button" 
                     className="btn btn-primary"
-                    onClick={() => {
-                      addToast('success', 'Closing Registered', `Daily cash drawer count of ৳${totalPhysicalCounted.toLocaleString()} logged.`);
-                      setShowReconcileModal(false);
-                    }}
+                    disabled={isSubmittingCount}
+                    onClick={() => handleSaveCashCount(false)}
                   >
-                    Save & Close Register
+                    {isSubmittingCount ? 'Saving Count...' : 'Save & Audit Register'}
                   </button>
                 </div>
               </div>
