@@ -65,22 +65,22 @@ export default async function NetworkingPage() {
   const breadcrumbs = [{ name: 'Networking Products', path: '/networking' }];
 
   return (
-    <div className="min-h-screen bg-[#060a14] text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 
-      <section className="py-12 px-4 border-b border-slate-800/80 bg-gradient-to-b from-blue-950/20 to-transparent">
+      <section className="py-12 px-4 border-b border-slate-200 dark:border-slate-800/80 bg-gradient-to-b from-blue-50/70 via-transparent to-transparent dark:from-blue-950/20">
         <div className="max-w-7xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 bg-blue-900/40 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold text-cyan-300">
+          <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-900/40 dark:border-blue-500/30 dark:text-cyan-300 px-3 py-1 rounded-full text-xs font-semibold">
             <Wifi size={14} />
             <span>High-Speed Connectivity Solutions</span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
             Networking Products in Moulvibazar — Wi-Fi Routers, Switches & Fiber Optics
           </h1>
 
-          <p className="text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
+          <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
             Eliminate Wi-Fi dead zones and buffer-free streaming with high-performance networking products from {BUSINESS_INFO.name}. We supply dual-band and Wi-Fi 6 wireless routers, high-capacity Gigabit PoE switches for CCTV, ONU fiber modems, and durable router mini UPS backup units in Moulvibazar.
           </p>
         </div>
@@ -89,10 +89,10 @@ export default async function NetworkingPage() {
       <section className="py-12 px-4 max-w-7xl mx-auto w-full flex-1">
         <div className="flex items-center justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-xl font-bold text-white">Networking Devices & UPS in Stock</h2>
-            <p className="text-xs text-slate-400 mt-1">High-speed dual-band routers, switches, and network accessories</p>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Networking Devices & UPS in Stock</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">High-speed dual-band routers, switches, and network accessories</p>
           </div>
-          <span className="text-xs font-mono bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 text-slate-300">
+          <span className="text-xs font-mono bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 shadow-xs">
             {products.length} Products Found
           </span>
         </div>
@@ -121,10 +121,10 @@ export default async function NetworkingPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-12 text-center space-y-4">
-            <Wifi size={48} className="mx-auto text-slate-600" />
-            <h3 className="text-lg font-bold text-slate-200">Routers & Mini UPS Ready for Dispatch</h3>
-            <p className="text-xs text-slate-400 max-w-md mx-auto">
+          <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center space-y-4 shadow-xs">
+            <Wifi size={48} className="mx-auto text-slate-400 dark:text-slate-600" />
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">Routers & Mini UPS Ready for Dispatch</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
               Call {BUSINESS_INFO.phone} for immediate router setup or office network installation in Moulvibazar.
             </p>
           </div>

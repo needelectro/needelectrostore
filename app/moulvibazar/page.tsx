@@ -73,7 +73,7 @@ export default async function MoulvibazarPage() {
   const breadcrumbs = [{ name: 'Moulvibazar Hub', path: '/moulvibazar' }];
 
   return (
-    <div className="min-h-screen bg-[#060a14] text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localSchema) }}
@@ -82,25 +82,25 @@ export default async function MoulvibazarPage() {
       <Breadcrumb items={breadcrumbs} />
 
       {/* Hero */}
-      <section className="py-12 px-4 border-b border-slate-800/80 bg-gradient-to-b from-blue-950/30 via-slate-950/40 to-transparent">
+      <section className="py-12 px-4 border-b border-slate-200 dark:border-slate-800/80 bg-gradient-to-b from-blue-50/70 via-transparent to-transparent dark:from-blue-950/30">
         <div className="max-w-7xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 bg-blue-900/40 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold text-cyan-300">
+          <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-900/40 dark:border-blue-500/30 dark:text-cyan-300 px-3 py-1 rounded-full text-xs font-semibold">
             <MapPin size={14} />
             <span>Moulvibazar Town Showroom & Service Center</span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
             Laptop, Computer, CCTV & Electrical Solutions in Moulvibazar
           </h1>
 
-          <p className="text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
+          <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
             Welcome to {BUSINESS_INFO.name}, situated at MR Plaza in Kusumbag, Moulvibazar. We are your dedicated neighborhood destination for tested enterprise laptops, custom gaming & office PCs, CCTV security setups, electrical components, licensed electrician services, and flexible laptop EMI installment plans.
           </p>
 
           <div className="pt-2 flex flex-wrap gap-3">
             <a
               href={`tel:${BUSINESS_INFO.phoneClean}`}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-lg shadow-blue-500/20 transition-all inline-flex items-center gap-2"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md shadow-blue-500/20 transition-all inline-flex items-center gap-2"
             >
               <Phone size={14} />
               <span>Call Showroom: {BUSINESS_INFO.phone}</span>
@@ -109,14 +109,14 @@ export default async function MoulvibazarPage() {
               href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=Hello%20NEED%20ELECTRO%2C%20I%20am%20in%20Moulvibazar%20and%20looking%20for...`}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs inline-flex items-center gap-2 shadow-lg shadow-emerald-600/20 transition-all"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs inline-flex items-center gap-2 shadow-md shadow-emerald-600/20 transition-all"
             >
               <MessageCircle size={15} />
               <span>Chat on WhatsApp</span>
             </a>
             <Link
               href="/laptop-emi"
-              className="bg-slate-900 hover:bg-slate-800 text-cyan-300 px-5 py-2.5 rounded-xl text-xs font-semibold border border-slate-700/80 transition-colors"
+              className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-blue-700 dark:text-cyan-300 px-5 py-2.5 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors shadow-xs"
             >
               Laptop EMI Options →
             </Link>
@@ -125,33 +125,33 @@ export default async function MoulvibazarPage() {
       </section>
 
       {/* Moulvibazar Location Details Card */}
-      <section className="py-10 px-4 bg-slate-950/60 border-b border-slate-800/80">
+      <section className="py-10 px-4 bg-white dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800/80">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
-          <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
-            <span className="text-cyan-400 font-bold block text-sm flex items-center gap-1.5">
+          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-2">
+            <span className="text-blue-600 dark:text-cyan-400 font-bold block text-sm flex items-center gap-1.5">
               <MapPin size={16} /> Showroom Address
             </span>
-            <p className="text-slate-300">
+            <p className="text-slate-700 dark:text-slate-300">
               {BUSINESS_INFO.address.streetAddress}, {BUSINESS_INFO.address.addressLocality}, {BUSINESS_INFO.address.addressRegion} - {BUSINESS_INFO.address.postalCode}, Bangladesh.
             </p>
             <span className="text-slate-500 text-[11px] block">Conveniently located near Kusumbag circle and shopping hub.</span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
-            <span className="text-cyan-400 font-bold block text-sm flex items-center gap-1.5">
+          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-2">
+            <span className="text-blue-600 dark:text-cyan-400 font-bold block text-sm flex items-center gap-1.5">
               <Clock size={16} /> Opening Hours
             </span>
-            <p className="text-slate-300">
+            <p className="text-slate-700 dark:text-slate-300">
               Saturday to Thursday: <strong>9:30 AM – 9:30 PM</strong>
             </p>
-            <span className="text-amber-400 text-[11px] block">Friday: Closed for weekend maintenance.</span>
+            <span className="text-amber-600 dark:text-amber-400 text-[11px] block">Friday: Closed for weekend maintenance.</span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
-            <span className="text-cyan-400 font-bold block text-sm flex items-center gap-1.5">
+          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-2">
+            <span className="text-blue-600 dark:text-cyan-400 font-bold block text-sm flex items-center gap-1.5">
               <ShieldCheck size={16} /> Local Service Coverage
             </span>
-            <p className="text-slate-300">
+            <p className="text-slate-700 dark:text-slate-300">
               Moulvibazar Town, Kusumbag, Chowmuhana, Shamshernagar Road, Sreemangal Road, Barikona, plus Sreemangal and Kulaura.
             </p>
           </div>
@@ -162,10 +162,10 @@ export default async function MoulvibazarPage() {
       <section className="py-12 px-4 max-w-7xl mx-auto w-full flex-1">
         <div className="flex items-center justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-xl font-bold text-white">Popular Tech in Moulvibazar Stock</h2>
-            <p className="text-xs text-slate-400 mt-1">Available for hands-on demonstration and immediate pickup today</p>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Popular Tech in Moulvibazar Stock</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Available for hands-on demonstration and immediate pickup today</p>
           </div>
-          <Link href="/laptops" className="text-xs font-bold text-cyan-400 hover:underline flex items-center gap-1">
+          <Link href="/laptops" className="text-xs font-bold text-blue-600 dark:text-cyan-400 hover:underline flex items-center gap-1">
             <span>View All Laptops</span>
             <ArrowRight size={13} />
           </Link>
@@ -196,47 +196,47 @@ export default async function MoulvibazarPage() {
       </section>
 
       {/* Local Services Grid */}
-      <section className="py-12 px-4 bg-slate-950/80 border-t border-slate-800/80">
+      <section className="py-12 px-4 bg-white dark:bg-slate-950/80 border-t border-slate-200 dark:border-slate-800/80">
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="text-center max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold text-white mb-2">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
               Technology & Electrical Services in Moulvibazar
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Certified technicians dispatched directly from our Kusumbag showroom
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
-            <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-              <Laptop size={28} className="text-cyan-400" />
-              <h3 className="text-base font-bold text-white">Laptop Repair & Upgrades</h3>
-              <p className="text-slate-400 leading-relaxed">
+            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+              <Laptop size={28} className="text-blue-600 dark:text-cyan-400" />
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Laptop Repair & Upgrades</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
                 SSD speed upgrade, RAM expansion, battery replacement, keyboard repairs, thermal paste refresh, and Windows OS installation with genuine drivers.
               </p>
-              <Link href="/laptops" className="text-cyan-400 font-bold block pt-2 hover:underline">
+              <Link href="/laptops" className="text-blue-600 dark:text-cyan-400 font-bold block pt-2 hover:underline">
                 Explore Laptops & Upgrades →
               </Link>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-              <Camera size={28} className="text-blue-400" />
-              <h3 className="text-base font-bold text-white">CCTV Camera Installation</h3>
-              <p className="text-slate-400 leading-relaxed">
+            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+              <Camera size={28} className="text-blue-600 dark:text-blue-400" />
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">CCTV Camera Installation</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
                 Full setup of HD analog and IP security cameras for residences, business retail counters, and factories across Moulvibazar with mobile app live streaming.
               </p>
-              <Link href="/services/cctv-installation" className="text-cyan-400 font-bold block pt-2 hover:underline">
+              <Link href="/services/cctv-installation" className="text-blue-600 dark:text-cyan-400 font-bold block pt-2 hover:underline">
                 Book CCTV Survey →
               </Link>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-              <Zap size={28} className="text-amber-400" />
-              <h3 className="text-base font-bold text-white">Licensed Electrician Booking</h3>
-              <p className="text-slate-400 leading-relaxed">
+            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+              <Zap size={28} className="text-amber-500 dark:text-amber-400" />
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Licensed Electrician Booking</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
                 Concealed wall wiring, distribution board (DB) setup, circuit breaker replacements, earthing safety, and rapid electrical troubleshooting.
               </p>
-              <Link href="/services/electrician" className="text-amber-400 font-bold block pt-2 hover:underline">
+              <Link href="/services/electrician" className="text-amber-600 dark:text-amber-400 font-bold block pt-2 hover:underline">
                 Book an Electrician →
               </Link>
             </div>
@@ -245,9 +245,9 @@ export default async function MoulvibazarPage() {
       </section>
 
       {/* Bilingual Bangla SEO Content */}
-      <section className="py-12 px-4 border-t border-slate-800/80 bg-slate-900/40">
-        <div className="max-w-4xl mx-auto space-y-4 text-xs text-slate-300 leading-relaxed">
-          <h2 className="text-lg font-bold text-white">
+      <section className="py-12 px-4 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40">
+        <div className="max-w-4xl mx-auto space-y-4 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">
             মৌলভীবাজার জেলা ও শহরে নির্ভরযোগ্য প্রযুক্তি ও ইলেকট্রিক্যাল সেবাদাতা
           </h2>
           <p>
@@ -257,9 +257,9 @@ export default async function MoulvibazarPage() {
             আমাদের রয়েছে ইন-হাউস দক্ষ টেকনিশিয়ান টিম। মৌলভীবাজার শহর, শ্রীমঙ্গল, কুলাউড়া ও রাজনগরে সিসিটিভি ক্যামেরা ইনস্টলেশন এবং অভিজ্ঞ ইলেকট্রিশিয়ান সার্ভিস বুকিংয়ের জন্য আমাদের সরাসরি ফোন করুন অথবা শোরুমে আসুন।
           </p>
           <div className="pt-2 flex items-center gap-3">
-            <span className="font-semibold text-white">হটলাইন: {BUSINESS_INFO.phone}</span>
+            <span className="font-semibold text-slate-900 dark:text-white">হটলাইন: {BUSINESS_INFO.phone}</span>
             <span>•</span>
-            <span className="text-slate-400">ঠিকানা: শপ নং ৫, এমআর প্লাজা, কুসুমবাগ, মৌলভীবাজার</span>
+            <span className="text-slate-500 dark:text-slate-400">ঠিকানা: শপ নং ৫, এমআর প্লাজা, কুসুমবাগ, মৌলভীবাজার</span>
           </div>
         </div>
       </section>

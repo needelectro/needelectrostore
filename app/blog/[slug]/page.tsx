@@ -61,7 +61,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#060a14] text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
@@ -79,55 +79,55 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
       <article className="max-w-4xl mx-auto px-4 py-10 w-full flex-1 space-y-8">
         <Link
           href="/blog"
-          className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-cyan-400 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-cyan-400 transition-colors"
         >
           <ArrowLeft size={13} />
           <span>Back to All Guides</span>
         </Link>
 
-        <header className="space-y-4 border-b border-slate-800 pb-8">
+        <header className="space-y-4 border-b border-slate-200 dark:border-slate-800 pb-8">
           <div className="flex items-center gap-2">
-            <span className="bg-blue-950 text-cyan-400 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-bold">
+            <span className="bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-cyan-400 border border-blue-200 dark:border-blue-500/30 px-3 py-1 rounded-full text-xs font-bold">
               {post.category}
             </span>
-            <span className="text-xs text-slate-500">•</span>
-            <span className="text-xs text-slate-400">{post.readingTime}</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500">•</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">{post.readingTime}</span>
           </div>
 
-          <h1 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
+          <h1 className="text-2xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
             {post.title}
           </h1>
 
-          <p className="text-sm md:text-base text-cyan-300 font-medium">
+          <p className="text-sm md:text-base text-blue-600 dark:text-cyan-300 font-medium">
             {post.bnTitle}
           </p>
 
-          <div className="flex items-center gap-4 text-xs text-slate-400 pt-2">
+          <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 pt-2">
             <div className="flex items-center gap-1.5">
-              <User size={14} className="text-cyan-400" />
+              <User size={14} className="text-blue-600 dark:text-cyan-400" />
               <span>By {post.author}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Calendar size={14} className="text-slate-500" />
+              <Calendar size={14} className="text-slate-400 dark:text-slate-500" />
               <span>Published {post.publishedDate}</span>
             </div>
           </div>
         </header>
 
         {/* Executive Summary */}
-        <div className="p-6 rounded-2xl bg-blue-950/20 border border-blue-800/40 text-sm text-slate-200 leading-relaxed space-y-2">
-          <span className="font-bold text-cyan-300 block text-xs uppercase tracking-wider">Executive Summary</span>
+        <div className="p-6 rounded-2xl bg-blue-50/70 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/40 text-sm text-slate-700 dark:text-slate-200 leading-relaxed space-y-2">
+          <span className="font-bold text-blue-700 dark:text-cyan-300 block text-xs uppercase tracking-wider">Executive Summary</span>
           <p>{post.summary}</p>
         </div>
 
         {/* Article Body Sections */}
-        <div className="space-y-8 text-sm text-slate-300 leading-relaxed">
+        <div className="space-y-8 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
           {post.sections.map((section, idx) => (
             <section key={idx} className="space-y-3">
-              <h2 className="text-lg md:text-xl font-bold text-white tracking-tight border-b border-slate-800/60 pb-2">
+              <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white tracking-tight border-b border-slate-200 dark:border-slate-800/60 pb-2">
                 {section.heading}
               </h2>
-              <p className="leading-relaxed text-slate-300">
+              <p className="leading-relaxed">
                 {section.content}
               </p>
             </section>
@@ -136,13 +136,13 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 
         {/* Article FAQs if any */}
         {post.faqs.length > 0 && (
-          <div className="pt-8 border-t border-slate-800 space-y-4">
-            <h2 className="text-xl font-bold text-white">Frequently Asked Questions</h2>
+          <div className="pt-8 border-t border-slate-200 dark:border-slate-800 space-y-4">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Frequently Asked Questions</h2>
             <div className="space-y-3">
               {post.faqs.map((faq, idx) => (
-                <div key={idx} className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
-                  <h3 className="text-sm font-bold text-cyan-300">{faq.question}</h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">{faq.answer}</p>
+                <div key={idx} className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
+                  <h3 className="text-sm font-bold text-blue-700 dark:text-cyan-300">{faq.question}</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{faq.answer}</p>
                 </div>
               ))}
             </div>
@@ -150,17 +150,17 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         )}
 
         {/* Showroom CTA Box */}
-        <div className="mt-12 p-8 rounded-2xl bg-gradient-to-r from-blue-950/40 to-slate-900 border border-blue-500/30 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="mt-12 p-8 rounded-2xl bg-gradient-to-r from-blue-50 via-white to-blue-50 dark:from-blue-950/40 dark:to-slate-900 border border-blue-200 dark:border-blue-500/30 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
           <div className="space-y-1 text-center md:text-left">
-            <h3 className="text-base font-bold text-white">Have Questions for Our Tech Team?</h3>
-            <p className="text-xs text-slate-400">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Have Questions for Our Tech Team?</h3>
+            <p className="text-xs text-slate-600 dark:text-slate-400">
               Visit our showroom at MR Plaza, Kusumbag, Moulvibazar or consult directly with our technicians.
             </p>
           </div>
           <div className="flex gap-3 shrink-0">
             <a
               href={`tel:${BUSINESS_INFO.phoneClean}`}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-lg shadow-blue-500/20"
+              className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-blue-500/20"
             >
               <Phone size={14} />
               <span>{BUSINESS_INFO.phone}</span>

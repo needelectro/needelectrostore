@@ -95,7 +95,7 @@ export default function FaqPage() {
   const breadcrumbs = [{ name: 'Customer FAQs', path: '/faq' }];
 
   return (
-    <div className="min-h-screen bg-[#060a14] text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
@@ -103,18 +103,18 @@ export default function FaqPage() {
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 
-      <section className="py-12 px-4 border-b border-slate-800/80 bg-gradient-to-b from-blue-950/20 via-transparent to-transparent">
+      <section className="py-12 px-4 border-b border-slate-200 dark:border-slate-800/80 bg-gradient-to-b from-blue-50/70 via-transparent to-transparent dark:from-blue-950/20">
         <div className="max-w-7xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 bg-blue-900/40 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold text-cyan-300">
+          <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 dark:bg-blue-900/40 dark:border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold text-blue-700 dark:text-cyan-300">
             <HelpCircle size={14} />
             <span>Help Center & Answers</span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
             Frequently Asked Questions — NEED ELECTRO Moulvibazar
           </h1>
 
-          <p className="text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
+          <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
             Everything you need to know about our laptops, testing standards, EMI financing, CCTV installations, electrician services, and delivery policies.
           </p>
         </div>
@@ -123,19 +123,19 @@ export default function FaqPage() {
       <section className="py-14 px-4 max-w-4xl mx-auto w-full flex-1 space-y-12">
         {FAQS.map((group, gIdx) => (
           <div key={gIdx} className="space-y-4">
-            <h2 className="text-xl font-bold text-cyan-400 border-b border-slate-800 pb-2">
+            <h2 className="text-xl font-bold text-blue-600 dark:text-cyan-400 border-b border-slate-200 dark:border-slate-800 pb-2">
               {group.category}
             </h2>
             <div className="space-y-4">
               {group.items.map((item, idx) => (
                 <div
                   key={idx}
-                  className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2 hover:border-slate-700 transition-colors"
+                  className="p-5 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
                 >
-                  <h3 className="text-sm md:text-base font-bold text-white">
+                  <h3 className="text-sm md:text-base font-bold text-slate-900 dark:text-white">
                     {item.question}
                   </h3>
-                  <p className="text-xs md:text-sm text-slate-300 leading-relaxed">
+                  <p className="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                     {item.answer}
                   </p>
                 </div>
@@ -145,15 +145,15 @@ export default function FaqPage() {
         ))}
 
         {/* Contact CTA */}
-        <div className="p-8 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-4">
-          <h3 className="text-lg font-bold text-white">Still Have a Question?</h3>
-          <p className="text-xs text-slate-400 max-w-md mx-auto">
+        <div className="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs text-center space-y-4">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white">Still Have a Question?</h3>
+          <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto">
             Our showroom team is available to assist you via phone or WhatsApp during opening hours.
           </p>
           <div className="flex justify-center gap-4 pt-2">
             <a
               href={`tel:${BUSINESS_INFO.phoneClean}`}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl inline-flex items-center gap-1.5"
+              className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20"
             >
               <Phone size={14} />
               <span>Call Showroom: {BUSINESS_INFO.phone}</span>

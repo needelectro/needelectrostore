@@ -99,7 +99,7 @@ export default async function LaptopEmiPage() {
   const breadcrumbs = [{ name: 'Laptop EMI', path: '/laptop-emi' }];
 
   return (
-    <div className="min-h-screen bg-[#060a14] text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
@@ -108,32 +108,32 @@ export default async function LaptopEmiPage() {
       <Breadcrumb items={breadcrumbs} />
 
       {/* Hero */}
-      <section className="py-12 px-4 border-b border-slate-800/80 bg-gradient-to-b from-blue-950/20 via-transparent to-transparent">
+      <section className="py-12 px-4 border-b border-slate-200 dark:border-slate-800/80 bg-gradient-to-b from-blue-50/70 via-transparent to-transparent dark:from-blue-950/20">
         <div className="max-w-7xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 bg-blue-900/40 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold text-cyan-300">
+          <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-900/40 dark:border-blue-500/30 dark:text-cyan-300 px-3 py-1 rounded-full text-xs font-semibold">
             <CreditCard size={14} />
             <span>In-House Laptop Installment Financing</span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
             Laptop EMI in Moulvibazar — Buy Genuine Laptops with Easy Installments
           </h1>
 
-          <p className="text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
+          <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
             Own the laptop you need for work, university, or freelancing without financial strain. At {BUSINESS_INFO.name}, we provide transparent in-house installment plans (3 to 12 months) with minimal down payments and zero hidden charges.
           </p>
 
           <div className="pt-2 flex flex-wrap gap-3">
             <a
               href="#calculator"
-              className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-lg shadow-blue-500/20 transition-all inline-flex items-center gap-2"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md shadow-blue-500/20 transition-all inline-flex items-center gap-2"
             >
               <Calculator size={15} />
               <span>Calculate Monthly Payment ↓</span>
             </a>
             <Link
               href="/laptops"
-              className="bg-slate-900 hover:bg-slate-800 text-slate-200 px-5 py-2.5 rounded-xl text-xs font-semibold border border-slate-700/80 transition-colors inline-flex items-center gap-1.5"
+              className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 px-5 py-2.5 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors inline-flex items-center gap-1.5 shadow-xs"
             >
               <span>Browse Available Laptops →</span>
             </Link>
@@ -144,8 +144,8 @@ export default async function LaptopEmiPage() {
       {/* Active Plans from ERP */}
       <section className="py-14 px-4 max-w-7xl mx-auto w-full">
         <div className="text-center max-w-2xl mx-auto mb-10">
-          <h2 className="text-2xl font-bold text-white mb-2">Available Installment Plans</h2>
-          <p className="text-xs text-slate-400">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Available Installment Plans</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Current live financing options managed directly through the NEED ELECTRO ERP system
           </p>
         </div>
@@ -154,29 +154,29 @@ export default async function LaptopEmiPage() {
           {emiPlans.map(plan => (
             <div
               key={plan.id}
-              className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-cyan-500/40 transition-all flex flex-col justify-between space-y-4"
+              className="p-6 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-cyan-500/40 transition-all flex flex-col justify-between space-y-4 shadow-xs"
             >
               <div>
-                <span className="bg-blue-950 text-cyan-400 border border-blue-500/30 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider block w-fit mb-3">
+                <span className="bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950 dark:text-cyan-400 dark:border-blue-500/30 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider block w-fit mb-3">
                   {plan.durationMonths} Months Tenure
                 </span>
-                <h3 className="text-base font-bold text-white">{plan.name}</h3>
-                <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">{plan.description}</p>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">{plan.name}</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed">{plan.description}</p>
 
-                <div className="mt-4 pt-4 border-t border-slate-800/80 space-y-2 text-xs">
+                <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800/80 space-y-2 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Min Down Payment:</span>
-                    <span className="text-slate-200 font-bold">{Number(plan.minDownPaymentPercent)}%</span>
+                    <span className="text-slate-500 dark:text-slate-400">Min Down Payment:</span>
+                    <span className="text-slate-800 dark:text-slate-200 font-bold">{Number(plan.minDownPaymentPercent)}%</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Interest Rate:</span>
-                    <span className="text-emerald-400 font-bold">
+                    <span className="text-slate-500 dark:text-slate-400">Interest Rate:</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">
                       {Number(plan.interestRatePercent) === 0 ? '0% Interest' : `${Number(plan.interestRatePercent)}%`}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Processing Fee:</span>
-                    <span className="text-slate-200 font-bold">৳{Number(plan.processingFee).toLocaleString()}</span>
+                    <span className="text-slate-500 dark:text-slate-400">Processing Fee:</span>
+                    <span className="text-slate-800 dark:text-slate-200 font-bold">৳{Number(plan.processingFee).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -186,7 +186,7 @@ export default async function LaptopEmiPage() {
                   href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=Hello%2C%20I%20am%20interested%20in%20the%20${encodeURIComponent(plan.name)}%20for%20a%20laptop%20at%20NEED%20ELECTRO%20Moulvibazar.`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs py-2.5 rounded-xl border border-slate-700 transition-colors flex items-center justify-center gap-1.5"
+                  className="w-full bg-slate-100 hover:bg-blue-50 text-blue-700 hover:text-blue-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-cyan-300 font-bold text-xs py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors flex items-center justify-center gap-1.5"
                 >
                   <MessageCircle size={14} />
                   <span>Apply for this Plan</span>
@@ -198,11 +198,11 @@ export default async function LaptopEmiPage() {
       </section>
 
       {/* Interactive Calculator Section */}
-      <section id="calculator" className="py-12 px-4 bg-slate-950/80 border-y border-slate-800/80">
+      <section id="calculator" className="py-12 px-4 bg-white dark:bg-slate-950/80 border-y border-slate-200 dark:border-slate-800/80">
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-white mb-1">Interactive Laptop EMI Calculator</h2>
-            <p className="text-xs text-slate-400">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Interactive Laptop EMI Calculator</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Estimate your initial down payment and monthly installment amount
             </p>
           </div>
@@ -214,47 +214,47 @@ export default async function LaptopEmiPage() {
       <section className="py-14 px-4 max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-white">Who is Eligible for Laptop EMI?</h2>
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Who is Eligible for Laptop EMI?</h2>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
               We believe technology should be accessible to all honest and hard-working individuals in Moulvibazar. You are welcome to apply if you meet the following criteria:
             </p>
-            <ul className="space-y-3 text-xs text-slate-300">
+            <ul className="space-y-3 text-xs text-slate-600 dark:text-slate-300">
               <li className="flex items-start gap-2.5">
-                <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                 <span><strong>Bangladeshi Citizen:</strong> Must possess an authentic National ID (NID) card or Smart Card.</span>
               </li>
               <li className="flex items-start gap-2.5">
-                <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                 <span><strong>Local Residence:</strong> Resident of Moulvibazar Town, Sreemangal, Kulaura, Rajnagar, or Sylhet Division.</span>
               </li>
               <li className="flex items-start gap-2.5">
-                <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                 <span><strong>Students or Working Professionals:</strong> University students, freelancers, business owners, teachers, and private/gov employees.</span>
               </li>
               <li className="flex items-start gap-2.5">
-                <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                 <span><strong>One Local Guarantor:</strong> A parent, sibling, teacher, or verified local resident to co-sign the agreement.</span>
               </li>
             </ul>
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-white">Required Documents</h2>
-            <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3 text-xs text-slate-300">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Required Documents</h2>
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-3 text-xs text-slate-600 dark:text-slate-300 shadow-xs">
               <div className="flex items-start gap-3">
-                <FileText size={18} className="text-cyan-400 shrink-0 mt-0.5" />
+                <FileText size={18} className="text-blue-600 dark:text-cyan-400 shrink-0 mt-0.5" />
                 <span>Applicant Photocopy of National ID Card (NID) & 2 Passport Photos</span>
               </div>
               <div className="flex items-start gap-3">
-                <FileText size={18} className="text-cyan-400 shrink-0 mt-0.5" />
+                <FileText size={18} className="text-blue-600 dark:text-cyan-400 shrink-0 mt-0.5" />
                 <span>Recent Utility Bill (Electricity/Gas/Water) of residence</span>
               </div>
               <div className="flex items-start gap-3">
-                <FileText size={18} className="text-cyan-400 shrink-0 mt-0.5" />
+                <FileText size={18} className="text-blue-600 dark:text-cyan-400 shrink-0 mt-0.5" />
                 <span>Guarantor NID Photocopy & 1 Passport Photo</span>
               </div>
               <div className="flex items-start gap-3">
-                <FileText size={18} className="text-cyan-400 shrink-0 mt-0.5" />
+                <FileText size={18} className="text-blue-600 dark:text-cyan-400 shrink-0 mt-0.5" />
                 <span>Student ID card or Salary Certificate / Trade License (if applicable)</span>
               </div>
             </div>
@@ -263,14 +263,14 @@ export default async function LaptopEmiPage() {
       </section>
 
       {/* FAQs Section */}
-      <section className="py-12 px-4 bg-slate-950/60 border-t border-slate-800/80">
+      <section className="py-12 px-4 bg-white dark:bg-slate-950/60 border-t border-slate-200 dark:border-slate-800/80">
         <div className="max-w-4xl mx-auto space-y-6">
-          <h2 className="text-2xl font-bold text-white text-center">Frequently Asked Questions about Laptop EMI</h2>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white text-center">Frequently Asked Questions about Laptop EMI</h2>
           <div className="space-y-4">
             {emiFaqs.map((faq, idx) => (
-              <div key={idx} className="p-5 rounded-xl bg-slate-900/70 border border-slate-800 space-y-1.5">
-                <h3 className="text-sm font-bold text-white">{faq.question}</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">{faq.answer}</p>
+              <div key={idx} className="p-5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 space-y-1.5 shadow-xs">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">{faq.question}</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{faq.answer}</p>
               </div>
             ))}
           </div>

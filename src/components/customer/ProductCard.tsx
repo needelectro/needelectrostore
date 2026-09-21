@@ -34,9 +34,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const emiMonthly = product.retailPrice > 0 ? Math.round((product.retailPrice * 0.75) / 6) : null;
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 hover:border-cyan-500/50 rounded-2xl overflow-hidden shadow-lg hover:shadow-cyan-500/10 transition-all duration-200 flex flex-col group">
+    <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-cyan-500/50 rounded-2xl overflow-hidden shadow-xs hover:shadow-xl transition-all duration-200 flex flex-col group">
       {/* Product Image */}
-      <Link href={`/product/${slug}`} className="relative block bg-slate-950/70 p-6 aspect-[4/3] overflow-hidden">
+      <Link href={`/product/${slug}`} className="relative block bg-slate-50 dark:bg-slate-950/70 p-6 aspect-[4/3] overflow-hidden border-b border-slate-100 dark:border-slate-800/80">
         <img
           src={imgUrl}
           alt={`${product.name} available at ${BUSINESS_INFO.name} Moulvibazar`}
@@ -46,19 +46,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-          <span className="bg-slate-900/90 border border-slate-700 text-slate-300 px-2 py-0.5 rounded text-[11px] font-semibold tracking-wide">
+          <span className="bg-white/95 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-300 px-2 py-0.5 rounded-md text-[11px] font-bold tracking-wide shadow-2xs">
             {product.brand}
           </span>
           {isLaptop && emiMonthly && (
-            <span className="bg-blue-600/90 text-white px-2 py-0.5 rounded text-[10px] font-bold">
-              EMI from ৳{emiMonthly.toLocaleString()}/mo
+            <span className="bg-blue-600 text-white px-2 py-0.5 rounded-md text-[10px] font-bold shadow-2xs">
+              EMI ৳{emiMonthly.toLocaleString()}/mo
             </span>
           )}
         </div>
 
         <div className="absolute top-3 right-3">
           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-            isAvailable ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/30' : 'bg-rose-950/80 text-rose-400 border border-rose-500/30'
+            isAvailable 
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/80 dark:text-emerald-400 dark:border-emerald-500/30' 
+              : 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/80 dark:text-rose-400 dark:border-rose-500/30'
           }`}>
             {isAvailable ? 'In Stock' : 'Pre-Order'}
           </span>
@@ -68,32 +70,32 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       {/* Content */}
       <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
         <div>
-          <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono mb-1">
+          <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono mb-1">
             <span>SKU: {product.sku}</span>
             <span>{product.category}</span>
           </div>
 
           <Link href={`/product/${slug}`}>
-            <h3 className="text-sm font-bold text-slate-100 group-hover:text-cyan-400 transition-colors line-clamp-2 leading-snug">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors line-clamp-2 leading-snug">
               {product.name}
             </h3>
           </Link>
 
-          {/* Quick Specs preview if laptop */}
+          {/* Quick Specs preview */}
           {product.specs && typeof product.specs === 'object' && (
             <div className="mt-2.5 flex flex-wrap gap-1.5 text-[11px]">
               {product.specs.processor && (
-                <span className="bg-slate-800/80 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">
+                <span className="bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700/60 font-medium">
                   {product.specs.processor}
                 </span>
               )}
               {product.specs.ram && (
-                <span className="bg-slate-800/80 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">
+                <span className="bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700/60 font-medium">
                   {product.specs.ram}
                 </span>
               )}
               {product.specs.storage && (
-                <span className="bg-slate-800/80 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60">
+                <span className="bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700/60 font-medium">
                   {product.specs.storage}
                 </span>
               )}
@@ -102,10 +104,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
 
         {/* Pricing & CTA */}
-        <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+        <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
           <div>
-            <span className="text-xs text-slate-500 block">Price</span>
-            <span className="text-lg font-extrabold text-cyan-400">
+            <span className="text-[11px] text-slate-400 block font-medium">Showroom Price</span>
+            <span className="text-lg font-extrabold text-blue-600 dark:text-cyan-400 font-mono">
               ৳{product.retailPrice.toLocaleString()}
             </span>
           </div>
@@ -116,13 +118,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Inquire about ${product.name} on WhatsApp`}
-              className="p-2 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-500/30 transition-colors"
+              className="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 dark:text-emerald-400 dark:border-emerald-500/30 transition-colors"
             >
               <MessageCircle size={15} />
             </a>
             <Link
               href={`/product/${slug}`}
-              className="p-2 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-400 border border-cyan-500/30 transition-colors"
+              className="p-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 dark:bg-cyan-950/60 dark:hover:bg-cyan-900/60 dark:text-cyan-400 dark:border-cyan-500/30 transition-colors"
               aria-label={`View details of ${product.name}`}
             >
               <ArrowRight size={15} />

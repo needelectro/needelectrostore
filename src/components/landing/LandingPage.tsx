@@ -11,7 +11,7 @@ import {
   Laptop, Tv, Camera, Wifi, Check, Star, HelpCircle,
   Clock, Calendar, MessageSquare, AlertCircle, X, Search,
   Compass, Shield, Award, HeartHandshake, ChevronDown, Menu,
-  Globe, Code, Rocket, Terminal
+  Globe, Code, Rocket, Terminal, Sun, Moon
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -25,6 +25,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
   const [productCategoryFilter, setProductCategoryFilter] = useState<string>('ALL');
   const [searchKeyword, setSearchKeyword] = useState<string>('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Customer Theme State (defaults to 'light')
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  React.useEffect(() => {
+    try {
+      const saved = (localStorage.getItem('customer_theme') as 'light' | 'dark') || 'light';
+      setTheme(saved);
+      document.documentElement.setAttribute('data-theme', saved);
+    } catch (e) {}
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+    try {
+      localStorage.setItem('customer_theme', next);
+      document.documentElement.setAttribute('data-theme', next);
+    } catch (e) {}
+  };
 
   // Modals
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -204,6 +224,28 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
               <Phone size={13} />
               <span>01733-983752</span>
             </a>
+
+            {/* Customer Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              aria-label={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
+              title={theme === 'light' ? 'Switch to Dark Theme' : 'Switch to Light Theme'}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                color: '#ffffff',
+                borderRadius: '9999px',
+                width: '32px',
+                height: '32px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {theme === 'light' ? <Moon size={15} color="#38bdf8" /> : <Sun size={15} color="#f59e0b" />}
+            </button>
 
             {/* Mobile Hamburger Toggle Button */}
             <button

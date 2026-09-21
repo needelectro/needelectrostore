@@ -63,22 +63,22 @@ export default async function SmartDevicesPage() {
   const breadcrumbs = [{ name: 'Smart Devices', path: '/smart-devices' }];
 
   return (
-    <div className="min-h-screen bg-[#060a14] text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 
-      <section className="py-12 px-4 border-b border-slate-800/80 bg-gradient-to-b from-blue-950/20 to-transparent">
+      <section className="py-12 px-4 border-b border-slate-200 dark:border-slate-800/80 bg-gradient-to-b from-blue-50/70 via-transparent to-transparent dark:from-blue-950/20">
         <div className="max-w-7xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 bg-blue-900/40 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold text-cyan-300">
+          <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-900/40 dark:border-blue-500/30 dark:text-cyan-300 px-3 py-1 rounded-full text-xs font-semibold">
             <Smartphone size={14} />
             <span>Smart Automation & Gadgets</span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
             Smart Devices & Modern Gadgets in Moulvibazar
           </h1>
 
-          <p className="text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
+          <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
             Upgrade your daily tech lifestyle with smart devices and intelligent home electronics from {BUSINESS_INFO.name}. From multi-port USB Type-C hubs and smart power monitoring plugs to high-definition converters, explore curated gadgets in Moulvibazar.
           </p>
         </div>
@@ -87,10 +87,10 @@ export default async function SmartDevicesPage() {
       <section className="py-12 px-4 max-w-7xl mx-auto w-full flex-1">
         <div className="flex items-center justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-xl font-bold text-white">Smart Devices & Adapters in Stock</h2>
-            <p className="text-xs text-slate-400 mt-1">Smart electronics with manufacturer warranty</p>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Smart Devices & Adapters in Stock</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Smart electronics with manufacturer warranty</p>
           </div>
-          <span className="text-xs font-mono bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 text-slate-300">
+          <span className="text-xs font-mono bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 shadow-xs">
             {products.length} Products Found
           </span>
         </div>
@@ -119,10 +119,10 @@ export default async function SmartDevicesPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-12 text-center space-y-4">
-            <Smartphone size={48} className="mx-auto text-slate-600" />
-            <h3 className="text-lg font-bold text-slate-200">Smart Gadgets Ready for Showroom Pickup</h3>
-            <p className="text-xs text-slate-400 max-w-md mx-auto">
+          <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center space-y-4 shadow-xs">
+            <Smartphone size={48} className="mx-auto text-slate-400 dark:text-slate-600" />
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">Smart Gadgets Ready for Showroom Pickup</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
               Visit our Kusumbag showroom in Moulvibazar to test and experience the latest electronics.
             </p>
           </div>

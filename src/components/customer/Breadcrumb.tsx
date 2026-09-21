@@ -23,22 +23,22 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
       <nav aria-label="Breadcrumb" className="py-3 px-4 max-w-7xl mx-auto w-full">
-        <ol className="flex flex-wrap items-center gap-1.5 text-xs text-slate-400">
+        <ol className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
           {allItems.map((item, idx) => {
             const isLast = idx === allItems.length - 1;
             return (
               <li key={item.path} className="flex items-center gap-1.5">
-                {idx > 0 && <ChevronRight size={13} className="text-slate-600 shrink-0" />}
+                {idx > 0 && <ChevronRight size={13} className="text-slate-300 dark:text-slate-600 shrink-0" />}
                 {isLast ? (
-                  <span className="text-cyan-400 font-medium truncate max-w-xs md:max-w-md" aria-current="page">
+                  <span className="text-blue-600 dark:text-cyan-400 font-semibold truncate max-w-xs md:max-w-md" aria-current="page">
                     {item.name}
                   </span>
                 ) : (
                   <Link
                     href={item.path}
-                    className="hover:text-slate-200 transition-colors flex items-center gap-1"
+                    className="hover:text-slate-900 dark:hover:text-slate-200 text-slate-600 dark:text-slate-400 transition-colors flex items-center gap-1"
                   >
-                    {idx === 0 && <Home size={12} className="text-slate-500" />}
+                    {idx === 0 && <Home size={12} className="text-slate-400 dark:text-slate-500" />}
                     <span>{item.name}</span>
                   </Link>
                 )}

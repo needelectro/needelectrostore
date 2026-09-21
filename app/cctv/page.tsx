@@ -68,38 +68,38 @@ export default async function CctvPage() {
   const breadcrumbs = [{ name: 'CCTV & Security', path: '/cctv' }];
 
   return (
-    <div className="min-h-screen bg-[#060a14] text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 
-      <section className="py-12 px-4 border-b border-slate-800/80 bg-gradient-to-b from-blue-950/20 to-transparent">
+      <section className="py-12 px-4 border-b border-slate-200 dark:border-slate-800/80 bg-gradient-to-b from-blue-50/70 via-transparent to-transparent dark:from-blue-950/20">
         <div className="max-w-7xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 bg-blue-900/40 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold text-cyan-300">
+          <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-900/40 dark:border-blue-500/30 dark:text-cyan-300 px-3 py-1 rounded-full text-xs font-semibold">
             <Camera size={14} />
             <span>24/7 Surveillance & Security Solutions</span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
             CCTV Camera in Moulvibazar — Cameras, DVR/NVR & Professional Installation
           </h1>
 
-          <p className="text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
+          <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
             Secure your residence, retail showroom, warehouse, or institution with high-definition CCTV security from {BUSINESS_INFO.name}. We supply crystal-clear IP and HD analog cameras, weatherproof night vision models, surveillance storage, and complete turnkey technician installation with smartphone live remote viewing.
           </p>
 
           <div className="pt-2 flex flex-wrap gap-3">
             <Link
               href="/services/cctv-installation"
-              className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-blue-500/20 transition-all inline-flex items-center gap-2"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition-all inline-flex items-center gap-2"
             >
               <Video size={14} />
               <span>Book CCTV Installation Service →</span>
             </Link>
             <a
               href={`tel:${BUSINESS_INFO.phoneClean}`}
-              className="bg-slate-900 hover:bg-slate-800 text-slate-200 px-4 py-2 rounded-xl text-xs font-semibold border border-slate-700/80 transition-colors inline-flex items-center gap-1.5"
+              className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 px-4 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors inline-flex items-center gap-1.5 shadow-xs"
             >
-              <Phone size={13} className="text-cyan-400" />
+              <Phone size={13} className="text-blue-600 dark:text-cyan-400" />
               <span>CCTV Consultation: {BUSINESS_INFO.phone}</span>
             </a>
           </div>
@@ -110,10 +110,10 @@ export default async function CctvPage() {
       <section className="py-12 px-4 max-w-7xl mx-auto w-full flex-1">
         <div className="flex items-center justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-xl font-bold text-white">CCTV Cameras & Security Hardware in Stock</h2>
-            <p className="text-xs text-slate-400 mt-1">Authentic EZVIZ, Hikvision, and Dahua cameras with replacement warranty</p>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">CCTV Cameras & Security Hardware in Stock</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Authentic EZVIZ, Hikvision, and Dahua cameras with replacement warranty</p>
           </div>
-          <span className="text-xs font-mono bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 text-slate-300">
+          <span className="text-xs font-mono bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 shadow-xs">
             {products.length} Products Found
           </span>
         </div>
@@ -142,10 +142,10 @@ export default async function CctvPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-12 text-center space-y-4">
-            <Camera size={48} className="mx-auto text-slate-600" />
-            <h3 className="text-lg font-bold text-slate-200">CCTV Packages Available</h3>
-            <p className="text-xs text-slate-400 max-w-md mx-auto">
+          <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center space-y-4 shadow-xs">
+            <Camera size={48} className="mx-auto text-slate-400 dark:text-slate-600" />
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">CCTV Packages Available</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
               We supply customized 2-camera, 4-camera, 8-camera, and 16-camera CCTV packages with DVR/NVR, hard disk, and cabling across Moulvibazar. Contact us for site survey.
             </p>
           </div>

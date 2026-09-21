@@ -67,36 +67,36 @@ export default async function ElectricalProductsPage() {
   const breadcrumbs = [{ name: 'Electrical Products', path: '/electrical-products' }];
 
   return (
-    <div className="min-h-screen bg-[#060a14] text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 
-      <section className="py-12 px-4 border-b border-slate-800/80 bg-gradient-to-b from-amber-950/15 via-transparent to-transparent">
+      <section className="py-12 px-4 border-b border-slate-200 dark:border-slate-800/80 bg-gradient-to-b from-amber-50/70 via-transparent to-transparent dark:from-amber-950/15">
         <div className="max-w-7xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 bg-amber-900/40 border border-amber-500/30 px-3 py-1 rounded-full text-xs font-semibold text-amber-300">
+          <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 dark:bg-amber-900/40 dark:border-amber-500/30 dark:text-amber-300 px-3 py-1 rounded-full text-xs font-semibold">
             <Zap size={14} />
             <span>Certified Electrical Hardware</span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
             Electrical Products in Moulvibazar — Cables, Breakers & Switchgear
           </h1>
 
-          <p className="text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
+          <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
             Reliable electrical installations start with certified, high-grade components. {BUSINESS_INFO.name} provides certified copper wiring, miniature circuit breakers (MCB), residual current devices (RCCB), main distribution boards, heavy-duty switches, and industrial electrical supplies in Moulvibazar.
           </p>
 
           <div className="pt-2 flex flex-wrap gap-3">
             <Link
               href="/electrical-services"
-              className="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow-lg shadow-amber-500/20 transition-all inline-flex items-center gap-2"
+              className="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md shadow-amber-500/20 transition-all inline-flex items-center gap-2"
             >
               <Wrench size={14} />
               <span>Electrical Services & Wiring →</span>
             </Link>
             <Link
               href="/services/electrician"
-              className="bg-slate-900 hover:bg-slate-800 text-slate-200 px-4 py-2 rounded-xl text-xs font-semibold border border-slate-700/80 transition-colors"
+              className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 px-4 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors shadow-xs"
             >
               Book an Electrician in Moulvibazar →
             </Link>
@@ -108,10 +108,10 @@ export default async function ElectricalProductsPage() {
       <section className="py-12 px-4 max-w-7xl mx-auto w-full flex-1">
         <div className="flex items-center justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-xl font-bold text-white">Electrical Supplies & Safety Components</h2>
-            <p className="text-xs text-slate-400 mt-1">Genuine certified electrical hardware meeting Bangladesh national safety standards</p>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Electrical Supplies & Safety Components</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Genuine certified electrical hardware meeting Bangladesh national safety standards</p>
           </div>
-          <span className="text-xs font-mono bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 text-slate-300">
+          <span className="text-xs font-mono bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 shadow-xs">
             {products.length} Products Found
           </span>
         </div>
@@ -140,11 +140,11 @@ export default async function ElectricalProductsPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-12 text-center space-y-4">
-            <Zap size={48} className="mx-auto text-slate-600" />
-            <h3 className="text-lg font-bold text-slate-200">Full Electrical Catalog Available in Showroom</h3>
-            <p className="text-xs text-slate-400 max-w-md mx-auto">
-              Our Kusumbag showroom carries a full range of cables, breakers, switches, and lighting supplies. Call {BUSINESS_INFO.phone} for trade quotes.
+          <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center space-y-4 shadow-xs">
+            <Zap size={48} className="mx-auto text-slate-400 dark:text-slate-600" />
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">Wholesale & Retail Electrical Supplies</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+              Looking for bulk cables, MCBs, or electrical contractor supplies in Moulvibazar? Call {BUSINESS_INFO.phone} for trade pricing and site deliveries.
             </p>
           </div>
         )}

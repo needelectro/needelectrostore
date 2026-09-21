@@ -44,7 +44,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" data-theme="dark">
+    <html lang="en" data-theme="light">
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -52,6 +52,22 @@ export default function RootLayout({
         <link
           href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
           rel="stylesheet"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var isStaff = window.location.pathname.startsWith('/admin');
+                if (isStaff) {
+                  var staffTheme = localStorage.getItem('needelectro_theme') || 'dark';
+                  document.documentElement.setAttribute('data-theme', staffTheme);
+                } else {
+                  var custTheme = localStorage.getItem('customer_theme') || 'light';
+                  document.documentElement.setAttribute('data-theme', custTheme);
+                }
+              } catch(e) {}
+            `,
+          }}
         />
       </head>
       <body>
