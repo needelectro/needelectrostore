@@ -154,33 +154,156 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           left: 0 !important;
           right: 0 !important;
           width: 100% !important;
-          background-color: rgba(255, 255, 255, 0.96) !important;
+          background-color: rgba(255, 255, 255, 0.97) !important;
           border-bottom: 1px solid #e2e8f0 !important;
-          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05) !important;
+          box-shadow: 0 2px 16px rgba(0, 140, 255, 0.07) !important;
         }
 
-        .landing-page-root.theme-light .desktop-nav-links a {
-          color: #334155 !important;
+        /* Desktop nav link base */
+        .landing-page-root .ne-nav-link {
+          position: relative;
+          color: #94a3b8;
+          text-decoration: none;
+          font-size: 0.875rem;
+          font-weight: 600;
+          padding: 0.3rem 0;
+          letter-spacing: 0.01em;
+          transition: color 0.22s ease;
         }
-
-        .landing-page-root.theme-light .desktop-nav-links a:hover {
+        .landing-page-root .ne-nav-link::after {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          width: 0;
+          height: 2px;
+          border-radius: 2px;
+          background: linear-gradient(90deg, #008CFF, #38bdf8);
+          transition: width 0.28s cubic-bezier(0.4,0,0.2,1);
+        }
+        .landing-page-root .ne-nav-link:hover {
+          color: #ffffff;
+        }
+        .landing-page-root .ne-nav-link:hover::after {
+          width: 100%;
+        }
+        /* Active/Home link */
+        .landing-page-root .ne-nav-link.ne-nav-active {
+          color: #ffffff;
+        }
+        .landing-page-root .ne-nav-link.ne-nav-active::after {
+          width: 100%;
+        }
+        /* Light theme overrides */
+        .landing-page-root.theme-light .ne-nav-link {
+          color: #475569 !important;
+        }
+        .landing-page-root.theme-light .ne-nav-link:hover {
           color: #0284c7 !important;
         }
-
-        .landing-page-root.theme-light .desktop-nav-links a[href="#home"] {
-          color: #0284c7 !important;
+        .landing-page-root.theme-light .ne-nav-link.ne-nav-active {
+          color: #0f172a !important;
         }
 
-        .landing-page-root.theme-light .desktop-nav-links a[href="#software"] {
+        /* Apps & Websites badge */
+        .landing-page-root .ne-apps-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          color: #38bdf8;
+          text-decoration: none;
+          font-size: 0.82rem;
+          font-weight: 700;
+          padding: 0.28rem 0.75rem 0.28rem 0.55rem;
+          border-radius: 9999px;
+          background: linear-gradient(135deg, rgba(0,140,255,0.14) 0%, rgba(56,189,248,0.10) 100%);
+          border: 1px solid rgba(56,189,248,0.35);
+          letter-spacing: 0.01em;
+          transition: all 0.25s ease;
+          position: relative;
+          overflow: hidden;
+        }
+        .landing-page-root .ne-apps-badge::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(90deg, transparent 0%, rgba(56,189,248,0.15) 50%, transparent 100%);
+          transform: translateX(-100%);
+          animation: ne-badge-shimmer 2.8s ease-in-out infinite;
+        }
+        .landing-page-root .ne-apps-badge:hover {
+          background: linear-gradient(135deg, rgba(0,140,255,0.25) 0%, rgba(56,189,248,0.18) 100%);
+          border-color: rgba(56,189,248,0.65);
+          box-shadow: 0 0 16px rgba(56,189,248,0.25);
+          transform: translateY(-1px);
+        }
+        .landing-page-root.theme-light .ne-apps-badge {
           color: #0284c7 !important;
+          background: linear-gradient(135deg, rgba(0,140,255,0.1) 0%, rgba(56,189,248,0.07) 100%) !important;
+          border-color: rgba(2,132,199,0.3) !important;
+        }
+        @keyframes ne-badge-shimmer {
+          0%   { transform: translateX(-100%); }
+          50%  { transform: translateX(100%); }
+          100% { transform: translateX(100%); }
+        }
+
+        /* Hotline pill */
+        .landing-page-root .ne-hotline {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          color: #ffffff;
+          font-size: 0.8rem;
+          font-weight: 700;
+          text-decoration: none;
+          padding: 0.38rem 0.9rem;
+          border-radius: 9999px;
+          background: linear-gradient(135deg, #008CFF 0%, #0055b3 100%);
+          border: 1px solid rgba(0,140,255,0.4);
+          box-shadow: 0 0 0 0 rgba(0,140,255,0.45);
+          letter-spacing: 0.02em;
+          transition: all 0.25s ease;
+          animation: ne-hotline-pulse 2.5s ease-in-out infinite;
+        }
+        .landing-page-root .ne-hotline:hover {
+          transform: translateY(-1px) scale(1.03);
+          box-shadow: 0 4px 18px rgba(0,140,255,0.5);
+          animation: none;
+        }
+        @keyframes ne-hotline-pulse {
+          0%,100% { box-shadow: 0 0 0 0 rgba(0,140,255,0.4); }
+          50%      { box-shadow: 0 0 0 6px rgba(0,140,255,0); }
+        }
+        .landing-page-root.theme-light .ne-hotline {
+          color: #ffffff !important;
+        }
+
+        /* Theme toggle */
+        .landing-page-root .ne-theme-toggle {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 34px;
+          height: 34px;
+          border-radius: 50%;
+          border: 1.5px solid rgba(255,255,255,0.2);
+          background: rgba(255,255,255,0.06);
+          cursor: pointer;
+          transition: all 0.25s ease;
+        }
+        .landing-page-root .ne-theme-toggle:hover {
+          background: rgba(0,140,255,0.18);
+          border-color: rgba(0,140,255,0.5);
+          transform: rotate(20deg) scale(1.1);
+        }
+        .landing-page-root.theme-light .ne-theme-toggle {
+          border-color: #cbd5e1 !important;
+          background: #f1f5f9 !important;
+        }
+        .landing-page-root.theme-light .ne-theme-toggle:hover {
           background: #e0f2fe !important;
-          border-color: #bae6fd !important;
-        }
-
-        .landing-page-root.theme-light .hotline-pill {
-          background: #f0f9ff !important;
-          color: #0284c7 !important;
-          border: 1px solid #bae6fd !important;
+          border-color: #38bdf8 !important;
         }
 
         .landing-page-root.theme-light .mobile-hamburger-btn {
@@ -788,54 +911,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           <nav className="desktop-nav-links" style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '1.4rem',
-            fontSize: '0.88rem',
-            fontWeight: 600
+            gap: '0.2rem',
           }}>
-            <a href="#home" style={{ color: '#ffffff', textDecoration: 'none' }}>Home</a>
-            <a href="#software" style={{
-              color: '#38bdf8',
-              textDecoration: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              background: 'rgba(56, 189, 248, 0.12)',
-              padding: '0.25rem 0.65rem',
-              borderRadius: '9999px',
-              border: '1px solid rgba(56, 189, 248, 0.3)'
-            }}>
+            <a href="#home" className="ne-nav-link ne-nav-active">Home</a>
+            <a href="#software" className="ne-apps-badge" style={{ margin: '0 0.55rem' }}>
               <Globe size={13} />
-              <span>Apps & Websites</span>
+              <span>Apps &amp; Websites</span>
             </a>
-            <a href="#products" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Products</a>
-            <a href="#laptops" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Laptops</a>
-            <a href="#services" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Services</a>
-            <a href="#cctv" style={{ color: '#cbd5e1', textDecoration: 'none' }}>CCTV & Security</a>
-            <a href="#emi" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Laptop EMI</a>
-            <a href="#about" style={{ color: '#cbd5e1', textDecoration: 'none' }}>About Us</a>
-            <a href="#contact" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Contact</a>
+            <a href="#products" className="ne-nav-link" style={{ marginLeft: '0.3rem' }}>Products</a>
+            <a href="#laptops" className="ne-nav-link">Laptops</a>
+            <a href="#services" className="ne-nav-link">Services</a>
+            <a href="#cctv" className="ne-nav-link">CCTV &amp; Security</a>
+            <a href="#emi" className="ne-nav-link">Laptop EMI</a>
+            <a href="#about" className="ne-nav-link">About Us</a>
+            <a href="#contact" className="ne-nav-link" style={{ marginRight: '0.3rem' }}>Contact</a>
           </nav>
 
           {/* Right Action Group */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', flexShrink: 0 }}>
             {/* Phone Hotline Pill */}
-            <a
-              href="tel:01733983752"
-              className="hotline-pill"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                color: '#38bdf8',
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                textDecoration: 'none',
-                background: 'rgba(56, 189, 248, 0.1)',
-                padding: '0.4rem 0.8rem',
-                borderRadius: '9999px',
-                border: '1px solid rgba(56, 189, 248, 0.25)'
-              }}
-            >
+            <a href="tel:01733983752" className="ne-hotline">
               <Phone size={13} />
               <span>01733-983752</span>
             </a>
@@ -843,21 +938,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             {/* Customer Theme Toggle Button */}
             <button
               onClick={toggleTheme}
+              className="ne-theme-toggle"
               aria-label={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
               title={theme === 'light' ? 'Switch to Dark Theme' : 'Switch to Light Theme'}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: theme === 'light' ? '#f1f5f9' : 'rgba(255, 255, 255, 0.08)',
-                border: theme === 'light' ? '1px solid #cbd5e1' : '1px solid rgba(255, 255, 255, 0.18)',
-                color: theme === 'light' ? '#0f172a' : '#ffffff',
-                borderRadius: '9999px',
-                width: '32px',
-                height: '32px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
             >
               {theme === 'light' ? <Moon size={15} color="#0284c7" /> : <Sun size={15} color="#f59e0b" />}
             </button>
