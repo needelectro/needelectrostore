@@ -149,9 +149,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
 
         /* 1. Header */
         .landing-page-root.theme-light header {
-          background-color: rgba(255, 255, 255, 0.94) !important;
+          background-color: rgba(255, 255, 255, 0.96) !important;
           border-bottom: 1px solid #e2e8f0 !important;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05) !important;
         }
 
         .landing-page-root.theme-light .desktop-nav-links a {
@@ -184,6 +184,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           color: #0f172a !important;
         }
 
+        .landing-page-root.theme-light .mobile-nav-drawer {
+          background-color: #ffffff !important;
+          border-top: 1px solid #e2e8f0 !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+        }
+        .landing-page-root.theme-light .mobile-nav-drawer a {
+          color: #1e293b !important;
+        }
+
         /* 2. Hero Section */
         .landing-page-root.theme-light #home {
           background: radial-gradient(circle at 50% -10%, rgba(2, 132, 199, 0.14) 0%, #f8fafc 70%) !important;
@@ -194,7 +203,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
         }
 
         .landing-page-root.theme-light #home p {
-          color: #475569 !important;
+          color: #334155 !important;
         }
 
         .landing-page-root.theme-light #home div[style*="backgroundImage"] {
@@ -241,12 +250,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
         }
 
         .landing-page-root.theme-light #home > div > div:last-child > div > div:last-child {
-          color: #64748b !important;
+          color: #475569 !important;
         }
 
-        /* 3. Content Sections */
+        /* 3. Global Section Backgrounds & Typography */
         .landing-page-root.theme-light section {
           background-color: #f8fafc !important;
+          border-color: #e2e8f0 !important;
         }
 
         .landing-page-root.theme-light #products,
@@ -256,15 +266,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           background-color: #ffffff !important;
         }
 
+        .landing-page-root.theme-light #solutions,
         .landing-page-root.theme-light #laptops,
         .landing-page-root.theme-light #cctv,
         .landing-page-root.theme-light #emi,
-        .landing-page-root.theme-light #contact,
-        .landing-page-root.theme-light section:nth-of-type(3) {
+        .landing-page-root.theme-light #why-choose,
+        .landing-page-root.theme-light #testimonials,
+        .landing-page-root.theme-light #faq,
+        .landing-page-root.theme-light #contact {
           background-color: #f8fafc !important;
         }
 
-        /* Section Titles and Descriptions */
         .landing-page-root.theme-light h1,
         .landing-page-root.theme-light h2,
         .landing-page-root.theme-light h3,
@@ -276,42 +288,436 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           color: #475569 !important;
         }
 
-        /* 4. Cards & Containers */
-        .landing-page-root.theme-light div[style*="background: rgba(255, 255, 255"],
-        .landing-page-root.theme-light div[style*="background: rgba(15, 23, 42"],
-        .landing-page-root.theme-light div[style*="background: #090f20"],
-        .landing-page-root.theme-light div[style*="background: #0b1329"],
-        .landing-page-root.theme-light div[style*="background: #070c18"],
-        .landing-page-root.theme-light div[style*="backgroundColor: #090f20"],
-        .landing-page-root.theme-light div[style*="backgroundColor: #0b1329"],
-        .landing-page-root.theme-light div[style*="backgroundColor: #070c18"],
-        .landing-page-root.theme-light div[style*="backgroundColor: rgba(15, 23, 42"] {
+        /* 4. Section 3: "Explore Our Solutions" Cards */
+        .landing-page-root.theme-light #solutions a,
+        .landing-page-root.theme-light .solution-card,
+        .landing-page-root.theme-light section:nth-of-type(2) a[style*="flexDirection: column"],
+        .landing-page-root.theme-light a[style*="rgba(15, 23, 42"] {
           background-color: #ffffff !important;
           border: 1px solid #e2e8f0 !important;
-          box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05) !important;
-        }
-
-        .landing-page-root.theme-light div[style*="background"]:hover {
-          border-color: #93c5fd !important;
-        }
-
-        /* 5. Typography */
-        .landing-page-root.theme-light div[style*="color: #ffffff"]:not(a[style*="linear-gradient"] *):not(button[style*="linear-gradient"] *),
-        .landing-page-root.theme-light div[style*="color: #cbd5e1"],
-        .landing-page-root.theme-light div[style*="color: #f8fafc"],
-        .landing-page-root.theme-light span[style*="color: #ffffff"]:not(a[style*="linear-gradient"] *):not(button[style*="linear-gradient"] *),
-        .landing-page-root.theme-light span[style*="color: #cbd5e1"],
-        .landing-page-root.theme-light span[style*="color: #f8fafc"] {
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04) !important;
           color: #0f172a !important;
         }
+        .landing-page-root.theme-light #solutions a:hover,
+        .landing-page-root.theme-light .solution-card:hover {
+          border-color: #0284c7 !important;
+          box-shadow: 0 10px 25px rgba(2, 132, 199, 0.1) !important;
+        }
+        .landing-page-root.theme-light #solutions a h3,
+        .landing-page-root.theme-light .solution-card h3 {
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light #solutions a p,
+        .landing-page-root.theme-light .solution-card p {
+          color: #475569 !important;
+        }
 
-        .landing-page-root.theme-light div[style*="color: #94a3b8"],
-        .landing-page-root.theme-light span[style*="color: #94a3b8"],
-        .landing-page-root.theme-light p[style*="color: #94a3b8"] {
+        /* 5. Section 4: Featured Products & Inventory */
+        .landing-page-root.theme-light .products-search-input,
+        .landing-page-root.theme-light #products input {
+          background-color: #ffffff !important;
+          color: #0f172a !important;
+          border: 1px solid #cbd5e1 !important;
+        }
+        .landing-page-root.theme-light .products-filter-tab,
+        .landing-page-root.theme-light #products button:not([style*="#008CFF"]):not([style*="rgb(0, 140, 255)"]) {
+          background-color: #f1f5f9 !important;
+          color: #334155 !important;
+          border: 1px solid #e2e8f0 !important;
+        }
+        .landing-page-root.theme-light .products-filter-tab.active,
+        .landing-page-root.theme-light #products button[style*="#008CFF"] {
+          background-color: #008CFF !important;
+          color: #ffffff !important;
+          border-color: #008CFF !important;
+        }
+        .landing-page-root.theme-light .products-empty-box,
+        .landing-page-root.theme-light #products div[style*="border: 1px dashed"] {
+          background-color: #ffffff !important;
+          border: 1px dashed #cbd5e1 !important;
+          color: #64748b !important;
+        }
+        .landing-page-root.theme-light .products-empty-box h3,
+        .landing-page-root.theme-light #products div[style*="border: 1px dashed"] h3 {
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light .product-card,
+        .landing-page-root.theme-light #products div[style*="justifyContent: space-between"] {
+          background-color: #ffffff !important;
+          border: 1px solid #e2e8f0 !important;
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04) !important;
+        }
+        .landing-page-root.theme-light .product-img-box,
+        .landing-page-root.theme-light #products div[style*="height: 160px"] {
+          background-color: #f8fafc !important;
+          border: 1px solid #e2e8f0 !important;
+        }
+        .landing-page-root.theme-light .product-card h3 {
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light .product-card p {
+          color: #475569 !important;
+        }
+        .landing-page-root.theme-light .product-price-val {
+          color: #0284c7 !important;
+        }
+        .landing-page-root.theme-light .product-view-btn {
+          background-color: #f1f5f9 !important;
+          color: #0f172a !important;
+          border: 1px solid #cbd5e1 !important;
+        }
+        .landing-page-root.theme-light .product-view-btn:hover {
+          background-color: #e2e8f0 !important;
+        }
+        .landing-page-root.theme-light .product-emi-badge {
+          background-color: #fef3c7 !important;
+          color: #b45309 !important;
+          border: 1px solid #fde68a !important;
+        }
+
+        /* 6. Section 5: Laptop Section */
+        .landing-page-root.theme-light .laptop-card,
+        .landing-page-root.theme-light #laptops > div > div:last-child > div {
+          background-color: #ffffff !important;
+          border: 1px solid #e2e8f0 !important;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
+        }
+        .landing-page-root.theme-light .laptop-card h3,
+        .landing-page-root.theme-light #laptops h3 {
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light .laptop-card p,
+        .landing-page-root.theme-light #laptops p {
+          color: #475569 !important;
+        }
+        .landing-page-root.theme-light .laptop-specs-box,
+        .landing-page-root.theme-light #laptops div[style*="gridTemplateColumns: repeat(2, 1fr)"] {
+          background-color: #f1f5f9 !important;
+          border: 1px solid #e2e8f0 !important;
+          color: #334155 !important;
+        }
+        .landing-page-root.theme-light .laptop-specs-box strong,
+        .landing-page-root.theme-light #laptops div[style*="gridTemplateColumns: repeat(2, 1fr)"] strong {
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light .laptop-price,
+        .landing-page-root.theme-light #laptops div[style*="fontSize: 1.5rem"],
+        .landing-page-root.theme-light #laptops div[style*="font-size: 1.5rem"] {
+          color: #0284c7 !important;
+        }
+        .landing-page-root.theme-light .laptop-emi-badge,
+        .landing-page-root.theme-light #laptops span[style*="fef08a"] {
+          background-color: #fef3c7 !important;
+          color: #b45309 !important;
+          border: 1px solid #fde68a !important;
+        }
+
+        /* 7. Section 6: Services */
+        .landing-page-root.theme-light .service-card,
+        .landing-page-root.theme-light #services div[style*="justifyContent: space-between"] {
+          background-color: #ffffff !important;
+          border: 1px solid #e2e8f0 !important;
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04) !important;
+        }
+        .landing-page-root.theme-light .service-card h3,
+        .landing-page-root.theme-light #services h3 {
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light .service-card p,
+        .landing-page-root.theme-light #services p {
+          color: #475569 !important;
+        }
+        .landing-page-root.theme-light .service-book-btn,
+        .landing-page-root.theme-light #services button {
+          background-color: #f0f9ff !important;
+          border: 1px solid #bae6fd !important;
+          color: #0284c7 !important;
+        }
+        .landing-page-root.theme-light .service-book-btn:hover,
+        .landing-page-root.theme-light #services button:hover {
+          background-color: #e0f2fe !important;
+        }
+
+        /* 8. Section 7: CCTV Section */
+        .landing-page-root.theme-light #cctv {
+          background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+          border-top: 1px solid #bae6fd !important;
+          border-bottom: 1px solid #bae6fd !important;
+        }
+        .landing-page-root.theme-light #cctv h2 {
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light #cctv p {
+          color: #334155 !important;
+        }
+        .landing-page-root.theme-light .cctv-feature-item,
+        .landing-page-root.theme-light #cctv div[style*="gap: 0.65rem"] {
+          color: #1e293b !important;
+        }
+        .landing-page-root.theme-light .cctv-preview-box,
+        .landing-page-root.theme-light #cctv div[style*="boxShadow: 0 20px 40px"] {
+          background-color: #ffffff !important;
+          border: 1px solid #e2e8f0 !important;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06) !important;
+        }
+        .landing-page-root.theme-light .cctv-preview-box h3 {
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light .cctv-specs-box,
+        .landing-page-root.theme-light #cctv div[style*="background: rgba(2, 6, 23"] {
+          background-color: #f8fafc !important;
+          color: #334155 !important;
+          border: 1px solid #e2e8f0 !important;
+        }
+        .landing-page-root.theme-light .cctv-price-text,
+        .landing-page-root.theme-light #cctv div[style*="fontSize: 2rem"] {
+          color: #0284c7 !important;
+        }
+        .landing-page-root.theme-light #cctv a[href^="tel"] {
+          background: #ffffff !important;
+          color: #0f172a !important;
+          border: 1px solid #cbd5e1 !important;
+        }
+
+        /* 9. Section 8: Software & Apps Studio */
+        .landing-page-root.theme-light #software {
+          background: #ffffff !important;
+          border-top: 1px solid #e2e8f0 !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+        }
+        .landing-page-root.theme-light .software-feature-card,
+        .landing-page-root.theme-light #software div[style*="linear-gradient(135deg, rgba(15, 23, 42"] {
+          background: #ffffff !important;
+          border: 1px solid #e2e8f0 !important;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05) !important;
+        }
+        .landing-page-root.theme-light .software-feature-card h3,
+        .landing-page-root.theme-light #software h3 {
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light .software-feature-card p,
+        .landing-page-root.theme-light #software p {
+          color: #475569 !important;
+        }
+        .landing-page-root.theme-light .software-check-item,
+        .landing-page-root.theme-light #software div[style*="gap: 0.65rem"] {
+          color: #1e293b !important;
+        }
+        .landing-page-root.theme-light .software-tech-pills,
+        .landing-page-root.theme-light #software div[style*="background: rgba(2, 6, 23, 0.55)"] {
+          background-color: #f8fafc !important;
+          border: 1px solid #e2e8f0 !important;
+        }
+        .landing-page-root.theme-light .software-tech-pills span,
+        .landing-page-root.theme-light #software div[style*="background: rgba(2, 6, 23, 0.55)"] span {
+          background-color: #ffffff !important;
+          color: #475569 !important;
+          border: 1px solid #e2e8f0 !important;
+        }
+        .landing-page-root.theme-light .software-process-box,
+        .landing-page-root.theme-light #software div[style*="padding: 2rem 2.5rem"] {
+          background-color: #f8fafc !important;
+          border: 1px solid #e2e8f0 !important;
+        }
+        .landing-page-root.theme-light .software-process-box div > div:last-child {
+          color: #475569 !important;
+        }
+        .landing-page-root.theme-light .software-cta-box,
+        .landing-page-root.theme-light #software div[style*="marginTop: 2.5rem"] {
+          background: linear-gradient(135deg, #f0f9ff 0%, #faf5ff 100%) !important;
+          border: 1px solid #e2e8f0 !important;
+        }
+        .landing-page-root.theme-light .software-cta-box h3 {
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light .software-cta-box p {
+          color: #475569 !important;
+        }
+
+        /* 10. Section 9: EMI Promotion */
+        .landing-page-root.theme-light .emi-step-card,
+        .landing-page-root.theme-light #emi div[style*="padding: 1.75rem"] {
+          background-color: #ffffff !important;
+          border: 1px solid #fde68a !important;
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04) !important;
+        }
+        .landing-page-root.theme-light .emi-step-card h3,
+        .landing-page-root.theme-light #emi h3 {
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light .emi-step-card p,
+        .landing-page-root.theme-light #emi p {
+          color: #475569 !important;
+        }
+
+        /* 11. Section 10: Why Choose / Trust Advantage */
+        .landing-page-root.theme-light .trust-feature-card,
+        .landing-page-root.theme-light #why-choose div[style*="padding: 1.75rem"],
+        .landing-page-root.theme-light div[style*="background: rgba(15, 23, 42, 0.55)"] {
+          background-color: #ffffff !important;
+          border: 1px solid #e2e8f0 !important;
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04) !important;
+        }
+        .landing-page-root.theme-light .trust-feature-card h3 {
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light .trust-feature-card p {
+          color: #475569 !important;
+        }
+
+        /* 12. Section 11: About & Showroom */
+        .landing-page-root.theme-light #about {
+          background-color: #ffffff !important;
+          border-top: 1px solid #e2e8f0 !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+        }
+        .landing-page-root.theme-light #about p {
+          color: #334155 !important;
+        }
+        .landing-page-root.theme-light .metrics-row,
+        .landing-page-root.theme-light #about div[style*="gap: 1.5rem"] {
+          border-color: #e2e8f0 !important;
+        }
+        .landing-page-root.theme-light .showroom-info-card,
+        .landing-page-root.theme-light #about div[style*="linear-gradient"] {
+          background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+          border: 1px solid #bae6fd !important;
+          box-shadow: 0 6px 20px rgba(2, 132, 199, 0.08) !important;
+        }
+        .landing-page-root.theme-light .showroom-info-card div,
+        .landing-page-root.theme-light #about div[style*="linear-gradient"] div {
+          color: #1e293b !important;
+        }
+        .landing-page-root.theme-light .showroom-info-card div:last-child,
+        .landing-page-root.theme-light #about div[style*="linear-gradient"] div:last-child {
+          color: #0284c7 !important;
+          font-weight: 700 !important;
+        }
+
+        /* 13. Section 12: Testimonials */
+        .landing-page-root.theme-light .testimonial-card,
+        .landing-page-root.theme-light #testimonials div[style*="borderRadius: 18px"],
+        .landing-page-root.theme-light #testimonials div[style*="padding: 1.75rem"] {
+          background-color: #ffffff !important;
+          border: 1px solid #e2e8f0 !important;
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04) !important;
+        }
+        .landing-page-root.theme-light .testimonial-quote,
+        .landing-page-root.theme-light #testimonials p {
+          color: #334155 !important;
+        }
+        .landing-page-root.theme-light .testimonial-name,
+        .landing-page-root.theme-light #testimonials div[style*="fontWeight: 800"] {
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light .testimonial-role,
+        .landing-page-root.theme-light #testimonials div[style*="fontSize: 0.76rem"] {
           color: #64748b !important;
         }
 
-        /* Preserve white text inside primary gradient buttons */
+        /* 14. Section 13: Customer FAQ (ACCORDION VISIBILITY FIX) */
+        .landing-page-root.theme-light .faq-item,
+        .landing-page-root.theme-light #faq div[style*="overflow: hidden"] {
+          background-color: #ffffff !important;
+          border: 1px solid #e2e8f0 !important;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+        }
+        .landing-page-root.theme-light .faq-question-btn,
+        .landing-page-root.theme-light #faq button {
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light .faq-question-btn span,
+        .landing-page-root.theme-light #faq button span {
+          color: #0f172a !important;
+          font-weight: 700 !important;
+        }
+        .landing-page-root.theme-light .faq-answer,
+        .landing-page-root.theme-light #faq div[style*="padding: 0 1.5rem 1.25rem"] {
+          color: #334155 !important;
+          border-top: 1px solid #f1f5f9 !important;
+        }
+
+        /* 15. Section 14: Contact & Showroom */
+        .landing-page-root.theme-light #contact {
+          background-color: #f8fafc !important;
+        }
+        .landing-page-root.theme-light .contact-info-title,
+        .landing-page-root.theme-light #contact div[style*="fontWeight: 800"] {
+          color: #0f172a !important;
+          font-weight: 800 !important;
+        }
+        .landing-page-root.theme-light .contact-info-desc,
+        .landing-page-root.theme-light #contact div[style*="fontSize: 0.88rem"] {
+          color: #475569 !important;
+        }
+        .landing-page-root.theme-light .contact-form-container,
+        .landing-page-root.theme-light #contact div[style*="padding: 2.5rem"] {
+          background-color: #ffffff !important;
+          border: 1px solid #e2e8f0 !important;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+        }
+        .landing-page-root.theme-light .contact-form-container h3 {
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light .contact-form-container p {
+          color: #64748b !important;
+        }
+        .landing-page-root.theme-light .contact-form-label,
+        .landing-page-root.theme-light #contact label {
+          color: #1e293b !important;
+          font-weight: 700 !important;
+        }
+        .landing-page-root.theme-light .contact-form-input,
+        .landing-page-root.theme-light #contact input,
+        .landing-page-root.theme-light #contact textarea {
+          background-color: #f8fafc !important;
+          border: 1px solid #cbd5e1 !important;
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light .contact-form-input:focus,
+        .landing-page-root.theme-light #contact input:focus {
+          background-color: #ffffff !important;
+          border-color: #008CFF !important;
+        }
+
+        /* 16. Modals (Booking & Product Details) */
+        .landing-page-root.theme-light .landing-modal-content,
+        .landing-page-root.theme-light div[style*="position: fixed"][style*="zIndex: 99999"] > div {
+          background-color: #ffffff !important;
+          color: #0f172a !important;
+          border: 1px solid #e2e8f0 !important;
+          box-shadow: 0 25px 60px rgba(0, 0, 0, 0.18) !important;
+        }
+        .landing-page-root.theme-light .landing-modal-content h3,
+        .landing-page-root.theme-light div[style*="position: fixed"][style*="zIndex: 99999"] h3 {
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light .landing-modal-content p,
+        .landing-page-root.theme-light div[style*="position: fixed"][style*="zIndex: 99999"] p {
+          color: #475569 !important;
+        }
+        .landing-page-root.theme-light .landing-modal-content label,
+        .landing-page-root.theme-light div[style*="position: fixed"][style*="zIndex: 99999"] label {
+          color: #1e293b !important;
+          font-weight: 700 !important;
+        }
+        .landing-page-root.theme-light .landing-modal-content input,
+        .landing-page-root.theme-light div[style*="position: fixed"][style*="zIndex: 99999"] input {
+          background-color: #f8fafc !important;
+          border: 1px solid #cbd5e1 !important;
+          color: #0f172a !important;
+        }
+        .landing-page-root.theme-light .landing-modal-content div[style*="background: rgba(2, 6, 23"] {
+          background-color: #f1f5f9 !important;
+          border: 1px solid #e2e8f0 !important;
+        }
+        .landing-page-root.theme-light .modal-close-btn,
+        .landing-page-root.theme-light div[style*="position: fixed"][style*="zIndex: 99999"] button[style*="borderRadius: 50%"] {
+          background-color: #f1f5f9 !important;
+          color: #0f172a !important;
+        }
+
+        /* 17. Preserve White Text for Brand Primary Gradient Buttons & Badges */
         .landing-page-root.theme-light a[style*="linear-gradient"],
         .landing-page-root.theme-light button[style*="linear-gradient"],
         .landing-page-root.theme-light a[style*="linear-gradient"] *,
@@ -319,61 +725,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           color: #ffffff !important;
         }
 
-        /* 6. Filter Tabs */
-        .landing-page-root.theme-light button[style*="background: rgba(255, 255, 255, 0.05)"],
-        .landing-page-root.theme-light button[style*="background: rgba(255, 255, 255, 0.08)"] {
-          background-color: #f1f5f9 !important;
-          color: #334155 !important;
-          border: 1px solid #e2e8f0 !important;
-        }
-
-        /* 7. Inputs, Search & Selects */
-        .landing-page-root.theme-light input,
-        .landing-page-root.theme-light select,
-        .landing-page-root.theme-light textarea {
-          background-color: #ffffff !important;
-          color: #0f172a !important;
-          border: 1px solid #cbd5e1 !important;
-        }
-
-        .landing-page-root.theme-light input::placeholder,
-        .landing-page-root.theme-light textarea::placeholder {
-          color: #94a3b8 !important;
-        }
-
-        .landing-page-root.theme-light div[style*="background: rgba(15, 23, 42, 0.8)"],
-        .landing-page-root.theme-light div[style*="background: rgba(15, 23, 42, 0.6)"] {
-          background-color: #ffffff !important;
-          border: 1px solid #cbd5e1 !important;
-        }
-
-        /* 8. Modals & Drawers */
-        .landing-page-root.theme-light div[style*="position: fixed"][style*="zIndex: 9999"],
-        .landing-page-root.theme-light div[style*="position: fixed"][style*="zIndex: 2000"] {
-          background-color: rgba(15, 23, 42, 0.6) !important;
-        }
-
-        .landing-page-root.theme-light div[style*="maxHeight: 90vh"],
-        .landing-page-root.theme-light div[style*="maxHeight: 85vh"] {
-          background-color: #ffffff !important;
-          color: #0f172a !important;
-          border: 1px solid #e2e8f0 !important;
-        }
-
-        /* 9. Footer */
+        /* 18. Footer */
         .landing-page-root.theme-light footer {
           background-color: #0b1120 !important;
           color: #94a3b8 !important;
           border-top: 1px solid #1e293b !important;
         }
-
         .landing-page-root.theme-light footer h3,
         .landing-page-root.theme-light footer h4,
         .landing-page-root.theme-light footer a,
-        .landing-page-root.theme-light footer span[style*="color: #ffffff"] {
+        .landing-page-root.theme-light footer span[style*="color: #ffffff"],
+        .landing-page-root.theme-light footer div[style*="color: #ffffff"] {
           color: #f8fafc !important;
         }
-
         .landing-page-root.theme-light footer a:hover {
           color: #38bdf8 !important;
         }
@@ -513,7 +877,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
 
         {/* Mobile Navigation Drawer Overlay */}
         {mobileMenuOpen && (
-          <div style={{
+          <div className="mobile-nav-drawer" style={{
             backgroundColor: '#090e1a',
             borderTop: '1px solid rgba(255, 255, 255, 0.08)',
             borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
@@ -812,7 +1176,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
       {/* =========================================================================
           3. QUICK SERVICE & PRODUCT CATEGORIES
           ========================================================================= */}
-      <section style={{ padding: '4rem 1.5rem', backgroundColor: '#090f20' }}>
+      <section id="solutions" className="landing-solutions-section" style={{ padding: '4rem 1.5rem', backgroundColor: '#090f20' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', maxWidth: '750px', margin: '0 auto 3rem' }}>
             <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#008CFF', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
@@ -908,6 +1272,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 <a
                   key={cat.title}
                   href={cat.link}
+                  className="solution-card"
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -1000,6 +1365,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 <input
                   type="text"
                   placeholder="Search products..."
+                  className="products-search-input"
                   value={searchKeyword}
                   onChange={e => setSearchKeyword(e.target.value)}
                   style={{
@@ -1019,6 +1385,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 <button
                   key={cat}
                   onClick={() => setProductCategoryFilter(cat)}
+                  className={`products-filter-tab ${productCategoryFilter === cat ? 'active' : ''}`}
                   style={{
                     background: productCategoryFilter === cat ? '#008CFF' : 'rgba(255, 255, 255, 0.06)',
                     color: productCategoryFilter === cat ? '#ffffff' : '#94a3b8',
@@ -1038,7 +1405,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
 
           {/* Products Grid */}
           {featuredProducts.length === 0 ? (
-            <div style={{
+            <div className="products-empty-box" style={{
               textAlign: 'center',
               padding: '4rem 2rem',
               background: 'rgba(15, 23, 42, 0.5)',
@@ -1059,6 +1426,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
               {featuredProducts.slice(0, 8).map(prod => (
                 <div
                   key={prod.id}
+                  className="product-card"
                   style={{
                     borderRadius: '20px',
                     background: 'rgba(15, 23, 42, 0.7)',
@@ -1072,7 +1440,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 >
                   <div>
                     {/* Image / Graphic Display */}
-                    <div style={{
+                    <div className="product-img-box" style={{
                       height: '160px',
                       borderRadius: '14px',
                       background: 'rgba(2, 6, 23, 0.6)',
@@ -1127,14 +1495,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
                       <div>
                         <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Price</span>
-                        <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#38bdf8' }}>
+                        <div className="product-price-val" style={{ fontSize: '1.45rem', fontWeight: 900, color: '#38bdf8' }}>
                           ৳{(Number(prod.retailPrice) || 0).toLocaleString()}
                         </div>
                       </div>
 
                       {/* EMI pill if laptop */}
                       {(prod.category === 'Laptop' || prod.name.toLowerCase().includes('laptop')) && (
-                        <span style={{
+                        <span className="product-emi-badge" style={{
                           fontSize: '0.72rem',
                           background: 'rgba(254, 240, 138, 0.1)',
                           color: '#fef08a',
@@ -1151,6 +1519,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <button
                         onClick={() => setSelectedProduct(prod)}
+                        className="product-view-btn"
                         style={{
                           flex: 1,
                           background: 'rgba(255, 255, 255, 0.08)',
@@ -1224,6 +1593,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             ]).map((laptop: any) => (
               <div
                 key={laptop.id}
+                className="laptop-card"
                 style={{
                   borderRadius: '20px',
                   background: 'rgba(15, 23, 42, 0.8)',
@@ -1239,7 +1609,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                     <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#38bdf8', textTransform: 'uppercase' }}>
                       {laptop.brand || 'Laptop'}
                     </span>
-                    <span style={{
+                    <span className="laptop-emi-badge" style={{
                       background: 'rgba(254, 240, 138, 0.15)',
                       color: '#fef08a',
                       fontSize: '0.72rem',
@@ -1259,7 +1629,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                     {laptop.model || 'High durability commercial business laptop with genuine battery backup.'}
                   </p>
 
-                  <div style={{
+                  <div className="laptop-specs-box" style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(2, 1fr)',
                     gap: '0.6rem',
@@ -1279,7 +1649,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 <div style={{ marginTop: '1.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
                     <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Showroom Price</span>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#ffffff' }}>
+                    <div className="laptop-price" style={{ fontSize: '1.5rem', fontWeight: 900, color: '#ffffff' }}>
                       ৳{Number(laptop.retailPrice).toLocaleString()}
                     </div>
                   </div>
@@ -1343,6 +1713,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             ].map(svc => (
               <div
                 key={svc.title}
+                className="service-card"
                 style={{
                   borderRadius: '18px',
                   background: 'rgba(15, 23, 42, 0.65)',
@@ -1380,6 +1751,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                     setSelectedServiceTitle(svc.title);
                     setIsServiceBookingOpen(true);
                   }}
+                  className="service-book-btn"
                   style={{
                     marginTop: '1.25rem',
                     background: 'rgba(0, 140, 255, 0.1)',
@@ -1438,7 +1810,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                   'Motion Detection, Human Tracking & Siren Alerts',
                   'Professional Concealed Cabling with 1-Year Service Warranty'
                 ].map((pt, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', fontSize: '0.92rem', color: '#f1f5f9' }}>
+                  <div key={i} className="cctv-feature-item" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', fontSize: '0.92rem', color: '#f1f5f9' }}>
                     <div style={{ background: '#10b981', color: '#ffffff', borderRadius: '50%', padding: '2px', display: 'flex' }}>
                       <Check size={12} />
                     </div>
@@ -1489,7 +1861,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             </div>
 
             {/* Visual Box */}
-            <div style={{
+            <div className="cctv-preview-box" style={{
               background: 'rgba(15, 23, 42, 0.8)',
               border: '1px solid rgba(255, 255, 255, 0.12)',
               borderRadius: '24px',
@@ -1506,7 +1878,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 </p>
               </div>
 
-              <div style={{
+              <div className="cctv-specs-box" style={{
                 background: 'rgba(2, 6, 23, 0.6)',
                 padding: '1.25rem',
                 borderRadius: '14px',
@@ -1523,7 +1895,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
 
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Starting Package Price</div>
-                <div style={{ fontSize: '2rem', fontWeight: 900, color: '#38bdf8', margin: '0.2rem 0 1rem' }}>
+                <div className="cctv-price-text" style={{ fontSize: '2rem', fontWeight: 900, color: '#38bdf8', margin: '0.2rem 0 1rem' }}>
                   ৳14,500 <span style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 400 }}>approx</span>
                 </div>
                 <a
@@ -1634,7 +2006,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             marginBottom: '3.5rem'
           }}>
             {/* Card 1: Website Development */}
-            <div style={{
+            <div className="software-feature-card" style={{
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(8, 25, 48, 0.85) 100%)',
               border: '1px solid rgba(56, 189, 248, 0.3)',
               borderRadius: '24px',
@@ -1699,7 +2071,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                     'Domain Registration, High-Speed SSD Cloud Hosting & SSL Included',
                     'Bangla & English Multilingual Language Support'
                   ].map((item, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', fontSize: '0.88rem', color: '#f1f5f9' }}>
+                    <div key={idx} className="software-check-item" style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', fontSize: '0.88rem', color: '#f1f5f9' }}>
                       <div style={{
                         background: '#06b6d4',
                         color: '#070c18',
@@ -1717,7 +2089,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 </div>
 
                 {/* Tech Pills */}
-                <div style={{
+                <div className="software-tech-pills" style={{
                   display: 'flex',
                   flexWrap: 'wrap',
                   gap: '0.45rem',
@@ -1794,7 +2166,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             </div>
 
             {/* Card 2: Mobile App Development */}
-            <div style={{
+            <div className="software-feature-card" style={{
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(28, 14, 52, 0.85) 100%)',
               border: '1px solid rgba(168, 85, 247, 0.35)',
               borderRadius: '24px',
@@ -1859,7 +2231,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                     'Cloud Database Synchronization with Offline Data Support',
                     'Google Play Store & Apple App Store Publishing Support'
                   ].map((item, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', fontSize: '0.88rem', color: '#f1f5f9' }}>
+                    <div key={idx} className="software-check-item" style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', fontSize: '0.88rem', color: '#f1f5f9' }}>
                       <div style={{
                         background: '#c084fc',
                         color: '#070c18',
@@ -1877,7 +2249,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 </div>
 
                 {/* Tech Pills */}
-                <div style={{
+                <div className="software-tech-pills" style={{
                   display: 'flex',
                   flexWrap: 'wrap',
                   gap: '0.45rem',
@@ -1955,7 +2327,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           </div>
 
           {/* Development Process / Why Choose Need Electro Software */}
-          <div style={{
+          <div className="software-process-box" style={{
             background: 'rgba(15, 23, 42, 0.7)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
             borderRadius: '20px',
@@ -2003,7 +2375,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           </div>
 
           {/* Call-to-Action Banner */}
-          <div style={{
+          <div className="software-cta-box" style={{
             marginTop: '2.5rem',
             padding: '2rem 2.5rem',
             borderRadius: '20px',
@@ -2090,7 +2462,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             textAlign: 'left',
             marginBottom: '3rem'
           }}>
-            <div style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '18px', padding: '1.75rem' }}>
+            <div className="emi-step-card" style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '18px', padding: '1.75rem' }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', fontWeight: 800 }}>
                 1
               </div>
@@ -2100,7 +2472,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
               </p>
             </div>
 
-            <div style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '18px', padding: '1.75rem' }}>
+            <div className="emi-step-card" style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '18px', padding: '1.75rem' }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', fontWeight: 800 }}>
                 2
               </div>
@@ -2110,7 +2482,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
               </p>
             </div>
 
-            <div style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '18px', padding: '1.75rem' }}>
+            <div className="emi-step-card" style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '18px', padding: '1.75rem' }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', fontWeight: 800 }}>
                 3
               </div>
@@ -2145,7 +2517,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
       {/* =========================================================================
           9. WHY CHOOSE NEED ELECTRO (TRUST SECTION)
           ========================================================================= */}
-      <section style={{ padding: '5rem 1.5rem', backgroundColor: '#070c18' }}>
+      <section id="why-choose" className="trust-section" style={{ padding: '5rem 1.5rem', backgroundColor: '#070c18' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 3.5rem' }}>
             <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#008CFF', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
@@ -2174,6 +2546,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             ].map(card => (
               <div
                 key={card.title}
+                className="trust-feature-card"
                 style={{
                   padding: '1.75rem',
                   borderRadius: '20px',
@@ -2279,7 +2652,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
               </a>
             </div>
 
-            <div style={{
+            <div className="showroom-info-card" style={{
               background: 'linear-gradient(135deg, rgba(0, 43, 91, 0.5) 0%, rgba(0, 140, 255, 0.2) 100%)',
               border: '1px solid rgba(0, 140, 255, 0.3)',
               borderRadius: '24px',
@@ -2303,7 +2676,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
       {/* =========================================================================
           11. CUSTOMER REVIEWS / TESTIMONIALS
           ========================================================================= */}
-      <section style={{ padding: '5rem 1.5rem', backgroundColor: '#070c18' }}>
+      <section id="testimonials" className="testimonials-section" style={{ padding: '5rem 1.5rem', backgroundColor: '#070c18' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 3rem' }}>
             <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#008CFF', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
@@ -2350,6 +2723,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             ].map((rev, i) => (
               <div
                 key={i}
+                className="testimonial-card"
                 style={{
                   background: 'rgba(15, 23, 42, 0.65)',
                   border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -2366,13 +2740,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                       <Star key={s} size={15} fill="#f59e0b" />
                     ))}
                   </div>
-                  <p style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: 1.6, margin: 0, fontStyle: 'italic' }}>
+                  <p className="testimonial-quote" style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: 1.6, margin: 0, fontStyle: 'italic' }}>
                     "{rev.comment}"
                   </p>
                 </div>
                 <div style={{ marginTop: '1.25rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '0.85rem' }}>
-                  <div style={{ fontWeight: 800, fontSize: '0.92rem', color: '#ffffff' }}>{rev.name}</div>
-                  <div style={{ fontSize: '0.76rem', color: '#94a3b8' }}>{rev.role} • Moulvibazar</div>
+                  <div className="testimonial-name" style={{ fontWeight: 800, fontSize: '0.92rem', color: '#ffffff' }}>{rev.name}</div>
+                  <div className="testimonial-role" style={{ fontSize: '0.76rem', color: '#94a3b8' }}>{rev.role} • Moulvibazar</div>
                 </div>
               </div>
             ))}
@@ -2383,7 +2757,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
       {/* =========================================================================
           12. CUSTOMER FAQ SECTION
           ========================================================================= */}
-      <section style={{ padding: '5rem 1.5rem', backgroundColor: '#090f20' }}>
+      <section id="faq" className="faq-section" style={{ padding: '5rem 1.5rem', backgroundColor: '#090f20' }}>
         <div style={{ maxWidth: '880px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#008CFF', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
@@ -2442,6 +2816,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             ].map((faq, i) => (
               <div
                 key={i}
+                className="faq-item"
                 style={{
                   background: 'rgba(15, 23, 42, 0.7)',
                   border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -2451,6 +2826,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
               >
                 <button
                   onClick={() => setOpenFaqIndex(openFaqIndex === i ? null : i)}
+                  className="faq-question-btn"
                   style={{
                     width: '100%',
                     padding: '1.25rem 1.5rem',
@@ -2478,7 +2854,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 </button>
 
                 {openFaqIndex === i && (
-                  <div style={{
+                  <div className="faq-answer" style={{
                     padding: '0 1.5rem 1.25rem',
                     color: '#94a3b8',
                     fontSize: '0.9rem',
@@ -2521,8 +2897,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                     <MapPin size={22} />
                   </div>
                   <div>
-                    <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '1rem' }}>Showroom Address</div>
-                    <div style={{ color: '#94a3b8', fontSize: '0.88rem', marginTop: '2px' }}>
+                    <div className="contact-info-title" style={{ fontWeight: 800, color: '#ffffff', fontSize: '1rem' }}>Showroom Address</div>
+                    <div className="contact-info-desc" style={{ color: '#94a3b8', fontSize: '0.88rem', marginTop: '2px' }}>
                       Shop No: 5, MR Plaza, Kusumbag, Moulvibazar, Bangladesh
                     </div>
                   </div>
@@ -2533,7 +2909,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                     <Phone size={22} />
                   </div>
                   <div>
-                    <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '1rem' }}>Phone / WhatsApp</div>
+                    <div className="contact-info-title" style={{ fontWeight: 800, color: '#ffffff', fontSize: '1rem' }}>Phone / WhatsApp</div>
                     <a href="tel:01733983752" style={{ color: '#38bdf8', fontSize: '0.92rem', textDecoration: 'none', display: 'block', marginTop: '2px', fontWeight: 700 }}>
                       01733-983752
                     </a>
@@ -2545,7 +2921,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                     <Mail size={22} />
                   </div>
                   <div>
-                    <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '1rem' }}>Official Email</div>
+                    <div className="contact-info-title" style={{ fontWeight: 800, color: '#ffffff', fontSize: '1rem' }}>Official Email</div>
                     <a href="mailto:info.needelectro@gmail.com" style={{ color: '#38bdf8', fontSize: '0.92rem', textDecoration: 'none', display: 'block', marginTop: '2px' }}>
                       info.needelectro@gmail.com
                     </a>
@@ -2589,7 +2965,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
             </div>
 
             {/* Quick Contact & Inquiry Form */}
-            <div style={{
+            <div className="contact-form-container" style={{
               background: 'rgba(15, 23, 42, 0.75)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
               borderRadius: '24px',
@@ -2604,13 +2980,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
 
               <form onSubmit={handleBookingSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
-                  <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
+                  <label className="contact-form-label" style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
                     Your Full Name *
                   </label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Tanvir Ahmed"
+                    className="contact-form-input"
                     value={bookingName}
                     onChange={e => setBookingName(e.target.value)}
                     style={{
@@ -2626,13 +3003,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
+                  <label className="contact-form-label" style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
                     Phone Number *
                   </label>
                   <input
                     type="tel"
                     required
                     placeholder="01700-000000"
+                    className="contact-form-input"
                     value={bookingPhone}
                     onChange={e => setBookingPhone(e.target.value)}
                     style={{
@@ -2648,12 +3026,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
+                  <label className="contact-form-label" style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
                     Interested Service / Product
                   </label>
                   <input
                     type="text"
                     placeholder="e.g. HP Laptop EMI, CCTV 4-Cam package, Electrical wiring..."
+                    className="contact-form-input"
                     value={bookingNotes}
                     onChange={e => setBookingNotes(e.target.value)}
                     style={{
@@ -2801,7 +3180,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           justifyContent: 'center',
           padding: '1rem'
         }}>
-          <div style={{
+          <div className="landing-modal-content" style={{
             background: '#0f172a',
             border: '1px solid rgba(0, 140, 255, 0.4)',
             borderRadius: '24px',
@@ -2813,6 +3192,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           }}>
             <button
               onClick={() => setIsServiceBookingOpen(false)}
+              className="modal-close-btn"
               style={{
                 position: 'absolute',
                 top: '1.25rem',
@@ -2989,7 +3369,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           justifyContent: 'center',
           padding: '1rem'
         }}>
-          <div style={{
+          <div className="landing-modal-content" style={{
             background: '#0f172a',
             border: '1px solid rgba(0, 140, 255, 0.4)',
             borderRadius: '24px',
@@ -3001,6 +3381,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
           }}>
             <button
               onClick={() => setSelectedProduct(null)}
+              className="modal-close-btn"
               style={{
                 position: 'absolute',
                 top: '1.25rem',
