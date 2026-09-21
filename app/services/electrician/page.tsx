@@ -1,35 +1,44 @@
-'use client';
-
-import React, { useState } from 'react';
+import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BUSINESS_INFO } from '@/lib/seoConfig';
+import { BUSINESS_INFO, generateSeoMetadata, buildServiceSchema, buildBreadcrumbSchema } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
-import { Wrench, Zap, ShieldCheck, CheckCircle2, Phone, MessageCircle, Clock, MapPin, AlertCircle } from 'lucide-react';
+import { ElectricianBookingForm } from './ElectricianBookingForm';
+import { Wrench, ShieldCheck, Clock, CheckCircle2, Phone, MessageCircle, MapPin, Zap } from 'lucide-react';
+
+export async function generateMetadata(): Promise<Metadata> {
+  return generateSeoMetadata({
+    title: 'Book Certified Electrician in Moulvibazar | Home & Commercial Wiring | NEED ELECTRO',
+    description: 'Book licensed and certified electricians in Moulvibazar at NEED ELECTRO. Same-day technician dispatch for home wiring, circuit breaker installation, DB panel maintenance, and short-circuit troubleshooting.',
+    path: '/services/electrician',
+    keywords: [
+      'Electrician in Moulvibazar',
+      'Electrician Moulvibazar',
+      'Book electrician Moulvibazar',
+      'Electrical service Moulvibazar',
+      'Home electrician Moulvibazar',
+      'Short circuit repair Moulvibazar',
+      'ইলেকট্রিশিয়ান মৌলভীবাজার',
+      'মৌলভীবাজার ইলেকট্রিক্যাল কাজ',
+    ],
+  });
+}
 
 export default function ElectricianBookingPage() {
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [area, setArea] = useState('Moulvibazar Town');
-  const [serviceType, setServiceType] = useState('Wiring & Electrical Troubleshooting');
-  const [details, setDetails] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const serviceSchema = buildServiceSchema({
+    name: 'Certified Electrician Booking Service',
+    serviceType: 'ElectricianServices',
+    description: 'Licensed and background-verified electricians for residential, commercial, and industrial electrical wiring and repairs in Moulvibazar, Sylhet, Bangladesh.',
+    path: '/services/electrician',
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !phone.trim()) {
-      alert('Please provide your name and phone number so our electrician can contact you.');
-      return;
-    }
-
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-    }, 600);
-  };
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'Electrical Services', path: '/electrical-services' },
+    { name: 'Book Electrician', path: '/services/electrician' },
+  ]);
 
   const breadcrumbs = [
     { name: 'Services', path: '/electrical-services' },
@@ -38,6 +47,14 @@ export default function ElectricianBookingPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 
@@ -98,139 +115,45 @@ export default function ElectricianBookingPage() {
               </div>
             </div>
 
-            {/* Direct Contact Alternatives */}
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-2">
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block">Prefer to call directly?</span>
+            <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-3">
+              <h3 className="text-sm font-bold text-amber-700 dark:text-amber-300 flex items-center gap-2">
+                <Zap size={16} />
+                <span>Electrical Safety Guarantee</span>
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                All wiring installations use high-grade copper cables with flame-retardant PVC insulation and genuine Miniature Circuit Breakers (MCBs) adhering strictly to Bangladesh National Building Code (BNBC) fire safety guidelines.
+              </p>
+            </div>
+
+            <div className="border-t border-slate-200 dark:border-slate-800 pt-6 space-y-3">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Need Immediate Assistance?</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                For urgent power tripping, sparks, or electrical emergencies in Moulvibazar town:
+              </p>
               <div className="flex flex-wrap gap-3">
                 <a
                   href={`tel:${BUSINESS_INFO.phoneClean}`}
-                  className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-xs"
+                  className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-xs"
                 >
-                  <Phone size={14} className="text-blue-600 dark:text-cyan-400" />
-                  <span>{BUSINESS_INFO.phone}</span>
+                  <Phone size={14} />
+                  <span>Call {BUSINESS_INFO.phone}</span>
                 </a>
                 <a
-                  href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=I%20want%20to%20book%20an%20electrician%20in%20Moulvibazar.`}
+                  href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=Hello%20NEED%20ELECTRO,%20I%20need%20urgent%20electrician%20assistance%20in%20Moulvibazar`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950 dark:hover:bg-emerald-900 text-emerald-700 dark:text-emerald-400 font-bold text-xs px-4 py-2.5 rounded-lg border border-emerald-200 dark:border-emerald-500/30"
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-xs transition-colors"
                 >
                   <MessageCircle size={14} />
-                  <span>WhatsApp Dispatch</span>
+                  <span>WhatsApp Technician Dispatch</span>
                 </a>
               </div>
             </div>
           </div>
 
-          {/* Right Col: Booking Form */}
+          {/* Right Col: Interactive ERP Booking Form */}
           <div className="lg:col-span-5">
-            <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Book Electrician Online</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
-                Fill out the details below. Our service coordinator will call you to confirm your booking.
-              </p>
-
-              {submitted ? (
-                <div className="p-6 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 text-center space-y-3">
-                  <CheckCircle2 size={36} className="mx-auto text-emerald-600 dark:text-emerald-400" />
-                  <h3 className="text-base font-bold text-emerald-900 dark:text-white">Booking Request Received!</h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-300">
-                    Thank you <strong>{name}</strong>. Our Moulvibazar coordinator will call you at <strong>{phone}</strong> within 30 minutes to confirm your technician schedule.
-                  </p>
-                  <button
-                    onClick={() => setSubmitted(false)}
-                    className="mt-3 text-xs text-blue-600 dark:text-cyan-400 hover:underline font-semibold"
-                  >
-                    Submit another request
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-                  <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Your Full Name *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Tanvir Ahmed"
-                      value={name}
-                      onChange={e => setName(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-amber-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Phone Number (Required for call) *</label>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="e.g. 01712-345678"
-                      value={phone}
-                      onChange={e => setPhone(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-amber-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Service Area in Moulvibazar</label>
-                    <select
-                      value={area}
-                      onChange={e => setArea(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-500"
-                    >
-                      <option value="Moulvibazar Town">Moulvibazar Town (Kusumbag / Chowmuhana)</option>
-                      <option value="Shamshernagar Road">Shamshernagar Road</option>
-                      <option value="Sreemangal Road">Sreemangal Road</option>
-                      <option value="Sreemangal Upazila">Sreemangal Upazila</option>
-                      <option value="Kulaura Upazila">Kulaura Upazila</option>
-                      <option value="Rajnagar Upazila">Rajnagar Upazila</option>
-                      <option value="Other Area in Sylhet">Other Area in Sylhet</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Service Required</label>
-                    <select
-                      value={serviceType}
-                      onChange={e => setServiceType(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-500"
-                    >
-                      <option value="Wiring & Electrical Troubleshooting">Wiring & Electrical Troubleshooting</option>
-                      <option value="Distribution Board (DB) & Breaker Setup">Distribution Board (DB) & Breaker Setup</option>
-                      <option value="Short Circuit / Emergency Fault Inspection">Short Circuit / Emergency Fault Inspection</option>
-                      <option value="Light Fixture & Fan Installation">Light Fixture & Fan Installation</option>
-                      <option value="Earthing & Grounding System">Earthing & Grounding System</option>
-                      <option value="IPS / Inverter / Generator Wiring">IPS / Inverter / Generator Wiring</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Problem Description / Address Details</label>
-                    <textarea
-                      rows={3}
-                      placeholder="Briefly describe the issue or give house/building address..."
-                      value={details}
-                      onChange={e => setDetails(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-amber-500"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold py-2.5 rounded-lg transition-all shadow-md shadow-amber-500/20 flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <span>Submitting request...</span>
-                    ) : (
-                      <>
-                        <Wrench size={14} />
-                        <span>Confirm Booking Request</span>
-                      </>
-                    )}
-                  </button>
-                </form>
-              )}
-            </div>
+            <ElectricianBookingForm />
           </div>
         </div>
       </section>

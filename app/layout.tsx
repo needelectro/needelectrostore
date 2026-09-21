@@ -9,20 +9,26 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'NEED ELECTRO ERP — Trusted Electrical & Technological Solutions',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://needelectroerp.vercel.app'),
+  title: {
+    default: 'NEED ELECTRO | Laptop, Computer, CCTV & Electrical Solutions in Moulvibazar',
+    template: '%s | NEED ELECTRO',
+  },
   description:
-    'Commercial enterprise ERP, Point of Sale (POS), Laptop EMI & Installment Management, Inventory Control, and Accounting platform for NEED ELECTRO.',
+    'Premier destination for authentic laptops (HP, Dell, Lenovo), custom computers, CCTV camera security, electrical products, certified electrician services, and flexible laptop EMI in Moulvibazar, Sylhet, Bangladesh.',
   keywords: [
     'NEED ELECTRO',
-    'ERP',
-    'POS',
-    'Laptop EMI',
-    'Mobile App Development',
-    'Website Development',
-    'Software Solutions',
-    'Inventory',
-    'Accounting',
+    'Laptop shop in Moulvibazar',
+    'Computer shop in Moulvibazar',
+    'CCTV camera in Moulvibazar',
+    'Electrician in Moulvibazar',
+    'Electrical products in Moulvibazar',
+    'Laptop EMI in Moulvibazar',
+    'মৌলভীবাজার ল্যাপটপ',
+    'মৌলভীবাজার কম্পিউটার দোকান',
+    'মৌলভীবাজার সিসিটিভি',
     'Moulvibazar',
+    'Sylhet',
     'Bangladesh',
   ],
   authors: [{ name: 'Amdadur Rahman' }],
@@ -30,7 +36,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'NEED ELECTRO ERP',
+    title: 'NEED ELECTRO',
   },
   icons: {
     icon: '/logo-icon.png',

@@ -545,6 +545,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (target === 'service' && (perm.startsWith('services.') || perm.startsWith('service.'))) return true;
       if (target === 'warranty' && perm.startsWith('warranty.')) return true;
       if (target === 'ledgers' && (perm.startsWith('accounting.') || perm.startsWith('customers.') || perm.startsWith('suppliers.'))) return true;
+      if ((target === 'control_center' || target === 'seo_management') && (perm.startsWith('settings.') || perm === 'control_center' || perm === 'settings')) return true;
       return false;
     });
   };

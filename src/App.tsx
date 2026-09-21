@@ -311,6 +311,8 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
         return <SettingsModule onNavigate={handleNavigate} />;
       case 'control_center':
         return <ControlCenterModule onNavigate={handleNavigate} initialTab={moduleInitialParam as any} />;
+      case 'seo_management':
+        return <ControlCenterModule onNavigate={handleNavigate} initialTab="seo" />;
       default:
         return <DashboardModule onNavigate={handleNavigate} />;
     }

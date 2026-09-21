@@ -5,7 +5,7 @@ import {
   Truck, Users, PackageSearch, ShieldCheck, Wrench, Wallet,
   PieChart, BookOpen, UserCheck, GitFork, BarChart3,
   Lock, ScrollText, Settings, ChevronRight, Zap, RotateCcw, Sliders, Landmark,
-  User
+  User, Globe
 } from 'lucide-react';
 import { NeedElectroLogo } from './NeedElectroLogo';
 import { UserProfileModal } from './UserProfileModal';
@@ -93,6 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       group: 'Enterprise Control',
       items: [
         { id: 'control_center', label: 'System Control Center', icon: Sliders, badge: 'SUPER', badgeColor: '#2563eb' },
+        { id: 'seo_management', label: 'SEO Management', icon: Globe, badge: 'SEO', badgeColor: '#06b6d4' },
         { id: 'employees', label: 'Employees & Techs', icon: UserCheck },
         { id: 'branches', label: 'Branches & Transfers', icon: GitFork },
         { id: 'roles', label: 'Roles & RBAC', icon: Lock },

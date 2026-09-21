@@ -1,42 +1,60 @@
-'use client';
-
-import React, { useState } from 'react';
+import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BUSINESS_INFO } from '@/lib/seoConfig';
+import { BUSINESS_INFO, generateSeoMetadata, buildServiceSchema, buildBreadcrumbSchema } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
-import { Video, ShieldCheck, CheckCircle2, Phone, MessageCircle, Eye, Wifi, HardDrive, Smartphone } from 'lucide-react';
+import { CctvBookingForm } from './CctvBookingForm';
+import { Video, ShieldCheck, CheckCircle2, Phone, MessageCircle, Eye, Wifi, HardDrive, Smartphone, ArrowRight } from 'lucide-react';
+
+export async function generateMetadata(): Promise<Metadata> {
+  return generateSeoMetadata({
+    title: 'CCTV Camera Installation in Moulvibazar | Site Survey, Cabling & Setup | NEED ELECTRO',
+    description: 'Professional CCTV camera security installation in Moulvibazar. Site inspection, HD & IP camera setup, DVR/NVR surveillance hard drive storage, night vision, and mobile live viewing configuration by NEED ELECTRO technicians.',
+    path: '/services/cctv-installation',
+    keywords: [
+      'CCTV camera installation Moulvibazar',
+      'CCTV setup Moulvibazar',
+      'Security camera Moulvibazar',
+      'CCTV camera Moulvibazar',
+      'IP camera installation Moulvibazar',
+      'CCTV shop Moulvibazar',
+      'মৌলভীবাজার সিসিটিভি ক্যামেরা',
+      'সিসিটিভি ইনস্টলেশন মৌলভীবাজার',
+    ],
+  });
+}
 
 export default function CctvInstallationPage() {
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [cameraCount, setCameraCount] = useState('4 Cameras Setup');
-  const [propertyType, setPropertyType] = useState('Residence / Home');
-  const [address, setAddress] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const serviceSchema = buildServiceSchema({
+    name: 'CCTV Camera Security Installation Service',
+    serviceType: 'SecuritySystemInstallation',
+    description: 'Turnkey CCTV security surveillance installation, coaxial/Cat6 concealed cabling, DVR/NVR setup, surveillance storage configuration, and smartphone live streaming in Moulvibazar, Sylhet, Bangladesh.',
+    path: '/services/cctv-installation',
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !phone.trim()) {
-      alert('Please provide your name and contact phone number.');
-      return;
-    }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-    }, 600);
-  };
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'CCTV & Security', path: '/cctv' },
+    { name: 'CCTV Installation', path: '/services/cctv-installation' },
+  ]);
 
   const breadcrumbs = [
-    { name: 'Services', path: '/electrical-services' },
+    { name: 'CCTV & Security', path: '/cctv' },
     { name: 'CCTV Installation', path: '/services/cctv-installation' },
   ];
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 
@@ -58,173 +76,77 @@ export default function CctvInstallationPage() {
         </div>
       </section>
 
-      {/* Steps & Booking Grid */}
+      {/* Main Content & Booking Form */}
       <section className="py-12 px-4 max-w-7xl mx-auto w-full flex-1">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          <div className="lg:col-span-7 space-y-8">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Our 4-Step CCTV Installation Process</h2>
-              <div className="space-y-4 text-xs">
-                <div className="p-4 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-start gap-3.5 shadow-xs">
-                  <span className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-600/30 dark:text-cyan-400 font-bold flex items-center justify-center shrink-0">1</span>
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Free Site Assessment & Camera Angle Planning</h3>
-                    <p className="text-slate-600 dark:text-slate-400 mt-1">We inspect building blind spots, entry gates, cash counters, and boundary walls to determine optimal focal lengths.</p>
-                  </div>
-                </div>
+          {/* Left Col: Features & Architecture */}
+          <div className="lg:col-span-7 space-y-6">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Complete 4-Step Surveillance Deployment</h2>
 
-                <div className="p-4 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-start gap-3.5 shadow-xs">
-                  <span className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-600/30 dark:text-cyan-400 font-bold flex items-center justify-center shrink-0">2</span>
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Concealed Wiring & Camera Mounting</h3>
-                    <p className="text-slate-600 dark:text-slate-400 mt-1">Using pure copper Cat6 / coaxial cables with weather-tight conduit pipes, protecting cables from rat bites and sun damage.</p>
-                  </div>
+            <div className="space-y-4">
+              <div className="p-4 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-start gap-3.5 shadow-xs">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-cyan-400 font-bold shrink-0 text-sm">
+                  1
                 </div>
-
-                <div className="p-4 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-start gap-3.5 shadow-xs">
-                  <span className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-600/30 dark:text-cyan-400 font-bold flex items-center justify-center shrink-0">3</span>
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">DVR / NVR Configuration & Hard Drive Setup</h3>
-                    <p className="text-slate-600 dark:text-slate-400 mt-1">Surveillance hard drive installation with motion detection recording enabled to maximize 20+ days of storage history.</p>
-                  </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">Free On-Site Security Survey</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                    We inspect your property in Moulvibazar to eliminate blind spots, determine camera viewing angles, and calculate exact cable lengths.
+                  </p>
                 </div>
+              </div>
 
-                <div className="p-4 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-start gap-3.5 shadow-xs">
-                  <span className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-600/30 dark:text-cyan-400 font-bold flex items-center justify-center shrink-0">4</span>
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Remote Phone Viewing Configuration</h3>
-                    <p className="text-slate-600 dark:text-slate-400 mt-1">We connect your system to your mobile phone (Android / iPhone) with secure cloud P2P, enabling real-time monitoring from anywhere.</p>
-                  </div>
+              <div className="p-4 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-start gap-3.5 shadow-xs">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-cyan-400 font-bold shrink-0 text-sm">
+                  2
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">Concealed & Weatherproof Cabling</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                    Heavy-duty copper cabling secured inside PVC conduits protects against rats, rainwater, and physical tampering.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-start gap-3.5 shadow-xs">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-cyan-400 font-bold shrink-0 text-sm">
+                  3
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">Surveillance Hard Drive Setup</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                    Genuine Western Digital Purple or Seagate SkyHawk drives optimized for continuous 24/7 video writes with up to 30 days of retention.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-start gap-3.5 shadow-xs">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-cyan-400 font-bold shrink-0 text-sm">
+                  4
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">Mobile Phone Remote Live Streaming</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                    P2P encrypted cloud setup allows you to view live video feeds, receive motion alerts, and play back recordings anywhere in the world on Android or iOS.
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Direct Contact */}
-            <div className="pt-2 flex flex-wrap gap-3">
-              <a
-                href={`tel:${BUSINESS_INFO.phoneClean}`}
-                className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-xs"
-              >
-                <Phone size={14} className="text-blue-600 dark:text-cyan-400" />
-                <span>Call Technician: {BUSINESS_INFO.phone}</span>
-              </a>
-              <a
-                href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=Hello%2C%20I%20want%20to%20install%20CCTV%20cameras%20at%20my%20property%20in%20Moulvibazar.`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950 dark:hover:bg-emerald-900 text-emerald-700 dark:text-emerald-400 font-bold text-xs px-4 py-2.5 rounded-lg border border-emerald-200 dark:border-emerald-500/30"
-              >
-                <MessageCircle size={14} />
-                <span>WhatsApp Site Inspection</span>
-              </a>
+            <div className="p-5 rounded-2xl bg-blue-500/10 border border-blue-500/20 space-y-2">
+              <h3 className="text-sm font-bold text-blue-700 dark:text-cyan-300 flex items-center gap-2">
+                <ShieldCheck size={16} />
+                <span>1-Year Complete Equipment Warranty</span>
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                All cameras and DVR/NVR recorders supplied by {BUSINESS_INFO.name} include a minimum 1-year official brand replacement warranty and free maintenance support.
+              </p>
             </div>
           </div>
 
-          {/* Form */}
+          {/* Right Col: Interactive ERP Booking Form */}
           <div className="lg:col-span-5">
-            <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Request CCTV Site Survey</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
-                Tell us about your property. Our technician will contact you for a site survey and quote.
-              </p>
-
-              {submitted ? (
-                <div className="p-6 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 text-center space-y-3">
-                  <CheckCircle2 size={36} className="mx-auto text-emerald-600 dark:text-emerald-400" />
-                  <h3 className="text-base font-bold text-emerald-900 dark:text-white">Survey Request Received!</h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-300">
-                    Thank you <strong>{name}</strong>. Our CCTV team will call you at <strong>{phone}</strong> to confirm your site visit.
-                  </p>
-                  <button
-                    onClick={() => setSubmitted(false)}
-                    className="mt-3 text-xs text-blue-600 dark:text-cyan-400 hover:underline font-semibold"
-                  >
-                    Submit another request
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-                  <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Full Name *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Shakil Chowdhury"
-                      value={name}
-                      onChange={e => setName(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Phone Number *</label>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="e.g. 01712-345678"
-                      value={phone}
-                      onChange={e => setPhone(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Estimated Cameras Needed</label>
-                    <select
-                      value={cameraCount}
-                      onChange={e => setCameraCount(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-500"
-                    >
-                      <option value="2 Cameras (Basic Entry/Exit)">2 Cameras (Basic Entry/Exit)</option>
-                      <option value="4 Cameras (Home / Medium Shop)">4 Cameras (Home / Medium Shop)</option>
-                      <option value="8 Cameras (Showroom / Multi-Room)">8 Cameras (Showroom / Multi-Room)</option>
-                      <option value="16+ Cameras (Factory / Commercial Building)">16+ Cameras (Factory / Commercial Building)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Property Type</label>
-                    <select
-                      value={propertyType}
-                      onChange={e => setPropertyType(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-500"
-                    >
-                      <option value="Residence / Home">Residence / Home</option>
-                      <option value="Retail Shop / Showroom">Retail Shop / Showroom</option>
-                      <option value="Office / Commercial Space">Office / Commercial Space</option>
-                      <option value="Warehouse / Industrial Yard">Warehouse / Industrial Yard</option>
-                      <option value="Mosque / School / Institution">Mosque / School / Institution</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Address / Location</label>
-                    <textarea
-                      rows={2}
-                      placeholder="e.g. Kusumbag, Moulvibazar town"
-                      value={address}
-                      onChange={e => setAddress(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold py-2.5 rounded-lg transition-all shadow-md shadow-blue-500/20 flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <span>Submitting survey request...</span>
-                    ) : (
-                      <>
-                        <Video size={14} />
-                        <span>Schedule Free Site Survey</span>
-                      </>
-                    )}
-                  </button>
-                </form>
-              )}
-            </div>
+            <CctvBookingForm />
           </div>
         </div>
       </section>
