@@ -755,6 +755,13 @@ export interface SystemSettings {
   supportEmail?: string;
   footerText?: string;
   accentColor?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
+  googleSearchConsoleVerification?: string;
+  googleAnalyticsId?: string;
+  googleTagManagerId?: string;
+  seoRedirects?: Array<{ from: string; to: string; permanent: boolean }>;
 }
 
 // Super Admin System Control Center Types

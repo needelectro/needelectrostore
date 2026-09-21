@@ -1,0 +1,135 @@
+import React from 'react';
+import type { Metadata } from 'next';
+import { prisma } from '@/lib/prisma';
+import { BUSINESS_INFO, generateSeoMetadata } from '@/lib/seoConfig';
+import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
+import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
+import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
+import { ProductCard } from '@/src/components/customer/ProductCard';
+import { Monitor, Cpu, ShieldCheck, CheckCircle2 } from 'lucide-react';
+
+export const revalidate = 60;
+
+export async function generateMetadata(): Promise<Metadata> {
+  return generateSeoMetadata({
+    title: 'Computer Shop in Moulvibazar | Desktop PCs & Components | NEED ELECTRO',
+    description: 'Looking for a reliable computer shop in Moulvibazar? NEED ELECTRO builds custom desktop PCs, gaming rigs, office workstations, and supplies monitors, processors, and parts with genuine warranty.',
+    path: '/computers',
+    keywords: [
+      'Computer shop Moulvibazar',
+      'Desktop computer Moulvibazar',
+      'PC parts Moulvibazar',
+      'Office computer Moulvibazar',
+      'Gaming PC Moulvibazar',
+      'মৌলভীবাজার কম্পিউটার দোকান',
+    ],
+  });
+}
+
+export default async function ComputersPage() {
+  let products: any[] = [];
+  try {
+    products = await prisma.product.findMany({
+      where: {
+        OR: [
+          { category: { contains: 'computer', mode: 'insensitive' } },
+          { category: { contains: 'desktop', mode: 'insensitive' } },
+          { category: { contains: 'monitor', mode: 'insensitive' } },
+          { name: { contains: 'desktop', mode: 'insensitive' } },
+          { name: { contains: 'monitor', mode: 'insensitive' } },
+          { name: { contains: 'pc', mode: 'insensitive' } },
+        ],
+        status: { in: ['ACTIVE', 'OUT_OF_STOCK'] },
+      },
+      select: {
+        id: true,
+        name: true,
+        sku: true,
+        category: true,
+        brand: true,
+        model: true,
+        description: true,
+        imageUrl: true,
+        retailPrice: true,
+        emiPrice: true,
+        currentStock: true,
+        warrantyPeriodMonths: true,
+        specs: true,
+      },
+      orderBy: [{ currentStock: 'desc' }, { retailPrice: 'asc' }],
+    });
+  } catch (err) {
+    console.error('Computers query error:', err);
+  }
+
+  const breadcrumbs = [{ name: 'Computers', path: '/computers' }];
+
+  return (
+    <div className="min-h-screen bg-[#060a14] text-slate-100 flex flex-col">
+      <CustomerHeader />
+      <Breadcrumb items={breadcrumbs} />
+
+      <section className="py-12 px-4 border-b border-slate-800/80 bg-gradient-to-b from-blue-950/20 to-transparent">
+        <div className="max-w-7xl mx-auto space-y-4">
+          <div className="inline-flex items-center gap-2 bg-blue-900/40 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold text-cyan-300">
+            <Monitor size={14} />
+            <span>Moulvibazar Computer Solutions</span>
+          </div>
+          <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+            Computer Shop in Moulvibazar — Desktop PCs, Workstations & Parts
+          </h1>
+          <p className="text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
+            NEED ELECTRO is your dependable desktop computer destination in Moulvibazar. Whether setting up high-performance office workstations, custom desktop builds for video editing and programming, or upgrading processors, motherboards, and monitors, we provide 100% genuine hardware backed by official distributor warranties.
+          </p>
+        </div>
+      </section>
+
+      <section className="py-12 px-4 max-w-7xl mx-auto w-full flex-1">
+        <div className="flex items-center justify-between gap-4 mb-8">
+          <div>
+            <h2 className="text-xl font-bold text-white">Computers & Display Hardware in Stock</h2>
+            <p className="text-xs text-slate-400 mt-1">Visit our Kusumbag showroom for custom PC build consultations</p>
+          </div>
+          <span className="text-xs font-mono bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 text-slate-300">
+            {products.length} Products Found
+          </span>
+        </div>
+
+        {products.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {products.map(item => (
+              <ProductCard
+                key={item.id}
+                product={{
+                  id: item.id,
+                  name: item.name,
+                  sku: item.sku,
+                  category: item.category,
+                  brand: item.brand,
+                  model: item.model,
+                  description: item.description,
+                  imageUrl: item.imageUrl,
+                  retailPrice: Number(item.retailPrice),
+                  emiPrice: Number(item.emiPrice),
+                  currentStock: item.currentStock,
+                  warrantyPeriodMonths: item.warrantyPeriodMonths,
+                  specs: item.specs,
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-12 text-center space-y-4">
+            <Monitor size={48} className="mx-auto text-slate-600" />
+            <h3 className="text-lg font-bold text-slate-200">Custom Desktop Builds Available on Request</h3>
+            <p className="text-xs text-slate-400 max-w-md mx-auto">
+              We assemble customized Intel and AMD Ryzen desktop setups tailored to your budget. Contact {BUSINESS_INFO.phone} for quotes.
+            </p>
+          </div>
+        )}
+      </section>
+
+      <CustomerFooter />
+    </div>
+  );
+}

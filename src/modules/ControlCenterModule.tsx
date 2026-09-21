@@ -17,6 +17,7 @@ import {
 } from '../types';
 
 import { MasterEntityHub } from '../components/admin/MasterEntityHub';
+import { SeoControlCenter } from '../components/admin/SeoControlCenter';
 
 type ControlCenterTab = 
   | 'master_crud'
@@ -31,7 +32,8 @@ type ControlCenterTab =
   | 'warranty'
   | 'notifications'
   | 'security'
-  | 'maintenance';
+  | 'maintenance'
+  | 'seo';
 
 interface ControlCenterModuleProps {
   onNavigate: (module: string, targetId?: string) => void;
@@ -689,7 +691,8 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
           { id: 'warranty', label: 'Warranty Policies', icon: Shield },
           { id: 'notifications', label: 'Notification Center', icon: Bell },
           { id: 'security', label: 'Users & Security', icon: Lock },
-          { id: 'maintenance', label: 'Maintenance & Merging', icon: Database }
+          { id: 'maintenance', label: 'Maintenance & Merging', icon: Database },
+          { id: 'seo', label: '🌐 SEO Management', icon: Globe }
         ].map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -2406,6 +2409,13 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
             </div>
           </div>
         </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 13. SUPER ADMIN SEO & GEO-SEO CONTROL CENTER */}
+      {/* ========================================================================= */}
+      {activeTab === 'seo' && (
+        <SeoControlCenter />
       )}
 
       {/* ========================================================================= */}

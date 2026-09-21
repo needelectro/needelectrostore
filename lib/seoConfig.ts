@@ -1,0 +1,604 @@
+// NEED ELECTRO ERP & Customer Website — Centralized SEO & Geo-SEO Configuration
+import type { Metadata } from 'next';
+
+export const BUSINESS_INFO = {
+  name: 'NEED ELECTRO',
+  tagline: 'Trusted Electrical & Technological Solutions',
+  legalName: 'NEED ELECTRO',
+  founder: 'Amdadur Rahman',
+  phone: '+880 1733-983752',
+  phoneClean: '+8801733983752',
+  whatsappClean: '8801733983752',
+  email: 'info.needelectro@gmail.com',
+  supportEmail: 'contact.amdadur@gmail.com',
+  domain: process.env.NEXT_PUBLIC_SITE_URL || 'https://needelectroerp.vercel.app',
+  currency: 'BDT',
+  currencySymbol: '৳',
+  address: {
+    streetAddress: 'Shop No: 5, MR Plaza, Kusumbag',
+    addressLocality: 'Moulvibazar',
+    addressRegion: 'Sylhet',
+    postalCode: '3200',
+    addressCountry: 'BD',
+  },
+  geo: {
+    latitude: 24.4826,
+    longitude: 91.7675,
+  },
+  openingHours: [
+    'Saturday 09:30-21:30',
+    'Sunday 09:30-21:30',
+    'Monday 09:30-21:30',
+    'Tuesday 09:30-21:30',
+    'Wednesday 09:30-21:30',
+    'Thursday 09:30-21:30',
+  ],
+  socialProfiles: {
+    facebook: 'https://facebook.com/needelectro',
+    youtube: 'https://youtube.com/@needelectro',
+    linkedin: 'https://linkedin.com/company/needelectro',
+    whatsapp: 'https://wa.me/8801733983752',
+  },
+  serviceAreas: [
+    'Moulvibazar Town',
+    'Kusumbag, Moulvibazar',
+    'Chowmuhana, Moulvibazar',
+    'Shamshernagar Road, Moulvibazar',
+    'Sreemangal, Moulvibazar',
+    'Kulaura, Moulvibazar',
+    'Rajnagar, Moulvibazar',
+    'Kamalganj, Moulvibazar',
+    'Sylhet Division',
+    'Bangladesh (Nationwide Courier Delivery)',
+  ],
+  categories: [
+    { title: 'Laptops', slug: 'laptops', icon: 'Laptop', description: 'Business, student & gaming laptops from HP, Dell, Lenovo with warranty & EMI in Moulvibazar.' },
+    { title: 'Computers', slug: 'computers', icon: 'Monitor', description: 'Custom desktop PCs, office setups, and high-performance computing hardware.' },
+    { title: 'CCTV & Security', slug: 'cctv', icon: 'Camera', description: 'HD & IP CCTV camera solutions, DVR/NVR setup, mobile app monitoring, and professional installation.' },
+    { title: 'Electrical Products', slug: 'electrical-products', icon: 'Zap', description: 'Industrial and home electrical circuit breakers, copper wiring, distribution boards, and switches.' },
+    { title: 'Computer Accessories', slug: 'computer-accessories', icon: 'Cpu', description: 'High-speed NVMe SSDs, RAM upgrades, mechanical keyboards, precision mice, and adapters.' },
+    { title: 'Networking Products', slug: 'networking', icon: 'Wifi', description: 'Dual-band Wi-Fi routers, Gigabit switches, ONU fiber optics, and patch cables.' },
+    { title: 'Smart Devices', slug: 'smart-devices', icon: 'Smartphone', description: 'Smart plugs, converter hubs, audio devices, and home automation electronics.' },
+  ],
+};
+
+// URL slug generator
+export function slugify(text: string): string {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[\s\W-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+// Generate Canonical URL
+export function getCanonicalUrl(path: string = ''): string {
+  const base = BUSINESS_INFO.domain.replace(/\/+$/, '');
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${base}${cleanPath === '/' ? '' : cleanPath}`;
+}
+
+// Universal Metadata Generator
+export function generateSeoMetadata({
+  title,
+  description,
+  path = '',
+  keywords = [],
+  ogImage = '/logo-dark-transparent.png',
+  noIndex = false,
+}: {
+  title: string;
+  description: string;
+  path?: string;
+  keywords?: string[];
+  ogImage?: string;
+  noIndex?: boolean;
+}): Metadata {
+  const canonical = getCanonicalUrl(path);
+  const fullTitle = title.includes(BUSINESS_INFO.name) ? title : `${title} | ${BUSINESS_INFO.name}`;
+  const imageUrl = ogImage.startsWith('http') ? ogImage : `${BUSINESS_INFO.domain.replace(/\/+$/, '')}${ogImage.startsWith('/') ? ogImage : `/${ogImage}`}`;
+
+  return {
+    title: fullTitle,
+    description,
+    keywords: [
+      ...keywords,
+      'NEED ELECTRO',
+      'Moulvibazar',
+      'Sylhet',
+      'Bangladesh',
+      'Laptop shop Moulvibazar',
+      'Computer shop Moulvibazar',
+      'CCTV Moulvibazar',
+      'Electrician Moulvibazar',
+      'মৌলভীবাজার ল্যাপটপ',
+      'ল্যাপটপ কিস্তিতে',
+    ],
+    alternates: {
+      canonical,
+    },
+    robots: {
+      index: !noIndex,
+      follow: !noIndex,
+      googleBot: {
+        index: !noIndex,
+        follow: !noIndex,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+    openGraph: {
+      title: fullTitle,
+      description,
+      url: canonical,
+      siteName: BUSINESS_INFO.name,
+      locale: 'en_US',
+      type: 'website',
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: fullTitle,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: fullTitle,
+      description,
+      images: [imageUrl],
+    },
+  };
+}
+
+// -------------------------------------------------------------
+// Schema.org Structured Data Builders
+// -------------------------------------------------------------
+
+export function buildOrganizationSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': `${BUSINESS_INFO.domain}/#organization`,
+    name: BUSINESS_INFO.name,
+    legalName: BUSINESS_INFO.legalName,
+    url: BUSINESS_INFO.domain,
+    logo: `${BUSINESS_INFO.domain}/logo-icon.png`,
+    description: BUSINESS_INFO.tagline,
+    telephone: BUSINESS_INFO.phoneClean,
+    email: BUSINESS_INFO.email,
+    sameAs: [
+      BUSINESS_INFO.socialProfiles.facebook,
+      BUSINESS_INFO.socialProfiles.youtube,
+      BUSINESS_INFO.socialProfiles.linkedin,
+    ],
+    contactPoint: [
+      {
+        '@type': 'ContactPoint',
+        telephone: BUSINESS_INFO.phoneClean,
+        contactType: 'customer service',
+        areaServed: 'BD',
+        availableLanguage: ['en', 'bn'],
+      },
+    ],
+  };
+}
+
+export function buildLocalBusinessSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ElectronicsStore',
+    '@id': `${BUSINESS_INFO.domain}/#localbusiness`,
+    name: BUSINESS_INFO.name,
+    image: `${BUSINESS_INFO.domain}/main-logo.jpg`,
+    url: BUSINESS_INFO.domain,
+    telephone: BUSINESS_INFO.phoneClean,
+    priceRange: '৳৳',
+    description: `${BUSINESS_INFO.name} is the premier laptop, computer, CCTV security, and electrical solutions provider in Moulvibazar, Sylhet, Bangladesh. Offering authentic HP, Dell, and Lenovo laptops, certified electrician services, and flexible laptop EMI installment plans.`,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: BUSINESS_INFO.address.streetAddress,
+      addressLocality: BUSINESS_INFO.address.addressLocality,
+      addressRegion: BUSINESS_INFO.address.addressRegion,
+      postalCode: BUSINESS_INFO.address.postalCode,
+      addressCountry: BUSINESS_INFO.address.addressCountry,
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: BUSINESS_INFO.geo.latitude,
+      longitude: BUSINESS_INFO.geo.longitude,
+    },
+    openingHoursSpecification: [
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'],
+        opens: '09:30',
+        closes: '21:30',
+      },
+    ],
+    areaServed: BUSINESS_INFO.serviceAreas.map(area => ({
+      '@type': 'AdministrativeArea',
+      name: area,
+    })),
+    currenciesAccepted: 'BDT',
+    paymentAccepted: 'Cash, Credit Card, bKash, Nagad, Bank Transfer, EMI Installment',
+  };
+}
+
+export function buildBreadcrumbSchema(items: Array<{ name: string; path: string }>) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: getCanonicalUrl(item.path),
+    })),
+  };
+}
+
+export function buildProductSchema(product: {
+  name: string;
+  sku: string;
+  category: string;
+  brand: string;
+  model?: string | null;
+  description?: string | null;
+  imageUrl?: string | null;
+  retailPrice: number;
+  currentStock: number;
+  warrantyPeriodMonths?: number;
+  specs?: any;
+}) {
+  const canonical = getCanonicalUrl(`/product/${slugify(product.name)}-${product.sku.toLowerCase()}`);
+  const img = product.imageUrl || `${BUSINESS_INFO.domain}/logo-dark-transparent.png`;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    image: img.startsWith('http') ? img : `${BUSINESS_INFO.domain}${img}`,
+    description: product.description || `${product.name} available at ${BUSINESS_INFO.name} Moulvibazar. Genuine product with warranty and fast delivery across Bangladesh.`,
+    sku: product.sku,
+    mpn: product.sku,
+    brand: {
+      '@type': 'Brand',
+      name: product.brand || 'NEED ELECTRO',
+    },
+    category: product.category,
+    offers: {
+      '@type': 'Offer',
+      url: canonical,
+      priceCurrency: BUSINESS_INFO.currency,
+      price: product.retailPrice > 0 ? product.retailPrice.toFixed(2) : '0.00',
+      priceValidUntil: '2027-12-31',
+      itemCondition: 'https://schema.org/NewCondition',
+      availability: product.currentStock > 0 
+        ? 'https://schema.org/InStock' 
+        : 'https://schema.org/OutOfStock',
+      seller: {
+        '@type': 'Organization',
+        name: BUSINESS_INFO.name,
+      },
+    },
+  };
+}
+
+export function buildFaqSchema(faqs: Array<{ question: string; answer: string }>) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map(faq => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  };
+}
+
+export function buildArticleSchema(article: {
+  title: string;
+  slug: string;
+  description: string;
+  datePublished: string;
+  dateModified?: string;
+  authorName?: string;
+  imageUrl?: string;
+}) {
+  const canonical = getCanonicalUrl(`/blog/${article.slug}`);
+  const img = article.imageUrl || `${BUSINESS_INFO.domain}/main-logo.jpg`;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: article.title,
+    description: article.description,
+    image: img.startsWith('http') ? img : `${BUSINESS_INFO.domain}${img}`,
+    datePublished: article.datePublished,
+    dateModified: article.dateModified || article.datePublished,
+    author: {
+      '@type': 'Person',
+      name: article.authorName || BUSINESS_INFO.founder,
+      jobTitle: 'Founder & Managing Director',
+      worksFor: {
+        '@type': 'Organization',
+        name: BUSINESS_INFO.name,
+      },
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: BUSINESS_INFO.name,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${BUSINESS_INFO.domain}/logo-icon.png`,
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': canonical,
+    },
+  };
+}
+
+export function buildServiceSchema({
+  name,
+  serviceType,
+  description,
+  path,
+}: {
+  name: string;
+  serviceType: string;
+  description: string;
+  path: string;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name,
+    serviceType,
+    description,
+    url: getCanonicalUrl(path),
+    provider: {
+      '@type': 'LocalBusiness',
+      name: BUSINESS_INFO.name,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: BUSINESS_INFO.address.streetAddress,
+        addressLocality: BUSINESS_INFO.address.addressLocality,
+        addressRegion: BUSINESS_INFO.address.addressRegion,
+        postalCode: BUSINESS_INFO.address.postalCode,
+        addressCountry: BUSINESS_INFO.address.addressCountry,
+      },
+      telephone: BUSINESS_INFO.phoneClean,
+    },
+    areaServed: BUSINESS_INFO.serviceAreas.map(area => ({
+      '@type': 'AdministrativeArea',
+      name: area,
+    })),
+  };
+}
+
+// -------------------------------------------------------------
+// Static Knowledge Center / Blog Articles
+// -------------------------------------------------------------
+
+export interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  bnTitle: string;
+  description: string;
+  category: 'Laptops' | 'Computers' | 'CCTV' | 'Electrical' | 'Financing';
+  publishedDate: string;
+  readingTime: string;
+  author: string;
+  summary: string;
+  sections: Array<{ heading: string; content: string }>;
+  faqs: Array<{ question: string; answer: string }>;
+}
+
+export const BLOG_POSTS: BlogPost[] = [
+  {
+    id: 'blog-1',
+    slug: 'laptop-buying-guide-students-moulvibazar',
+    title: 'How to Choose the Best Laptop for Students in Moulvibazar (2026 Guide)',
+    bnTitle: 'মৌলভীবাজারে শিক্ষার্থীদের জন্য সেরা ল্যাপটপ বাছাই করার পূর্ণাঙ্গ গাইড',
+    description: 'A comprehensive buying guide for college and university students in Moulvibazar looking for dependable, budget-friendly laptops for coding, freelancing, and academic coursework.',
+    category: 'Laptops',
+    publishedDate: '2026-03-01',
+    readingTime: '6 min read',
+    author: 'Amdadur Rahman',
+    summary: 'Finding the right balance between budget, battery life, and processing power is critical for students. Discover recommended configurations for HP EliteBook, Dell Latitude, and Lenovo ThinkPad laptops available locally in Moulvibazar.',
+    sections: [
+      {
+        heading: '1. Processor & RAM Requirements for Modern Students',
+        content: 'For everyday coursework, browsing, and document editing, an Intel Core i5 or AMD Ryzen 5 processor paired with 8GB RAM is the minimum benchmark. For computer science students, web developers, or graphic designers in Moulvibazar, 16GB of DDR4 or DDR5 RAM guarantees smooth multitasking without freezing when running VS Code, Figma, and multiple browser tabs.',
+      },
+      {
+        heading: '2. Solid State Drive (SSD) is Mandatory',
+        content: 'Never purchase a laptop with only a mechanical hard disk (HDD). A 256GB or 512GB NVMe M.2 SSD boots Windows 11 in under 10 seconds and opens office software instantaneously. NEED ELECTRO configures all student laptops with authentic, health-tested SSDs.',
+      },
+      {
+        heading: '3. Battery Life & Portability in Moulvibazar',
+        content: 'Students commuting from Sreemangal, Rajnagar, or rural Moulvibazar need at least 4 to 6 hours of dependable battery backup. Lightweight 14-inch laptops such as the HP EliteBook 840 G6/G7 or Dell Latitude 7400 weigh under 1.4 kg and fit comfortably into college backpacks.',
+      },
+      {
+        heading: '4. Student EMI & Installment Options at NEED ELECTRO',
+        content: 'We offer structured 3, 6, and 12-month installment plans for students with a verified local guardian or guarantor. You can walk out with an enterprise-grade laptop with an initial down payment, making quality education tech affordable.',
+      },
+    ],
+    faqs: [
+      {
+        question: 'Can I get a laptop on EMI as a student in Moulvibazar?',
+        answer: 'Yes! NEED ELECTRO provides flexible installment financing for students with a parent or local guarantor NID verification.',
+      },
+      {
+        question: 'Which brand is best for engineering or computer science students?',
+        answer: 'HP EliteBook and Dell Latitude series are the top choices due to their durable magnesium chassis, upgradable RAM, and thermal efficiency.',
+      },
+    ],
+  },
+  {
+    id: 'blog-2',
+    slug: 'used-laptop-buying-checklist',
+    title: 'Used Laptop Buying Checklist: 7 Critical Hardware Checks Before Paying',
+    bnTitle: 'ব্যবহৃত (Used) ল্যাপটপ কেনার পূর্বে ৭টি গুরুত্বপূর্ণ হার্ডওয়্যার চেকলিস্ট',
+    description: 'Learn how to inspect used and refurbished laptops in Moulvibazar. Check battery health, display bleeding, motherboard thermals, and keyboard functionality with professional testing tips.',
+    category: 'Laptops',
+    publishedDate: '2026-03-05',
+    readingTime: '7 min read',
+    author: 'Amdadur Rahman',
+    summary: 'Avoid costly mistakes when buying pre-owned laptops. Use our 7-step hardware verification checklist to verify laptop condition, authentic chargers, and warranty coverage in Moulvibazar.',
+    sections: [
+      {
+        heading: '1. Inspect the Physical Body & Hinges',
+        content: 'Check the chassis for dents, hairline cracks, or loose display hinges. Open and close the screen smoothly. High-quality business laptops like Lenovo ThinkPad and HP EliteBook feature aluminum or carbon fiber bodies that withstand years of use.',
+      },
+      {
+        heading: '2. Check Battery Health & Cycle Count',
+        content: 'Run Windows PowerShell command "powercfg /batteryreport" to verify the design capacity versus full charge capacity. At NEED ELECTRO, we test all laptop batteries with commercial load analyzers, guaranteeing minimum 80%+ battery health.',
+      },
+      {
+        heading: '3. Scan Display for Dead Pixels & Backlight Bleed',
+        content: 'Open full-screen solid white, black, and RGB color images to inspect for dead pixels, bright spots, or edge backlight bleeding. An IPS Full HD (1920x1080) panel provides crisp colors and wide viewing angles.',
+      },
+      {
+        heading: '4. Stress-Test CPU & Thermals',
+        content: 'Run a short CPU benchmark and verify that cooling fans spin cleanly without grinding noise. Thermal paste should be fresh to prevent thermal throttling under heavy workloads.',
+      },
+    ],
+    faqs: [
+      {
+        question: 'Does NEED ELECTRO test used laptops before selling?',
+        answer: 'Yes. Every pre-owned laptop passes a 24-point hardware diagnostic test including RAM stress tests, SSD health verification, thermal checks, keyboard and port testing.',
+      },
+      {
+        question: 'What replacement warranty do I get on used laptops in Moulvibazar?',
+        answer: 'NEED ELECTRO provides a 7-day replacement warranty and up to 2 years of free service warranty on tested laptops.',
+      },
+    ],
+  },
+  {
+    id: 'blog-3',
+    slug: 'cctv-camera-installation-guide-moulvibazar',
+    title: 'Complete CCTV Camera Installation Guide for Homes & Shops in Moulvibazar',
+    bnTitle: 'মৌলভীবাজারে বাসা-বাড়ি ও ব্যবসা প্রতিষ্ঠানের জন্য সিসিটিভি ক্যামেরা ইনস্টলেশন গাইড',
+    description: 'Everything you need to know about setting up CCTV security cameras in Moulvibazar: selecting IP vs HD cameras, DVR/NVR storage calculations, night vision, and remote smartphone monitoring.',
+    category: 'CCTV',
+    publishedDate: '2026-03-10',
+    readingTime: '5 min read',
+    author: 'Amdadur Rahman',
+    summary: 'Protect your home, retail store, or commercial facility in Moulvibazar with professional CCTV camera installation. Learn about camera types, wiring best practices, and remote surveillance.',
+    sections: [
+      {
+        heading: '1. Choosing Between HD Analog and IP Network Cameras',
+        content: 'For standard retail shops and home entrances in Moulvibazar, 2MP to 5MP HD analog cameras connected to a DVR provide crystal-clear 1080p recording at an economical price. For large multi-story commercial buildings, warehouse yards, or long-distance monitoring, PoE IP cameras with an NVR offer superior resolution, optical zoom, and digital noise reduction.',
+      },
+      {
+        heading: '2. Smart Color Night Vision & Weatherproofing',
+        content: 'Ensure all outdoor cameras feature minimum IP66 or IP67 weatherproof ratings to resist Sylhet rainy season downpours. ColorVu and smart infrared cameras maintain vivid full-color recording even in pitch-black midnight environments.',
+      },
+      {
+        heading: '3. Hard Drive Surveillance Storage Calculation',
+        content: 'Always install dedicated surveillance-grade hard drives (such as Western Digital Purple or Seagate SkyHawk). A 4-camera setup with H.265+ compression on a 1TB drive provides approximately 15 to 20 days of continuous 24/7 video backup.',
+      },
+      {
+        heading: '4. Live Remote Viewing on Android & iPhone',
+        content: 'Our technicians configure your DVR or NVR with secure cloud P2P mobile apps (Hik-Connect, EZVIZ, or DMSS). You can view live feeds, rewind historical recordings, and receive motion detection alerts on your smartphone anywhere in the world.',
+      },
+    ],
+    faqs: [
+      {
+        question: 'Can NEED ELECTRO technicians install CCTV at my home in Moulvibazar?',
+        answer: 'Yes! Our certified technicians handle complete site survey, cabling, camera mounting, DVR setup, and mobile viewing configuration across Moulvibazar, Sreemangal, Kulaura, and Rajnagar.',
+      },
+      {
+        question: 'Can I view my CCTV cameras from abroad or Dhaka on my mobile phone?',
+        answer: 'Yes. All our CCTV installations feature P2P cloud connectivity, allowing you to watch live feeds securely from anywhere via Wi-Fi or mobile data.',
+      },
+    ],
+  },
+  {
+    id: 'blog-4',
+    slug: 'home-electrical-safety-tips',
+    title: 'Essential Home Electrical Safety Tips: Prevent Short Circuits & Fire Hazards',
+    bnTitle: 'বাসাবাড়ির ইলেকট্রিক্যাল সেফটি টিপস: শর্ট সার্কিট ও দুর্ঘটনা এড়ানোর উপায়',
+    description: 'Learn critical electrical safety measures for homes and commercial buildings in Moulvibazar. Choosing the right circuit breakers, grounding/earthing systems, and certified electrician inspections.',
+    category: 'Electrical',
+    publishedDate: '2026-03-15',
+    readingTime: '5 min read',
+    author: 'Amdadur Rahman',
+    summary: 'Electrical faults and short circuits cause severe property damage. Follow these certified electrician safety recommendations to safeguard your residential and commercial wiring in Moulvibazar.',
+    sections: [
+      {
+        heading: '1. Install Certified Miniature Circuit Breakers (MCB) & RCCB',
+        content: 'Never rely on obsolete fuse wire systems. Install high-grade MCBs to protect circuits against overload and short circuits. Furthermore, Residual Current Circuit Breakers (RCCB) prevent fatal electric shocks by instantly tripping if current leaks to ground.',
+      },
+      {
+        heading: '2. Importance of Proper Grounding (Earthing)',
+        content: 'In Sylhet and Moulvibazar, heavy monsoon thunderstorms and lightning strikes are frequent. A copper earthing rod driven deep into moist soil protects delicate electronics, refrigerators, laptops, and air conditioners from high-voltage electrical surges.',
+      },
+      {
+        heading: '3. Avoid Overloading Multi-Plugs & Sockets',
+        content: 'Connecting heavy inductive loads (such as heaters, kettles, and high-tonnage AC units) to cheap plastic multi-plugs is a major fire hazard. Ensure heavy appliances have dedicated 16A or 20A wiring directly connected to the main distribution board.',
+      },
+      {
+        heading: '4. Schedule Periodic Professional Inspections',
+        content: 'Wiring older than 5 years should be checked with an insulation resistance meter (Megger) to detect hidden insulation degradation. NEED ELECTRO provides certified residential and commercial electrical inspection services across Moulvibazar.',
+      },
+    ],
+    faqs: [
+      {
+        question: 'How do I book an electrician in Moulvibazar town?',
+        answer: 'You can book an expert electrician directly on our website or call +880 1733-983752. Our team handles wiring, DB boards, lighting, and troubleshooting.',
+      },
+    ],
+  },
+  {
+    id: 'blog-5',
+    slug: 'laptop-emi-installment-guide-moulvibazar',
+    title: 'Laptop EMI in Moulvibazar: How to Buy Laptops with Easy Monthly Installments',
+    bnTitle: 'মৌলভীবাজারে কিস্তিতে ল্যাপটপ কেনার সহজ নিয়ম ও সুবিধা (Laptop EMI Guide)',
+    description: 'Complete guide to laptop financing and EMI in Moulvibazar. Learn eligibility requirements, down payment structures, installment durations (3 to 12 months), and ownership terms at NEED ELECTRO.',
+    category: 'Financing',
+    publishedDate: '2026-03-18',
+    readingTime: '6 min read',
+    author: 'Amdadur Rahman',
+    summary: 'You do not need to pay the full price upfront to get a high-performance laptop for your studies, career, or business. Discover how NEED ELECTRO makes laptop ownership easy with transparent EMI in Moulvibazar.',
+    sections: [
+      {
+        heading: '1. What is Laptop EMI at NEED ELECTRO?',
+        content: 'Equated Monthly Installment (EMI) allows customers to take home their desired laptop by paying an affordable down payment (typically 20% to 30%), with the remaining balance divided into equal monthly payments over 3, 6, 9, or 12 months.',
+      },
+      {
+        heading: '2. Who is Eligible for Laptop EMI in Moulvibazar?',
+        content: 'Eligibility is straightforward. Applicants must be Bangladeshi citizens with a valid National ID (NID) card, permanent or verified resident address in Moulvibazar or Sylhet Division, and provide one local guarantor (family member, business owner, or teacher).',
+      },
+      {
+        heading: '3. Required Documents for EMI Application',
+        content: '1. Applicant National ID (NID) photocopy and passport photo. 2. Utility bill (electricity/gas) of residence. 3. Guarantor NID photocopy and contact phone number. 4. Student ID card or job employment letter (if applicable).',
+      },
+      {
+        heading: '4. Warranty Protection During Installment Period',
+        content: 'Your laptop warranty remains completely active throughout the EMI tenure. You receive the exact same 7-day replacement warranty and 2-year service warranty as full cash buyers.',
+      },
+    ],
+    faqs: [
+      {
+        question: 'Is a credit card required for laptop EMI at NEED ELECTRO?',
+        answer: 'No credit card is mandatory! We offer in-house direct installment management through our ERP system with NID and local guarantor verification.',
+      },
+      {
+        question: 'Can I pay my monthly installments through bKash or Nagad?',
+        answer: 'Yes! Customers can pay their monthly installment via bKash, Nagad, bank transfer, or directly at our Kusumbag, Moulvibazar showroom.',
+      },
+    ],
+  },
+];
