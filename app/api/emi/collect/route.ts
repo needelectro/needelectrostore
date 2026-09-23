@@ -38,6 +38,10 @@ export async function POST(req: NextRequest) {
         throw new Error('Installment not found on this EMI contract');
       }
 
+      if (installment.status === 'PAID') {
+        throw new Error(`Installment #${installment.installmentNumber} on contract ${emiAccount.emiNumber} is already fully paid.`);
+      }
+
       const receiptNumber = 'REC-EMI-' + Date.now().toString().slice(-6);
 
       // 1. Create Payment Record
@@ -61,13 +65,13 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // 2. Update Installment Status
+      // 2. Update Installment Status with Concurrency Guard
       const newPaid = Number(installment.paidAmount) + amount;
       const targetAmount = Number(installment.amount);
       const newStatus = newPaid >= targetAmount ? 'PAID' : 'PARTIALLY_PAID';
 
-      await tx.eMIInstallment.update({
-        where: { id: installmentId },
+      const instUpdate = await tx.eMIInstallment.updateMany({
+        where: { id: installmentId, status: { not: 'PAID' } },
         data: {
           paidAmount: new Prisma.Decimal(newPaid),
           paidDate: new Date(),
@@ -76,6 +80,10 @@ export async function POST(req: NextRequest) {
           paymentMethod,
         },
       });
+
+      if (instUpdate.count === 0) {
+        throw new Error(`Concurrency race condition: Installment #${installment.installmentNumber} was already settled.`);
+      }
 
       // 3. Update EMI Account Balances
       const newTotalPaid = Number(emiAccount.totalPaid) + amount;

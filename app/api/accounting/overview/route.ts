@@ -35,13 +35,19 @@ export async function GET(req: NextRequest) {
       return sum + cost * item.quantity;
     }, 0);
 
-    // 3. Operating Expenses
+    // 3. Operating Expenses (Excluding capital inventory procurements to prevent double-counting with COGS)
     const expensesAggregate = await prisma.expense.aggregate({
+      where: {
+        category: {
+          notIn: ['Inventory', 'Purchase Expenses', 'Assets'],
+        },
+      },
       _sum: { amount: true },
     });
     const totalExpenses = Number(expensesAggregate._sum.amount || 0);
 
     // 4. Gross Profit & Net Profit
+    // Standard GAAP / IFRS Reconciliation Formula: Revenue - COGS - Operating Expenses = Net Profit
     const grossProfit = totalRevenue - totalCOGS;
     const netProfit = grossProfit - totalExpenses;
 

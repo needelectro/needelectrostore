@@ -114,10 +114,17 @@ export async function authenticateRequest(req: NextRequest): Promise<Authenticat
       })
       .catch(() => {});
 
-    // Parse role permissions
+    // Parse role permissions with fallback to role by code if roleRel is not linked
     let permissions: string[] = [];
-    if (session.user.roleRel?.permissions) {
-      const raw = session.user.roleRel.permissions;
+    let roleObj = session.user.roleRel;
+    if (!roleObj && session.user.role) {
+      roleObj = await prisma.role.findFirst({
+        where: { code: session.user.role },
+      });
+    }
+
+    if (roleObj?.permissions) {
+      const raw = roleObj.permissions;
       permissions = Array.isArray(raw) ? (raw as string[]) : [];
     }
 
@@ -136,7 +143,7 @@ export async function authenticateRequest(req: NextRequest): Promise<Authenticat
       email: session.user.email,
       username: session.user.username,
       role: session.user.role,
-      roleId: session.user.roleId,
+      roleId: session.user.roleId || roleObj?.id || null,
       branchId: session.user.branchId || '',
       primaryBranchId: session.user.primaryBranchId || session.user.branchId || '',
       allowedBranchIds: allowedBranches,
@@ -183,11 +190,66 @@ export async function requireSuperAdmin(req: NextRequest): Promise<Authenticated
 
 /**
  * Check if user has permission or is Super Admin
+ * Seamlessly supports both dot (sales.create) and colon (sales:create) syntax, as well as module wildcards
  */
-export function hasPermission(user: AuthenticatedUser, module: string, action?: string): boolean {
+export function hasPermission(user: AuthenticatedUser, moduleOrPermission: string, action?: string): boolean {
   if (user.role === 'SUPER_ADMIN') return true;
-  if (!action) {
-    return user.permissions.some((p) => p.startsWith(`${module}:`) || p === module);
+  
+  // Extract permissions defensively (supports user.permissions or user.roleDefinition.permissions)
+  let userPerms: string[] = [];
+  if (Array.isArray(user.permissions)) {
+    userPerms = user.permissions;
+  } else if ((user as any).roleDefinition?.permissions) {
+    const raw = (user as any).roleDefinition.permissions;
+    if (Array.isArray(raw)) userPerms = raw;
+    else if (typeof raw === 'string') {
+      try { userPerms = JSON.parse(raw); } catch { userPerms = []; }
+    }
   }
-  return user.permissions.includes(`${module}:${action}`);
+
+  if (userPerms.includes('*')) return true;
+
+  let mod = moduleOrPermission;
+  let act = action;
+
+  // If single argument given like "sales.create" or "sales:view", parse into module and action
+  if (!act && (mod.includes('.') || mod.includes(':'))) {
+    const sep = mod.includes('.') ? '.' : ':';
+    const parts = mod.split(sep);
+    mod = parts[0];
+    act = parts.slice(1).join(sep);
+  }
+
+  const modLower = mod.toLowerCase().trim();
+  const actLower = act ? act.toLowerCase().trim() : '';
+
+  if (!actLower) {
+    return userPerms.some((p) => {
+      const pLower = p.toLowerCase();
+      return (
+        pLower === modLower ||
+        pLower.startsWith(`${modLower}.`) ||
+        pLower.startsWith(`${modLower}:`) ||
+        pLower === `${modLower}.*` ||
+        pLower === `${modLower}:*`
+      );
+    });
+  }
+
+  const dotFormat = `${modLower}.${actLower}`;
+  const colonFormat = `${modLower}:${actLower}`;
+  const dotWildcard = `${modLower}.*`;
+  const colonWildcard = `${modLower}:*`;
+
+  return userPerms.some((p) => {
+    const pLower = p.toLowerCase();
+    return (
+      pLower === dotFormat ||
+      pLower === colonFormat ||
+      pLower === dotWildcard ||
+      pLower === colonWildcard ||
+      pLower === '*'
+    );
+  });
 }
+

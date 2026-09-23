@@ -116,26 +116,70 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // 3. Deduct financial account if cash refund issued
-      if (Number(totalRefundAmount) > 0 && refundMethod !== 'CREDIT_NOTE') {
-        const targetAccountId = accountId || 'acc-1';
-        let account = await tx.financialAccount.findFirst({
-          where: { id: targetAccountId },
-        });
+      // 3. Financial Settlement: Deduct Financial Account on Cash/Bank refund OR Credit Customer Due Balance on Credit Note
+      const refundAmt = Number(totalRefundAmount);
+      if (refundAmt > 0) {
+        if (refundMethod === 'CREDIT_NOTE' || returnType === 'CREDIT_NOTE') {
+          // Adjust customer credit balance
+          if (customerId) {
+            const updatedCustomer = await tx.customer.update({
+              where: { id: customerId },
+              data: {
+                currentBalance: { decrement: new Prisma.Decimal(refundAmt) },
+              },
+            });
 
-        if (!account) {
-          account = await tx.financialAccount.findFirst({
-            where: { type: 'CASH' },
+            await tx.ledgerEntry.create({
+              data: {
+                id: 'led-' + Date.now() + '-ret-cust',
+                date: new Date(),
+                partyType: 'CUSTOMER',
+                partyId: customerId,
+                referenceType: 'RETURN',
+                referenceNumber: returnNumber,
+                description: `Credit note issued for return ${returnNumber} (Invoice: ${saleInvoiceId})`,
+                debit: new Prisma.Decimal(0),
+                credit: new Prisma.Decimal(refundAmt),
+                runningBalance: updatedCustomer.currentBalance,
+              },
+            });
+          }
+        } else {
+          // Cash / Bank / Mobile Banking refund disbursement
+          const targetAccountId = accountId || 'acc-1';
+          let account = await tx.financialAccount.findFirst({
+            where: { id: targetAccountId },
           });
-        }
 
-        if (account) {
-          await tx.financialAccount.updateMany({
-            where: { id: account.id },
-            data: {
-              balance: { decrement: new Prisma.Decimal(totalRefundAmount) },
-            },
-          });
+          if (!account) {
+            account = await tx.financialAccount.findFirst({
+              where: { type: 'CASH' },
+            });
+          }
+
+          if (account) {
+            await tx.financialAccount.update({
+              where: { id: account.id },
+              data: {
+                balance: { decrement: new Prisma.Decimal(refundAmt) },
+              },
+            });
+
+            await tx.ledgerEntry.create({
+              data: {
+                id: 'led-' + Date.now() + '-ret-acc',
+                date: new Date(),
+                partyType: 'ACCOUNT',
+                partyId: account.id,
+                referenceType: 'RETURN',
+                referenceNumber: returnNumber,
+                description: `Refund disbursed to ${customerName} for return ${returnNumber} (Invoice: ${saleInvoiceId})`,
+                debit: new Prisma.Decimal(0),
+                credit: new Prisma.Decimal(refundAmt),
+                runningBalance: new Prisma.Decimal(Number(account.balance) - refundAmt),
+              },
+            });
+          }
         }
       }
 

@@ -198,14 +198,28 @@ export async function POST(req: NextRequest) {
           throw new Error(`Product ${item.productName} not found.`);
         }
 
+        // Concurrency Guard: Validate stock in database transaction to prevent negative stock
+        if (product.currentStock < item.quantity) {
+          throw new Error(`Insufficient stock for ${item.productName}. Available: ${product.currentStock}, Requested: ${item.quantity}`);
+        }
+
         const openingStock = product.currentStock;
         const closingStock = openingStock - item.quantity;
 
-        // Decrement Product Stock
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { currentStock: closingStock },
+        // Atomic check-and-decrement
+        const stockUpdate = await tx.product.updateMany({
+          where: {
+            id: item.productId,
+            currentStock: { gte: item.quantity },
+          },
+          data: {
+            currentStock: { decrement: item.quantity },
+          },
         });
+
+        if (stockUpdate.count === 0) {
+          throw new Error(`Concurrency conflict: Stock for ${item.productName} was updated by another transaction. Please retry.`);
+        }
 
         // Record Inventory Transaction
         await tx.inventoryTransaction.create({
@@ -230,27 +244,20 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        // If serialized, assign serials to SOLD
+        // If serialized, assign serials to SOLD with atomic availability guard
         if (item.isSerialized && item.serialNumbers && item.serialNumbers.length > 0) {
           for (const sn of item.serialNumbers) {
-            const serialRecord = await tx.productSerial.findUnique({
-              where: { serialNumber: sn },
-            });
-
-            if (!serialRecord) {
-              throw new Error(`Serial number ${sn} does not exist in inventory.`);
-            }
-            if (serialRecord.status === 'SOLD') {
-              throw new Error(`Serial number ${sn} is already sold.`);
-            }
-
             const warrantyMonths = item.warrantyMonths || 0;
             const warrantyStart = new Date();
             const warrantyEnd = new Date();
             warrantyEnd.setMonth(warrantyEnd.getMonth() + warrantyMonths);
 
-            await tx.productSerial.update({
-              where: { serialNumber: sn },
+            const serialUpdate = await tx.productSerial.updateMany({
+              where: {
+                serialNumber: sn,
+                productId: item.productId,
+                status: 'AVAILABLE',
+              },
               data: {
                 status: 'SOLD',
                 saleInvoiceId: sale.id,
@@ -260,6 +267,10 @@ export async function POST(req: NextRequest) {
                 warrantyEndDate: warrantyMonths > 0 ? warrantyEnd : null,
               },
             });
+
+            if (serialUpdate.count === 0) {
+              throw new Error(`Serial number "${sn}" for ${item.productName} is unavailable or already sold.`);
+            }
           }
         }
       }
@@ -384,41 +395,66 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // 6. Update Financial Account Balance if paid amount received
+      // 6. Update Financial Accounts & Ledgers (With Full Split / Mixed Payment Multi-Account Allocation)
       if (saleData.paidAmount > 0) {
-        const targetAccountId = paymentAccountId || 'acc-1';
-        let account = await tx.financialAccount.findFirst({
-          where: { id: targetAccountId },
+        const splitPayments = Array.isArray(saleData.payments) && saleData.payments.length > 0
+          ? saleData.payments
+          : [{ method: 'Cash', amount: saleData.paidAmount, accountId: paymentAccountId }];
+
+        const allActiveAccounts = await tx.financialAccount.findMany({
+          where: { isActive: true },
         });
 
-        if (!account) {
-          account = await tx.financialAccount.findFirst({
-            where: { type: 'CASH' }
-          });
-        }
+        for (const p of splitPayments) {
+          const splitAmount = Number(p.amount);
+          if (splitAmount <= 0) continue;
 
-        if (account) {
-          await tx.financialAccount.update({
-            where: { id: account.id },
-            data: {
-              balance: { increment: new Prisma.Decimal(saleData.paidAmount) },
-            },
-          });
+          let targetAccount = null;
+          if (p.accountId) {
+            targetAccount = allActiveAccounts.find((a) => a.id === p.accountId) || null;
+          }
 
-          await tx.ledgerEntry.create({
-            data: {
-              id: 'led-' + Date.now() + '-cash',
-              date: new Date(),
-              partyType: 'ACCOUNT',
-              partyId: account.id,
-              referenceType: 'SALE',
-              referenceNumber: invoiceNumber,
-              description: `Payment received for invoice ${invoiceNumber}`,
-              debit: new Prisma.Decimal(saleData.paidAmount),
-              credit: new Prisma.Decimal(0),
-              runningBalance: new Prisma.Decimal(Number(account.balance) + saleData.paidAmount),
-            },
-          });
+          if (!targetAccount) {
+            const methodLower = (p.method || 'cash').toLowerCase().trim();
+            if (methodLower.includes('bkash')) {
+              targetAccount = allActiveAccounts.find((a) => a.name.toLowerCase().includes('bkash') || a.type === 'MOBILE_BANKING') || null;
+            } else if (methodLower.includes('nagad') || methodLower.includes('rocket')) {
+              targetAccount = allActiveAccounts.find((a) => a.name.toLowerCase().includes('nagad') || a.type === 'MOBILE_BANKING') || null;
+            } else if (methodLower.includes('bank') || methodLower.includes('card')) {
+              targetAccount = allActiveAccounts.find((a) => a.type === 'BANK') || null;
+            } else {
+              targetAccount = allActiveAccounts.find((a) => a.type === 'CASH') || null;
+            }
+          }
+
+          if (!targetAccount) {
+            targetAccount = allActiveAccounts[0] || null;
+          }
+
+          if (targetAccount) {
+            await tx.financialAccount.update({
+              where: { id: targetAccount.id },
+              data: {
+                balance: { increment: new Prisma.Decimal(splitAmount) },
+              },
+            });
+
+            const methodLabel = p.method || 'Cash';
+            await tx.ledgerEntry.create({
+              data: {
+                id: 'led-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+                date: new Date(),
+                partyType: 'ACCOUNT',
+                partyId: targetAccount.id,
+                referenceType: 'SALE',
+                referenceNumber: invoiceNumber,
+                description: `Payment received (${methodLabel}) for invoice ${invoiceNumber} from ${saleData.customerName}`,
+                debit: new Prisma.Decimal(splitAmount),
+                credit: new Prisma.Decimal(0),
+                runningBalance: new Prisma.Decimal(Number(targetAccount.balance) + splitAmount),
+              },
+            });
+          }
         }
       }
 

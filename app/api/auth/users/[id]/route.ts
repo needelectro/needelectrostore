@@ -75,31 +75,80 @@ export async function DELETE(
   }
 
   try {
-    const targetUser = await prisma.user.findUnique({ where: { id: params.id } });
+    const targetUser = await prisma.user.findUnique({
+      where: { id: params.id },
+      include: {
+        investor: true,
+      },
+    });
+
     if (!targetUser) {
       return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
     }
 
-    await prisma.$transaction(async (tx) => {
-      await tx.session.deleteMany({ where: { userId: targetUser.id } });
-      await tx.user.delete({ where: { id: params.id } });
+    // Check if user has historical business records
+    const [salesCount, purchasesCount] = await Promise.all([
+      prisma.sale.count({ where: { salespersonId: targetUser.id } }),
+      prisma.purchase.count({ where: { branchId: targetUser.branchId } }),
+    ]);
 
-      await tx.auditLog.create({
-        data: {
-          id: 'audit-' + Date.now(),
-          userId: user.id,
-          userName: user.name,
-          action: 'SUPER_ADMIN_USER_DELETE',
-          module: 'USERS',
-          recordId: targetUser.id,
-          details: `Super Admin ${user.name} deleted user ${targetUser.name} (${targetUser.email})`,
-        },
+    const hasLinkedRecords = Boolean(targetUser.investor || salesCount > 0);
+
+    await prisma.$transaction(async (tx) => {
+      // Always revoke all active sessions
+      await tx.session.updateMany({
+        where: { userId: targetUser.id, isRevoked: false },
+        data: { isRevoked: true },
       });
+
+      if (hasLinkedRecords) {
+        // Safe Deactivation to preserve historical business transactions & investor profile
+        await tx.user.update({
+          where: { id: targetUser.id },
+          data: {
+            status: 'DEACTIVATED',
+            active: false,
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            id: 'audit-' + Date.now(),
+            userId: user.id,
+            userName: user.name,
+            action: 'USER_DEACTIVATED',
+            module: 'USERS',
+            recordId: targetUser.id,
+            details: `Super Admin ${user.name} safely deactivated user ${targetUser.name} (${targetUser.email}) preserving historical transactions.`,
+          },
+        });
+      } else {
+        // No historical dependencies - safe to delete
+        await tx.session.deleteMany({ where: { userId: targetUser.id } });
+        await tx.user.delete({ where: { id: targetUser.id } });
+
+        await tx.auditLog.create({
+          data: {
+            id: 'audit-' + Date.now(),
+            userId: user.id,
+            userName: user.name,
+            action: 'SUPER_ADMIN_USER_DELETE',
+            module: 'USERS',
+            recordId: targetUser.id,
+            details: `Super Admin ${user.name} permanently deleted user ${targetUser.name} (${targetUser.email})`,
+          },
+        });
+      }
     });
 
-    return NextResponse.json({ success: true, message: `User ${targetUser.name} deleted successfully.` });
+    const msg = hasLinkedRecords
+      ? `User ${targetUser.name} has historical records and was safely deactivated without data loss.`
+      : `User ${targetUser.name} deleted successfully.`;
+
+    return NextResponse.json({ success: true, message: msg });
   } catch (err: any) {
     console.error('User deletion error:', err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
+

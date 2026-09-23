@@ -75,37 +75,39 @@ export async function POST(
       });
     }
 
-    // Record Operating Expense under 'Purchase Expenses'
-    const expVoucher = 'EXP-SUP-' + Date.now().toString().slice(-6);
-    await tx.expense.create({
-      data: {
-        id: 'exp-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
-        voucherNumber: expVoucher,
-        category: 'Purchase Expenses',
-        amount: new Prisma.Decimal(amount),
-        date: new Date(),
-        paymentMethod: paymentMethod || 'CASH',
-        branchId: user.branchId || 'branch-main-1',
-        description: `Supplier Payment for Purchases: ${supplier.name} (${supplier.company || ''}) — Ref: ${voucherNumber}`,
-        createdBy: user.name,
-      },
-    });
-
-    // Create Accounting Ledger Entry
+    // Create Accounting Ledger Entry for Supplier (Debit Supplier Payable)
     await tx.ledgerEntry.create({
       data: {
-        id: 'led-' + Date.now(),
+        id: 'led-' + Date.now() + '-sup',
         date: new Date(),
         partyType: 'SUPPLIER',
         partyId: supplier.id,
         referenceType: 'SUPPLIER_PAYMENT',
         referenceNumber: voucherNumber,
-        description: `Payment to ${supplier.name} (${supplier.company})`,
+        description: `Payment disbursed to supplier ${supplier.name} (${supplier.company || ''})`,
         debit: new Prisma.Decimal(amount),
         credit: new Prisma.Decimal(0),
         runningBalance: new Prisma.Decimal(Number(supplier.currentPayable) - Number(amount)),
       },
     });
+
+    // Create Accounting Ledger Entry for Financial Account (Credit Cash / Bank)
+    if (account) {
+      await tx.ledgerEntry.create({
+        data: {
+          id: 'led-' + Date.now() + '-acc',
+          date: new Date(),
+          partyType: 'ACCOUNT',
+          partyId: account.id,
+          referenceType: 'SUPPLIER_PAYMENT',
+          referenceNumber: voucherNumber,
+          description: `Disbursement to supplier ${supplier.name} for purchase settlement`,
+          debit: new Prisma.Decimal(0),
+          credit: new Prisma.Decimal(amount),
+          runningBalance: new Prisma.Decimal(Number(account.balance) - Number(amount)),
+        },
+      });
+    }
 
     // Audit Log
     await tx.auditLog.create({

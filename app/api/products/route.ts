@@ -134,60 +134,6 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // Automatically record initial procurement as an Operating Expense
-      const unitCost = Number(productData.costPrice || productData.purchasePrice || 0);
-      const effectiveStock = initialStock > 0 ? initialStock : (unitCost > 0 ? 1 : 0);
-      const totalExpenseAmount = unitCost * effectiveStock;
-
-      let recordedExpense = null;
-      if (totalExpenseAmount > 0) {
-        const voucherNumber = 'EXP-PRD-' + Date.now().toString().slice(-6);
-        recordedExpense = await tx.expense.create({
-          data: {
-            id: 'exp-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
-            voucherNumber,
-            category: 'Purchase Expenses',
-            amount: new Prisma.Decimal(totalExpenseAmount),
-            date: new Date(),
-            paymentMethod: 'Cash',
-            branchId: user.branchId || 'branch-main-1',
-            description: `Product Catalog Inflow: ${product.name} (SKU: ${product.sku}) — ${effectiveStock} unit(s) @ ৳${unitCost.toLocaleString()}`,
-            createdBy: user.name,
-          },
-        });
-
-        // Deduct financial account balance if active account exists
-        const account = await tx.financialAccount.findFirst({
-          where: { isActive: true },
-          orderBy: { name: 'asc' },
-        });
-
-        if (account) {
-          await tx.financialAccount.update({
-            where: { id: account.id },
-            data: {
-              balance: { decrement: new Prisma.Decimal(totalExpenseAmount) },
-            },
-          });
-        }
-
-        // Record Accounting Ledger Entry
-        await tx.ledgerEntry.create({
-          data: {
-            id: 'led-' + Date.now(),
-            date: new Date(),
-            partyType: 'ACCOUNT',
-            partyId: account?.id || 'main',
-            referenceType: 'EXPENSE',
-            referenceNumber: voucherNumber,
-            description: `Catalog Stock Procurement: ${product.name} (${product.sku}) - ${effectiveStock} unit(s)`,
-            debit: new Prisma.Decimal(0),
-            credit: new Prisma.Decimal(totalExpenseAmount),
-            runningBalance: new Prisma.Decimal(account ? Number(account.balance) - totalExpenseAmount : 0),
-          },
-        });
-      }
-
       // Audit Log
       await tx.auditLog.create({
         data: {
@@ -197,18 +143,17 @@ export async function POST(req: NextRequest) {
           action: 'PRODUCT_CREATED',
           module: 'INVENTORY',
           recordId: product.id,
-          details: `Created product ${product.name} (SKU: ${product.sku}). Initial stock: ${initialStock}${totalExpenseAmount > 0 ? ` (Recorded expense: ৳${totalExpenseAmount})` : ''}`,
+          details: `Created product ${product.name} (SKU: ${product.sku}). Initial stock: ${initialStock}`,
         },
       });
 
-      return { product, expense: recordedExpense };
+      return { product };
     });
 
     return NextResponse.json({
       success: true,
       message: 'Product created successfully.',
       product: result.product,
-      expense: result.expense,
     });
   } catch (err: any) {
     console.error('Create product error:', err);
