@@ -127,7 +127,19 @@ interface ERPContextType {
   collectEMIPayment: (emiAccountId: string, installmentId: string, amount: number, penaltyAmount: number, paymentMethod: PaymentMethod, ref?: string, notes?: string, accountId?: string) => Promise<{ success: boolean; error?: string; receiptNumber?: string }>;
   createProduct: (productData: Omit<Product, 'id' | 'createdAt'>, initialSerials?: string[]) => Promise<{ success: boolean; error?: string; product?: Product; expense?: any }>;
   updateProduct: (productData: Product) => Promise<{ success: boolean; error?: string }>;
-  createPurchase: (purchaseData: { supplierId: string; branchId: string; items: { productId: string; quantity: number; costPrice: number; serials: string[] }[]; paymentMethod: string; paidAmount: number; notes?: string; depositAccountId?: string }) => Promise<{ success: boolean; error?: string; purchase?: Purchase }>;
+  createPurchase: (purchaseData: {
+    supplierId: string;
+    supplierName?: string;
+    branchId: string;
+    items: { productId: string; productName?: string; quantity: number; costPrice: number; serials?: string[]; serialNumbers?: string[] }[];
+    subtotal?: number;
+    total?: number;
+    paidAmount: number;
+    dueAmount?: number;
+    paymentMethod: string;
+    notes?: string;
+    depositAccountId?: string;
+  }) => Promise<{ success: boolean; error?: string; purchase?: Purchase }>;
   recordSupplierPayment: (supplierId: string, amount: number, paymentMethod: PaymentMethod, accountId?: string, reference?: string, notes?: string) => Promise<{ success: boolean; error?: string }>;
   recordReturn: (returnData: Omit<ProductReturn, 'id' | 'returnNumber' | 'createdAt' | 'handledBy'>) => Promise<{ success: boolean; error?: string; returnRecord?: ProductReturn }>;
   collectCustomerDue: (customerId: string, amount: number, paymentMethod: PaymentMethod, accountId?: string, reference?: string, notes?: string) => Promise<{ success: boolean; error?: string; receiptNumber?: string }>;
@@ -1060,10 +1072,14 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const createPurchase = async (
     purchaseData: {
       supplierId: string;
+      supplierName?: string;
       branchId: string;
-      items: { productId: string; quantity: number; costPrice: number; serials: string[] }[];
-      paymentMethod: string;
+      items: { productId: string; productName?: string; quantity: number; costPrice: number; serials?: string[]; serialNumbers?: string[] }[];
+      subtotal?: number;
+      total?: number;
       paidAmount: number;
+      dueAmount?: number;
+      paymentMethod: string;
       notes?: string;
       depositAccountId?: string;
     }

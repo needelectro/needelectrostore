@@ -91,9 +91,11 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
         }
         return {
           productId: item.productId,
+          productName: prod?.name || '',
           quantity: item.quantity,
           costPrice: item.costPrice,
-          serials: serialArr
+          serials: serialArr,
+          serialNumbers: serialArr
         };
       });
     } catch (err: any) {
@@ -102,12 +104,18 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
     }
 
     try {
+      const supplier = suppliers.find(s => s.id === supplierId);
+      const totalCost = calculateTotalCost();
       const res = await createPurchase({
         supplierId,
+        supplierName: supplier?.name || '',
         branchId,
         items: formattedItems,
-        paymentMethod,
+        subtotal: totalCost,
+        total: totalCost,
         paidAmount,
+        dueAmount: Math.max(0, totalCost - paidAmount),
+        paymentMethod,
         notes
       });
 

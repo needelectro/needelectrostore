@@ -42,8 +42,31 @@ export async function POST(req: NextRequest) {
       notes,
     } = payload;
 
-    if (!supplierId || !items || items.length === 0) {
-      return NextResponse.json({ success: false, error: 'Supplier and items are required' }, { status: 400 });
+    if (!supplierId || !items || !Array.isArray(items) || items.length === 0) {
+      return NextResponse.json({ success: false, error: 'Supplier and at least one item are required' }, { status: 400 });
+    }
+
+    // Safe calculations with fallbacks to avoid DecimalError: Invalid argument: undefined
+    const calculatedSubtotal = items.reduce(
+      (sum: number, it: any) => sum + (Number(it.costPrice || 0) * Number(it.quantity || 1)),
+      0
+    );
+    const calculatedDiscount = Number(discount || 0);
+    const calculatedTax = Number(tax || 0);
+    const finalTotal =
+      total !== undefined && total !== null
+        ? Number(total)
+        : Math.max(0, calculatedSubtotal - calculatedDiscount + calculatedTax);
+    const finalPaid = Number(paidAmount || 0);
+    const finalDue =
+      dueAmount !== undefined && dueAmount !== null
+        ? Number(dueAmount)
+        : Math.max(0, finalTotal - finalPaid);
+
+    let finalSupplierName = supplierName;
+    if (!finalSupplierName && supplierId) {
+      const sup = await prisma.supplier.findUnique({ where: { id: supplierId } });
+      finalSupplierName = sup?.name || 'Unknown Supplier';
     }
 
     const invoiceNumber = 'PUR-INV-' + Date.now().toString().slice(-6);
@@ -55,54 +78,64 @@ export async function POST(req: NextRequest) {
           id: 'pur-' + Date.now(),
           invoiceNumber,
           supplierId,
-          supplierName,
+          supplierName: finalSupplierName,
           branchId: branchId || user.branchId || 'branch-main-1',
           date: new Date(),
           status: 'Received',
-          subtotal: new Prisma.Decimal(subtotal || total),
-          discount: new Prisma.Decimal(discount || 0),
-          tax: new Prisma.Decimal(tax || 0),
-          total: new Prisma.Decimal(total),
-          paidAmount: new Prisma.Decimal(paidAmount || 0),
-          dueAmount: new Prisma.Decimal(dueAmount || 0),
-          paymentMethod,
-          notes,
+          subtotal: new Prisma.Decimal(calculatedSubtotal),
+          discount: new Prisma.Decimal(calculatedDiscount),
+          tax: new Prisma.Decimal(calculatedTax),
+          total: new Prisma.Decimal(finalTotal),
+          paidAmount: new Prisma.Decimal(finalPaid),
+          dueAmount: new Prisma.Decimal(finalDue),
+          paymentMethod: paymentMethod || 'Cash',
+          notes: notes || null,
         },
       });
 
       // 2. Create Purchase Items & Update Inventory
       for (const item of items) {
+        const product = await tx.product.findUnique({ where: { id: item.productId } });
+        const prodName = item.productName || product?.name || 'Product';
+        const itemQuantity = Number(item.quantity || 1);
+        const itemCost = Number(item.costPrice || 0);
+        const itemSubtotal = itemCost * itemQuantity;
+        const itemSerials = Array.isArray(item.serialNumbers)
+          ? item.serialNumbers
+          : Array.isArray(item.serials)
+          ? item.serials
+          : [];
+
         await tx.purchaseItem.create({
           data: {
             id: 'pitem-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
             purchaseId: purchase.id,
             productId: item.productId,
-            productName: item.productName,
-            quantity: item.quantity,
-            costPrice: new Prisma.Decimal(item.costPrice),
-            subtotal: new Prisma.Decimal(item.costPrice * item.quantity),
-            serialNumbers: item.serialNumbers || [],
+            productName: prodName,
+            quantity: itemQuantity,
+            costPrice: new Prisma.Decimal(itemCost),
+            subtotal: new Prisma.Decimal(itemSubtotal),
+            serialNumbers: itemSerials,
           },
         });
 
-        const product = await tx.product.findUnique({ where: { id: item.productId } });
         if (product) {
           const openingStock = product.currentStock;
-          const closingStock = openingStock + item.quantity;
+          const closingStock = openingStock + itemQuantity;
 
           // Increment Product Stock and update cost price
           await tx.product.update({
             where: { id: item.productId },
             data: {
               currentStock: closingStock,
-              costPrice: new Prisma.Decimal(item.costPrice),
+              costPrice: new Prisma.Decimal(itemCost),
             },
           });
 
           // Insert Serials if serialized
-          if (product.isSerialized && item.serialNumbers && item.serialNumbers.length > 0) {
-            for (const sn of item.serialNumbers) {
-              const serialClean = sn.trim();
+          if (product.isSerialized && itemSerials.length > 0) {
+            for (const sn of itemSerials) {
+              const serialClean = typeof sn === 'string' ? sn.trim() : '';
               if (!serialClean) continue;
 
               await tx.productSerial.upsert({
@@ -112,7 +145,7 @@ export async function POST(req: NextRequest) {
                   purchaseId: purchase.id,
                   purchaseDate: new Date(),
                   supplierId,
-                  purchaseCost: new Prisma.Decimal(item.costPrice),
+                  purchaseCost: new Prisma.Decimal(itemCost),
                   branchId: branchId || user.branchId || 'branch-main-1',
                 },
                 create: {
@@ -124,7 +157,7 @@ export async function POST(req: NextRequest) {
                   purchaseId: purchase.id,
                   purchaseDate: new Date(),
                   supplierId,
-                  purchaseCost: new Prisma.Decimal(item.costPrice),
+                  purchaseCost: new Prisma.Decimal(itemCost),
                 },
               });
             }
@@ -138,16 +171,16 @@ export async function POST(req: NextRequest) {
               date: new Date(),
               type: 'PURCHASE_IN',
               productId: product.id,
-              productName: product.name,
+              productName: prodName,
               branchId: branchId || user.branchId || 'branch-main-1',
-              quantity: item.quantity,
-              unitCost: new Prisma.Decimal(item.costPrice),
-              totalValue: new Prisma.Decimal(item.costPrice * item.quantity),
+              quantity: itemQuantity,
+              unitCost: new Prisma.Decimal(itemCost),
+              totalValue: new Prisma.Decimal(itemSubtotal),
               openingStock,
               closingStock,
               referenceType: 'PURCHASE',
               referenceId: purchase.id,
-              serialNumbers: item.serialNumbers || [],
+              serialNumbers: itemSerials,
               notes: `Purchased on invoice ${invoiceNumber}`,
               createdBy: user.name,
             },
@@ -156,11 +189,11 @@ export async function POST(req: NextRequest) {
       }
 
       // 3. Update Supplier Payable Balance if there is Due
-      if (dueAmount > 0) {
+      if (finalDue > 0) {
         await tx.supplier.update({
           where: { id: supplierId },
           data: {
-            currentPayable: { increment: new Prisma.Decimal(dueAmount) },
+            currentPayable: { increment: new Prisma.Decimal(finalDue) },
           },
         });
 
@@ -174,18 +207,30 @@ export async function POST(req: NextRequest) {
             referenceNumber: invoiceNumber,
             description: `Payable for purchase invoice ${invoiceNumber}`,
             debit: new Prisma.Decimal(0),
-            credit: new Prisma.Decimal(dueAmount),
-            runningBalance: new Prisma.Decimal(dueAmount),
+            credit: new Prisma.Decimal(finalDue),
+            runningBalance: new Prisma.Decimal(finalDue),
           },
         });
       }
 
-      // 4. Record Expense & Deduct Financial Account if paid amount was provided upfront
-      if (paidAmount && paidAmount > 0) {
-        const targetAccountId = (payload as any).accountId || (payload as any).depositAccountId || 'acc-1';
-        let account = await tx.financialAccount.findFirst({
-          where: { id: targetAccountId },
-        });
+      // 4. Record Outflow & Deduct Financial Account if paid amount was provided upfront
+      if (finalPaid > 0) {
+        const targetAccountId = (payload as any).accountId || (payload as any).depositAccountId;
+        let account = targetAccountId
+          ? await tx.financialAccount.findFirst({ where: { id: targetAccountId } })
+          : null;
+
+        if (!account && paymentMethod) {
+          account = await tx.financialAccount.findFirst({
+            where: {
+              isActive: true,
+              OR: [
+                { type: { contains: paymentMethod, mode: 'insensitive' } },
+                { name: { contains: paymentMethod, mode: 'insensitive' } },
+              ],
+            },
+          });
+        }
 
         if (!account) {
           account = await tx.financialAccount.findFirst({
@@ -198,13 +243,15 @@ export async function POST(req: NextRequest) {
           await tx.financialAccount.update({
             where: { id: account.id },
             data: {
-              balance: { decrement: new Prisma.Decimal(paidAmount) },
+              balance: { decrement: new Prisma.Decimal(finalPaid) },
             },
           });
         }
 
         const expVoucher = 'EXP-PUR-' + Date.now().toString().slice(-6);
-        const itemSummary = items.map(i => `${i.productName} (x${i.quantity})`).join(', ');
+        const itemSummary = items
+          .map((i: any) => `${i.productName || 'Item'} (x${i.quantity || 1})`)
+          .join(', ');
 
         // Record official Expense under 'Purchase Expenses'
         await tx.expense.create({
@@ -212,11 +259,11 @@ export async function POST(req: NextRequest) {
             id: 'exp-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
             voucherNumber: expVoucher,
             category: 'Purchase Expenses',
-            amount: new Prisma.Decimal(paidAmount),
+            amount: new Prisma.Decimal(finalPaid),
             date: new Date(),
             paymentMethod: paymentMethod || 'Cash',
             branchId: branchId || user.branchId || 'branch-main-1',
-            description: `Product Purchase [${invoiceNumber}] from ${supplierName}: ${itemSummary.slice(0, 180)}`,
+            description: `Product Purchase [${invoiceNumber}] from ${finalSupplierName}: ${itemSummary.slice(0, 180)}`,
             createdBy: user.name,
           },
         });
@@ -226,13 +273,15 @@ export async function POST(req: NextRequest) {
             id: 'led-' + Date.now() + '-pur-cash',
             date: new Date(),
             partyType: 'ACCOUNT',
-            partyId: account ? account.id : targetAccountId,
+            partyId: account ? account.id : (targetAccountId || 'acc-1'),
             referenceType: 'EXPENSE',
             referenceNumber: expVoucher,
-            description: `Payment disbursed for product purchase ${invoiceNumber} (${supplierName})`,
+            description: `Payment disbursed for product purchase ${invoiceNumber} (${finalSupplierName})`,
             debit: new Prisma.Decimal(0),
-            credit: new Prisma.Decimal(paidAmount),
-            runningBalance: new Prisma.Decimal(account ? Number(account.balance) - Number(paidAmount) : 0),
+            credit: new Prisma.Decimal(finalPaid),
+            runningBalance: new Prisma.Decimal(
+              account ? Number(account.balance) - finalPaid : 0
+            ),
           },
         });
       }
@@ -246,7 +295,7 @@ export async function POST(req: NextRequest) {
           action: 'PURCHASE_CREATED',
           module: 'PURCHASES',
           recordId: purchase.id,
-          details: `Purchase ${invoiceNumber} created from ${supplierName}. Total: ৳${total}`,
+          details: `Purchase ${invoiceNumber} created from ${finalSupplierName}. Total: ৳${finalTotal}, Paid: ৳${finalPaid}`,
         },
       });
 
