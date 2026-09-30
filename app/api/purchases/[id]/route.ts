@@ -211,34 +211,27 @@ export async function DELETE(
         performedBy: user.name,
       });
 
-      // 4. Also reverse any legacy EXP-PUR- voucher if it was created
+      // 4. Also mark any legacy EXP-PUR- voucher as CANCELLED if it was created
       const legacyExpense = await tx.expense.findFirst({
         where: {
           description: { contains: purchase.invoiceNumber },
         },
       });
       if (legacyExpense) {
-        await tx.expense.delete({ where: { id: legacyExpense.id } });
-      }
-
-      // 5. Check if permanent delete query param or status cancellation
-      const { searchParams } = new URL(req.url);
-      const hardDelete = searchParams.get('hard') === 'true';
-
-      if (hardDelete) {
-        await tx.purchaseItem.deleteMany({ where: { purchaseId: purchase.id } });
-        await tx.purchase.delete({ where: { id: purchase.id } });
-      } else {
-        await tx.purchase.update({
-          where: { id: purchase.id },
-          data: {
-            status: 'CANCELLED',
-            paidAmount: new Prisma.Decimal(0),
-            dueAmount: new Prisma.Decimal(0),
-            notes: `${purchase.notes ? purchase.notes + ' | ' : ''}CANCELLED by ${user.name} on ${new Date().toISOString()}`,
-          },
+        await tx.expense.update({
+          where: { id: legacyExpense.id },
+          data: { status: 'CANCELLED' },
         });
       }
+
+      // 5. Soft cancel: keep purchase in database with status 'CANCELLED' (Strict reversal logic, no hard deletion)
+      await tx.purchase.update({
+        where: { id: purchase.id },
+        data: {
+          status: 'CANCELLED',
+          notes: `${purchase.notes ? purchase.notes + ' | ' : ''}CANCELLED & REVERSED by ${user.name} on ${new Date().toISOString()}`,
+        },
+      });
 
       // 6. Audit trail
       await tx.auditLog.create({
@@ -246,10 +239,10 @@ export async function DELETE(
           id: 'audit-' + Date.now(),
           userId: user.id,
           userName: user.name,
-          action: hardDelete ? 'SUPER_ADMIN_PURCHASE_PERMANENT_DELETE' : 'SUPER_ADMIN_PURCHASE_CANCEL',
+          action: 'SUPER_ADMIN_PURCHASE_CANCEL_REVERSE',
           module: 'PURCHASES',
           recordId: purchase.id,
-          details: `Super Admin ${user.name} ${hardDelete ? 'permanently deleted' : 'cancelled'} Purchase ${purchase.invoiceNumber} (Supplier: ${purchase.supplierName}, Total: ${purchase.total}, Reversing Cash Out: ৳${purchase.paidAmount}, Due: ৳${purchase.dueAmount})`,
+          details: `Super Admin ${user.name} cancelled Purchase ${purchase.invoiceNumber} (Supplier: ${purchase.supplierName}, Total: ${purchase.total}, Reversing Cash Out: ৳${purchase.paidAmount}, Due: ৳${purchase.dueAmount})`,
         },
       });
     });

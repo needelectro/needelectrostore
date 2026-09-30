@@ -695,6 +695,7 @@ model Expense {
   branchId       String   @map("branch_id")
   description    String
   attachmentName String?  @map("attachment_name")
+  status         String   @default("COMPLETED")
   createdBy      String   @map("created_by")
   createdAt      DateTime @default(now()) @map("created_at")
 
@@ -702,6 +703,7 @@ model Expense {
   @@index([category])
   @@index([branchId])
   @@index([date])
+  @@index([status])
   @@map("expenses")
 }
 
@@ -1102,6 +1104,30 @@ model CashAdjustment {
   @@index([adjustmentNumber])
   @@index([date])
   @@map("cash_adjustments")
+}
+
+model CashReconciliation {
+  id              String   @id
+  sessionNumber   String   @unique @map("session_number")
+  date            DateTime @default(now())
+  accountId       String   @map("account_id")
+  accountName     String   @map("account_name")
+  expectedBalance Decimal  @map("expected_balance") @db.Decimal(12, 2)
+  physicalBalance Decimal  @map("physical_balance") @db.Decimal(12, 2)
+  difference      Decimal  @map("difference") @db.Decimal(12, 2)
+  status          String   @default("BALANCED") // BALANCED, SHORTAGE, EXCESS, ADJUSTED
+  reason          String?
+  notes           String?
+  denominations   Json?
+  adjustmentId    String?  @map("adjustment_id")
+  branchId        String?  @map("branch_id")
+  performedBy     String   @map("performed_by")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([sessionNumber])
+  @@index([date])
+  @@index([accountId])
+  @@map("cash_reconciliations")
 }
 
 model CustomerPayment {

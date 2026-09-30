@@ -68,6 +68,10 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
   const [useDirectCount, setUseDirectCount] = useState(false);
   const [directCountedTotal, setDirectCountedTotal] = useState<number>(0);
   const [reconcileNotes, setReconcileNotes] = useState('');
+  const [reconcileReason, setReconcileReason] = useState<string>('CASH_SHORTAGE');
+  const [reconcileCustomReason, setReconcileCustomReason] = useState<string>('');
+  const [reconcileHistory, setReconcileHistory] = useState<any[]>([]);
+  const [activeLedgerTab, setActiveLedgerTab] = useState<'movements' | 'reconciliations'>('movements');
   const [isAutoReconciling, setIsAutoReconciling] = useState(false);
   const [isSubmittingCount, setIsSubmittingCount] = useState(false);
 
@@ -130,11 +134,17 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
         params.paymentMethod = methodFilter;
       }
 
-      const res = await api.cashManagement.getCashSummary(params);
+      const [res, reconRes] = await Promise.all([
+        api.cashManagement.getCashSummary(params),
+        api.cashManagement.getReconciliations({ limit: '100' })
+      ]);
       if (res && res.success) {
         setSummaryData(res.data);
       } else {
         addToast('error', 'Error Loading Cash Data', (res as any)?.error || 'Failed to fetch cash position.');
+      }
+      if (reconRes && reconRes.success && Array.isArray(reconRes.data)) {
+        setReconcileHistory(reconRes.data);
       }
     } catch (err: any) {
       console.error('Failed to load cash position:', err);
@@ -270,6 +280,15 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
       return;
     }
 
+    const finalReason = autoAdjust
+      ? (reconcileReason === 'OTHER' ? reconcileCustomReason.trim() : reconcileReason)
+      : (reconcileNotes || 'Physical Drawer Audit');
+
+    if (autoAdjust && cashDiscrepancy !== 0 && !finalReason) {
+      addToast('error', 'Adjustment Reason Required', 'A clear justification reason is strictly required to adjust cash discrepancies in the accounting ledger.');
+      return;
+    }
+
     setIsSubmittingCount(true);
     try {
       const denominations = useDirectCount ? undefined : {
@@ -288,6 +307,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
         systemBalance: expectedPhysicalCash,
         physicalBalance: totalPhysicalCounted,
         denominations,
+        reason: finalReason,
         notes: reconcileNotes,
         autoAdjust
       });
@@ -1461,7 +1481,54 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
         padding: '1.5rem',
         boxShadow: 'var(--shadow-sm)'
       }}>
-        <div style={{
+        {/* Toggle between Cash Movements Ledger and Physical Cash Difference Reports */}
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => setActiveLedgerTab('movements')}
+            style={{
+              padding: '0.5rem 1rem',
+              borderRadius: '6px',
+              border: 'none',
+              background: activeLedgerTab === 'movements' ? 'var(--brand-primary)' : 'rgba(255, 255, 255, 0.05)',
+              color: activeLedgerTab === 'movements' ? '#fff' : 'var(--text-secondary)',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <Receipt size={16} /> Cash Transactions Ledger
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveLedgerTab('reconciliations')}
+            style={{
+              padding: '0.5rem 1rem',
+              borderRadius: '6px',
+              border: 'none',
+              background: activeLedgerTab === 'reconciliations' ? '#10b981' : 'rgba(255, 255, 255, 0.05)',
+              color: activeLedgerTab === 'reconciliations' ? '#fff' : 'var(--text-secondary)',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <ShieldCheck size={16} /> Physical Cash Difference Reporting & Audits ({reconcileHistory.length})
+          </button>
+        </div>
+
+        {activeLedgerTab === 'movements' ? (
+          <div>
+            <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -1610,6 +1677,172 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
           </table>
         </div>
       </div>
+    ) : (
+      /* DIFFERENCE REPORTING & PHYSICAL RECONCILIATIONS VIEW */
+      <div>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1rem',
+          marginBottom: '1.25rem'
+        }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <ShieldCheck size={20} /> Physical Cash Reconciliation & Difference Reporting
+            </h3>
+            <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              Audit log of all physical drawer counts, variance tracking, and required adjustment justifications
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => setShowReconcileModal(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}
+          >
+            <Calculator size={15} /> Perform Physical Cash Count
+          </button>
+        </div>
+
+        {/* Reconciliation KPI Summary */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: '1rem',
+          marginBottom: '1.5rem'
+        }}>
+          <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '1rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>TOTAL RECONCILIATION AUDITS</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#38bdf8', marginTop: '0.25rem' }}>
+              {reconcileHistory.length}
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '1rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>BALANCED SESSIONS</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10b981', marginTop: '0.25rem' }}>
+              {reconcileHistory.filter(r => Number(r.difference) === 0).length}
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '1rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>SHORTAGES DETECTED</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ef4444', marginTop: '0.25rem' }}>
+              {reconcileHistory.filter(r => Number(r.difference) < 0).length}
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '1rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>ADJUSTED WITH REASON</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f59e0b', marginTop: '0.25rem' }}>
+              {reconcileHistory.filter(r => r.status === 'ADJUSTED').length}
+            </div>
+          </div>
+        </div>
+
+        {/* Reconciliations Table */}
+        <div className="table-responsive" style={{ maxHeight: '600px', overflowY: 'auto' }}>
+          <table className="data-table" style={{ width: '100%', fontSize: '0.825rem' }}>
+            <thead>
+              <tr style={{ background: 'var(--bg-card-muted)', position: 'sticky', top: 0, zIndex: 10 }}>
+                <th>Date & Time</th>
+                <th>Count Session #</th>
+                <th>Target Account</th>
+                <th style={{ textAlign: 'right' }}>Expected Cash (৳)</th>
+                <th style={{ textAlign: 'right' }}>Physical Counted (৳)</th>
+                <th style={{ textAlign: 'right' }}>Difference (৳)</th>
+                <th>Audit Status</th>
+                <th>Adjustment Reason & Justification</th>
+                <th>Auditor</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reconcileHistory.length === 0 ? (
+                <tr>
+                  <td colSpan={9} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                    <Calculator size={32} style={{ margin: '0 auto 0.5rem', opacity: 0.3 }} />
+                    <div>No physical cash counts recorded yet. Click "Perform Physical Cash Count" to audit drawer.</div>
+                  </td>
+                </tr>
+              ) : (
+                reconcileHistory.map((rec) => {
+                  const diff = Number(rec.difference);
+                  const isBalanced = diff === 0;
+                  return (
+                    <tr key={rec.id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.03)' }}>
+                      <td style={{ whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>
+                        {new Date(rec.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}{' '}
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                          {new Date(rec.date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#10b981' }}>
+                          {rec.sessionNumber}
+                        </span>
+                      </td>
+                      <td style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
+                        {rec.accountName}
+                      </td>
+                      <td style={{ textAlign: 'right', fontWeight: 700, color: '#38bdf8' }}>
+                        ৳{Number(rec.expectedBalance).toLocaleString('en-IN')}
+                      </td>
+                      <td style={{ textAlign: 'right', fontWeight: 700, color: '#10b981' }}>
+                        ৳{Number(rec.physicalBalance).toLocaleString('en-IN')}
+                      </td>
+                      <td style={{ textAlign: 'right', fontWeight: 800 }}>
+                        <span style={{
+                          padding: '0.2rem 0.5rem',
+                          borderRadius: '4px',
+                          fontSize: '0.75rem',
+                          background: isBalanced ? 'rgba(16, 185, 129, 0.15)' : diff > 0 ? 'rgba(56, 189, 248, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                          color: isBalanced ? '#10b981' : diff > 0 ? '#38bdf8' : '#ef4444'
+                        }}>
+                          {diff > 0 ? '+' : ''}৳{diff.toLocaleString('en-IN')}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{
+                          padding: '0.2rem 0.55rem',
+                          borderRadius: '4px',
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          background: rec.status === 'BALANCED'
+                            ? 'rgba(16, 185, 129, 0.2)'
+                            : rec.status === 'ADJUSTED'
+                            ? 'rgba(245, 158, 11, 0.2)'
+                            : 'rgba(239, 68, 68, 0.2)',
+                          color: rec.status === 'BALANCED' ? '#10b981' : rec.status === 'ADJUSTED' ? '#f59e0b' : '#ef4444'
+                        }}>
+                          {rec.status}
+                        </span>
+                      </td>
+                      <td style={{ maxWidth: '240px' }}>
+                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.775rem' }}>
+                          {rec.reason || (isBalanced ? '✓ Normal Balance' : '—')}
+                        </div>
+                        {rec.notes && (
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>
+                            {rec.notes}
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                        {rec.performedBy}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )}
+  </div>
 
       {/* -------------------------------------------------------------
           MODAL 1: SUPER ADMIN CASH ADJUSTMENT
@@ -2561,19 +2794,54 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                   background: cashDiscrepancy > 0 ? 'rgba(56, 189, 248, 0.08)' : 'rgba(239, 68, 68, 0.08)',
                   border: cashDiscrepancy > 0 ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
                   borderRadius: 'var(--radius-md)',
-                  padding: '0.85rem 1rem',
-                  marginBottom: '1rem',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: '0.75rem'
+                  padding: '1rem',
+                  marginBottom: '1rem'
                 }}>
-                  <div style={{ fontSize: '0.8rem' }}>
-                    <strong>Discrepancy Action:</strong>
-                    <div style={{ color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
-                      Automatically book an adjustment entry to match drawer balance to actual count.
+                  <div style={{ fontSize: '0.825rem', marginBottom: '0.6rem' }}>
+                    <strong style={{ color: cashDiscrepancy > 0 ? '#38bdf8' : '#ef4444' }}>
+                      Variance Action Required ({cashDiscrepancy > 0 ? 'Excess' : 'Shortage'} of ৳{Math.abs(cashDiscrepancy).toLocaleString('en-IN')}):
+                    </strong>
+                    <div style={{ color: 'var(--text-secondary)', marginTop: '0.15rem', fontSize: '0.75rem' }}>
+                      In accordance with accounting rules, a justification reason is mandatory to book an adjusting transaction into the central ledger.
                     </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.6rem', marginBottom: '0.75rem' }}>
+                    <div>
+                      <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: 700 }}>
+                        Adjustment Reason *
+                      </label>
+                      <select
+                        className="form-control"
+                        style={{ fontSize: '0.8rem' }}
+                        value={reconcileReason}
+                        onChange={e => setReconcileReason(e.target.value)}
+                      >
+                        <option value="CASH_SHORTAGE">Cash Shortage (Counter / Shift Discrepancy)</option>
+                        <option value="CASH_EXCESS">Cash Excess (Customer Overpayment / Unrecorded Inflow)</option>
+                        <option value="CHANGE_CALCULATION_ERROR">Change Calculation Error</option>
+                        <option value="UNRECORDED_EXPENSE">Unrecorded Petty Cash Expense</option>
+                        <option value="THEFT_OR_LOSS">Theft or Missing Store Cash</option>
+                        <option value="DRAWER_COUNT_CORRECTION">Drawer Count Physical Verification Correction</option>
+                        <option value="OTHER">Other Specific Reason (Write details below)</option>
+                      </select>
+                    </div>
+
+                    {reconcileReason === 'OTHER' && (
+                      <div>
+                        <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: 700 }}>
+                          Specify Reason Details *
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          style={{ fontSize: '0.8rem' }}
+                          placeholder="Detailed explanation for cash variance..."
+                          value={reconcileCustomReason}
+                          onChange={e => setReconcileCustomReason(e.target.value)}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <button
@@ -2585,12 +2853,15 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                       background: cashDiscrepancy > 0 ? '#0284c7' : '#dc2626',
                       color: '#ffffff',
                       border: 'none',
-                      fontSize: '0.78rem',
+                      fontSize: '0.8rem',
                       fontWeight: 700,
-                      padding: '0.4rem 0.85rem'
+                      padding: '0.5rem 1rem',
+                      width: '100%',
+                      borderRadius: '6px',
+                      cursor: 'pointer'
                     }}
                   >
-                    {isSubmittingCount ? 'Reconciling...' : `Auto-Reconcile (${cashDiscrepancy > 0 ? '+' : ''}৳${cashDiscrepancy.toLocaleString()})`}
+                    {isSubmittingCount ? 'Reconciling & Adjusting...' : `Approve & Auto-Reconcile Variance (${cashDiscrepancy > 0 ? '+' : ''}৳${cashDiscrepancy.toLocaleString()})`}
                   </button>
                 </div>
               )}

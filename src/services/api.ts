@@ -443,7 +443,11 @@ export const api = {
       request<{ success: boolean; message: string; countNumber: string; difference: number; adjustmentApplied: boolean; error?: string }>('/api/cash-management/count', {
         method: 'POST',
         body: JSON.stringify(countData)
-      })
+      }),
+    getReconciliations: (params?: Record<string, string>) => {
+      const q = params ? '?' + new URLSearchParams(params).toString() : '';
+      return request<{ success: boolean; data: any[] }>(`/api/cash-management/count${q}`);
+    }
   },
 
   // 13. Reports

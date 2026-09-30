@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
       where: {
         partyType: 'ACCOUNT',
         ...(accountFilter ? { partyId: accountFilter } : {}),
-        status: 'COMPLETED',
+        status: { in: ['COMPLETED', 'REVERSED'] },
         date: { lt: startDate },
       },
       _sum: {

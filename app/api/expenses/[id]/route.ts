@@ -113,8 +113,13 @@ export async function DELETE(
         performedBy: user.name,
       });
 
-      // 2. Delete expense record
-      await tx.expense.delete({ where: { id: params.id } });
+      // 2. Soft cancel expense record (Strict reversal logic, no hard deletion)
+      await tx.expense.update({
+        where: { id: params.id },
+        data: {
+          status: 'CANCELLED',
+        },
+      });
 
       // 3. Audit trail
       await tx.auditLog.create({
@@ -122,15 +127,15 @@ export async function DELETE(
           id: 'audit-' + Date.now(),
           userId: user.id,
           userName: user.name,
-          action: 'SUPER_ADMIN_EXPENSE_DELETE',
+          action: 'SUPER_ADMIN_EXPENSE_CANCEL_REVERSE',
           module: 'EXPENSES',
           recordId: expense.id,
-          details: `Super Admin ${user.name} deleted Expense ${expense.voucherNumber} (Amount: ৳${expense.amount}, Category: ${expense.category}) and restored cash to account.`,
+          details: `Super Admin ${user.name} cancelled Expense ${expense.voucherNumber} (Amount: ৳${expense.amount}, Category: ${expense.category}) and restored cash to account via ledger reversal.`,
         },
       });
     });
 
-    return NextResponse.json({ success: true, message: `Expense ${expense.voucherNumber} deleted and cash balance restored.` });
+    return NextResponse.json({ success: true, message: `Expense ${expense.voucherNumber} cancelled and cash balance restored via ledger reversal.` });
   } catch (err: any) {
     console.error('Expense deletion error:', err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });

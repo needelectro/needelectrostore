@@ -276,12 +276,14 @@ export async function calculateAccountBalancesFromLedger() {
 
   const accountStats = await Promise.all(
     accounts.map(async (acc) => {
-      // Sum all completed debits and credits for this account
+      // Sum all completed and reversed debits and credits for this account
+      // Reversed entries must be included because their corresponding reversal entries
+      // counteract them symmetrically in double-entry ledger bookkeeping.
       const agg = await prisma.ledgerEntry.aggregate({
         where: {
           partyType: 'ACCOUNT',
           partyId: acc.id,
-          status: 'COMPLETED',
+          status: { in: ['COMPLETED', 'REVERSED'] },
         },
         _sum: {
           debit: true,
@@ -324,7 +326,7 @@ export async function syncStoredBalancesWithLedger(tx?: Prisma.TransactionClient
       where: {
         partyType: 'ACCOUNT',
         partyId: acc.id,
-        status: 'COMPLETED',
+        status: { in: ['COMPLETED', 'REVERSED'] },
       },
       _sum: {
         debit: true,

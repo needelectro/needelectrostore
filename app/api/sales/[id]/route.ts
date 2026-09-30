@@ -231,25 +231,14 @@ export async function DELETE(
         performedBy: user.name,
       });
 
-      // 5. Check if permanent delete query param or status cancellation
-      const { searchParams } = new URL(req.url);
-      const hardDelete = searchParams.get('hard') === 'true';
-
-      if (hardDelete) {
-        await tx.saleItem.deleteMany({ where: { saleId: sale.id } });
-        await tx.sale.delete({ where: { id: sale.id } });
-      } else {
-        // Soft cancel: keep sale in database with status 'CANCELLED' as required by Requirement 4 & 18
-        await tx.sale.update({
-          where: { id: sale.id },
-          data: {
-            status: 'CANCELLED',
-            paidAmount: new Prisma.Decimal(0),
-            dueAmount: new Prisma.Decimal(0),
-            notes: `${sale.notes ? sale.notes + ' | ' : ''}CANCELLED by ${user.name} on ${new Date().toISOString()}`,
-          },
-        });
-      }
+      // 5. Soft cancel: keep sale in database with status 'CANCELLED' (Strict reversal logic, no hard deletion)
+      await tx.sale.update({
+        where: { id: sale.id },
+        data: {
+          status: 'CANCELLED',
+          notes: `${sale.notes ? sale.notes + ' | ' : ''}CANCELLED & REVERSED by ${user.name} on ${new Date().toISOString()}`,
+        },
+      });
 
       // 6. Audit trail
       await tx.auditLog.create({
@@ -257,10 +246,10 @@ export async function DELETE(
           id: 'audit-' + Date.now(),
           userId: user.id,
           userName: user.name,
-          action: hardDelete ? 'SUPER_ADMIN_SALE_PERMANENT_DELETE' : 'SUPER_ADMIN_SALE_CANCEL',
+          action: 'SUPER_ADMIN_SALE_CANCEL_REVERSE',
           module: 'SALES',
           recordId: sale.id,
-          details: `Super Admin ${user.name} ${hardDelete ? 'permanently deleted' : 'cancelled'} Sale ${sale.invoiceNumber} (Total: ${sale.grandTotal}, Reversing Cash: ৳${sale.paidAmount}, Due: ৳${sale.dueAmount})`,
+          details: `Super Admin ${user.name} cancelled Sale ${sale.invoiceNumber} (Total: ${sale.grandTotal}, Reversing Cash Inflow: ৳${sale.paidAmount}, Due: ৳${sale.dueAmount})`,
         },
       });
     });
