@@ -6,38 +6,9 @@ const prisma = new PrismaClient();
 async function reconcileAll() {
   console.log('=== STARTING FULL ERP HISTORICAL DATA RECONCILIATION ===\n');
 
-  // 1. Reconcile Main Cash Drawer (acc-1) Opening Balance
-  const existingCashOb = await prisma.ledgerEntry.findFirst({
-    where: {
-      partyType: 'ACCOUNT',
-      partyId: 'acc-1',
-      referenceType: 'OPENING_BALANCE',
-    },
-  });
-
-  if (!existingCashOb) {
-    console.log('1. Inserting OB-CASH-01 (৳1,67,789.00) for Main Cash Drawer...');
-    await prisma.ledgerEntry.create({
-      data: {
-        id: 'led-ob-cash-167789',
-        date: new Date('2026-09-15T00:00:00.000Z'),
-        partyType: 'ACCOUNT',
-        partyId: 'acc-1',
-        referenceType: 'OPENING_BALANCE',
-        referenceNumber: 'OB-CASH-01',
-        description: 'Verified Physical Cash Opening Balance from store audit & verified records',
-        debit: new Prisma.Decimal(167789.00),
-        credit: new Prisma.Decimal(0),
-        runningBalance: new Prisma.Decimal(167789.00),
-        status: 'COMPLETED',
-        paymentMethod: 'Cash',
-        performedBy: 'System Auditor',
-      },
-    });
-    console.log('   ✓ OB-CASH-01 recorded successfully.');
-  } else {
-    console.log('1. OB-CASH-01 already present in ledger.');
-  }
+  // 1. Main Cash Drawer (acc-1): Do not insert artificial seed / opening balance.
+  // The user will enter real seed/investment capital manually.
+  console.log('1. Main Cash Drawer (acc-1): Maintaining clean ledger without artificial seed opening balance.');
 
   // 2. Reconcile Transfer TRF-174678 (2026-09-15: ৳20,000 from acc-1 to acc-ebl-amdadur)
   const existingTrf174678 = await prisma.ledgerEntry.findFirst({
