@@ -756,8 +756,18 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Wallet size={16} style={{ color: 'var(--brand-primary)' }} />
-            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               Active Cash Drawers, Banks & Digital Wallets
+              <span style={{ 
+                background: 'rgba(0, 140, 255, 0.1)', 
+                color: '#008CFF', 
+                padding: '0.15rem 0.5rem', 
+                borderRadius: '999px', 
+                fontSize: '0.75rem', 
+                fontWeight: 700,
+              }}>
+                Total: ৳{financialAccounts.reduce((sum, acc) => sum + Number(acc.balance || 0), 0).toLocaleString('en-IN')}
+              </span>
             </h3>
           </div>
           <button
