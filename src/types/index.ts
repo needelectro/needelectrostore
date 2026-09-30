@@ -1019,6 +1019,7 @@ export interface CashMovementRecord {
 
 export interface CashSummary {
   currentCash: number;
+  totalAvailableMoney?: number;
   physicalCash: number;
   digitalBankCash: number;
   openingCash: number;

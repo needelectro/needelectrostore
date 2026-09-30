@@ -387,7 +387,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        currentCash: totalCash,
+        currentCash: totalAvailableMoney,
         physicalCash,
         digitalBankCash,
         totalCash,
@@ -423,7 +423,7 @@ export async function GET(req: NextRequest) {
           currency: a.currency,
         })),
         cashVsProfit: {
-          currentCashBalance: totalCash,
+          currentCashBalance: totalAvailableMoney,
           totalRevenue,
           totalCOGS,
           grossProfit,

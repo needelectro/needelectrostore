@@ -212,7 +212,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
   }, [financialAccounts]);
 
   const expectedPhysicalCash = useMemo(() => {
-    return primaryCashAccount ? Number(primaryCashAccount.balance) : (summaryData?.currentCash || 0);
+    return primaryCashAccount ? Number(primaryCashAccount.balance) : (summaryData?.physicalCash || 0);
   }, [primaryCashAccount, summaryData]);
 
   const calculatedDenominationsTotal = useMemo(() => {
@@ -687,19 +687,19 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                 letterSpacing: '0.5px',
                 textTransform: 'uppercase'
               }}>
-                ● Live Available Business Liquidity
+                ● Total Available Cash (Physical + Digital)
               </span>
               <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                (Opening Cash + Inflows − Outflows)
+                (Drawer + Banks & Mobile Wallets)
               </span>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
               <span style={{ fontSize: '2.8rem', fontWeight: 900, color: '#f8fafc', letterSpacing: '-0.5px' }}>
-                ৳{summaryData ? summaryData.currentCash.toLocaleString('en-IN') : '...'}
+                ৳{summaryData ? (summaryData.totalAvailableMoney ?? (summaryData.physicalCash + summaryData.digitalBankCash)).toLocaleString('en-IN') : '...'}
               </span>
               <span style={{ fontSize: '1rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-                {settings.currencyCode || 'BDT'} Available
+                {settings.currencyCode || 'BDT'} Total Available
               </span>
             </div>
 
