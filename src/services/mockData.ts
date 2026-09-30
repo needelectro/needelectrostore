@@ -4186,78 +4186,7 @@ export const INITIAL_EXPENSES: Expense[] = [
 export const INITIAL_AUDIT_LOGS: AuditLog[] = [];
 export const INITIAL_INVENTORY_TRANSACTIONS: InventoryTransaction[] = [];
 export const INITIAL_PURCHASES: Purchase[] = [];
-export const INITIAL_INVESTMENTS: Investment[] = [
-  {
-    "id": "inv-1",
-    "referenceNumber": "INV-CAP-001",
-    "investorName": "Amdadur Rahman",
-    "amount": 80000,
-    "date": "2026-05-07T12:00:00Z",
-    "type": "CAPITAL",
-    "paymentMethod": "CASH",
-    "depositAccountId": "acc-1",
-    "status": "ACTIVE",
-    "expectedReturnPercent": 0,
-    "notes": "Managing Partner Founder Equity Investment",
-    "createdBy": "Amdadur Rahman"
-  },
-  {
-    "id": "inv-2",
-    "referenceNumber": "INV-CAP-002",
-    "investorName": "Kohes",
-    "amount": 100000,
-    "date": "2026-06-01T12:00:00Z",
-    "type": "CAPITAL",
-    "paymentMethod": "CASH",
-    "depositAccountId": "acc-1",
-    "status": "ACTIVE",
-    "expectedReturnPercent": 0,
-    "notes": "Partner Capital Contribution",
-    "createdBy": "Amdadur Rahman"
-  },
-  {
-    "id": "inv-3",
-    "referenceNumber": "INV-CAP-003",
-    "investorName": "Khaled",
-    "amount": 35000,
-    "date": "2026-06-01T12:00:00Z",
-    "type": "CAPITAL",
-    "paymentMethod": "CASH",
-    "depositAccountId": "acc-1",
-    "status": "ACTIVE",
-    "expectedReturnPercent": 0,
-    "notes": "Partner Capital Contribution",
-    "createdBy": "Amdadur Rahman"
-  },
-  {
-    "id": "inv-4",
-    "referenceNumber": "INV-CAP-004",
-    "investorName": "Jisan",
-    "amount": 38000,
-    "date": "2026-06-16T12:00:00Z",
-    "type": "CAPITAL",
-    "paymentMethod": "CASH",
-    "depositAccountId": "acc-1",
-    "status": "ACTIVE",
-    "expectedReturnPercent": 0,
-    "notes": "Partner Capital (20k + 18k)",
-    "createdBy": "Amdadur Rahman"
-  },
-  {
-    "id": "inv-5",
-    "referenceNumber": "INV-CAP-005",
-    "investorName": "Saleh",
-    "amount": 20000,
-    "date": "2026-06-16T12:00:00Z",
-    "type": "CAPITAL",
-    "paymentMethod": "CASH",
-    "depositAccountId": "acc-1",
-    "status": "ACTIVE",
-    "expectedReturnPercent": 0,
-    "notes": "Partner Capital Contribution",
-    "createdBy": "Amdadur Rahman"
-  }
-];
+export const INITIAL_INVESTMENTS: Investment[] = [];
 export const INITIAL_EMPLOYEES: Employee[] = [];
 export const INITIAL_ATTENDANCE: AttendanceRecord[] = [];
 export const INITIAL_RETURNS: ProductReturn[] = [];

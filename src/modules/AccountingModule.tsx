@@ -84,6 +84,7 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
   // Investment Form State
   const [investorName, setInvestorName] = useState('');
   const [investAmount, setInvestAmount] = useState<number>(100000);
+  const [investDate, setInvestDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [investType, setInvestType] = useState<InvestmentType>('EQUITY');
   const [targetAccountId, setTargetAccountId] = useState(financialAccounts[0]?.id || '');
   const [investRef, setInvestRef] = useState('');
@@ -104,11 +105,13 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
   const [newInvestorPhone, setNewInvestorPhone] = useState('');
   const [newInvestorPassword, setNewInvestorPassword] = useState('');
   const [newInvestorInitialAmount, setNewInvestorInitialAmount] = useState<number>(50000);
+  const [newInvestorDate, setNewInvestorDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [newInvestorAccountId, setNewInvestorAccountId] = useState(financialAccounts[0]?.id || '');
   const [newInvestorNotes, setNewInvestorNotes] = useState('');
 
   // Add Capital Form
   const [addCapitalAmount, setAddCapitalAmount] = useState<number>(20000);
+  const [addCapitalDate, setAddCapitalDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [addCapitalAccountId, setAddCapitalAccountId] = useState(financialAccounts[0]?.id || '');
   const [addCapitalNotes, setAddCapitalNotes] = useState('');
 
@@ -301,6 +304,7 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
           password: newInvestorPassword.trim(),
           initialAmount: newInvestorInitialAmount,
           depositAccountId: newInvestorAccountId || financialAccounts[0]?.id,
+          date: newInvestorDate,
           notes: newInvestorNotes.trim(),
         }),
       });
@@ -339,6 +343,7 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
           investorId: selectedInvestorForCapital.id,
           amount: addCapitalAmount,
           depositAccountId: addCapitalAccountId || financialAccounts[0]?.id,
+          date: addCapitalDate,
           notes: addCapitalNotes.trim(),
         }),
       });
@@ -520,7 +525,7 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
     const res = await recordInvestment({
       investorName: investorName.trim(),
       amount: investAmount,
-      date: new Date().toISOString().split('T')[0],
+      date: investDate || new Date().toISOString().split('T')[0],
       investmentType: investType,
       depositAccountId: targetAccountId,
       paymentMethod,
@@ -1724,24 +1729,33 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                   </tr>
                 </thead>
                 <tbody>
-                  {investments.map(inv => {
-                    const acc = financialAccounts.find(a => a.id === inv.depositAccountId);
-                    return (
-                      <tr key={inv.id}>
-                        <td style={{ fontWeight: 700, color: 'var(--brand-primary)' }}>{inv.reference || inv.id}</td>
-                        <td style={{ fontWeight: 700 }}>{inv.investorName}</td>
-                        <td>
-                          <span className="badge badge-warning">{inv.investmentType}</span>
-                        </td>
-                        <td>{inv.date}</td>
-                        <td>{acc?.name || 'Cash/Bank Account'}</td>
-                        <td style={{ textAlign: 'right', fontWeight: 800, color: '#10b981' }}>
-                          ৳{inv.amount.toLocaleString()}
-                        </td>
-                        <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{inv.notes || '—'}</td>
-                      </tr>
-                    );
-                  })}
+                  {investments.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem 1rem', color: 'var(--text-muted)' }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.25rem' }}>No investments recorded yet.</div>
+                        <div style={{ fontSize: '0.8rem' }}>Click &quot;Add Capital / Investment&quot; or select an investor from the roster above to record capital with accurate dates and details.</div>
+                      </td>
+                    </tr>
+                  ) : (
+                    investments.map(inv => {
+                      const acc = financialAccounts.find(a => a.id === inv.depositAccountId);
+                      return (
+                        <tr key={inv.id}>
+                          <td style={{ fontWeight: 700, color: 'var(--brand-primary)' }}>{inv.reference || inv.id}</td>
+                          <td style={{ fontWeight: 700 }}>{inv.investorName}</td>
+                          <td>
+                            <span className="badge badge-warning">{inv.investmentType}</span>
+                          </td>
+                          <td>{inv.date ? new Date(inv.date).toLocaleDateString() : '—'}</td>
+                          <td>{acc?.name || 'Cash/Bank Account'}</td>
+                          <td style={{ textAlign: 'right', fontWeight: 800, color: '#10b981' }}>
+                            ৳{inv.amount.toLocaleString()}
+                          </td>
+                          <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{inv.notes || '—'}</td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
@@ -1902,20 +1916,33 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                   </div>
                 </div>
 
-                <div>
-                  <label className="form-label">Deposit Target Account</label>
-                  <select 
-                    className="form-control"
-                    value={targetAccountId}
-                    onChange={e => setTargetAccountId(e.target.value)}
-                    required
-                  >
-                    {financialAccounts.map(a => (
-                      <option key={a.id} value={a.id}>
-                        {a.name} ({a.type})
-                      </option>
-                    ))}
-                  </select>
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.75rem' }}>
+                  <div>
+                    <label className="form-label">Investment Date *</label>
+                    <input 
+                      type="date"
+                      className="form-control"
+                      value={investDate}
+                      onChange={e => setInvestDate(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Deposit Target Account *</label>
+                    <select 
+                      className="form-control"
+                      value={targetAccountId}
+                      onChange={e => setTargetAccountId(e.target.value)}
+                      required
+                    >
+                      {financialAccounts.map(a => (
+                        <option key={a.id} value={a.id}>
+                          {a.name} ({a.type})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 <div>
@@ -2057,6 +2084,18 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                   </div>
                 </div>
 
+                {newInvestorInitialAmount > 0 && (
+                  <div>
+                    <label className="form-label">Investment Date</label>
+                    <input 
+                      type="date"
+                      className="form-control"
+                      value={newInvestorDate}
+                      onChange={e => setNewInvestorDate(e.target.value)}
+                    />
+                  </div>
+                )}
+
                 <div>
                   <label className="form-label">Internal Notes / Terms</label>
                   <input 
@@ -2121,16 +2160,29 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                   </div>
                 </div>
 
-                <div>
-                  <label className="form-label">Additional Capital Amount (৳) *</label>
-                  <input 
-                    type="number"
-                    className="form-control"
-                    min="1"
-                    value={addCapitalAmount}
-                    onChange={e => setAddCapitalAmount(Number(e.target.value))}
-                    required
-                  />
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.75rem' }}>
+                  <div>
+                    <label className="form-label">Additional Capital (৳) *</label>
+                    <input 
+                      type="number"
+                      className="form-control"
+                      min="1"
+                      value={addCapitalAmount}
+                      onChange={e => setAddCapitalAmount(Number(e.target.value))}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Investment Date *</label>
+                    <input 
+                      type="date"
+                      className="form-control"
+                      value={addCapitalDate}
+                      onChange={e => setAddCapitalDate(e.target.value)}
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div>

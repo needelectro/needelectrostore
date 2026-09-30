@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireSuperAdmin, hashPassword } from '@/lib/auth';
+import { recordAccountMovement, reverseTransaction } from '@/lib/accounting';
 
 export async function GET(req: NextRequest) {
   const user = await requireSuperAdmin(req);
@@ -220,7 +221,7 @@ export async function POST(req: NextRequest) {
     // ACTION 1: CREATE NEW INVESTOR ACCOUNT
     // -----------------------------------------------------------------
     if (action === 'create-investor') {
-      const { name, email, phone, password, initialAmount, depositAccountId, notes } = body;
+      const { name, email, phone, password, initialAmount, depositAccountId, notes, date, initialDate } = body;
 
       if (!name || !email || !password) {
         return NextResponse.json(
@@ -282,6 +283,7 @@ export async function POST(req: NextRequest) {
       // 3. Create Initial Investment if provided
       const amount = Number(initialAmount || 0);
       if (amount > 0) {
+        const invDate = date || initialDate ? new Date(date || initialDate) : new Date();
         let targetAccId = depositAccountId || 'acc-1';
         let account = await prisma.financialAccount.findFirst({
           where: { id: targetAccId },
@@ -295,47 +297,40 @@ export async function POST(req: NextRequest) {
         
         targetAccId = account?.id || targetAccId;
         const targetAcc = await prisma.financialAccount.findUnique({ where: { id: targetAccId } });
-
         const investmentNumber = `INV-REF-${Date.now().toString().slice(-6)}`;
+        const pMethod = targetAcc?.type === 'CASH' ? 'Cash' : 'Bank Transfer';
 
-        await prisma.investment.create({
-          data: {
-            id: `inv-${Date.now()}`,
-            referenceNumber: investmentNumber,
-            investorName: name,
-            amount,
-            date: new Date(),
-            investmentType: 'EQUITY',
-            depositAccountId: targetAccId,
-            paymentMethod: targetAcc?.type === 'CASH' ? 'Cash' : 'Bank Transfer',
-            reference: `Initial Capital Injection (${investorCode})`,
-            notes: notes || `Initial investment recorded for ${name}`,
-            status: 'ACTIVE',
-            createdBy: user.name,
-            investorId: newInvestor.id,
-          },
-        });
+        await prisma.$transaction(async (tx) => {
+          const inv = await tx.investment.create({
+            data: {
+              id: `inv-${Date.now()}`,
+              referenceNumber: investmentNumber,
+              investorName: name,
+              amount,
+              date: invDate,
+              investmentType: 'EQUITY',
+              depositAccountId: targetAccId,
+              paymentMethod: pMethod,
+              reference: `Initial Capital Injection (${investorCode})`,
+              notes: notes || `Initial investment recorded for ${name}`,
+              status: 'ACTIVE',
+              createdBy: user.name,
+              investorId: newInvestor.id,
+            },
+          });
 
-        // Increment target financial account balance
-        await prisma.financialAccount.update({
-          where: { id: targetAccId },
-          data: { balance: { increment: amount } },
-        });
-
-        // Double-entry ledger entry
-        await prisma.ledgerEntry.create({
-          data: {
-            id: `led-${Date.now()}`,
-            date: new Date(),
-            partyType: 'ACCOUNT',
-            partyId: targetAccId,
+          await recordAccountMovement(tx, {
+            accountId: targetAccId,
+            paymentMethod: pMethod,
             referenceType: 'INVESTMENT',
             referenceNumber: investmentNumber,
+            amount,
+            direction: 'INFLOW',
             description: `Capital investment received from ${name} (${investorCode})`,
-            debit: amount,
-            credit: 0,
-            runningBalance: Number(targetAcc?.balance || 0) + amount,
-          },
+            performedBy: user.name,
+            relatedTransactionId: inv.id,
+            date: invDate,
+          });
         });
       }
 
@@ -363,7 +358,7 @@ export async function POST(req: NextRequest) {
     // ACTION 2: ADD ADDITIONAL INVESTMENT TO EXISTING INVESTOR
     // -----------------------------------------------------------------
     if (action === 'add-investment') {
-      const { investorId, amount, depositAccountId, paymentMethod, reference, notes } = body;
+      const { investorId, amount, depositAccountId, paymentMethod, reference, notes, date } = body;
 
       const numAmount = Number(amount);
       if (!investorId || !numAmount || numAmount <= 0) {
@@ -381,6 +376,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: 'Investor not found.' }, { status: 404 });
       }
 
+      const invDate = date ? new Date(date) : new Date();
+
       let targetAccId = depositAccountId || 'acc-1';
       let account = await prisma.financialAccount.findFirst({
         where: { id: targetAccId },
@@ -394,65 +391,113 @@ export async function POST(req: NextRequest) {
       
       targetAccId = account?.id || targetAccId;
       const targetAcc = await prisma.financialAccount.findUnique({ where: { id: targetAccId } });
-
       const investmentNumber = `INV-ADD-${Date.now().toString().slice(-6)}`;
+      const pMethod = paymentMethod || (targetAcc?.type === 'CASH' ? 'Cash' : 'Bank Transfer');
 
-      const investment = await prisma.investment.create({
-        data: {
-          id: `inv-${Date.now()}`,
-          referenceNumber: investmentNumber,
-          investorName: investor.name,
-          amount: numAmount,
-          date: new Date(),
-          investmentType: 'EQUITY',
-          depositAccountId: targetAccId,
-          paymentMethod: paymentMethod || (targetAcc?.type === 'CASH' ? 'Cash' : 'Bank Transfer'),
-          reference: reference || `Additional Capital (${investor.investorId})`,
-          notes: notes || `Additional capital injected by ${investor.name}`,
-          status: 'ACTIVE',
-          createdBy: user.name,
-          investorId: investor.id,
-        },
-      });
+      const investment = await prisma.$transaction(async (tx) => {
+        const inv = await tx.investment.create({
+          data: {
+            id: `inv-${Date.now()}`,
+            referenceNumber: investmentNumber,
+            investorName: investor.name,
+            amount: numAmount,
+            date: invDate,
+            investmentType: 'EQUITY',
+            depositAccountId: targetAccId,
+            paymentMethod: pMethod,
+            reference: reference || `Additional Capital (${investor.investorId})`,
+            notes: notes || `Additional capital injected by ${investor.name}`,
+            status: 'ACTIVE',
+            createdBy: user.name,
+            investorId: investor.id,
+          },
+        });
 
-      // Update financial account balance
-      await prisma.financialAccount.update({
-        where: { id: targetAccId },
-        data: { balance: { increment: numAmount } },
-      });
-
-      // Ledger entry
-      await prisma.ledgerEntry.create({
-        data: {
-          id: `led-${Date.now()}`,
-          date: new Date(),
-          partyType: 'ACCOUNT',
-          partyId: targetAccId,
+        await recordAccountMovement(tx, {
+          accountId: targetAccId,
+          paymentMethod: pMethod,
           referenceType: 'INVESTMENT',
           referenceNumber: investmentNumber,
+          amount: numAmount,
+          direction: 'INFLOW',
           description: `Additional capital received from ${investor.name} (${investor.investorId})`,
-          debit: numAmount,
-          credit: 0,
-          runningBalance: Number(targetAcc?.balance || 0) + numAmount,
-        },
-      });
+          performedBy: user.name,
+          relatedTransactionId: inv.id,
+          date: invDate,
+        });
 
-      await prisma.auditLog.create({
-        data: {
-          id: `audit-${Date.now()}`,
-          userId: user.id,
-          userName: user.name,
-          action: 'INVESTMENT_ADDED',
-          module: 'INVESTORS',
-          recordId: investment.id,
-          details: `Added capital ৳${numAmount} to investor ${investor.name} (${investor.investorId})`,
-        },
+        await tx.auditLog.create({
+          data: {
+            id: `audit-${Date.now()}`,
+            userId: user.id,
+            userName: user.name,
+            action: 'INVESTMENT_ADDED',
+            module: 'INVESTORS',
+            recordId: inv.id,
+            details: `Added capital ৳${numAmount} to investor ${investor.name} (${investor.investorId}) on ${invDate.toLocaleDateString()}`,
+          },
+        });
+
+        return inv;
       });
 
       return NextResponse.json({
         success: true,
         message: `Successfully added ৳${numAmount.toLocaleString()} capital for ${investor.name}.`,
         data: investment,
+      });
+    }
+
+    // -----------------------------------------------------------------
+    // ACTION 2B: DELETE / REMOVE INVESTMENT
+    // -----------------------------------------------------------------
+    if (action === 'delete-investment') {
+      const { investmentId, reason } = body;
+      if (!investmentId) {
+        return NextResponse.json({ success: false, error: 'Investment ID required.' }, { status: 400 });
+      }
+
+      const inv = await prisma.investment.findUnique({
+        where: { id: investmentId },
+      });
+
+      if (!inv) {
+        return NextResponse.json({ success: false, error: 'Investment record not found.' }, { status: 404 });
+      }
+
+      await prisma.$transaction(async (tx) => {
+        const ledgerEntries = await tx.ledgerEntry.findMany({
+          where: { referenceNumber: inv.referenceNumber, status: 'COMPLETED' },
+        });
+
+        if (ledgerEntries.length > 0) {
+          await reverseTransaction(tx, {
+            referenceNumber: inv.referenceNumber,
+            reason: reason || 'Investment removed by administrator',
+            performedBy: user.name || user.email || 'Admin',
+          });
+        }
+
+        await tx.investment.delete({
+          where: { id: investmentId },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            id: `audit-${Date.now()}`,
+            userId: user.id,
+            userName: user.name,
+            action: 'INVESTMENT_REMOVED',
+            module: 'INVESTORS',
+            recordId: investmentId,
+            details: `Removed investment ${inv.referenceNumber} (৳${Number(inv.amount)}) for ${inv.investorName}: ${reason || 'Manual correction'}`,
+          },
+        });
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `Investment ${inv.referenceNumber} removed successfully.`,
       });
     }
 
