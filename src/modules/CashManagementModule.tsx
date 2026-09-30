@@ -846,13 +846,13 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                   </div>
 
                   <div style={{ margin: '0.65rem 0 0.4rem' }}>
-                    <div style={{ fontSize: '1.35rem', fontWeight: 800, color: bal >= 0 ? '#f8fafc' : '#ef4444' }}>
+                    <div style={{ fontSize: '1.45rem', fontWeight: 900, color: bal < 0 ? '#ef4444' : 'var(--text-primary)', letterSpacing: '-0.3px' }}>
                       ৳{bal.toLocaleString('en-IN')}
                     </div>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.5rem' }}>
                   <button
                     type="button"
                     onClick={() => {
@@ -862,11 +862,12 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                       setShowTransferModal(true);
                     }}
                     style={{
-                      background: 'rgba(255, 255, 255, 0.04)',
-                      border: '1px solid rgba(255, 255, 255, 0.08)',
-                      borderRadius: '4px',
+                      background: 'var(--bg-card-muted, rgba(125, 125, 125, 0.08))',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '5px',
                       color: 'var(--text-secondary)',
                       fontSize: '0.725rem',
+                      fontWeight: 600,
                       padding: '0.25rem 0.6rem',
                       cursor: 'pointer',
                       display: 'flex',
@@ -1300,7 +1301,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
 
           <div>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>GROSS SALES REVENUE</span>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f8fafc' }}>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)' }}>
               ৳{summaryData ? summaryData.cashVsProfit.totalRevenue.toLocaleString('en-IN') : '0'}
             </div>
             <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Invoice values generated</span>
@@ -1664,7 +1665,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                     <td style={{ textAlign: 'right', fontWeight: 700, color: '#ef4444' }}>
                       {row.cashOut > 0 ? `−৳${row.cashOut.toLocaleString('en-IN')}` : '—'}
                     </td>
-                    <td style={{ textAlign: 'right', fontWeight: 800, color: '#f8fafc', fontSize: '0.875rem' }}>
+                    <td style={{ textAlign: 'right', fontWeight: 800, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
                       ৳{row.runningBalance.toLocaleString('en-IN')}
                     </td>
                     <td style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
@@ -2682,9 +2683,9 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                       borderRadius: '5px',
                       fontSize: '0.75rem',
                       fontWeight: !useDirectCount ? 700 : 500,
-                      background: !useDirectCount ? 'var(--brand-primary)' : 'rgba(255, 255, 255, 0.05)',
-                      color: !useDirectCount ? '#fff' : 'var(--text-muted)',
-                      border: 'none',
+                      background: !useDirectCount ? 'var(--brand-primary)' : 'var(--bg-card-muted, rgba(125, 125, 125, 0.08))',
+                      color: !useDirectCount ? '#fff' : 'var(--text-secondary)',
+                      border: '1px solid var(--border-color)',
                       cursor: 'pointer'
                     }}
                   >
@@ -2698,9 +2699,9 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                       borderRadius: '5px',
                       fontSize: '0.75rem',
                       fontWeight: useDirectCount ? 700 : 500,
-                      background: useDirectCount ? 'var(--brand-primary)' : 'rgba(255, 255, 255, 0.05)',
-                      color: useDirectCount ? '#fff' : 'var(--text-muted)',
-                      border: 'none',
+                      background: useDirectCount ? 'var(--brand-primary)' : 'var(--bg-card-muted, rgba(125, 125, 125, 0.08))',
+                      color: useDirectCount ? '#fff' : 'var(--text-secondary)',
+                      border: '1px solid var(--border-color)',
                       cursor: 'pointer'
                     }}
                   >
