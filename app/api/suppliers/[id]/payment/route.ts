@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth, hasPermission } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
+import { recordAccountMovement } from '@/lib/accounting';
 
 export async function POST(
   req: NextRequest,
@@ -30,7 +31,7 @@ export async function POST(
 
   await prisma.$transaction(async (tx) => {
     // Create SupplierPayment record
-    await tx.supplierPayment.create({
+    const payment = await tx.supplierPayment.create({
       data: {
         id: 'spay-' + Date.now(),
         voucherNumber,
@@ -54,27 +55,6 @@ export async function POST(
       },
     });
 
-    // Deduct financial account balance
-    const targetAccountId = accountId || 'acc-1';
-    let account = await tx.financialAccount.findFirst({
-      where: { id: targetAccountId },
-    });
-
-    if (!account) {
-      account = await tx.financialAccount.findFirst({
-        where: { type: 'CASH' }
-      });
-    }
-
-    if (account) {
-      await tx.financialAccount.update({
-        where: { id: account.id },
-        data: {
-          balance: { decrement: new Prisma.Decimal(amount) },
-        },
-      });
-    }
-
     // Create Accounting Ledger Entry for Supplier (Debit Supplier Payable)
     await tx.ledgerEntry.create({
       data: {
@@ -88,26 +68,24 @@ export async function POST(
         debit: new Prisma.Decimal(amount),
         credit: new Prisma.Decimal(0),
         runningBalance: new Prisma.Decimal(Number(supplier.currentPayable) - Number(amount)),
+        status: 'COMPLETED',
+        performedBy: user.name,
       },
     });
 
-    // Create Accounting Ledger Entry for Financial Account (Credit Cash / Bank)
-    if (account) {
-      await tx.ledgerEntry.create({
-        data: {
-          id: 'led-' + Date.now() + '-acc',
-          date: new Date(),
-          partyType: 'ACCOUNT',
-          partyId: account.id,
-          referenceType: 'SUPPLIER_PAYMENT',
-          referenceNumber: voucherNumber,
-          description: `Disbursement to supplier ${supplier.name} for purchase settlement`,
-          debit: new Prisma.Decimal(0),
-          credit: new Prisma.Decimal(amount),
-          runningBalance: new Prisma.Decimal(Number(account.balance) - Number(amount)),
-        },
-      });
-    }
+    // Deduct Financial Account & Create Central Ledger Entry
+    const targetAccountId = accountId || 'acc-1';
+    await recordAccountMovement(tx, {
+      accountId: targetAccountId,
+      paymentMethod,
+      referenceType: 'SUPPLIER_PAYMENT',
+      referenceNumber: voucherNumber,
+      amount: Number(amount),
+      direction: 'OUTFLOW',
+      description: `Disbursement to supplier ${supplier.name} for purchase settlement`,
+      performedBy: user.name,
+      relatedTransactionId: payment.id,
+    });
 
     // Audit Log
     await tx.auditLog.create({

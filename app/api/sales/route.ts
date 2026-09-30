@@ -5,6 +5,7 @@ import { requireAuth, hasPermission, authenticateRequest } from '@/lib/auth';
 import { createSaleSchema } from '@/lib/validations';
 import { sendNotification } from '@/lib/notifications';
 import { Prisma } from '@prisma/client';
+import { recordAccountMovement } from '@/lib/accounting';
 
 export async function GET(req: NextRequest) {
   let user: any = await authenticateRequest(req);
@@ -395,66 +396,28 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // 6. Update Financial Accounts & Ledgers (With Full Split / Mixed Payment Multi-Account Allocation)
+      // 6. Update Financial Accounts & Central Ledger (With Full Split / Mixed Payment Multi-Account Allocation)
       if (saleData.paidAmount > 0) {
         const splitPayments = Array.isArray(saleData.payments) && saleData.payments.length > 0
           ? saleData.payments
           : [{ method: 'Cash', amount: saleData.paidAmount, accountId: paymentAccountId }];
 
-        const allActiveAccounts = await tx.financialAccount.findMany({
-          where: { isActive: true },
-        });
-
         for (const p of splitPayments) {
           const splitAmount = Number(p.amount);
           if (splitAmount <= 0) continue;
+          const methodLabel = p.method || 'Cash';
 
-          let targetAccount = null;
-          if (p.accountId) {
-            targetAccount = allActiveAccounts.find((a) => a.id === p.accountId) || null;
-          }
-
-          if (!targetAccount) {
-            const methodLower = (p.method || 'cash').toLowerCase().trim();
-            if (methodLower.includes('bkash')) {
-              targetAccount = allActiveAccounts.find((a) => a.name.toLowerCase().includes('bkash') || a.type === 'MOBILE_BANKING') || null;
-            } else if (methodLower.includes('nagad') || methodLower.includes('rocket')) {
-              targetAccount = allActiveAccounts.find((a) => a.name.toLowerCase().includes('nagad') || a.type === 'MOBILE_BANKING') || null;
-            } else if (methodLower.includes('bank') || methodLower.includes('card')) {
-              targetAccount = allActiveAccounts.find((a) => a.type === 'BANK') || null;
-            } else {
-              targetAccount = allActiveAccounts.find((a) => a.type === 'CASH') || null;
-            }
-          }
-
-          if (!targetAccount) {
-            targetAccount = allActiveAccounts[0] || null;
-          }
-
-          if (targetAccount) {
-            await tx.financialAccount.update({
-              where: { id: targetAccount.id },
-              data: {
-                balance: { increment: new Prisma.Decimal(splitAmount) },
-              },
-            });
-
-            const methodLabel = p.method || 'Cash';
-            await tx.ledgerEntry.create({
-              data: {
-                id: 'led-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
-                date: new Date(),
-                partyType: 'ACCOUNT',
-                partyId: targetAccount.id,
-                referenceType: 'SALE',
-                referenceNumber: invoiceNumber,
-                description: `Payment received (${methodLabel}) for invoice ${invoiceNumber} from ${saleData.customerName}`,
-                debit: new Prisma.Decimal(splitAmount),
-                credit: new Prisma.Decimal(0),
-                runningBalance: new Prisma.Decimal(Number(targetAccount.balance) + splitAmount),
-              },
-            });
-          }
+          await recordAccountMovement(tx, {
+            accountId: p.accountId || paymentAccountId,
+            paymentMethod: methodLabel,
+            referenceType: 'SALE',
+            referenceNumber: invoiceNumber,
+            amount: splitAmount,
+            direction: 'INFLOW',
+            description: `Payment received (${methodLabel}) for invoice ${invoiceNumber} from ${saleData.customerName}`,
+            performedBy: user.name,
+            relatedTransactionId: sale.id,
+          });
         }
       }
 

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth, hasPermission } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
+import { recordAccountMovement } from '@/lib/accounting';
 
 export async function GET(req: NextRequest) {
   const user = await requireAuth(req);
@@ -216,73 +217,16 @@ export async function POST(req: NextRequest) {
       // 4. Record Outflow & Deduct Financial Account if paid amount was provided upfront
       if (finalPaid > 0) {
         const targetAccountId = (payload as any).accountId || (payload as any).depositAccountId;
-        let account = targetAccountId
-          ? await tx.financialAccount.findFirst({ where: { id: targetAccountId } })
-          : null;
-
-        if (!account && paymentMethod) {
-          account = await tx.financialAccount.findFirst({
-            where: {
-              isActive: true,
-              OR: [
-                { type: { contains: paymentMethod, mode: 'insensitive' } },
-                { name: { contains: paymentMethod, mode: 'insensitive' } },
-              ],
-            },
-          });
-        }
-
-        if (!account) {
-          account = await tx.financialAccount.findFirst({
-            where: { isActive: true },
-            orderBy: { name: 'asc' },
-          });
-        }
-
-        if (account) {
-          await tx.financialAccount.update({
-            where: { id: account.id },
-            data: {
-              balance: { decrement: new Prisma.Decimal(finalPaid) },
-            },
-          });
-        }
-
-        const expVoucher = 'EXP-PUR-' + Date.now().toString().slice(-6);
-        const itemSummary = items
-          .map((i: any) => `${i.productName || 'Item'} (x${i.quantity || 1})`)
-          .join(', ');
-
-        // Record official Expense under 'Purchase Expenses'
-        await tx.expense.create({
-          data: {
-            id: 'exp-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
-            voucherNumber: expVoucher,
-            category: 'Purchase Expenses',
-            amount: new Prisma.Decimal(finalPaid),
-            date: new Date(),
-            paymentMethod: paymentMethod || 'Cash',
-            branchId: branchId || user.branchId || 'branch-main-1',
-            description: `Product Purchase [${invoiceNumber}] from ${finalSupplierName}: ${itemSummary.slice(0, 180)}`,
-            createdBy: user.name,
-          },
-        });
-
-        await tx.ledgerEntry.create({
-          data: {
-            id: 'led-' + Date.now() + '-pur-cash',
-            date: new Date(),
-            partyType: 'ACCOUNT',
-            partyId: account ? account.id : (targetAccountId || 'acc-1'),
-            referenceType: 'EXPENSE',
-            referenceNumber: expVoucher,
-            description: `Payment disbursed for product purchase ${invoiceNumber} (${finalSupplierName})`,
-            debit: new Prisma.Decimal(0),
-            credit: new Prisma.Decimal(finalPaid),
-            runningBalance: new Prisma.Decimal(
-              account ? Number(account.balance) - finalPaid : 0
-            ),
-          },
+        await recordAccountMovement(tx, {
+          accountId: targetAccountId,
+          paymentMethod: paymentMethod || 'Cash',
+          referenceType: 'PURCHASE',
+          referenceNumber: invoiceNumber,
+          amount: finalPaid,
+          direction: 'OUTFLOW',
+          description: `Product Purchase [${invoiceNumber}] payment to ${finalSupplierName}`,
+          performedBy: user.name,
+          relatedTransactionId: purchase.id,
         });
       }
 

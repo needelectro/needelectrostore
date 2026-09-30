@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAuth, hasPermission } from '@/lib/auth';
 import { createExpenseSchema } from '@/lib/validations';
 import { Prisma } from '@prisma/client';
+import { recordAccountMovement } from '@/lib/accounting';
 
 export async function GET(req: NextRequest) {
   const user = await requireAuth(req);
@@ -51,41 +52,18 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // Deduct financial account balance
-      let account = accountId 
-        ? await tx.financialAccount.findUnique({ where: { id: accountId } })
-        : null;
-
-      if (!account) {
-        account = await tx.financialAccount.findFirst({
-          where: { isActive: true },
-          orderBy: { name: 'asc' },
-        });
-      }
-
-      if (account) {
-        await tx.financialAccount.update({
-          where: { id: account.id },
-          data: {
-            balance: { decrement: new Prisma.Decimal(amount) },
-          },
-        });
-      }
-
-      // Record Accounting Ledger Entry
-      await tx.ledgerEntry.create({
-        data: {
-          id: 'led-' + Date.now(),
-          date: new Date(),
-          partyType: 'ACCOUNT',
-          partyId: account?.id || 'main',
-          referenceType: 'EXPENSE',
-          referenceNumber: voucherNumber,
-          description: `Operating Expense: ${category} - ${description}`,
-          debit: new Prisma.Decimal(0),
-          credit: new Prisma.Decimal(amount),
-          runningBalance: new Prisma.Decimal(account ? Number(account.balance) - amount : 0),
-        },
+      // Deduct financial account and record central ledger entry
+      await recordAccountMovement(tx, {
+        accountId,
+        paymentMethod,
+        referenceType: 'EXPENSE',
+        referenceNumber: voucherNumber,
+        amount,
+        direction: 'OUTFLOW',
+        description: `Operating Expense: [${category}] ${description}`,
+        performedBy: user.name,
+        relatedTransactionId: exp.id,
+        date: date ? new Date(date) : new Date(),
       });
 
       // Audit Log

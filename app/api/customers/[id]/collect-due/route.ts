@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAuth, hasPermission } from '@/lib/auth';
 import { sendNotification } from '@/lib/notifications';
 import { Prisma } from '@prisma/client';
+import { recordAccountMovement } from '@/lib/accounting';
 
 export async function POST(
   req: NextRequest,
@@ -66,15 +67,7 @@ export async function POST(
         },
       });
 
-      // 3. Increase Financial Account balance
-      const updatedAccount = await tx.financialAccount.update({
-        where: { id: targetAccountId },
-        data: {
-          balance: { increment: new Prisma.Decimal(numericAmount) },
-        },
-      });
-
-      // 4. Record Customer Ledger Entry
+      // 3. Record Customer Ledger Entry
       await tx.ledgerEntry.create({
         data: {
           id: 'led-' + Date.now() + '-cust',
@@ -87,23 +80,23 @@ export async function POST(
           debit: new Prisma.Decimal(0),
           credit: new Prisma.Decimal(numericAmount),
           runningBalance: updatedCustomer.currentBalance,
+          status: 'COMPLETED',
+          performedBy: user.name,
+          relatedTransactionId: payment.id,
         },
       });
 
-      // 5. Record Financial Account Ledger Entry
-      await tx.ledgerEntry.create({
-        data: {
-          id: 'led-' + Date.now() + '-acc',
-          date: new Date(),
-          partyType: 'ACCOUNT',
-          partyId: targetAccountId,
-          referenceType: 'DUE_PAYMENT',
-          referenceNumber: receiptNumber,
-          description: `Customer Due collected from ${customer.name} (${customer.phone})`,
-          debit: new Prisma.Decimal(numericAmount),
-          credit: new Prisma.Decimal(0),
-          runningBalance: updatedAccount.balance,
-        },
+      // 4. Increase Financial Account balance & record Central Ledger Entry
+      await recordAccountMovement(tx, {
+        accountId: targetAccountId,
+        paymentMethod: paymentMethod || 'Cash',
+        referenceType: 'DUE_PAYMENT',
+        referenceNumber: receiptNumber,
+        amount: numericAmount,
+        direction: 'INFLOW',
+        description: `Customer Due collected from ${customer.name} (${customer.phone})`,
+        performedBy: user.name,
+        relatedTransactionId: payment.id,
       });
 
       // 6. Audit Log

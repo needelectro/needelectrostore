@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth, hasPermission } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
+import { recordAccountMovement } from '@/lib/accounting';
 
 export async function GET(req: NextRequest) {
   const user = await requireAuth(req);
@@ -147,39 +148,17 @@ export async function POST(req: NextRequest) {
         } else {
           // Cash / Bank / Mobile Banking refund disbursement
           const targetAccountId = accountId || 'acc-1';
-          let account = await tx.financialAccount.findFirst({
-            where: { id: targetAccountId },
+          await recordAccountMovement(tx, {
+            accountId: targetAccountId,
+            paymentMethod: refundMethod || 'Cash',
+            referenceType: 'SALE_RETURN',
+            referenceNumber: returnNumber,
+            amount: refundAmt,
+            direction: 'OUTFLOW',
+            description: `Refund disbursed to ${customerName} for return ${returnNumber} (Invoice: ${saleInvoiceId})`,
+            performedBy: user.name,
+            relatedTransactionId: productReturn.id,
           });
-
-          if (!account) {
-            account = await tx.financialAccount.findFirst({
-              where: { type: 'CASH' },
-            });
-          }
-
-          if (account) {
-            await tx.financialAccount.update({
-              where: { id: account.id },
-              data: {
-                balance: { decrement: new Prisma.Decimal(refundAmt) },
-              },
-            });
-
-            await tx.ledgerEntry.create({
-              data: {
-                id: 'led-' + Date.now() + '-ret-acc',
-                date: new Date(),
-                partyType: 'ACCOUNT',
-                partyId: account.id,
-                referenceType: 'RETURN',
-                referenceNumber: returnNumber,
-                description: `Refund disbursed to ${customerName} for return ${returnNumber} (Invoice: ${saleInvoiceId})`,
-                debit: new Prisma.Decimal(0),
-                credit: new Prisma.Decimal(refundAmt),
-                runningBalance: new Prisma.Decimal(Number(account.balance) - refundAmt),
-              },
-            });
-          }
         }
       }
 

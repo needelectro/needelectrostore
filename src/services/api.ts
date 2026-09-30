@@ -393,7 +393,34 @@ export const api = {
       request<{ success: boolean; message: string }>('/api/accounting/opening-balances', {
         method: 'POST',
         body: JSON.stringify(payload)
-      })
+      }),
+    getLedger: (params?: Record<string, string>) => {
+      const q = params ? '?' + new URLSearchParams(params).toString() : '';
+      return request<{ success: boolean; data: any }>(`/api/accounting/ledger${q}`);
+    },
+    reverseTransaction: (payload: { referenceNumber: string; reason: string }) =>
+      request<{ success: boolean; message: string; data?: any }>('/api/accounting/ledger', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+    getCashFlow: (params?: Record<string, string>) => {
+      const q = params ? '?' + new URLSearchParams(params).toString() : '';
+      return request<{ success: boolean; data: any }>(`/api/accounting/cash-flow${q}`);
+    },
+    recordOtherIncome: (payload: any) =>
+      request<{ success: boolean; message: string; data: any }>('/api/accounting/other-income', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+    getOtherIncomes: () =>
+      request<{ success: boolean; data: any[] }>('/api/accounting/other-income'),
+    recordWithdrawal: (payload: any) =>
+      request<{ success: boolean; message: string; data: any }>('/api/accounting/withdrawals', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+    getWithdrawals: () =>
+      request<{ success: boolean; data: any[] }>('/api/accounting/withdrawals')
   },
 
   // 12.1 Cash Management & Drawer Engine

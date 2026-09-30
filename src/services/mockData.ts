@@ -140,7 +140,7 @@ export const INITIAL_FINANCIAL_ACCOUNTS: FinancialAccount[] = [
     "accountNumber": "CASH-MB-01",
     "bankName": "Cash in Hand Vault",
     "branchName": "Moulvibazar Main",
-    "balance": 167789,
+    "balance": 0,
     "currency": "BDT",
     "isActive": true
   },
@@ -184,6 +184,17 @@ export const INITIAL_FINANCIAL_ACCOUNTS: FinancialAccount[] = [
     "accountNumber": "01884599271",
     "bankName": "bKash Limited",
     "branchName": "Official Payment Wallet",
+    "balance": 0,
+    "currency": "BDT",
+    "isActive": true
+  },
+  {
+    "id": "acc-nagad-primary",
+    "name": "Nagad Payment Wallet (01733-983752)",
+    "type": "MOBILE_BANKING",
+    "accountNumber": "01733-983752",
+    "bankName": "Nagad (Bangladesh Post Office)",
+    "branchName": "Official Merchant Wallet",
     "balance": 0,
     "currency": "BDT",
     "isActive": true

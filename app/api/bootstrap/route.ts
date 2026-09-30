@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { authenticateRequest } from '@/lib/auth';
+import { syncStoredBalancesWithLedger } from '@/lib/accounting';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +34,13 @@ function serializeRecord(record: any): any {
 export async function GET(req: NextRequest) {
   try {
     const user = await authenticateRequest(req);
+
+    // Ensure financial account balances match ledger entries
+    try {
+      await syncStoredBalancesWithLedger();
+    } catch (e: any) {
+      console.warn('Sync balances during bootstrap warning:', e.message);
+    }
 
     // 1. Settings & Configs
     const [
@@ -275,6 +283,8 @@ export async function GET(req: NextRequest) {
       priceAuditLog,
       customerMergeAudit,
       openingBalances,
+      otherIncomes,
+      ownerWithdrawals,
     ] = await Promise.all([
       prisma.role.findMany({ orderBy: { createdAt: 'asc' } }),
       prisma.permission.findMany({ orderBy: [{ module: 'asc' }, { action: 'asc' }] }),
@@ -333,6 +343,8 @@ export async function GET(req: NextRequest) {
       prisma.priceAudit.findMany({ orderBy: { timestamp: 'desc' }, take: 100 }),
       prisma.customerMergeAudit.findMany({ orderBy: { timestamp: 'desc' } }),
       prisma.openingBalance.findMany({ orderBy: { createdAt: 'desc' } }),
+      prisma.otherIncome.findMany({ orderBy: { date: 'desc' }, take: 200 }),
+      prisma.ownerWithdrawal.findMany({ orderBy: { date: 'desc' }, take: 200 }),
     ]);
 
     // Shape sales and items to match erpStore expected interfaces
@@ -461,6 +473,8 @@ export async function GET(req: NextRequest) {
         priceAuditLog: serializeRecord(priceAuditLog),
         customerMergeAudit: serializeRecord(customerMergeAudit),
         openingBalances: serializeRecord(openingBalances),
+        otherIncomes: serializeRecord(otherIncomes),
+        ownerWithdrawals: serializeRecord(ownerWithdrawals),
       },
     });
   } catch (err: any) {

@@ -920,21 +920,73 @@ model InventoryTransaction {
 }
 
 model LedgerEntry {
-  id              String   @id
-  date            DateTime @default(now())
-  partyType       String   @map("party_type") // CUSTOMER, SUPPLIER, ACCOUNT, SYSTEM
-  partyId         String   @map("party_id")
-  referenceType   String   @map("reference_type") // SALE, EMI_PAYMENT, PURCHASE, EXPENSE, etc.
-  referenceNumber String   @map("reference_number")
-  description     String
-  debit           Decimal  @default(0) @db.Decimal(12, 2)
-  credit          Decimal  @default(0) @db.Decimal(12, 2)
-  runningBalance  Decimal  @default(0) @map("running_balance") @db.Decimal(12, 2)
+  id                   String    @id
+  date                 DateTime  @default(now())
+  partyType            String    @map("party_type") // CUSTOMER, SUPPLIER, ACCOUNT, SYSTEM
+  partyId              String    @map("party_id")
+  referenceType        String    @map("reference_type") // SALE, SALE_RETURN, PURCHASE, PURCHASE_RETURN, DUE_PAYMENT, SUPPLIER_PAYMENT, EXPENSE, EXPENSE_REVERSAL, INVESTMENT, OWNER_WITHDRAWAL, TRANSFER, OTHER_INCOME, OTHER_EXPENSE, CASH_ADJUSTMENT, OPENING_BALANCE
+  referenceNumber      String    @map("reference_number")
+  description          String
+  debit                Decimal   @default(0) @db.Decimal(12, 2)
+  credit               Decimal   @default(0) @db.Decimal(12, 2)
+  runningBalance       Decimal   @default(0) @map("running_balance") @db.Decimal(12, 2)
+  status               String    @default("COMPLETED") // COMPLETED, CANCELLED, REVERSED, RETURNED
+  reversalOfId         String?   @map("reversal_of_id")
+  relatedTransactionId String?   @map("related_transaction_id")
+  paymentMethod        String?   @map("payment_method")
+  performedBy          String?   @map("performed_by")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime? @updatedAt @map("updated_at")
 
   @@index([partyType, partyId])
   @@index([date])
   @@index([referenceNumber])
+  @@index([status])
+  @@index([referenceType])
   @@map("ledger_entries")
+}
+
+model OtherIncome {
+  id             String    @id
+  incomeNumber   String    @unique @map("income_number")
+  category       String
+  amount         Decimal   @db.Decimal(12, 2)
+  date           DateTime  @default(now())
+  accountId      String    @map("account_id")
+  paymentMethod  String    @default("Cash") @map("payment_method")
+  reference      String?
+  description    String
+  receivedFrom   String?   @map("received_from")
+  branchId       String?   @map("branch_id")
+  status         String    @default("COMPLETED") // COMPLETED, REVERSED, CANCELLED
+  receivedBy     String    @map("received_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime? @updatedAt @map("updated_at")
+
+  @@index([incomeNumber])
+  @@index([date])
+  @@index([category])
+  @@map("other_incomes")
+}
+
+model OwnerWithdrawal {
+  id               String    @id
+  withdrawalNumber String    @unique @map("withdrawal_number")
+  ownerName        String    @map("owner_name")
+  amount           Decimal   @db.Decimal(12, 2)
+  date             DateTime  @default(now())
+  sourceAccountId  String    @map("source_account_id")
+  paymentMethod    String    @default("Cash") @map("payment_method")
+  reference        String?
+  purpose          String?
+  status           String    @default("COMPLETED") // COMPLETED, REVERSED, CANCELLED
+  approvedBy       String    @map("approved_by")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime? @updatedAt @map("updated_at")
+
+  @@index([withdrawalNumber])
+  @@index([date])
+  @@map("owner_withdrawals")
 }
 
 // ---------------------------------------------------------

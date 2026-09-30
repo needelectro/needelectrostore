@@ -1,8 +1,9 @@
-// NEED ELECTRO ERP — Super Admin Purchase Master Update & Delete Handler
+// NEED ELECTRO ERP — Super Admin Purchase Master Update & Delete Handler with ACID Ledger Synchronization
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth, hasPermission } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
+import { reverseTransaction, recordAccountMovement } from '@/lib/accounting';
 
 export async function PUT(
   req: NextRequest,
@@ -17,12 +18,74 @@ export async function PUT(
 
   try {
     const body = await req.json();
-    const purchase = await prisma.purchase.findUnique({ where: { id: params.id } });
-    if (!purchase) {
+    const existing = await prisma.purchase.findUnique({
+      where: { id: params.id },
+      include: { items: true },
+    });
+    if (!existing) {
       return NextResponse.json({ success: false, error: 'Purchase record not found' }, { status: 404 });
     }
 
     const updated = await prisma.$transaction(async (tx) => {
+      const oldPaid = Number(existing.paidAmount);
+      const newPaid = body.paidAmount !== undefined ? Number(body.paidAmount) : oldPaid;
+      const oldDue = Number(existing.dueAmount);
+      const newDue = body.dueAmount !== undefined ? Number(body.dueAmount) : oldDue;
+
+      // 1. If paid amount changed, reverse previous payment and post new payment
+      if (body.paidAmount !== undefined && newPaid !== oldPaid) {
+        await reverseTransaction(tx, {
+          referenceNumber: existing.invoiceNumber,
+          reason: `Purchase ${existing.invoiceNumber} paid amount modified from ৳${oldPaid} to ৳${newPaid}`,
+          performedBy: user.name,
+        });
+
+        if (newPaid > 0) {
+          await recordAccountMovement(tx, {
+            accountId: body.accountId || (existing as any).depositAccountId,
+            paymentMethod: body.paymentMethod || existing.paymentMethod || 'Cash',
+            referenceType: 'PURCHASE',
+            referenceNumber: existing.invoiceNumber,
+            amount: newPaid,
+            direction: 'OUTFLOW',
+            description: `Payment disbursed for modified purchase ${existing.invoiceNumber} (${existing.supplierName})`,
+            performedBy: user.name,
+            relatedTransactionId: existing.id,
+          });
+        }
+      }
+
+      // 2. If due amount changed, adjust supplier payable
+      if (body.dueAmount !== undefined && newDue !== oldDue) {
+        const diff = newDue - oldDue;
+        await tx.supplier.update({
+          where: { id: existing.supplierId },
+          data: {
+            currentPayable: {
+              [diff > 0 ? 'increment' : 'decrement']: new Prisma.Decimal(Math.abs(diff)),
+            },
+          },
+        });
+
+        await tx.ledgerEntry.create({
+          data: {
+            id: 'led-pur-adj-' + Date.now(),
+            date: new Date(),
+            partyType: 'SUPPLIER',
+            partyId: existing.supplierId,
+            referenceType: 'PURCHASE_ADJUSTMENT',
+            referenceNumber: existing.invoiceNumber,
+            description: `Supplier payable adjustment for purchase ${existing.invoiceNumber} (Old Due: ৳${oldDue}, New Due: ৳${newDue})`,
+            debit: diff < 0 ? new Prisma.Decimal(Math.abs(diff)) : new Prisma.Decimal(0),
+            credit: diff > 0 ? new Prisma.Decimal(diff) : new Prisma.Decimal(0),
+            runningBalance: new Prisma.Decimal(newDue),
+            status: 'COMPLETED',
+            performedBy: user.name,
+          },
+        });
+      }
+
+      // 3. Update Purchase record
       const p = await tx.purchase.update({
         where: { id: params.id },
         data: {
@@ -38,10 +101,12 @@ export async function PUT(
           ...(body.dueAmount !== undefined && { dueAmount: new Prisma.Decimal(body.dueAmount) }),
           ...(body.paymentMethod && { paymentMethod: body.paymentMethod }),
           ...(body.notes !== undefined && { notes: body.notes }),
+          ...(body.status && { status: body.status }),
         },
         include: { items: true },
       });
 
+      // 4. Audit Log
       await tx.auditLog.create({
         data: {
           id: 'audit-' + Date.now(),
@@ -85,34 +150,116 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: 'Purchase record not found' }, { status: 404 });
     }
 
+    if (purchase.status === 'CANCELLED') {
+      return NextResponse.json({ success: false, error: 'Purchase has already been cancelled and reversed.' }, { status: 400 });
+    }
+
     await prisma.$transaction(async (tx) => {
-      // 1. Delete purchase items
-      await tx.purchaseItem.deleteMany({
-        where: { purchaseId: purchase.id },
+      // 1. Revert product stock & serials
+      for (const item of purchase.items) {
+        if (item.productId) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: {
+              currentStock: { decrement: item.quantity },
+            },
+          });
+
+          await tx.inventoryTransaction.create({
+            data: {
+              id: 'inv-pur-rev-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+              transactionNumber: 'REVERT-' + purchase.invoiceNumber + '-' + item.id.slice(-4),
+              date: new Date(),
+              type: 'DAMAGE_OUT',
+              productId: item.productId,
+              productName: item.productName,
+              branchId: purchase.branchId,
+              quantity: item.quantity,
+              unitCost: item.costPrice,
+              totalValue: new Prisma.Decimal(Number(item.costPrice) * item.quantity),
+              openingStock: item.quantity,
+              closingStock: 0,
+              referenceType: 'PURCHASE_CANCELLATION',
+              referenceId: purchase.invoiceNumber,
+              notes: `Stock reduced upon cancellation of purchase ${purchase.invoiceNumber}`,
+              createdBy: user.name,
+            },
+          });
+        }
+
+        // Delete serials created under this purchase if any
+        await tx.productSerial.deleteMany({
+          where: { purchaseId: purchase.id },
+        });
+      }
+
+      // 2. Revert supplier payable balance
+      const dueAmt = Number(purchase.dueAmount);
+      if (dueAmt > 0 && purchase.supplierId) {
+        await tx.supplier.update({
+          where: { id: purchase.supplierId },
+          data: {
+            currentPayable: { decrement: new Prisma.Decimal(dueAmt) },
+          },
+        });
+      }
+
+      // 3. Reverse central financial account entries (refund upfront cash to account)
+      await reverseTransaction(tx, {
+        referenceNumber: purchase.invoiceNumber,
+        reason: `Purchase ${purchase.invoiceNumber} cancelled/deleted by ${user.name}`,
+        performedBy: user.name,
       });
 
-      // 2. Delete purchase
-      await tx.purchase.delete({
-        where: { id: purchase.id },
+      // 4. Also reverse any legacy EXP-PUR- voucher if it was created
+      const legacyExpense = await tx.expense.findFirst({
+        where: {
+          description: { contains: purchase.invoiceNumber },
+        },
       });
+      if (legacyExpense) {
+        await tx.expense.delete({ where: { id: legacyExpense.id } });
+      }
 
-      // 3. Audit trail
+      // 5. Check if permanent delete query param or status cancellation
+      const { searchParams } = new URL(req.url);
+      const hardDelete = searchParams.get('hard') === 'true';
+
+      if (hardDelete) {
+        await tx.purchaseItem.deleteMany({ where: { purchaseId: purchase.id } });
+        await tx.purchase.delete({ where: { id: purchase.id } });
+      } else {
+        await tx.purchase.update({
+          where: { id: purchase.id },
+          data: {
+            status: 'CANCELLED',
+            paidAmount: new Prisma.Decimal(0),
+            dueAmount: new Prisma.Decimal(0),
+            notes: `${purchase.notes ? purchase.notes + ' | ' : ''}CANCELLED by ${user.name} on ${new Date().toISOString()}`,
+          },
+        });
+      }
+
+      // 6. Audit trail
       await tx.auditLog.create({
         data: {
           id: 'audit-' + Date.now(),
           userId: user.id,
           userName: user.name,
-          action: 'SUPER_ADMIN_PURCHASE_DELETE',
+          action: hardDelete ? 'SUPER_ADMIN_PURCHASE_PERMANENT_DELETE' : 'SUPER_ADMIN_PURCHASE_CANCEL',
           module: 'PURCHASES',
           recordId: purchase.id,
-          details: `Super Admin ${user.name} deleted Purchase ${purchase.invoiceNumber} (Supplier: ${purchase.supplierName}, Total: ${purchase.total})`,
+          details: `Super Admin ${user.name} ${hardDelete ? 'permanently deleted' : 'cancelled'} Purchase ${purchase.invoiceNumber} (Supplier: ${purchase.supplierName}, Total: ${purchase.total}, Reversing Cash Out: ৳${purchase.paidAmount}, Due: ৳${purchase.dueAmount})`,
         },
       });
     });
 
-    return NextResponse.json({ success: true, message: `Purchase ${purchase.invoiceNumber} deleted successfully.` });
+    return NextResponse.json({
+      success: true,
+      message: `Purchase ${purchase.invoiceNumber} successfully cancelled and all financial effects reversed.`,
+    });
   } catch (err: any) {
-    console.error('Purchase deletion error:', err);
+    console.error('Purchase cancellation error:', err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }

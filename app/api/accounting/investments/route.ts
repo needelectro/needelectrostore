@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth, hasPermission } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
+import { recordAccountMovement } from '@/lib/accounting';
 
 export async function POST(req: NextRequest) {
   const user = await requireAuth(req);
@@ -67,28 +68,20 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // Increase deposit account balance
-      await tx.financialAccount.update({
-        where: { id: depositAccountId },
-        data: { balance: { increment: new Prisma.Decimal(amount) } },
-      });
-
-      // Record Accounting Ledger Entry
-      await tx.ledgerEntry.create({
-        data: {
-          id: 'led-' + Date.now(),
-          date: invDate,
-          partyType: 'ACCOUNT',
-          partyId: depositAccountId,
-          referenceType: isSeed ? 'SEED_FUNDING' : 'CAPITAL_INVESTMENT',
-          referenceNumber,
-          description: isSeed
-            ? `Seed Funding received from ${investorName.trim()}`
-            : `Capital Investment from ${investorName.trim()} (${investmentType || 'CAPITAL_INVESTMENT'})`,
-          debit: new Prisma.Decimal(amount),
-          credit: new Prisma.Decimal(0),
-          runningBalance: new Prisma.Decimal(amount),
-        },
+      // Increase deposit account balance and record central ledger entry
+      await recordAccountMovement(tx, {
+        accountId: depositAccountId,
+        paymentMethod: paymentMethod || 'Cash',
+        referenceType: isSeed ? 'SEED_FUNDING' : 'INVESTMENT',
+        referenceNumber,
+        amount: Number(amount),
+        direction: 'INFLOW',
+        description: isSeed
+          ? `Seed Funding received from ${investorName.trim()}`
+          : `Capital Investment from ${investorName.trim()} (${investmentType || 'CAPITAL_INVESTMENT'})`,
+        performedBy: user.name,
+        relatedTransactionId: inv.id,
+        date: invDate,
       });
 
       // Audit Log

@@ -1,8 +1,9 @@
-// NEED ELECTRO ERP — Super Admin Expense Master Update & Delete Handler
+// NEED ELECTRO ERP — Super Admin Expense Master Update & Delete Handler with ACID Ledger Synchronization
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth, hasPermission } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
+import { reverseTransaction, recordAccountMovement } from '@/lib/accounting';
 
 export async function PUT(
   req: NextRequest,
@@ -17,12 +18,40 @@ export async function PUT(
 
   try {
     const body = await req.json();
-    const expense = await prisma.expense.findUnique({ where: { id: params.id } });
-    if (!expense) {
+    const existing = await prisma.expense.findUnique({ where: { id: params.id } });
+    if (!existing) {
       return NextResponse.json({ success: false, error: 'Expense record not found' }, { status: 404 });
     }
 
     const updated = await prisma.$transaction(async (tx) => {
+      const oldAmount = Number(existing.amount);
+      const newAmount = body.amount !== undefined ? Number(body.amount) : oldAmount;
+
+      // 1. If amount or account changed, reverse previous financial effect and post new
+      if (body.amount !== undefined && newAmount !== oldAmount) {
+        await reverseTransaction(tx, {
+          referenceNumber: existing.voucherNumber,
+          reason: `Expense ${existing.voucherNumber} amount modified from ৳${oldAmount} to ৳${newAmount}`,
+          performedBy: user.name,
+        });
+
+        if (newAmount > 0) {
+          await recordAccountMovement(tx, {
+            accountId: body.accountId,
+            paymentMethod: body.paymentMethod || existing.paymentMethod,
+            referenceType: 'EXPENSE',
+            referenceNumber: existing.voucherNumber,
+            amount: newAmount,
+            direction: 'OUTFLOW',
+            description: `Operating Expense: [${body.category || existing.category}] ${body.description || existing.description}`,
+            performedBy: user.name,
+            relatedTransactionId: existing.id,
+            date: body.date ? new Date(body.date) : existing.date,
+          });
+        }
+      }
+
+      // 2. Update Expense
       const exp = await tx.expense.update({
         where: { id: params.id },
         data: {
@@ -36,6 +65,7 @@ export async function PUT(
         },
       });
 
+      // 3. Audit Log
       await tx.auditLog.create({
         data: {
           id: 'audit-' + Date.now(),
@@ -76,8 +106,17 @@ export async function DELETE(
     }
 
     await prisma.$transaction(async (tx) => {
+      // 1. Reverse financial effects: restore money to account and post EXPENSE_REVERSAL in ledger
+      await reverseTransaction(tx, {
+        referenceNumber: expense.voucherNumber,
+        reason: `Expense ${expense.voucherNumber} cancelled/deleted by ${user.name}`,
+        performedBy: user.name,
+      });
+
+      // 2. Delete expense record
       await tx.expense.delete({ where: { id: params.id } });
 
+      // 3. Audit trail
       await tx.auditLog.create({
         data: {
           id: 'audit-' + Date.now(),
@@ -86,12 +125,12 @@ export async function DELETE(
           action: 'SUPER_ADMIN_EXPENSE_DELETE',
           module: 'EXPENSES',
           recordId: expense.id,
-          details: `Super Admin ${user.name} deleted Expense ${expense.voucherNumber} (Amount: ${expense.amount}, Category: ${expense.category})`,
+          details: `Super Admin ${user.name} deleted Expense ${expense.voucherNumber} (Amount: ৳${expense.amount}, Category: ${expense.category}) and restored cash to account.`,
         },
       });
     });
 
-    return NextResponse.json({ success: true, message: `Expense ${expense.voucherNumber} deleted successfully.` });
+    return NextResponse.json({ success: true, message: `Expense ${expense.voucherNumber} deleted and cash balance restored.` });
   } catch (err: any) {
     console.error('Expense deletion error:', err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });

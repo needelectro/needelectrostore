@@ -1376,6 +1376,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
               { label: 'Seed Funding', value: summaryData?.inflowBreakdown.seedFunding || 0, desc: 'Separate startup seed contributions' },
               { label: 'Transfers Received (Inflow)', value: summaryData?.inflowBreakdown.transfersIn || 0, desc: 'Inter-branch & inter-account cash transfers in' },
               { label: 'Technical & Electrical Service', value: summaryData?.inflowBreakdown.serviceIncome || 0, desc: 'Repairs & labor charges collected' },
+              { label: 'Other Cash Income', value: summaryData?.inflowBreakdown.otherIncome || 0, desc: 'Non-product revenue, scrap carton sales, rebates' },
               { label: 'Cash Inflow Adjustments', value: summaryData?.inflowBreakdown.adjustmentsInflow || 0, desc: 'Excess, corrections, manual deposits' },
             ].map((item, idx) => (
               <div key={idx} style={{
@@ -1422,6 +1423,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
               { label: 'Product Purchases (Paid Upfront)', value: summaryData?.outflowBreakdown.purchasePayments || 0, desc: 'Immediate supplier payments upon receipt' },
               { label: 'Supplier Due Payments', value: summaryData?.outflowBreakdown.supplierPayments || 0, desc: 'Payable vouchers cleared to suppliers' },
               { label: 'Operating Business Expenses', value: summaryData?.outflowBreakdown.operatingExpenses || 0, desc: 'Rent, electricity, packaging, logistics, tea' },
+              { label: 'Owner Withdrawals & Drawings', value: summaryData?.outflowBreakdown.otherOutflows || 0, desc: 'Owner personal drawings and equity reduction' },
               { label: 'Employee & Staff Salaries', value: summaryData?.outflowBreakdown.salaryPayments || 0, desc: 'Monthly disbursements & commissions' },
               { label: 'Customer Refunds (RMA)', value: summaryData?.outflowBreakdown.refunds || 0, desc: 'Goods returned & cash disbursed' },
               { label: 'Transfers Disbursed (Outflow)', value: summaryData?.outflowBreakdown.transfersOut || 0, desc: 'Inter-branch & inter-account cash transfers out' },

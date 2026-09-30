@@ -10,7 +10,7 @@ import {
   ProductCategoryConfig, BrandConfig, ConfigurablePaymentMethod, ExpenseCategoryConfig,
   ServiceCategoryConfig, WarrantyRuleConfig, DynamicNotificationTemplate,
   PriceChangeAudit, CustomerMergeAudit, PosSettings, InventoryRules,
-  CashAdjustment, CustomerPayment
+  CashAdjustment, CustomerPayment, OtherIncome, OwnerWithdrawal
 } from '../types';
 import {
   INITIAL_SETTINGS, INITIAL_BRANCHES, INITIAL_USERS, INITIAL_EMI_PLANS,
@@ -106,6 +106,8 @@ interface ERPContextType {
   inventoryTransactions: InventoryTransaction[];
   ledgerEntries: LedgerEntry[];
   warrantyClaims: WarrantyClaim[];
+  otherIncomes: OtherIncome[];
+  ownerWithdrawals: OwnerWithdrawal[];
 
   // Toasts
   toasts: ToastMessage[];
@@ -152,6 +154,9 @@ interface ERPContextType {
     sharePercentage?: number;
   }) => Promise<{ success: boolean; error?: string }>;
   transferFunds: (fromAccountId: string, toAccountId: string, amount: number, fee?: number, notes?: string) => Promise<{ success: boolean; error?: string }>;
+  recordOtherIncome: (incomeData: { category: string; amount: number; date: string; accountId?: string; paymentMethod?: string; reference?: string; description: string; receivedFrom?: string; branchId?: string }) => Promise<{ success: boolean; error?: string; income?: OtherIncome }>;
+  recordOwnerWithdrawal: (withdrawalData: { ownerName: string; amount: number; date: string; sourceAccountId?: string; paymentMethod?: string; reference?: string; purpose?: string }) => Promise<{ success: boolean; error?: string; withdrawal?: OwnerWithdrawal }>;
+  reverseTransaction: (options: { transactionId?: string; referenceNumber?: string; reason: string }) => Promise<{ success: boolean; error?: string }>;
   recordAttendance: (employeeId: string, status: AttendanceStatus, notes?: string) => Promise<{ success: boolean; error?: string }>;
   disburseSalary: (employeeId: string, month: string, paymentMethod: PaymentMethod, accountId?: string) => Promise<{ success: boolean; error?: string }>;
   createEmployee: (empData: Omit<Employee, 'id'>) => Promise<{ success: boolean; error?: string }>;
@@ -261,6 +266,8 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [inventoryTransactions, setInventoryTransactions] = useState<InventoryTransaction[]>(() => getStoredData('inventory_transactions', []));
   const [warrantyClaims, setWarrantyClaims] = useState<WarrantyClaim[]>(() => getStoredData('warranty_claims', []));
   const [ledgerEntries, setLedgerEntries] = useState<LedgerEntry[]>(() => getStoredData('ledger_entries', []));
+  const [otherIncomes, setOtherIncomes] = useState<OtherIncome[]>(() => getStoredData('other_incomes', []));
+  const [ownerWithdrawals, setOwnerWithdrawals] = useState<OwnerWithdrawal[]>(() => getStoredData('owner_withdrawals', []));
   const [purchases, setPurchases] = useState<Purchase[]>(() => getStoredData('purchases', []));
   const [financialAccounts, setFinancialAccounts] = useState<FinancialAccount[]>(() => getStoredData('financial_accounts', INITIAL_FINANCIAL_ACCOUNTS));
   const [investments, setInvestments] = useState<Investment[]>(() => getStoredData('investments', []));
@@ -324,6 +331,8 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => { setStoredData('inventory_transactions', inventoryTransactions); }, [inventoryTransactions]);
   useEffect(() => { setStoredData('warranty_claims', warrantyClaims); }, [warrantyClaims]);
   useEffect(() => { setStoredData('ledger_entries', ledgerEntries); }, [ledgerEntries]);
+  useEffect(() => { setStoredData('other_incomes', otherIncomes); }, [otherIncomes]);
+  useEffect(() => { setStoredData('owner_withdrawals', ownerWithdrawals); }, [ownerWithdrawals]);
   useEffect(() => { setStoredData('roles', roles); }, [roles]);
   useEffect(() => { setStoredData('permissions', permissionsList); }, [permissionsList]);
   useEffect(() => { setStoredData('setup_status', setupStatus); }, [setupStatus]);
@@ -403,6 +412,8 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (Array.isArray(d.priceAuditLog)) setPriceAuditLog(d.priceAuditLog);
         if (Array.isArray(d.customerMergeAudit)) setCustomerMergeAudit(d.customerMergeAudit);
         if (Array.isArray(d.openingBalances)) setOpeningBalances(d.openingBalances);
+        if (Array.isArray(d.otherIncomes)) setOtherIncomes(d.otherIncomes);
+        if (Array.isArray(d.ownerWithdrawals)) setOwnerWithdrawals(d.ownerWithdrawals);
 
         // If sales wasn't in bootstrap payload or was empty, also pull from direct sales endpoint
         if (!Array.isArray(d.sales) || d.sales.length === 0) {
@@ -1285,6 +1296,102 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (err: any) {
       const errMsg = err.message || 'Error executing fund transfer.';
       addToast('error', 'Transfer Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // -------------------------------------------------------------
+  // OTHER INCOME (NON-PRODUCT REVENUE)
+  // -------------------------------------------------------------
+  const recordOtherIncome = async (incomeData: {
+    category: string;
+    amount: number;
+    date: string;
+    accountId?: string;
+    paymentMethod?: string;
+    reference?: string;
+    description: string;
+    receivedFrom?: string;
+    branchId?: string;
+  }): Promise<{ success: boolean; error?: string; income?: OtherIncome }> => {
+    try {
+      const res = await api.accounting.recordOtherIncome(incomeData);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to record other income.';
+        addToast('error', 'Income Failed', err);
+        return { success: false, error: err };
+      }
+
+      await refreshFromDatabase();
+      const income = (res as any).data;
+      logAction('ACCOUNTING', 'OTHER_INCOME', income?.id || 'income', `Recorded other income: ৳${Number(incomeData.amount).toLocaleString()} (${incomeData.category})`);
+      addToast('success', 'Other Income Recorded', `৳${Number(incomeData.amount).toLocaleString()} added to account balance.`);
+      return { success: true, income };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error recording other income.';
+      addToast('error', 'Income Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // -------------------------------------------------------------
+  // OWNER WITHDRAWAL (EQUITY REDUCTION)
+  // -------------------------------------------------------------
+  const recordOwnerWithdrawal = async (withdrawalData: {
+    ownerName: string;
+    amount: number;
+    date: string;
+    sourceAccountId?: string;
+    paymentMethod?: string;
+    reference?: string;
+    purpose?: string;
+  }): Promise<{ success: boolean; error?: string; withdrawal?: OwnerWithdrawal }> => {
+    try {
+      const res = await api.accounting.recordWithdrawal(withdrawalData);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to record withdrawal.';
+        addToast('error', 'Withdrawal Failed', err);
+        return { success: false, error: err };
+      }
+
+      await refreshFromDatabase();
+      const withdrawal = (res as any).data;
+      logAction('ACCOUNTING', 'OWNER_WITHDRAWAL', withdrawal?.id || 'withdrawal', `Owner withdrawal: ৳${Number(withdrawalData.amount).toLocaleString()} by ${withdrawalData.ownerName}`);
+      addToast('success', 'Withdrawal Recorded', `৳${Number(withdrawalData.amount).toLocaleString()} deducted from account.`);
+      return { success: true, withdrawal };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error recording withdrawal.';
+      addToast('error', 'Withdrawal Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  // -------------------------------------------------------------
+  // CENTRAL FINANCIAL REVERSAL ENGINE
+  // -------------------------------------------------------------
+  const reverseTransaction = async (options: {
+    transactionId?: string;
+    referenceNumber?: string;
+    reason: string;
+  }): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.accounting.reverseTransaction({
+        referenceNumber: options.referenceNumber || options.transactionId || '',
+        reason: options.reason
+      });
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to reverse transaction.';
+        addToast('error', 'Reversal Failed', err);
+        return { success: false, error: err };
+      }
+
+      await refreshFromDatabase();
+      logAction('ACCOUNTING', 'TRANSACTION_REVERSED', options.referenceNumber || options.transactionId || '', `Reversed transaction: ${options.reason}`);
+      addToast('success', 'Transaction Reversed', 'Account balance restored and reversal logged.');
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error reversing transaction.';
+      addToast('error', 'Reversal Failed', errMsg);
       return { success: false, error: errMsg };
     }
   };
@@ -2385,6 +2492,8 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         inventoryTransactions,
         ledgerEntries,
         warrantyClaims,
+        otherIncomes,
+        ownerWithdrawals,
         toasts,
         addToast,
         removeToast,
@@ -2407,6 +2516,9 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         recordCashAdjustment,
         recordInvestment,
         transferFunds,
+        recordOtherIncome,
+        recordOwnerWithdrawal,
+        reverseTransaction,
         recordAttendance,
         disburseSalary,
         createEmployee,

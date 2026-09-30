@@ -578,14 +578,55 @@ export interface Expense {
 export interface LedgerEntry {
   id: string;
   date: string;
-  partyType: 'CUSTOMER' | 'SUPPLIER';
+  time?: string;
+  partyType: 'CUSTOMER' | 'SUPPLIER' | 'ACCOUNT' | 'SYSTEM' | string;
   partyId: string;
-  referenceType: 'INVOICE' | 'PAYMENT' | 'EMI' | 'PURCHASE' | 'RETURN' | 'ADJUSTMENT';
+  referenceType: string;
   referenceNumber: string;
   description: string;
   debit: number;
   credit: number;
   runningBalance: number;
+  status?: 'COMPLETED' | 'CANCELLED' | 'REVERSED' | 'RETURNED' | string;
+  reversalOfId?: string;
+  relatedTransactionId?: string;
+  paymentMethod?: string;
+  accountName?: string;
+  accountType?: string;
+  performedBy?: string;
+  createdAt?: string;
+}
+
+export interface OtherIncome {
+  id: string;
+  incomeNumber: string;
+  category: string;
+  amount: number;
+  date: string;
+  accountId: string;
+  paymentMethod: string;
+  reference?: string;
+  description: string;
+  receivedFrom?: string;
+  branchId?: string;
+  status: string;
+  receivedBy: string;
+  createdAt?: string;
+}
+
+export interface OwnerWithdrawal {
+  id: string;
+  withdrawalNumber: string;
+  ownerName: string;
+  amount: number;
+  date: string;
+  sourceAccountId: string;
+  paymentMethod: string;
+  reference?: string;
+  purpose?: string;
+  status: string;
+  approvedBy: string;
+  createdAt?: string;
 }
 
 export interface AuditLog {

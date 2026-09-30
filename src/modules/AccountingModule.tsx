@@ -5,13 +5,15 @@ import {
   Wallet, DollarSign, ArrowUpRight, ArrowDownRight, 
   Receipt, BookOpen, Calendar, Printer, Plus, ArrowLeftRight,
   Landmark, ShieldAlert, CheckCircle2, X, Users, Percent,
-  Lock, Unlock, ShieldCheck, Sparkles, Clock
+  Lock, Unlock, ShieldCheck, Sparkles, Clock, FileText,
+  RefreshCw, AlertCircle, ArrowDown, ArrowUp, Info, RotateCcw, Check, CreditCard
 } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
   ResponsiveContainer, Legend 
 } from 'recharts';
 import { InvestmentType, AccountType } from '../types';
+import { api } from '../services/api';
 
 interface AccountingModuleProps {
   onNavigate: (module: string, targetId?: string) => void;
@@ -21,14 +23,56 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
   const { 
     sales, emiPayments, expenses, suppliers, customers, emiAccounts, 
     products, services, selectedBranch, financialAccounts, investments,
-    recordInvestment, transferFunds
+    recordInvestment, transferFunds, recordOtherIncome, recordOwnerWithdrawal,
+    reverseTransaction, addToast, otherIncomes, ownerWithdrawals, ledgerEntries
   } = useERP();
 
-  const [activeTab, setActiveTab] = useState<'pnl' | 'accounts' | 'investments'>('pnl');
+  const [activeTab, setActiveTab] = useState<'pnl' | 'accounts' | 'statements' | 'cash_flow' | 'investments'>('pnl');
 
   // Modal states
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [showInvestmentModal, setShowInvestmentModal] = useState(false);
+  const [showOtherIncomeModal, setShowOtherIncomeModal] = useState(false);
+  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
+  const [selectedLedgerItem, setSelectedLedgerItem] = useState<any>(null);
+  const [showReversalModal, setShowReversalModal] = useState(false);
+  const [itemToReverse, setItemToReverse] = useState<any>(null);
+  const [reversalReason, setReversalReason] = useState('');
+  const [isSubmittingReversal, setIsSubmittingReversal] = useState(false);
+
+  // Other Income Form State
+  const [otherIncomeCategory, setOtherIncomeCategory] = useState('Scrap & Packaging Sale');
+  const [otherIncomeAmount, setOtherIncomeAmount] = useState<number>(1000);
+  const [otherIncomeAccountId, setOtherIncomeAccountId] = useState(financialAccounts[0]?.id || 'acc-1');
+  const [otherIncomeDesc, setOtherIncomeDesc] = useState('');
+  const [otherIncomeFrom, setOtherIncomeFrom] = useState('');
+  const [otherIncomeDate, setOtherIncomeDate] = useState(new Date().toISOString().split('T')[0]);
+  const [otherIncomeRef, setOtherIncomeRef] = useState('');
+  const [isSubmittingOtherIncome, setIsSubmittingOtherIncome] = useState(false);
+
+  // Owner Withdrawal Form State
+  const [withdrawalOwner, setWithdrawalOwner] = useState('Amdadur Rahman');
+  const [withdrawalAmount, setWithdrawalAmount] = useState<number>(5000);
+  const [withdrawalAccountId, setWithdrawalAccountId] = useState(financialAccounts[0]?.id || 'acc-1');
+  const [withdrawalPurpose, setWithdrawalPurpose] = useState('Personal Drawing');
+  const [withdrawalDate, setWithdrawalDate] = useState(new Date().toISOString().split('T')[0]);
+  const [withdrawalRef, setWithdrawalRef] = useState('');
+  const [isSubmittingWithdrawal, setIsSubmittingWithdrawal] = useState(false);
+
+  // Account Statement State
+  const [statementAccountId, setStatementAccountId] = useState(financialAccounts[0]?.id || 'acc-1');
+  const [statementRange, setStatementRange] = useState('this_month');
+  const [customStmtStart, setCustomStmtStart] = useState('');
+  const [customStmtEnd, setCustomStmtEnd] = useState('');
+  const [statementData, setStatementData] = useState<any>(null);
+  const [isLoadingStatement, setIsLoadingStatement] = useState(false);
+
+  // Cash Flow Report State
+  const [cashFlowRange, setCashFlowRange] = useState('this_month');
+  const [customCfStart, setCustomCfStart] = useState('');
+  const [customCfEnd, setCustomCfEnd] = useState('');
+  const [cashFlowData, setCashFlowData] = useState<any>(null);
+  const [isLoadingCashFlow, setIsLoadingCashFlow] = useState(false);
 
   // Transfer Form State
   const [fromAccountId, setFromAccountId] = useState(financialAccounts[0]?.id || '');
@@ -82,6 +126,153 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
       console.error('Error loading admin investor data:', err);
     } finally {
       setIsLoadingInvestorData(false);
+    }
+  };
+
+  const loadAccountStatement = async () => {
+    try {
+      setIsLoadingStatement(true);
+      const params: Record<string, string> = {
+        accountId: statementAccountId,
+        range: statementRange,
+      };
+      if (statementRange === 'custom') {
+        if (customStmtStart) params.startDate = customStmtStart;
+        if (customStmtEnd) params.endDate = customStmtEnd;
+      }
+      const res = await api.accounting.getLedger(params);
+      if (res && res.success) {
+        setStatementData(res.data);
+      }
+    } catch (err: any) {
+      console.error('Error loading account statement:', err);
+    } finally {
+      setIsLoadingStatement(false);
+    }
+  };
+
+  const loadCashFlow = async () => {
+    try {
+      setIsLoadingCashFlow(true);
+      const params: Record<string, string> = {
+        range: cashFlowRange,
+      };
+      if (cashFlowRange === 'custom') {
+        if (customCfStart) params.startDate = customCfStart;
+        if (customCfEnd) params.endDate = customCfEnd;
+      }
+      const res = await api.accounting.getCashFlow(params);
+      if (res && res.success) {
+        setCashFlowData(res.data);
+      }
+    } catch (err: any) {
+      console.error('Error loading cash flow:', err);
+    } finally {
+      setIsLoadingCashFlow(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'statements') {
+      loadAccountStatement();
+    }
+  }, [activeTab, statementAccountId, statementRange, customStmtStart, customStmtEnd]);
+
+  useEffect(() => {
+    if (activeTab === 'cash_flow') {
+      loadCashFlow();
+    }
+  }, [activeTab, cashFlowRange, customCfStart, customCfEnd]);
+
+  const handleOtherIncomeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otherIncomeAmount <= 0) {
+      alert('Income amount must be greater than 0.');
+      return;
+    }
+    if (!otherIncomeDesc.trim()) {
+      alert('Description is required for other income.');
+      return;
+    }
+    setIsSubmittingOtherIncome(true);
+    try {
+      const res = await recordOtherIncome({
+        category: otherIncomeCategory,
+        amount: Number(otherIncomeAmount),
+        date: otherIncomeDate,
+        accountId: otherIncomeAccountId,
+        description: otherIncomeDesc.trim(),
+        receivedFrom: otherIncomeFrom.trim() || undefined,
+        reference: otherIncomeRef.trim() || undefined,
+      });
+      if (res.success) {
+        setShowOtherIncomeModal(false);
+        setOtherIncomeAmount(1000);
+        setOtherIncomeDesc('');
+        setOtherIncomeFrom('');
+        setOtherIncomeRef('');
+        if (activeTab === 'statements') loadAccountStatement();
+        if (activeTab === 'cash_flow') loadCashFlow();
+      }
+    } finally {
+      setIsSubmittingOtherIncome(false);
+    }
+  };
+
+  const handleWithdrawalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (withdrawalAmount <= 0) {
+      alert('Withdrawal amount must be greater than 0.');
+      return;
+    }
+    if (!withdrawalOwner.trim()) {
+      alert('Owner name is required.');
+      return;
+    }
+    setIsSubmittingWithdrawal(true);
+    try {
+      const res = await recordOwnerWithdrawal({
+        ownerName: withdrawalOwner.trim(),
+        amount: Number(withdrawalAmount),
+        date: withdrawalDate,
+        sourceAccountId: withdrawalAccountId,
+        purpose: withdrawalPurpose.trim() || undefined,
+        reference: withdrawalRef.trim() || undefined,
+      });
+      if (res.success) {
+        setShowWithdrawalModal(false);
+        setWithdrawalAmount(5000);
+        setWithdrawalPurpose('Personal Drawing');
+        setWithdrawalRef('');
+        if (activeTab === 'statements') loadAccountStatement();
+        if (activeTab === 'cash_flow') loadCashFlow();
+      }
+    } finally {
+      setIsSubmittingWithdrawal(false);
+    }
+  };
+
+  const handleReversalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reversalReason.trim()) {
+      alert('Please provide a mandatory reversal reason for audit trail integrity.');
+      return;
+    }
+    setIsSubmittingReversal(true);
+    try {
+      const res = await reverseTransaction({
+        referenceNumber: itemToReverse?.referenceNumber || itemToReverse?.id,
+        reason: reversalReason.trim(),
+      });
+      if (res.success) {
+        setShowReversalModal(false);
+        setItemToReverse(null);
+        setReversalReason('');
+        if (activeTab === 'statements') loadAccountStatement();
+        if (activeTab === 'cash_flow') loadCashFlow();
+      }
+    } finally {
+      setIsSubmittingReversal(false);
     }
   };
 
@@ -363,12 +554,26 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <button 
             className="btn btn-secondary btn-sm"
             onClick={() => window.print()}
           >
             <Printer size={15} /> Print Statement
+          </button>
+          <button 
+            className="btn btn-outline btn-sm"
+            onClick={() => setShowOtherIncomeModal(true)}
+            style={{ color: '#10b981', borderColor: 'rgba(16, 185, 129, 0.4)' }}
+          >
+            <Plus size={15} /> Other Income
+          </button>
+          <button 
+            className="btn btn-outline btn-sm"
+            onClick={() => setShowWithdrawalModal(true)}
+            style={{ color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.4)' }}
+          >
+            <ArrowDown size={15} /> Owner Withdrawal
           </button>
           <button 
             className="btn btn-primary btn-sm"
@@ -386,18 +591,30 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
       </div>
 
       {/* Navigation Sub-Tabs */}
-      <div className="tabs-nav">
+      <div className="tabs-nav" style={{ overflowX: 'auto', flexWrap: 'nowrap' }}>
         <button 
           className={`tab-btn ${activeTab === 'pnl' ? 'active' : ''}`}
           onClick={() => setActiveTab('pnl')}
         >
-          P&L Statement & Financial Overview
+          P&L Statement & Overview
         </button>
         <button 
           className={`tab-btn ${activeTab === 'accounts' ? 'active' : ''}`}
           onClick={() => setActiveTab('accounts')}
         >
           Cash & Bank Accounts ({financialAccounts.length})
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'statements' ? 'active' : ''}`}
+          onClick={() => setActiveTab('statements')}
+        >
+          <BookOpen size={15} style={{ marginRight: '6px' }} /> Account Statement & Central Ledger
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'cash_flow' ? 'active' : ''}`}
+          onClick={() => setActiveTab('cash_flow')}
+        >
+          <TrendingUp size={15} style={{ marginRight: '6px' }} /> Cash Flow Report
         </button>
         <button 
           className={`tab-btn ${activeTab === 'investments' ? 'active' : ''}`}
@@ -594,54 +811,542 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
       {/* TAB 2: CASH & BANK ACCOUNTS */}
       {activeTab === 'accounts' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          {/* Summary Banner */}
-          <div className="erp-card" style={{ padding: '1.25rem', background: 'linear-gradient(135deg, rgba(37,99,235,0.08), rgba(16,185,129,0.08))' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {/* Executive Multi-Account Liquidity Dashboard */}
+          <div className="erp-card" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)', border: '1px solid rgba(0, 140, 255, 0.3)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
               <div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>Total Liquid Treasury Funds</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Combined cash in hand, bank accounts, and mobile banking wallets</p>
+                <span className="badge badge-success" style={{ marginBottom: '0.4rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <CheckCircle2 size={12} /> Central Account Ledger Engine Active
+                </span>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#f8fafc', margin: 0 }}>
+                  Total Available Money: ৳{financialAccounts.reduce((sum, a) => sum + Number(a.balance), 0).toLocaleString()}
+                </h2>
+                <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>
+                  Live mathematical balances derived directly from single-source-of-truth transaction ledger entries.
+                </p>
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--brand-primary)' }}>
-                ৳{totalLiquidCash.toLocaleString()}
+
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button 
+                  className="btn btn-primary btn-sm"
+                  onClick={() => setShowTransferModal(true)}
+                >
+                  <ArrowLeftRight size={14} /> Transfer Funds
+                </button>
+                <button 
+                  className="btn btn-outline btn-sm"
+                  onClick={() => {
+                    setStatementAccountId(financialAccounts[0]?.id || 'acc-1');
+                    setActiveTab('statements');
+                  }}
+                  style={{ color: '#38bdf8', borderColor: '#38bdf8' }}
+                >
+                  <BookOpen size={14} /> View Account Statement
+                </button>
+              </div>
+            </div>
+
+            {/* Account Type Summary Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.85rem' }}>
+              <div style={{ background: 'rgba(255, 255, 255, 0.04)', borderRadius: '10px', padding: '0.85rem', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                <div style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Wallet size={14} /> MAIN CASH / DRAWER
+                </div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#10b981', marginTop: '4px' }}>
+                  ৳{financialAccounts.filter(a => a.type === 'CASH' || a.id === 'acc-1').reduce((sum, a) => sum + Number(a.balance), 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Showroom Counter Cash</div>
+              </div>
+
+              <div style={{ background: 'rgba(255, 255, 255, 0.04)', borderRadius: '10px', padding: '0.85rem', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                <div style={{ fontSize: '0.75rem', color: '#38bdf8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Landmark size={14} /> BANK ACCOUNTS
+                </div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#38bdf8', marginTop: '4px' }}>
+                  ৳{financialAccounts.filter(a => a.type === 'BANK').reduce((sum, a) => sum + Number(a.balance), 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Commercial Banking</div>
+              </div>
+
+              <div style={{ background: 'rgba(255, 255, 255, 0.04)', borderRadius: '10px', padding: '0.85rem', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                <div style={{ fontSize: '0.75rem', color: '#ec4899', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <CreditCard size={14} /> bKash WALLET
+                </div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ec4899', marginTop: '4px' }}>
+                  ৳{financialAccounts.filter(a => a.id.toLowerCase().includes('bkash') || a.name.toLowerCase().includes('bkash')).reduce((sum, a) => sum + Number(a.balance), 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Merchant & Personal</div>
+              </div>
+
+              <div style={{ background: 'rgba(255, 255, 255, 0.04)', borderRadius: '10px', padding: '0.85rem', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                <div style={{ fontSize: '0.75rem', color: '#ea580c', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <CreditCard size={14} /> Nagad WALLET
+                </div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ea580c', marginTop: '4px' }}>
+                  ৳{financialAccounts.filter(a => a.id.toLowerCase().includes('nagad') || a.name.toLowerCase().includes('nagad')).reduce((sum, a) => sum + Number(a.balance), 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Digital Cash Agent</div>
               </div>
             </div>
           </div>
 
-          {/* Accounts Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-            {financialAccounts.map(acc => (
-              <div key={acc.id} className="erp-card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: '1rem' }}>{acc.name}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        {acc.accountNumber || acc.type} {acc.bankName ? `• ${acc.bankName}` : ''}
+          {/* Individual Accounts Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1rem' }}>
+            {financialAccounts.map(acc => {
+              const isCash = acc.type === 'CASH' || acc.id === 'acc-1';
+              const isBank = acc.type === 'BANK';
+              const isBkash = acc.id.includes('bkash') || acc.name.toLowerCase().includes('bkash');
+              const isNagad = acc.id.includes('nagad') || acc.name.toLowerCase().includes('nagad');
+              const themeColor = isCash ? '#10b981' : isBank ? '#38bdf8' : isBkash ? '#ec4899' : isNagad ? '#ea580c' : 'var(--brand-primary)';
+
+              return (
+                <div key={acc.id} className="erp-card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderLeft: `4px solid ${themeColor}` }}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-primary)' }}>{acc.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          {acc.accountNumber || (isCash ? 'Physical Cash Drawer' : acc.type)} {acc.bankName ? `• ${acc.bankName}` : ''}
+                        </div>
                       </div>
+                      <span className="badge" style={{ background: `${themeColor}20`, color: themeColor, fontWeight: 700, fontSize: '0.75rem' }}>
+                        {acc.type}
+                      </span>
                     </div>
-                    <span className="badge badge-info">{acc.type}</span>
+
+                    <div style={{ fontSize: '1.75rem', fontWeight: 900, color: Number(acc.balance) >= 0 ? themeColor : '#ef4444', margin: '0.75rem 0' }}>
+                      ৳{Number(acc.balance).toLocaleString()}
+                    </div>
                   </div>
 
-                  <div style={{ fontSize: '1.5rem', fontWeight: 900, color: acc.balance >= 0 ? 'var(--text-primary)' : '#ef4444', margin: '0.75rem 0' }}>
-                    ৳{acc.balance.toLocaleString()}
+                  <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <button 
+                      className="btn btn-outline btn-sm"
+                      onClick={() => {
+                        setStatementAccountId(acc.id);
+                        setActiveTab('statements');
+                      }}
+                      style={{ fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <BookOpen size={12} /> Statement
+                    </button>
+                    <button 
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => {
+                        setFromAccountId(acc.id);
+                        setShowTransferModal(true);
+                      }}
+                      style={{ fontSize: '0.75rem' }}
+                    >
+                      Transfer Out &rarr;
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* TAB: ACCOUNT STATEMENTS & CENTRAL LEDGER */}
+      {activeTab === 'statements' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {/* Statement Filter Toolbar */}
+          <div className="erp-card" style={{ padding: '1.25rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <label style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Select Account:</label>
+                <select 
+                  className="form-control"
+                  style={{ minWidth: '220px', fontWeight: 700 }}
+                  value={statementAccountId}
+                  onChange={e => setStatementAccountId(e.target.value)}
+                >
+                  {financialAccounts.map(a => (
+                    <option key={a.id} value={a.id}>
+                      {a.name} ({a.type}) — ৳{Number(a.balance).toLocaleString()}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Date Range Selector */}
+              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                {[
+                  { id: 'today', label: 'Today' },
+                  { id: 'yesterday', label: 'Yesterday' },
+                  { id: 'this_week', label: 'This Week' },
+                  { id: 'this_month', label: 'This Month' },
+                  { id: 'all', label: 'All Time' },
+                  { id: 'custom', label: 'Custom' },
+                ].map(r => (
+                  <button 
+                    key={r.id}
+                    className={`btn btn-sm ${statementRange === r.id ? 'btn-primary' : 'btn-outline'}`}
+                    onClick={() => setStatementRange(r.id)}
+                    style={{ fontSize: '0.78rem' }}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom Range Inputs */}
+            {statementRange === 'custom' && (
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)' }}>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>From:</label>
+                <input 
+                  type="date"
+                  className="form-control"
+                  style={{ maxWidth: '170px' }}
+                  value={customStmtStart}
+                  onChange={e => setCustomStmtStart(e.target.value)}
+                />
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>To:</label>
+                <input 
+                  type="date"
+                  className="form-control"
+                  style={{ maxWidth: '170px' }}
+                  value={customStmtEnd}
+                  onChange={e => setCustomStmtEnd(e.target.value)}
+                />
+              </div>
+            )}
+
+            {/* Statement Summary KPI Cards */}
+            {statementData && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+                <div style={{ background: 'var(--bg-card-muted)', padding: '0.85rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Opening Balance</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                    ৳{Number(statementData.openingBalance || 0).toLocaleString()}
                   </div>
                 </div>
 
-                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Status: Active</span>
-                  <button 
-                    className="btn btn-ghost btn-sm"
-                    onClick={() => {
-                      setFromAccountId(acc.id);
-                      setShowTransferModal(true);
-                    }}
-                  >
-                    Transfer Out &rarr;
-                  </button>
+                <div style={{ background: 'var(--bg-card-muted)', padding: '0.85rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                  <div style={{ fontSize: '0.75rem', color: '#10b981' }}>Total Inflows (Debit +)</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#10b981' }}>
+                    +৳{Number(statementData.totalDebit || 0).toLocaleString()}
+                  </div>
+                </div>
+
+                <div style={{ background: 'var(--bg-card-muted)', padding: '0.85rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                  <div style={{ fontSize: '0.75rem', color: '#ef4444' }}>Total Outflows (Credit −)</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ef4444' }}>
+                    −৳{Number(statementData.totalCredit || 0).toLocaleString()}
+                  </div>
+                </div>
+
+                <div style={{ background: 'var(--bg-card-muted)', padding: '0.85rem', borderRadius: '8px', border: '1px solid rgba(0, 140, 255, 0.3)' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--brand-primary)', fontWeight: 700 }}>Closing / Available Balance</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--brand-primary)' }}>
+                    ৳{Number(statementData.closingBalance || 0).toLocaleString()}
+                  </div>
                 </div>
               </div>
-            ))}
+            )}
           </div>
+
+          {/* Statement Transaction Ledger Table */}
+          <div className="erp-card" style={{ padding: '1.25rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <BookOpen size={18} color="var(--brand-primary)" />
+                  Account Statement Ledger Entries
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '2px 0 0' }}>
+                  Every financial movement affecting this account. Click any row to inspect transaction audit details.
+                </p>
+              </div>
+
+              <button 
+                className="btn btn-outline btn-sm"
+                onClick={loadAccountStatement}
+                disabled={isLoadingStatement}
+              >
+                <RefreshCw size={13} className={isLoadingStatement ? 'animate-spin' : ''} /> Refresh Statement
+              </button>
+            </div>
+
+            {isLoadingStatement ? (
+              <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 0.75rem' }} />
+                Loading central ledger entries...
+              </div>
+            ) : statementData?.entries && statementData.entries.length > 0 ? (
+              <div className="table-container">
+                <table className="erp-table">
+                  <thead>
+                    <tr>
+                      <th>Date & Time</th>
+                      <th>Reference #</th>
+                      <th>Type</th>
+                      <th>Description</th>
+                      <th style={{ textAlign: 'right' }}>Debit (+)</th>
+                      <th style={{ textAlign: 'right' }}>Credit (−)</th>
+                      <th style={{ textAlign: 'right' }}>Running Balance</th>
+                      <th style={{ textAlign: 'center' }}>Status</th>
+                      <th style={{ textAlign: 'center' }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {statementData.entries.map((entry: any) => {
+                      const isDebit = Number(entry.debit) > 0;
+                      const isReversed = entry.status === 'REVERSED';
+
+                      return (
+                        <tr 
+                          key={entry.id}
+                          style={{
+                            cursor: 'pointer',
+                            opacity: isReversed ? 0.65 : 1,
+                            background: isReversed ? 'rgba(239, 68, 68, 0.04)' : undefined
+                          }}
+                          onClick={() => setSelectedLedgerItem(entry)}
+                          title="Click to view transaction details"
+                        >
+                          <td style={{ fontSize: '0.825rem', whiteSpace: 'nowrap' }}>
+                            {new Date(entry.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                          </td>
+                          <td style={{ fontWeight: 700, color: 'var(--brand-primary)', fontSize: '0.825rem' }}>
+                            {entry.referenceNumber}
+                          </td>
+                          <td>
+                            <span className={`badge ${
+                              entry.referenceType.includes('SALE') ? 'badge-success' :
+                              entry.referenceType.includes('PURCHASE') ? 'badge-warning' :
+                              entry.referenceType.includes('EXPENSE') ? 'badge-danger' :
+                              entry.referenceType.includes('INVESTMENT') ? 'badge-info' :
+                              'badge-secondary'
+                            }`} style={{ fontSize: '0.7rem', fontWeight: 700 }}>
+                              {entry.referenceType}
+                            </span>
+                          </td>
+                          <td style={{ fontSize: '0.825rem', maxWidth: '280px' }}>
+                            {entry.description}
+                          </td>
+                          <td style={{ textAlign: 'right', fontWeight: 700, color: isDebit ? '#10b981' : 'var(--text-muted)' }}>
+                            {isDebit ? `+৳${Number(entry.debit).toLocaleString()}` : '—'}
+                          </td>
+                          <td style={{ textAlign: 'right', fontWeight: 700, color: !isDebit ? '#ef4444' : 'var(--text-muted)' }}>
+                            {!isDebit ? `−৳${Number(entry.credit).toLocaleString()}` : '—'}
+                          </td>
+                          <td style={{ textAlign: 'right', fontWeight: 800 }}>
+                            ৳{Number(entry.runningBalance).toLocaleString()}
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <span className={`badge ${isReversed ? 'badge-danger' : 'badge-success'}`} style={{ fontSize: '0.7rem' }}>
+                              {entry.status || 'COMPLETED'}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'center' }} onClick={e => e.stopPropagation()}>
+                            {!isReversed && (
+                              <button 
+                                className="btn btn-ghost btn-sm"
+                                style={{ color: '#ef4444', fontSize: '0.725rem', padding: '0.2rem 0.5rem' }}
+                                onClick={() => {
+                                  setItemToReverse(entry);
+                                  setShowReversalModal(true);
+                                }}
+                                title="Reverse this financial movement"
+                              >
+                                <RotateCcw size={12} /> Reverse
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                No ledger entries found for this account in the selected period.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB: CASH FLOW REPORT */}
+      {activeTab === 'cash_flow' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {/* Filter Bar */}
+          <div className="erp-card" style={{ padding: '1.25rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <TrendingUp size={20} color="#10b981" />
+                  Periodic Cash Flow Statement
+                </h3>
+                <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Cash In, Cash Out, Inter-account transfers and net liquidity change
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                {[
+                  { id: 'today', label: 'Today' },
+                  { id: 'yesterday', label: 'Yesterday' },
+                  { id: 'this_week', label: 'This Week' },
+                  { id: 'this_month', label: 'This Month' },
+                  { id: 'custom', label: 'Custom' },
+                ].map(r => (
+                  <button 
+                    key={r.id}
+                    className={`btn btn-sm ${cashFlowRange === r.id ? 'btn-primary' : 'btn-outline'}`}
+                    onClick={() => setCashFlowRange(r.id)}
+                    style={{ fontSize: '0.78rem' }}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+                <button 
+                  className="btn btn-outline btn-sm"
+                  onClick={loadCashFlow}
+                  disabled={isLoadingCashFlow}
+                >
+                  <RefreshCw size={13} className={isLoadingCashFlow ? 'animate-spin' : ''} />
+                </button>
+              </div>
+            </div>
+
+            {cashFlowRange === 'custom' && (
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)' }}>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>From:</label>
+                <input 
+                  type="date"
+                  className="form-control"
+                  style={{ maxWidth: '170px' }}
+                  value={customCfStart}
+                  onChange={e => setCustomCfStart(e.target.value)}
+                />
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>To:</label>
+                <input 
+                  type="date"
+                  className="form-control"
+                  style={{ maxWidth: '170px' }}
+                  value={customCfEnd}
+                  onChange={e => setCustomCfEnd(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Cash Flow KPI Summary Cards */}
+          {cashFlowData && (
+            <div className="kpi-grid">
+              <div className="kpi-card">
+                <div className="kpi-top">
+                  <span className="kpi-title">Opening Cash Balance</span>
+                  <div className="kpi-icon" style={{ background: 'rgba(56, 189, 248, 0.12)', color: '#38bdf8' }}>
+                    <Wallet size={18} />
+                  </div>
+                </div>
+                <div className="kpi-value">৳{Number(cashFlowData.openingBalance || 0).toLocaleString()}</div>
+                <div className="kpi-footer" style={{ color: 'var(--text-muted)' }}>Start of period liquidity</div>
+              </div>
+
+              <div className="kpi-card" style={{ borderLeft: '4px solid #10b981' }}>
+                <div className="kpi-top">
+                  <span className="kpi-title">Total Cash In</span>
+                  <div className="kpi-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#10b981' }}>
+                    <ArrowUpRight size={18} />
+                  </div>
+                </div>
+                <div className="kpi-value" style={{ color: '#10b981' }}>
+                  +৳{Number(cashFlowData.totalCashIn || 0).toLocaleString()}
+                </div>
+                <div className="kpi-footer" style={{ color: '#10b981' }}>Receipts + Capital + Dues</div>
+              </div>
+
+              <div className="kpi-card" style={{ borderLeft: '4px solid #ef4444' }}>
+                <div className="kpi-top">
+                  <span className="kpi-title">Total Cash Out</span>
+                  <div className="kpi-icon" style={{ background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444' }}>
+                    <ArrowDownRight size={18} />
+                  </div>
+                </div>
+                <div className="kpi-value" style={{ color: '#ef4444' }}>
+                  −৳{Number(cashFlowData.totalCashOut || 0).toLocaleString()}
+                </div>
+                <div className="kpi-footer" style={{ color: '#ef4444' }}>Purchases + Expenses + Drawings</div>
+              </div>
+
+              <div className="kpi-card" style={{ borderLeft: `4px solid ${Number(cashFlowData.netCashFlow || 0) >= 0 ? '#10b981' : '#ef4444'}` }}>
+                <div className="kpi-top">
+                  <span className="kpi-title">Net Cash Flow</span>
+                  <div className="kpi-icon" style={{
+                    background: Number(cashFlowData.netCashFlow || 0) >= 0 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                    color: Number(cashFlowData.netCashFlow || 0) >= 0 ? '#10b981' : '#ef4444'
+                  }}>
+                    <TrendingUp size={18} />
+                  </div>
+                </div>
+                <div className="kpi-value" style={{ color: Number(cashFlowData.netCashFlow || 0) >= 0 ? '#10b981' : '#ef4444' }}>
+                  {Number(cashFlowData.netCashFlow || 0) >= 0 ? '+' : ''}৳{Number(cashFlowData.netCashFlow || 0).toLocaleString()}
+                </div>
+                <div className="kpi-footer" style={{ color: 'var(--text-muted)' }}>Closing: ৳{Number(cashFlowData.closingBalance || 0).toLocaleString()}</div>
+              </div>
+            </div>
+          )}
+
+          {/* Categorized Inflow vs Outflow Breakdown */}
+          {cashFlowData?.breakdown && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.25rem' }}>
+              {/* Inflow Breakdown */}
+              <div className="erp-card" style={{ padding: '1.25rem' }}>
+                <h4 style={{ margin: '0 0 1rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.95rem', fontWeight: 800 }}>
+                  <ArrowUp size={16} /> Cash Inflow Sources
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {[
+                    { label: 'POS & Upfront Cash Sales', val: cashFlowData.breakdown.sales || 0 },
+                    { label: 'Customer Due Collections', val: cashFlowData.breakdown.customerDues || 0 },
+                    { label: 'Laptop EMI Financing Receipts', val: cashFlowData.breakdown.emi || 0 },
+                    { label: 'Other Business Income', val: cashFlowData.breakdown.otherIncome || 0 },
+                    { label: 'Capital Investments (Equity)', val: cashFlowData.breakdown.investments || 0 },
+                    { label: 'Inter-Account Transfers In', val: cashFlowData.transfersIn || 0 },
+                  ].map((item, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0.65rem', background: 'var(--bg-card-muted)', borderRadius: '6px' }}>
+                      <span style={{ fontSize: '0.825rem' }}>{item.label}</span>
+                      <span style={{ fontWeight: 700, color: item.val > 0 ? '#10b981' : 'var(--text-muted)', fontSize: '0.85rem' }}>
+                        ৳{Number(item.val).toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Outflow Breakdown */}
+              <div className="erp-card" style={{ padding: '1.25rem' }}>
+                <h4 style={{ margin: '0 0 1rem', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.95rem', fontWeight: 800 }}>
+                  <ArrowDown size={16} /> Cash Outflow Allocations
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {[
+                    { label: 'Inventory Purchases (Upfront Cash)', val: cashFlowData.breakdown.purchases || 0 },
+                    { label: 'Supplier Due Payments', val: cashFlowData.breakdown.supplierPayments || 0 },
+                    { label: 'Operating Business Expenses', val: cashFlowData.breakdown.expenses || 0 },
+                    { label: 'Owner Drawings & Withdrawals', val: cashFlowData.breakdown.withdrawals || 0 },
+                    { label: 'Staff Salaries Disbursed', val: cashFlowData.breakdown.salaries || 0 },
+                    { label: 'Customer RMA Returns & Refunds', val: cashFlowData.breakdown.refunds || 0 },
+                    { label: 'Inter-Account Transfers Out', val: cashFlowData.transfersOut || 0 },
+                  ].map((item, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0.65rem', background: 'var(--bg-card-muted)', borderRadius: '6px' }}>
+                      <span style={{ fontSize: '0.825rem' }}>{item.label}</span>
+                      <span style={{ fontWeight: 700, color: item.val > 0 ? '#ef4444' : 'var(--text-muted)', fontSize: '0.85rem' }}>
+                        ৳{Number(item.val).toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -1462,6 +2167,386 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                 </button>
                 <button type="submit" className="btn btn-success">
                   Confirm Capital Addition
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: RECORD OTHER INCOME */}
+      {showOtherIncomeModal && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content modal-content-md">
+            <div className="modal-header">
+              <div className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Plus size={20} color="#10b981" />
+                Record Other Business Income (Non-Product Revenue)
+              </div>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowOtherIncomeModal(false)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleOtherIncomeSubmit}>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <label className="form-label">Income Category *</label>
+                  <select 
+                    className="form-control"
+                    value={otherIncomeCategory}
+                    onChange={e => setOtherIncomeCategory(e.target.value)}
+                    required
+                  >
+                    <option value="Scrap & Packaging Sale">Scrap & Packaging Carton Sale</option>
+                    <option value="Commission & Rebate">Supplier Cash Rebate / Commission</option>
+                    <option value="Rental / Sublet">Office / Space Sublet Income</option>
+                    <option value="Bank Profit / Interest">Bank Interest / Profit Deposit</option>
+                    <option value="Delivery / Logistics Fee">Logistics / Courier Charges Collected</option>
+                    <option value="Miscellaneous Income">Miscellaneous / Other Income</option>
+                  </select>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div>
+                    <label className="form-label">Amount (৳) *</label>
+                    <input 
+                      type="number"
+                      className="form-control"
+                      min="1"
+                      value={otherIncomeAmount}
+                      onChange={e => setOtherIncomeAmount(Number(e.target.value))}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Receiving Account *</label>
+                    <select 
+                      className="form-control"
+                      value={otherIncomeAccountId}
+                      onChange={e => setOtherIncomeAccountId(e.target.value)}
+                      required
+                    >
+                      {financialAccounts.map(a => (
+                        <option key={a.id} value={a.id}>
+                          {a.name} ({a.type})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div>
+                    <label className="form-label">Date *</label>
+                    <input 
+                      type="date"
+                      className="form-control"
+                      value={otherIncomeDate}
+                      onChange={e => setOtherIncomeDate(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Received From (Payer)</label>
+                    <input 
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Bhanga Trader / Courier / Bank"
+                      value={otherIncomeFrom}
+                      onChange={e => setOtherIncomeFrom(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="form-label">Description / Source Details *</label>
+                  <textarea 
+                    className="form-control"
+                    rows={2}
+                    placeholder="Explain the source and purpose of this money received..."
+                    value={otherIncomeDesc}
+                    onChange={e => setOtherIncomeDesc(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="form-label">Reference Number (Optional)</label>
+                  <input 
+                    type="text"
+                    className="form-control"
+                    placeholder="e.g. SLIP-1029 / Money Receipt #"
+                    value={otherIncomeRef}
+                    onChange={e => setOtherIncomeRef(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowOtherIncomeModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-success" disabled={isSubmittingOtherIncome}>
+                  {isSubmittingOtherIncome ? 'Posting...' : 'Record Income & Credit Account'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: RECORD OWNER WITHDRAWAL */}
+      {showWithdrawalModal && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content modal-content-md">
+            <div className="modal-header">
+              <div className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <ArrowDown size={20} color="#f59e0b" />
+                Record Owner Withdrawal (Capital / Drawing Outflow)
+              </div>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowWithdrawalModal(false)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleWithdrawalSubmit}>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ background: 'rgba(245, 158, 11, 0.08)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(245, 158, 11, 0.2)', fontSize: '0.8rem', color: '#f59e0b' }}>
+                  ℹ️ Owner withdrawals reduce business equity liquidity and the source account balance. They are strictly separate from operational expenses and do not distort P&L calculations.
+                </div>
+
+                <div>
+                  <label className="form-label">Owner Name *</label>
+                  <input 
+                    type="text"
+                    className="form-control"
+                    value={withdrawalOwner}
+                    onChange={e => setWithdrawalOwner(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div>
+                    <label className="form-label">Amount (৳) *</label>
+                    <input 
+                      type="number"
+                      className="form-control"
+                      min="1"
+                      value={withdrawalAmount}
+                      onChange={e => setWithdrawalAmount(Number(e.target.value))}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Deduct From Account *</label>
+                    <select 
+                      className="form-control"
+                      value={withdrawalAccountId}
+                      onChange={e => setWithdrawalAccountId(e.target.value)}
+                      required
+                    >
+                      {financialAccounts.map(a => (
+                        <option key={a.id} value={a.id}>
+                          {a.name} ({a.type}) — Bal: ৳{Number(a.balance).toLocaleString()}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div>
+                    <label className="form-label">Date *</label>
+                    <input 
+                      type="date"
+                      className="form-control"
+                      value={withdrawalDate}
+                      onChange={e => setWithdrawalDate(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Purpose / Drawing Reason</label>
+                    <input 
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Personal family expense / Director drawing"
+                      value={withdrawalPurpose}
+                      onChange={e => setWithdrawalPurpose(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="form-label">Voucher / Cheque Reference (Optional)</label>
+                  <input 
+                    type="text"
+                    className="form-control"
+                    placeholder="e.g. CHQ-998231 / Cash Voucher #09"
+                    value={withdrawalRef}
+                    onChange={e => setWithdrawalRef(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowWithdrawalModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-warning" disabled={isSubmittingWithdrawal}>
+                  {isSubmittingWithdrawal ? 'Deducting...' : 'Confirm Withdrawal & Deduct Account'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: TRANSACTION DETAILS INSPECTOR */}
+      {selectedLedgerItem && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content modal-content-md">
+            <div className="modal-header">
+              <div className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <BookOpen size={20} color="var(--brand-primary)" />
+                Ledger Transaction Audit Record
+              </div>
+              <button className="btn btn-ghost btn-sm" onClick={() => setSelectedLedgerItem(null)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', background: 'var(--bg-card-muted)', padding: '0.85rem', borderRadius: '8px' }}>
+                <div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Transaction Reference</div>
+                  <div style={{ fontWeight: 800, color: 'var(--brand-primary)' }}>{selectedLedgerItem.referenceNumber}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Transaction Type</div>
+                  <div style={{ fontWeight: 700 }}>{selectedLedgerItem.referenceType}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Date & Time</div>
+                  <div style={{ fontWeight: 600 }}>{new Date(selectedLedgerItem.date).toLocaleString()}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Status</div>
+                  <span className={`badge ${selectedLedgerItem.status === 'REVERSED' ? 'badge-danger' : 'badge-success'}`}>
+                    {selectedLedgerItem.status || 'COMPLETED'}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Description</div>
+                <div style={{ padding: '0.75rem', background: 'var(--bg-card)', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
+                  {selectedLedgerItem.description}
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+                <div style={{ background: 'rgba(16, 185, 129, 0.08)', padding: '0.75rem', borderRadius: '6px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.72rem', color: '#10b981' }}>Debit (Inflow)</div>
+                  <div style={{ fontWeight: 800, color: '#10b981', fontSize: '1.1rem' }}>
+                    ৳{Number(selectedLedgerItem.debit).toLocaleString()}
+                  </div>
+                </div>
+                <div style={{ background: 'rgba(239, 68, 68, 0.08)', padding: '0.75rem', borderRadius: '6px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.72rem', color: '#ef4444' }}>Credit (Outflow)</div>
+                  <div style={{ fontWeight: 800, color: '#ef4444', fontSize: '1.1rem' }}>
+                    ৳{Number(selectedLedgerItem.credit).toLocaleString()}
+                  </div>
+                </div>
+                <div style={{ background: 'rgba(0, 140, 255, 0.08)', padding: '0.75rem', borderRadius: '6px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--brand-primary)' }}>Account Balance</div>
+                  <div style={{ fontWeight: 800, color: 'var(--brand-primary)', fontSize: '1.1rem' }}>
+                    ৳{Number(selectedLedgerItem.runningBalance).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+
+              {selectedLedgerItem.performedBy && (
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-color)', paddingTop: '0.5rem' }}>
+                  Recorded by: <strong>{selectedLedgerItem.performedBy}</strong>
+                </div>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              {selectedLedgerItem.status !== 'REVERSED' && (
+                <button 
+                  className="btn btn-outline"
+                  style={{ color: '#ef4444', borderColor: '#ef4444' }}
+                  onClick={() => {
+                    setItemToReverse(selectedLedgerItem);
+                    setSelectedLedgerItem(null);
+                    setShowReversalModal(true);
+                  }}
+                >
+                  <RotateCcw size={14} /> Reverse Transaction
+                </button>
+              )}
+              <button type="button" className="btn btn-secondary" onClick={() => setSelectedLedgerItem(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: TRANSACTION REVERSAL CONFIRMATION */}
+      {showReversalModal && itemToReverse && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content modal-content-md">
+            <div className="modal-header">
+              <div className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444' }}>
+                <AlertCircle size={20} />
+                Financial Reversal Confirmation
+              </div>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowReversalModal(false)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleReversalSubmit}>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ background: 'rgba(239, 68, 68, 0.08)', padding: '0.85rem', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.25)', color: '#ef4444', fontSize: '0.85rem' }}>
+                  ⚠️ <strong>Audit Integrity Rule:</strong> Financial transactions are never silently deleted. Reversing this transaction ({itemToReverse.referenceNumber}) will generate an equal and counteracting balancing ledger entry and restore the account balance.
+                </div>
+
+                <div style={{ background: 'var(--bg-card-muted)', padding: '0.75rem', borderRadius: '6px', fontSize: '0.85rem' }}>
+                  <div><strong>Reference:</strong> {itemToReverse.referenceNumber}</div>
+                  <div><strong>Type:</strong> {itemToReverse.referenceType}</div>
+                  <div><strong>Description:</strong> {itemToReverse.description}</div>
+                  <div><strong>Effect:</strong> {Number(itemToReverse.debit) > 0 ? `Debit +৳${Number(itemToReverse.debit).toLocaleString()}` : `Credit −৳${Number(itemToReverse.credit).toLocaleString()}`}</div>
+                </div>
+
+                <div>
+                  <label className="form-label">Mandatory Reason for Reversal *</label>
+                  <textarea 
+                    className="form-control"
+                    rows={3}
+                    placeholder="Enter explicit reason (e.g. Customer returned goods, entered wrong payment method, duplicate entry)..."
+                    value={reversalReason}
+                    onChange={e => setReversalReason(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowReversalModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-danger" disabled={isSubmittingReversal}>
+                  {isSubmittingReversal ? 'Reversing...' : 'Confirm & Reverse Financial Impact'}
                 </button>
               </div>
             </form>
