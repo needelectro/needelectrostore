@@ -7,8 +7,8 @@ import {
   INITIAL_AUDIT_LOGS, INITIAL_INVENTORY_TRANSACTIONS
 } from './mockData';
 
-// Current Clean Storage Prefix
-const STORAGE_PREFIX = 'NEED_ELECTRO_PROD_CLEAN_V3_';
+// Factory Reset Storage Engine
+const STORAGE_PREFIX = 'NEED_ELECTRO_FACTORY_V5_';
 
 // Auto-purge any legacy cached business data from users' browser localStorage
 if (typeof window !== 'undefined' && window.localStorage) {
@@ -16,13 +16,16 @@ if (typeof window !== 'undefined' && window.localStorage) {
     const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith('NEED_ELECTRO_') && !key.startsWith(STORAGE_PREFIX)) {
+      if (key && !key.startsWith(STORAGE_PREFIX)) {
         keysToRemove.push(key);
       }
     }
     keysToRemove.forEach(k => localStorage.removeItem(k));
+    if (window.sessionStorage) {
+      sessionStorage.clear();
+    }
   } catch (e) {
-    console.warn('LocalStorage cleanup notice:', e);
+    console.warn('LocalStorage factory reset notice:', e);
   }
 }
 

@@ -42,36 +42,9 @@ export const INITIAL_SETTINGS: SystemSettings = {
   accentColor: '#008CFF'
 };
 
-export const INITIAL_BRANCHES: Branch[] = [
-  {
-    id: 'branch-1',
-    name: 'Main Branch Moulvibazar',
-    code: 'MB-MAIN',
-    address: 'Shop#5, MR Plaza, Kusumbag, Moulvibazar',
-    phone: '01733-983752',
-    email: 'info.needelectro@gmail.com',
-    isWarehouse: false,
-    active: true
-  }
-];
+export const INITIAL_BRANCHES: Branch[] = [];
 
-export const INITIAL_USERS: User[] = [
-  {
-    id: 'user-superadmin-1',
-    name: 'Amdadur Rahman',
-    email: 'contact.amdadur@gmail.com',
-    username: 'amdadur',
-    role: 'SUPER_ADMIN',
-    roleId: 'role-superadmin',
-    branchId: 'branch-1',
-    allowedBranchIds: ['branch-1'],
-    phone: '01733-983752',
-    active: true,
-    status: 'ACTIVE',
-    failedLoginAttempts: 0,
-    createdAt: '2026-01-01'
-  }
-];
+export const INITIAL_USERS: User[] = [];
 
 export const INITIAL_EMI_PLANS: EMIPlan[] = [
   {
@@ -132,74 +105,7 @@ export const INITIAL_EMI_PLANS: EMIPlan[] = [
   }
 ];
 
-export const INITIAL_FINANCIAL_ACCOUNTS: FinancialAccount[] = [
-  {
-    "id": "acc-1",
-    "name": "Main Cash Drawer (Moulvibazar Showroom)",
-    "type": "CASH",
-    "accountNumber": "CASH-MB-01",
-    "bankName": "Cash in Hand Vault",
-    "branchName": "Moulvibazar Main",
-    "balance": 0,
-    "currency": "BDT",
-    "isActive": true
-  },
-  {
-    "id": "acc-ebl-amdadur",
-    "name": "Eastern Bank - Amdadur Rahman",
-    "type": "BANK",
-    "accountNumber": "EBL-AMDADUR",
-    "bankName": "Eastern Bank PLC",
-    "branchName": "Moulvibazar Branch",
-    "balance": 0,
-    "currency": "BDT",
-    "isActive": true
-  },
-  {
-    "id": "acc-pubali-amdadur",
-    "name": "Pubali Bank - Amdadur Rahman",
-    "type": "BANK",
-    "accountNumber": "PUBALI-AMDADUR",
-    "bankName": "Pubali Bank PLC",
-    "branchName": "Moulvibazar Branch",
-    "balance": 0,
-    "currency": "BDT",
-    "isActive": true
-  },
-  {
-    "id": "acc-pubali-fulori",
-    "name": "Pubali Bank - Fulori Miha",
-    "type": "BANK",
-    "accountNumber": "PUBALI-FULORI",
-    "bankName": "Pubali Bank PLC",
-    "branchName": "Moulvibazar Branch",
-    "balance": 0,
-    "currency": "BDT",
-    "isActive": true
-  },
-  {
-    "id": "acc-bkash-primary",
-    "name": "bKash Payment (01884599271)",
-    "type": "MOBILE_BANKING",
-    "accountNumber": "01884599271",
-    "bankName": "bKash Limited",
-    "branchName": "Official Payment Wallet",
-    "balance": 0,
-    "currency": "BDT",
-    "isActive": true
-  },
-  {
-    "id": "acc-nagad-primary",
-    "name": "Nagad Payment Wallet (01733-983752)",
-    "type": "MOBILE_BANKING",
-    "accountNumber": "01733-983752",
-    "bankName": "Nagad (Bangladesh Post Office)",
-    "branchName": "Official Merchant Wallet",
-    "balance": 0,
-    "currency": "BDT",
-    "isActive": true
-  }
-];
+export const INITIAL_FINANCIAL_ACCOUNTS: FinancialAccount[] = [];
 
 // Production Clean Entities (Zero Fake Data)
 // Production Clean Entities (Zero Business Data)
