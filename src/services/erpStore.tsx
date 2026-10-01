@@ -211,6 +211,7 @@ interface ERPContextType {
   // Super Admin Master Omnipotent Controls
   updateSale: (saleId: string, updates: Partial<Sale>) => Promise<{ success: boolean; error?: string }>;
   deleteSale: (saleId: string) => Promise<{ success: boolean; error?: string }>;
+  recordInvoicePayment: (invoiceId: string, paymentData: { amount: number; paymentMethod: PaymentMethod; accountId?: string; reference?: string; notes?: string }) => Promise<{ success: boolean; data?: any; error?: string }>;
   updateEMIAccount: (accountId: string, updates: Partial<EMIAccount>) => Promise<{ success: boolean; error?: string }>;
   deleteEMIAccount: (accountId: string) => Promise<{ success: boolean; error?: string }>;
   deleteProduct: (productId: string) => Promise<{ success: boolean; error?: string }>;
@@ -2170,6 +2171,26 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const recordInvoicePayment = async (
+    invoiceId: string,
+    paymentData: { amount: number; paymentMethod: PaymentMethod; accountId?: string; reference?: string; notes?: string }
+  ): Promise<{ success: boolean; data?: any; error?: string }> => {
+    try {
+      const res = await api.sales.recordPayment(invoiceId, paymentData);
+      if (!res || !res.success) {
+        throw new Error((res as any)?.error || 'Failed to record invoice payment.');
+      }
+      await refreshFromDatabase();
+      const s = sales.find(x => x.id === invoiceId || x.invoiceNumber === invoiceId);
+      logAction('POS', 'INVOICE_PAYMENT_RECORDED', invoiceId, `Recorded payment ৳${paymentData.amount.toLocaleString()} for invoice ${s?.invoiceNumber || invoiceId}`);
+      addToast('success', 'Payment Recorded', `Payment of ৳${paymentData.amount.toLocaleString()} recorded successfully.`);
+      return { success: true, data: res.data };
+    } catch (err: any) {
+      addToast('error', 'Payment Failed', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
   const updateEMIAccount = async (accountId: string, updates: Partial<EMIAccount>): Promise<{ success: boolean; error?: string }> => {
     try {
       const res = await api.emi.updateAccount(accountId, updates);
@@ -2569,6 +2590,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateInventoryRules,
         updateSale,
         deleteSale,
+        recordInvoicePayment,
         updateEMIAccount,
         deleteEMIAccount,
         deleteProduct,

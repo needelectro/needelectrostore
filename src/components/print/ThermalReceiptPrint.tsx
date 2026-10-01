@@ -99,7 +99,10 @@ export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, 
                 Main Branch: {safeSettings.address || 'Shop#5, MR Plaza, Kusumbag, Moulvibazar'}
               </div>
               <div style={{ fontSize: '8.5px' }}>
-                Hotline: <strong>{safeSettings.phone || '01733-983752'}</strong> | Email: <strong>info.needelectro@gmail.com</strong>
+                Hotline: <strong>{safeSettings.phone || '+880 1733-983752'}</strong> | Email: <strong>needelectro23@gmail.com</strong>
+              </div>
+              <div style={{ fontSize: '8.5px' }}>
+                Website: <strong>www.needelectro.com</strong>
               </div>
             </div>
 

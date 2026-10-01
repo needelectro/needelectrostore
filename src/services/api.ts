@@ -125,17 +125,23 @@ export const api = {
   sales: {
     getSales: (params?: Record<string, string>) => {
       const q = params ? '?' + new URLSearchParams(params).toString() : '';
-      return request<{ success: boolean; data: any[] }>(`/api/sales${q}`);
+      return request<{ success: boolean; data: any[]; total?: number; stats?: any }>(`/api/sales${q}`);
     },
+    getSale: (id: string) => request<{ success: boolean; data: any }>(`/api/sales/${id}`),
     createSale: (saleData: any, emiPlanConfig?: any, paymentAccountId?: string) =>
       request<{ success: boolean; message: string; sale: any }>('/api/sales', {
         method: 'POST',
         body: JSON.stringify({ saleData, emiPlanConfig, paymentAccountId })
       }),
     updateSale: (id: string, updates: any) =>
-      request<{ success: boolean; data: any }>(`/api/sales/${id}`, {
+      request<{ success: boolean; data: any; message?: string }>(`/api/sales/${id}`, {
         method: 'PUT',
         body: JSON.stringify(updates)
+      }),
+    recordPayment: (id: string, paymentData: { amount: number; paymentMethod: string; accountId?: string; reference?: string; notes?: string }) =>
+      request<{ success: boolean; message: string; data: any }>(`/api/sales/${id}/payment`, {
+        method: 'POST',
+        body: JSON.stringify(paymentData)
       }),
     deleteSale: (id: string) =>
       request<{ success: boolean; message: string }>(`/api/sales/${id}`, {

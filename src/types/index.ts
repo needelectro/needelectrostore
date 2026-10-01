@@ -331,6 +331,7 @@ export interface PaymentBreakdown {
 }
 
 export interface SaleItem {
+  id?: string;
   productId: string;
   productName: string;
   sku: string;
@@ -342,6 +343,9 @@ export interface SaleItem {
   warrantyMonths: number;
   isSerialized: boolean;
   serialNumbers: string[];
+  description?: string;
+  taxPercent?: number;
+  taxAmount?: number;
 }
 
 export interface Sale {
@@ -350,24 +354,37 @@ export interface Sale {
   customerId: string;
   customerName: string;
   customerPhone: string;
+  customerEmail?: string;
   customerAddress?: string;
+  customerType?: string;
+  customerCode?: string;
+  billingAddress?: string;
+  shippingAddress?: string;
   branchId: string;
+  branchName?: string;
   date: string;
   items?: SaleItem[];
   subtotal: number;
   overallDiscount: number;
   vatAmount: number;
   vatPercent: number;
+  deliveryCharge?: number;
+  serviceCharge?: number;
+  otherCharges?: number;
   grandTotal: number;
   paidAmount: number;
   dueAmount: number;
+  previousDue?: number;
+  totalDue?: number;
+  changeAmount?: number;
   payments?: PaymentBreakdown[];
   saleType: 'REGULAR' | 'EMI';
   emiAccountId?: string;
-  status?: 'COMPLETED' | 'RETURNED' | 'VOID';
+  status?: 'COMPLETED' | 'PAID' | 'PARTIALLY_PAID' | 'DUE' | 'EMI' | 'RETURNED' | 'VOID' | 'CANCELLED' | 'REFUNDED' | 'DRAFT' | 'PENDING';
   salespersonId?: string;
   salespersonName?: string;
   notes?: string;
+  metadata?: any;
   createdAt?: string;
 }
 

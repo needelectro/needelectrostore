@@ -21,68 +21,195 @@ export async function GET(req: NextRequest) {
   const branchId = searchParams.get('branchId');
   const customerId = searchParams.get('customerId');
   const status = searchParams.get('status');
+  const saleType = searchParams.get('saleType');
+  const salespersonId = searchParams.get('salespersonId');
+  const startDate = searchParams.get('startDate');
+  const endDate = searchParams.get('endDate');
+  const paymentMethod = searchParams.get('paymentMethod');
   const query = searchParams.get('query');
+  const limit = Math.min(Number(searchParams.get('limit')) || 500, 1000);
+  const offset = Number(searchParams.get('offset')) || 0;
 
   const where: any = {};
-  if (branchId) where.branchId = branchId;
+  if (branchId && branchId !== 'ALL') where.branchId = branchId;
   if (customerId) where.customerId = customerId;
-  if (status) where.status = status;
-  if (query) {
+  if (salespersonId && salespersonId !== 'ALL') where.salespersonId = salespersonId;
+  if (saleType && saleType !== 'ALL') where.saleType = saleType;
+
+  // Status Filter
+  if (status && status !== 'ALL') {
+    if (status === 'DUE') {
+      where.dueAmount = { gt: 0 };
+      where.status = { notIn: ['CANCELLED', 'VOID', 'RETURNED'] };
+    } else if (status === 'PAID') {
+      where.dueAmount = { lte: 0 };
+      where.status = { notIn: ['CANCELLED', 'VOID', 'RETURNED'] };
+    } else if (status === 'PARTIALLY_PAID') {
+      where.dueAmount = { gt: 0 };
+      where.paidAmount = { gt: 0 };
+      where.status = { notIn: ['CANCELLED', 'VOID', 'RETURNED'] };
+    } else {
+      where.status = status;
+    }
+  }
+
+  // Date Range Filter
+  if (startDate || endDate) {
+    where.date = {};
+    if (startDate) {
+      where.date.gte = new Date(startDate + 'T00:00:00.000Z');
+    }
+    if (endDate) {
+      where.date.lte = new Date(endDate + 'T23:59:59.999Z');
+    }
+  }
+
+  // Multi-field search
+  if (query && query.trim()) {
+    const q = query.trim();
     where.OR = [
-      { invoiceNumber: { contains: query, mode: 'insensitive' } },
-      { customerName: { contains: query, mode: 'insensitive' } },
-      { customerPhone: { contains: query } },
+      { invoiceNumber: { contains: q, mode: 'insensitive' } },
+      { customerName: { contains: q, mode: 'insensitive' } },
+      { customerPhone: { contains: q } },
+      { notes: { contains: q, mode: 'insensitive' } },
+      {
+        items: {
+          some: {
+            OR: [
+              { productName: { contains: q, mode: 'insensitive' } },
+              { sku: { contains: q, mode: 'insensitive' } },
+            ],
+          },
+        },
+      },
     ];
   }
 
-  const sales = await prisma.sale.findMany({
-    where,
-    include: { items: true, customer: true },
-    orderBy: { date: 'desc' },
-    take: 500,
+  const [sales, totalCount] = await Promise.all([
+    prisma.sale.findMany({
+      where,
+      include: {
+        items: true,
+        customer: true,
+        branch: true,
+      },
+      orderBy: { date: 'desc' },
+      take: limit,
+      skip: offset,
+    }),
+    prisma.sale.count({ where }),
+  ]);
+
+  // Client-side filter for paymentMethod inside payments Json if specified
+  let filteredSales = sales;
+  if (paymentMethod && paymentMethod !== 'ALL') {
+    filteredSales = sales.filter((s) => {
+      const pmts = (s.payments as any[]) || [];
+      return pmts.some(
+        (p) => String(p.method || '').toLowerCase() === paymentMethod.toLowerCase()
+      );
+    });
+  }
+
+  const formattedSales = filteredSales.map((s) => {
+    const custBalance = Number(s.customer?.currentBalance || 0);
+    const subtotal = Number(s.subtotal);
+    const overallDiscount = Number(s.overallDiscount);
+    const vatAmount = Number(s.vatAmount);
+    const vatPercent = Number(s.vatPercent);
+    const deliveryCharge = Number((s as any).deliveryCharge || 0);
+    const serviceCharge = Number((s as any).serviceCharge || 0);
+    const otherCharges = Number((s as any).otherCharges || 0);
+    const grandTotal = Number(s.grandTotal);
+    const paidAmount = Number(s.paidAmount);
+    const dueAmount = Number(s.dueAmount);
+    const previousDue = Number((s as any).previousDue || custBalance);
+    const totalDue = Number((s as any).totalDue || previousDue + dueAmount);
+    const changeAmount = Number((s as any).changeAmount || 0);
+
+    return {
+      id: s.id,
+      invoiceNumber: s.invoiceNumber,
+      customerId: s.customerId,
+      customerName: s.customerName,
+      customerPhone: s.customerPhone,
+      customerEmail: (s as any).customerEmail || s.customer?.email || '',
+      customerAddress: (s as any).billingAddress || s.customer?.address || '',
+      customerType: (s as any).customerType || 'RETAIL',
+      customerCode: s.customer?.customerId || '',
+      billingAddress: (s as any).billingAddress || s.customer?.address || '',
+      shippingAddress: (s as any).shippingAddress || (s as any).billingAddress || s.customer?.address || '',
+      branchId: s.branchId,
+      branchName: s.branch?.name || '',
+      date: s.date ? s.date.toISOString().split('T')[0] : '',
+      createdAt: s.createdAt ? s.createdAt.toISOString() : (s.date ? s.date.toISOString() : ''),
+      subtotal,
+      overallDiscount,
+      vatAmount,
+      vatPercent,
+      deliveryCharge,
+      serviceCharge,
+      otherCharges,
+      grandTotal,
+      paidAmount,
+      dueAmount,
+      previousDue,
+      totalDue,
+      changeAmount,
+      payments: (s.payments as any) || [],
+      saleType: s.saleType,
+      emiAccountId: s.emiAccountId,
+      status: s.status,
+      salespersonId: s.salespersonId,
+      salespersonName: s.salespersonName,
+      notes: s.notes,
+      metadata: (s as any).metadata || null,
+      items: s.items.map((item) => ({
+        id: item.id,
+        productId: item.productId,
+        productName: item.productName,
+        sku: item.sku,
+        category: item.category,
+        quantity: item.quantity,
+        unitPrice: Number(item.unitPrice),
+        discount: Number(item.discount),
+        total: Number(item.total),
+        warrantyMonths: item.warrantyMonths,
+        isSerialized: item.isSerialized,
+        serialNumbers: Array.isArray(item.serialNumbers) ? (item.serialNumbers as string[]) : [],
+        description: (item as any).description || '',
+        taxPercent: Number((item as any).taxPercent || 0),
+        taxAmount: Number((item as any).taxAmount || 0),
+      })),
+    };
   });
 
-  const formattedSales = sales.map(s => ({
-    id: s.id,
-    invoiceNumber: s.invoiceNumber,
-    customerId: s.customerId,
-    customerName: s.customerName,
-    customerPhone: s.customerPhone,
-    customerAddress: s.customer?.address || '',
-    branchId: s.branchId,
-    date: s.date ? s.date.toISOString().split('T')[0] : '',
-    createdAt: s.createdAt ? s.createdAt.toISOString() : (s.date ? s.date.toISOString() : ''),
-    subtotal: Number(s.subtotal),
-    overallDiscount: Number(s.overallDiscount),
-    vatAmount: Number(s.vatAmount),
-    vatPercent: Number(s.vatPercent),
-    grandTotal: Number(s.grandTotal),
-    paidAmount: Number(s.paidAmount),
-    dueAmount: Number(s.dueAmount),
-    payments: (s.payments as any) || [],
-    saleType: s.saleType,
-    emiAccountId: s.emiAccountId,
-    status: s.status,
-    salespersonId: s.salespersonId,
-    salespersonName: s.salespersonName,
-    notes: s.notes,
-    items: s.items.map(item => ({
-      id: item.id,
-      productId: item.productId,
-      productName: item.productName,
-      sku: item.sku,
-      category: item.category,
-      quantity: item.quantity,
-      unitPrice: Number(item.unitPrice),
-      discount: Number(item.discount),
-      total: Number(item.total),
-      warrantyMonths: item.warrantyMonths,
-      isSerialized: item.isSerialized,
-      serialNumbers: Array.isArray(item.serialNumbers) ? (item.serialNumbers as string[]) : [],
-    })),
-  }));
+  // Calculate live aggregate stats for dashboard
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  return NextResponse.json({ success: true, data: formattedSales });
+  const stats = {
+    totalInvoices: totalCount,
+    totalSalesVolume: formattedSales.reduce((acc, s) => acc + s.grandTotal, 0),
+    totalPaidVolume: formattedSales.reduce((acc, s) => acc + s.paidAmount, 0),
+    totalDueVolume: formattedSales.reduce((acc, s) => acc + s.dueAmount, 0),
+    todayInvoices: formattedSales.filter((s) => new Date(s.createdAt) >= today).length,
+    todaySales: formattedSales
+      .filter((s) => new Date(s.createdAt) >= today)
+      .reduce((acc, s) => acc + s.grandTotal, 0),
+    paidCount: formattedSales.filter((s) => s.dueAmount === 0 && s.status !== 'CANCELLED').length,
+    dueCount: formattedSales.filter((s) => s.dueAmount > 0 && s.status !== 'CANCELLED').length,
+    emiCount: formattedSales.filter((s) => s.saleType === 'EMI').length,
+    cancelledCount: formattedSales.filter((s) => s.status === 'CANCELLED' || s.status === 'VOID').length,
+    returnedCount: formattedSales.filter((s) => s.status === 'RETURNED').length,
+  };
+
+  return NextResponse.json({
+    success: true,
+    data: formattedSales,
+    total: totalCount,
+    stats,
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -102,6 +229,58 @@ export async function POST(req: NextRequest) {
 
     const { saleData, emiPlanConfig, paymentAccountId } = parsed.data;
 
+    // Backend financial validation and calculation:
+    let calculatedSubtotal = 0;
+    const validatedItems = saleData.items.map((item) => {
+      const lineUnit = Number(item.unitPrice);
+      const lineQty = Number(item.quantity);
+      const lineDisc = Number(item.discount || 0);
+      const lineTotal = Math.max(0, lineUnit * lineQty - lineDisc);
+      calculatedSubtotal += lineTotal;
+      return {
+        ...item,
+        unitPrice: lineUnit,
+        quantity: lineQty,
+        discount: lineDisc,
+        total: lineTotal,
+      };
+    });
+
+    const overallDiscount = Number(saleData.overallDiscount || 0);
+    const deliveryCharge = Number(saleData.deliveryCharge || 0);
+    const serviceCharge = Number(saleData.serviceCharge || 0);
+    const otherCharges = Number(saleData.otherCharges || 0);
+    const vatPercent = Number(saleData.vatPercent || 0);
+
+    const taxableAmount = Math.max(0, calculatedSubtotal - overallDiscount);
+    const calculatedVat = vatPercent > 0
+      ? Math.round((taxableAmount * vatPercent) / 100)
+      : Number(saleData.vatAmount || 0);
+
+    const calculatedGrandTotal = Math.max(
+      0,
+      taxableAmount + calculatedVat + deliveryCharge + serviceCharge + otherCharges
+    );
+
+    // Payments validation
+    const paymentsList = saleData.payments || [];
+    const totalPaidCalculated = paymentsList.reduce((acc, p) => acc + Number(p.amount || 0), 0);
+    const paidAmount = saleData.paidAmount !== undefined ? Number(saleData.paidAmount) : totalPaidCalculated;
+    const dueAmount = Math.max(0, calculatedGrandTotal - paidAmount);
+    const changeAmount = Math.max(0, paidAmount - calculatedGrandTotal);
+
+    // Determine invoice status
+    let initialStatus = 'PAID';
+    if (saleData.saleType === 'EMI') {
+      initialStatus = 'EMI';
+    } else if (dueAmount > 0 && paidAmount > 0) {
+      initialStatus = 'PARTIALLY_PAID';
+    } else if (dueAmount > 0 && paidAmount === 0) {
+      initialStatus = 'DUE';
+    } else {
+      initialStatus = 'PAID';
+    }
+
     // Execute within an ACID PostgreSQL transaction
     const result = await prisma.$transaction(async (tx) => {
       // 1. Generate guaranteed-unique invoice number with collision prevention
@@ -111,7 +290,6 @@ export async function POST(req: NextRequest) {
       let nextNum = pos?.nextInvoiceNumber || 1001;
 
       if (!invoiceNumber || (await tx.sale.findUnique({ where: { invoiceNumber } }))) {
-        // Query recent sales to calculate true highest numeric sequence
         const recentSales = await tx.sale.findMany({
           where: { invoiceNumber: { startsWith: prefix } },
           select: { invoiceNumber: true },
@@ -144,6 +322,11 @@ export async function POST(req: NextRequest) {
         });
       }
 
+      // Fetch customer for previous due calculation
+      const customer = await tx.customer.findUnique({ where: { id: saleData.customerId } });
+      const previousDue = Number(customer?.currentBalance || 0);
+      const totalCustomerDue = previousDue + dueAmount;
+
       const saleId = 'sale-' + Date.now();
 
       // 2. Create Sale Record
@@ -154,26 +337,37 @@ export async function POST(req: NextRequest) {
           customerId: saleData.customerId,
           customerName: saleData.customerName,
           customerPhone: saleData.customerPhone,
+          customerEmail: saleData.customerEmail || customer?.email || null,
+          customerType: saleData.customerType || 'RETAIL',
+          billingAddress: saleData.billingAddress || customer?.address || null,
+          shippingAddress: saleData.shippingAddress || saleData.billingAddress || customer?.address || null,
           branchId: saleData.branchId,
           date: new Date(),
-          subtotal: new Prisma.Decimal(saleData.subtotal),
-          overallDiscount: new Prisma.Decimal(saleData.overallDiscount || 0),
-          vatAmount: new Prisma.Decimal(saleData.vatAmount || 0),
-          vatPercent: new Prisma.Decimal(saleData.vatPercent || 0),
-          grandTotal: new Prisma.Decimal(saleData.grandTotal),
-          paidAmount: new Prisma.Decimal(saleData.paidAmount || 0),
-          dueAmount: new Prisma.Decimal(saleData.dueAmount || 0),
-          payments: saleData.payments || [],
+          subtotal: new Prisma.Decimal(calculatedSubtotal),
+          overallDiscount: new Prisma.Decimal(overallDiscount),
+          vatAmount: new Prisma.Decimal(calculatedVat),
+          vatPercent: new Prisma.Decimal(vatPercent),
+          deliveryCharge: new Prisma.Decimal(deliveryCharge),
+          serviceCharge: new Prisma.Decimal(serviceCharge),
+          otherCharges: new Prisma.Decimal(otherCharges),
+          grandTotal: new Prisma.Decimal(calculatedGrandTotal),
+          paidAmount: new Prisma.Decimal(paidAmount),
+          dueAmount: new Prisma.Decimal(dueAmount),
+          previousDue: new Prisma.Decimal(previousDue),
+          totalDue: new Prisma.Decimal(totalCustomerDue),
+          changeAmount: new Prisma.Decimal(changeAmount),
+          payments: paymentsList,
           saleType: saleData.saleType || 'REGULAR',
-          status: 'COMPLETED',
+          status: initialStatus,
           salespersonId: user.id,
           salespersonName: user.name,
           notes: saleData.notes,
+          metadata: saleData.metadata || null,
         },
       });
 
       // 3. Process Sale Items, Inventory & Serials
-      for (const item of saleData.items) {
+      for (const item of validatedItems) {
         const saleItemId = 'si-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6);
         await tx.saleItem.create({
           data: {
@@ -190,6 +384,9 @@ export async function POST(req: NextRequest) {
             warrantyMonths: item.warrantyMonths || 0,
             isSerialized: Boolean(item.isSerialized),
             serialNumbers: item.serialNumbers || [],
+            description: item.description || null,
+            taxPercent: new Prisma.Decimal(item.taxPercent || 0),
+            taxAmount: new Prisma.Decimal(item.taxAmount || 0),
           },
         });
 
@@ -199,7 +396,7 @@ export async function POST(req: NextRequest) {
           throw new Error(`Product ${item.productName} not found.`);
         }
 
-        // Concurrency Guard: Validate stock in database transaction to prevent negative stock
+        // Concurrency Guard: Validate stock in database transaction
         if (product.currentStock < item.quantity) {
           throw new Error(`Insufficient stock for ${item.productName}. Available: ${product.currentStock}, Requested: ${item.quantity}`);
         }
@@ -281,7 +478,7 @@ export async function POST(req: NextRequest) {
         const emiAccountId = 'emi-' + Date.now();
         const emiNumber = 'EMI-' + Date.now().toString().slice(-6);
 
-        const primaryItem = saleData.items[0];
+        const primaryItem = validatedItems[0];
         const primarySerial = (primaryItem.serialNumbers && primaryItem.serialNumbers[0]) || 'N/A';
 
         const startDate = new Date();
@@ -300,7 +497,7 @@ export async function POST(req: NextRequest) {
             productId: primaryItem.productId,
             productName: primaryItem.productName,
             serialNumber: primarySerial,
-            laptopPrice: new Prisma.Decimal(saleData.grandTotal),
+            laptopPrice: new Prisma.Decimal(calculatedGrandTotal),
             downPayment: new Prisma.Decimal(emiPlanConfig.downPayment),
             financedAmount: new Prisma.Decimal(emiPlanConfig.financedAmount),
             durationMonths: emiPlanConfig.durationMonths,
@@ -372,11 +569,11 @@ export async function POST(req: NextRequest) {
       }
 
       // 5. Update Customer Balance if there is Due
-      if (saleData.dueAmount > 0) {
+      if (dueAmount > 0) {
         await tx.customer.update({
           where: { id: saleData.customerId },
           data: {
-            currentBalance: { increment: new Prisma.Decimal(saleData.dueAmount) },
+            currentBalance: { increment: new Prisma.Decimal(dueAmount) },
           },
         });
 
@@ -389,18 +586,18 @@ export async function POST(req: NextRequest) {
             referenceType: 'SALE',
             referenceNumber: invoiceNumber,
             description: `Receivable for invoice ${invoiceNumber}`,
-            debit: new Prisma.Decimal(saleData.dueAmount),
+            debit: new Prisma.Decimal(dueAmount),
             credit: new Prisma.Decimal(0),
-            runningBalance: new Prisma.Decimal(saleData.dueAmount),
+            runningBalance: new Prisma.Decimal(totalCustomerDue),
           },
         });
       }
 
       // 6. Update Financial Accounts & Central Ledger (With Full Split / Mixed Payment Multi-Account Allocation)
-      if (saleData.paidAmount > 0) {
-        const splitPayments = Array.isArray(saleData.payments) && saleData.payments.length > 0
-          ? saleData.payments
-          : [{ method: 'Cash', amount: saleData.paidAmount, accountId: paymentAccountId }];
+      if (paidAmount > 0) {
+        const splitPayments = Array.isArray(paymentsList) && paymentsList.length > 0
+          ? paymentsList
+          : [{ method: 'Cash', amount: paidAmount, accountId: paymentAccountId }];
 
         for (const p of splitPayments) {
           const splitAmount = Number(p.amount);
@@ -430,24 +627,17 @@ export async function POST(req: NextRequest) {
           action: 'SALE_COMPLETED',
           module: 'POS',
           recordId: sale.id,
-          details: `Invoice ${invoiceNumber} created for ${saleData.customerName}. Total: ৳${saleData.grandTotal}. Paid: ৳${saleData.paidAmount}`,
+          details: `Invoice ${invoiceNumber} created for ${saleData.customerName}. Total: ৳${calculatedGrandTotal}. Paid: ৳${paidAmount}. Due: ৳${dueAmount}. Status: ${initialStatus}`,
         },
       });
 
       // Fetch complete sale with its newly created items and customer details
       const fullSale = await tx.sale.findUnique({
         where: { id: sale.id },
-        include: { items: true, customer: true },
+        include: { items: true, customer: true, branch: true },
       });
 
-      if (fullSale) {
-        return {
-          ...fullSale,
-          customerAddress: fullSale.customer?.address || '',
-        };
-      }
-
-      return sale;
+      return fullSale || sale;
     });
 
     // Asynchronously trigger customer SMS / WhatsApp digital receipt
@@ -456,7 +646,7 @@ export async function POST(req: NextRequest) {
         recipientPhone: saleData.customerPhone,
         recipientName: saleData.customerName,
         channel: 'BOTH',
-        customMessage: `NEED ELECTRO: Dear ${saleData.customerName}, your invoice ${result.invoiceNumber} has been generated. Total: ৳${Number(result.grandTotal).toLocaleString('en-IN')}, Paid: ৳${Number(result.paidAmount).toLocaleString('en-IN')}. Shop#5, MR Plaza, Kusumbag, Moulvibazar. Hotline: 01733-983752.`,
+        customMessage: `NEED ELECTRO: Dear ${saleData.customerName}, your invoice ${result.invoiceNumber} has been generated. Total: ৳${Number(result.grandTotal).toLocaleString('en-IN')}, Paid: ৳${Number(result.paidAmount).toLocaleString('en-IN')}, Due: ৳${Number(result.dueAmount).toLocaleString('en-IN')}. Shop#5, MR Plaza, Kusumbag, Moulvibazar. Hotline: 01733-983752.`,
         metadata: {
           referenceType: 'SALE',
           referenceId: result.id,

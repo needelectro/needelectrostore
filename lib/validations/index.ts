@@ -40,6 +40,9 @@ export const saleItemSchema = z.object({
   warrantyMonths: z.number().int().nonnegative().optional().default(0),
   isSerialized: z.boolean().optional().default(false),
   serialNumbers: z.array(z.string()).optional(),
+  description: z.string().optional(),
+  taxPercent: z.number().nonnegative().optional().default(0),
+  taxAmount: z.number().nonnegative().optional().default(0),
 });
 
 export const createSaleSchema = z.object({
@@ -48,14 +51,24 @@ export const createSaleSchema = z.object({
     customerId: z.string().min(1, 'Customer is required'),
     customerName: z.string().min(1, 'Customer name is required'),
     customerPhone: z.string().min(1, 'Customer phone is required'),
+    customerEmail: z.string().optional(),
+    customerType: z.string().optional().default('RETAIL'),
+    billingAddress: z.string().optional(),
+    shippingAddress: z.string().optional(),
     branchId: z.string().min(1, 'Branch is required'),
     subtotal: z.number().nonnegative(),
     overallDiscount: z.number().nonnegative().optional().default(0),
     vatAmount: z.number().nonnegative().optional().default(0),
     vatPercent: z.number().nonnegative().optional().default(0),
+    deliveryCharge: z.number().nonnegative().optional().default(0),
+    serviceCharge: z.number().nonnegative().optional().default(0),
+    otherCharges: z.number().nonnegative().optional().default(0),
     grandTotal: z.number().nonnegative(),
     paidAmount: z.number().nonnegative().optional().default(0),
     dueAmount: z.number().nonnegative().optional().default(0),
+    previousDue: z.number().optional().default(0),
+    totalDue: z.number().optional().default(0),
+    changeAmount: z.number().optional().default(0),
     payments: z.array(
       z.object({
         method: z.string(),
@@ -69,6 +82,7 @@ export const createSaleSchema = z.object({
     salespersonId: z.string().optional(),
     salespersonName: z.string().optional(),
     notes: z.string().optional(),
+    metadata: z.any().optional(),
   }),
   emiPlanConfig: z.object({
     planId: z.string().optional(),

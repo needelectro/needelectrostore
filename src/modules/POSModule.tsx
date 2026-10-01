@@ -53,6 +53,28 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
   const [transactionRef, setTransactionRef] = useState('');
   const [saleNotes, setSaleNotes] = useState('');
 
+  // Auto-load cloned invoice if duplicated from SalesModule
+  React.useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('needelectro_duplicate_cart');
+      if (stored) {
+        sessionStorage.removeItem('needelectro_duplicate_cart');
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const loaded = parsed.map((item: any) => ({
+            ...item,
+            availableSerials: serials
+              .filter(s => s.productId === item.productId && s.status === 'AVAILABLE')
+              .map(s => s.serialNumber),
+          }));
+          setCart(loaded);
+        }
+      }
+    } catch (e) {
+      console.warn('Duplicate cart load error:', e);
+    }
+  }, [serials]);
+
   // Categories list
   const categories = ['ALL', 'Laptop', 'Desktop', 'CCTV', 'Router', 'Electrical Products', 'Cables', 'Chargers', 'Accessories'];
 
@@ -216,11 +238,18 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
 
     const actualPaid = payments.reduce((sum, p) => sum + p.amount, 0);
     const dueAmount = Math.max(0, grandTotal - actualPaid);
+    const previousDue = Number(cust.currentBalance || 0);
 
     const saleResult = await createSale({
       customerId: cust.id,
       customerName: cust.name,
       customerPhone: cust.phone,
+      customerEmail: cust.email || undefined,
+      customerType: (cust as any).customerType || 'RETAIL',
+      billingAddress: cust.address || 'Shop No: 5, MR Plaza, Kusumbag, Moulvibazar',
+      shippingAddress: cust.address || 'Shop No: 5, MR Plaza, Kusumbag, Moulvibazar',
+      previousDue,
+      totalDue: previousDue + dueAmount,
       branchId: selectedBranch.id,
       date: new Date().toISOString().split('T')[0],
       items: cart.map(c => ({
@@ -245,7 +274,7 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
       dueAmount,
       payments,
       saleType: 'REGULAR',
-      status: 'COMPLETED',
+      status: dueAmount === 0 ? 'COMPLETED' : 'PARTIALLY_PAID',
       salespersonId: currentUser.id,
       salespersonName: currentUser.name,
       notes: saleNotes

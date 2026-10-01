@@ -428,6 +428,19 @@ model Sale {
   notes           String?
   createdAt       DateTime @default(now()) @map("created_at")
 
+  // Additional invoice fields
+  deliveryCharge  Decimal  @default(0) @map("delivery_charge") @db.Decimal(12, 2)
+  serviceCharge   Decimal  @default(0) @map("service_charge") @db.Decimal(12, 2)
+  otherCharges    Decimal  @default(0) @map("other_charges") @db.Decimal(12, 2)
+  customerType    String?  @default("RETAIL") @map("customer_type")
+  customerEmail   String?  @map("customer_email")
+  billingAddress  String?  @map("billing_address")
+  shippingAddress String?  @map("shipping_address")
+  previousDue     Decimal  @default(0) @map("previous_due") @db.Decimal(12, 2)
+  totalDue        Decimal  @default(0) @map("total_due") @db.Decimal(12, 2)
+  changeAmount    Decimal  @default(0) @map("change_amount") @db.Decimal(12, 2)
+  metadata        Json?
+
   branch     Branch      @relation(fields: [branchId], references: [id])
   customer   Customer    @relation(fields: [customerId], references: [id])
   items      SaleItem[]
@@ -455,6 +468,9 @@ model SaleItem {
   warrantyMonths Int     @default(0) @map("warranty_months")
   isSerialized   Boolean @default(false) @map("is_serialized")
   serialNumbers  Json?   @map("serial_numbers") // String array of serials
+  description    String?
+  taxPercent     Decimal @default(0) @map("tax_percent") @db.Decimal(5, 2)
+  taxAmount      Decimal @default(0) @map("tax_amount") @db.Decimal(12, 2)
 
   sale    Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
   product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
