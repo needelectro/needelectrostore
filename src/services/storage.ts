@@ -7,7 +7,24 @@ import {
   INITIAL_AUDIT_LOGS, INITIAL_INVENTORY_TRANSACTIONS
 } from './mockData';
 
-const STORAGE_PREFIX = 'NEED_ELECTRO_PROD_2026_';
+// Current Clean Storage Prefix
+const STORAGE_PREFIX = 'NEED_ELECTRO_PROD_CLEAN_V3_';
+
+// Auto-purge any legacy cached business data from users' browser localStorage
+if (typeof window !== 'undefined' && window.localStorage) {
+  try {
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('NEED_ELECTRO_') && !key.startsWith(STORAGE_PREFIX)) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+  } catch (e) {
+    console.warn('LocalStorage cleanup notice:', e);
+  }
+}
 
 export function getStoredData<T>(key: string, defaultValue: T): T {
   try {

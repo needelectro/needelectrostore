@@ -353,7 +353,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const refreshSales = async (): Promise<Sale[]> => {
     try {
       const res = await api.sales.getSales();
-      if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+      if (res && res.success && Array.isArray(res.data)) {
         setSales(res.data);
         setStoredData('sales', res.data);
         return res.data;
@@ -382,25 +382,25 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (Array.isArray(d.warrantyRulesConfig)) setWarrantyRulesConfig(d.warrantyRulesConfig);
         if (Array.isArray(d.notificationTemplatesConfig)) setNotificationTemplatesConfig(d.notificationTemplatesConfig);
 
-        if (Array.isArray(d.roles) && d.roles.length > 0) setRoles(d.roles);
-        if (Array.isArray(d.permissionsList) && d.permissionsList.length > 0) setPermissionsList(d.permissionsList);
-        if (Array.isArray(d.users) && d.users.length > 0) setUsers(d.users);
+        if (Array.isArray(d.roles)) setRoles(d.roles);
+        if (Array.isArray(d.permissionsList)) setPermissionsList(d.permissionsList);
+        if (Array.isArray(d.users)) setUsers(d.users);
 
-        if (Array.isArray(d.products) && d.products.length > 0) setProducts(d.products);
-        if (Array.isArray(d.serials)) setSerials(d.serials);
-        if (Array.isArray(d.customers) && d.customers.length > 0) setCustomers(d.customers);
-        if (Array.isArray(d.suppliers) && d.suppliers.length > 0) setSuppliers(d.suppliers);
-        if (Array.isArray(d.sales) && d.sales.length > 0) setSales(d.sales);
-        if (Array.isArray(d.purchases)) setPurchases(d.purchases);
-        if (Array.isArray(d.returns)) setReturns(d.returns);
-        if (Array.isArray(d.expenses) && d.expenses.length > 0) setExpenses(d.expenses);
-        if (Array.isArray(d.services)) setServices(d.services);
-        if (Array.isArray(d.technicians)) setTechnicians(d.technicians);
-        if (Array.isArray(d.warrantyClaims)) setWarrantyClaims(d.warrantyClaims);
-        if (Array.isArray(d.investments) && d.investments.length > 0) setInvestments(d.investments);
-        if (Array.isArray(d.financialAccounts) && d.financialAccounts.length > 0) setFinancialAccounts(d.financialAccounts);
-        if (Array.isArray(d.employees)) setEmployees(d.employees);
-        if (Array.isArray(d.emiPlans) && d.emiPlans.length > 0) {
+        if (Array.isArray(d.products)) { setProducts(d.products); setStoredData('products', d.products); }
+        if (Array.isArray(d.serials)) { setSerials(d.serials); setStoredData('serials', d.serials); }
+        if (Array.isArray(d.customers)) { setCustomers(d.customers); setStoredData('customers', d.customers); }
+        if (Array.isArray(d.suppliers)) { setSuppliers(d.suppliers); setStoredData('suppliers', d.suppliers); }
+        if (Array.isArray(d.sales)) { setSales(d.sales); setStoredData('sales', d.sales); }
+        if (Array.isArray(d.purchases)) { setPurchases(d.purchases); setStoredData('purchases', d.purchases); }
+        if (Array.isArray(d.returns)) { setReturns(d.returns); setStoredData('returns', d.returns); }
+        if (Array.isArray(d.expenses)) { setExpenses(d.expenses); setStoredData('expenses', d.expenses); }
+        if (Array.isArray(d.services)) { setServices(d.services); setStoredData('services', d.services); }
+        if (Array.isArray(d.technicians)) { setTechnicians(d.technicians); setStoredData('technicians', d.technicians); }
+        if (Array.isArray(d.warrantyClaims)) { setWarrantyClaims(d.warrantyClaims); setStoredData('warranty_claims', d.warrantyClaims); }
+        if (Array.isArray(d.investments)) { setInvestments(d.investments); setStoredData('investments', d.investments); }
+        if (Array.isArray(d.financialAccounts)) { setFinancialAccounts(d.financialAccounts); setStoredData('financial_accounts', d.financialAccounts); }
+        if (Array.isArray(d.employees)) { setEmployees(d.employees); setStoredData('employees', d.employees); }
+        if (Array.isArray(d.emiPlans)) {
           setEmiPlans(d.emiPlans);
         } else if (!emiPlans || emiPlans.length === 0) {
           setEmiPlans(INITIAL_EMI_PLANS);

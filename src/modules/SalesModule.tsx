@@ -70,7 +70,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
     try {
       const updatedSales = await refreshSales();
       await refreshFromDatabase();
-      addToast('success', 'Database Synchronized', `Successfully synced ${updatedSales.length || sales.length} invoices with central database.`);
+      addToast('success', 'Database Synchronized', `Successfully synced ${updatedSales.length} invoices with central database.`);
     } catch (e: any) {
       addToast('error', 'Sync Notice', e.message || 'Failed to sync with database.');
     } finally {
