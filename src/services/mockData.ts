@@ -105,7 +105,74 @@ export const INITIAL_EMI_PLANS: EMIPlan[] = [
   }
 ];
 
-export const INITIAL_FINANCIAL_ACCOUNTS: FinancialAccount[] = [];
+export const INITIAL_FINANCIAL_ACCOUNTS: FinancialAccount[] = [
+  {
+    id: "acc-1",
+    name: "Main Cash Drawer (Moulvibazar Showroom)",
+    type: "CASH",
+    accountNumber: "CASH-MB-01",
+    bankName: "Cash in Hand Vault",
+    branchName: "Moulvibazar Main",
+    balance: 0,
+    currency: "BDT",
+    isActive: true
+  },
+  {
+    id: "acc-ebl-amdadur",
+    name: "Eastern Bank - Amdadur Rahman",
+    type: "BANK",
+    accountNumber: "EBL-AMDADUR",
+    bankName: "Eastern Bank PLC",
+    branchName: "Moulvibazar Branch",
+    balance: 0,
+    currency: "BDT",
+    isActive: true
+  },
+  {
+    id: "acc-pubali-amdadur",
+    name: "Pubali Bank - Amdadur Rahman",
+    type: "BANK",
+    accountNumber: "PUBALI-AMDADUR",
+    bankName: "Pubali Bank PLC",
+    branchName: "Moulvibazar Branch",
+    balance: 0,
+    currency: "BDT",
+    isActive: true
+  },
+  {
+    id: "acc-pubali-fulori",
+    name: "Pubali Bank - Fulori Miha",
+    type: "BANK",
+    accountNumber: "PUBALI-FULORI",
+    bankName: "Pubali Bank PLC",
+    branchName: "Moulvibazar Branch",
+    balance: 0,
+    currency: "BDT",
+    isActive: true
+  },
+  {
+    id: "acc-bkash-primary",
+    name: "bKash Payment (01884599271)",
+    type: "MOBILE_BANKING",
+    accountNumber: "01884599271",
+    bankName: "bKash Limited",
+    branchName: "Official Payment Wallet",
+    balance: 0,
+    currency: "BDT",
+    isActive: true
+  },
+  {
+    id: "acc-nagad-primary",
+    name: "Nagad Payment Wallet (01733-983752)",
+    type: "MOBILE_BANKING",
+    accountNumber: "01733-983752",
+    bankName: "Nagad (Bangladesh Post Office)",
+    branchName: "Official Merchant Wallet",
+    balance: 0,
+    currency: "BDT",
+    isActive: true
+  }
+];
 
 // Production Clean Entities (Zero Fake Data)
 // Production Clean Entities (Zero Business Data)

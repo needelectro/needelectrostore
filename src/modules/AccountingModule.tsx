@@ -187,6 +187,36 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
     }
   }, [activeTab, cashFlowRange, customCfStart, customCfEnd]);
 
+  // Synchronize modal account selections when financial accounts load
+  useEffect(() => {
+    if (financialAccounts && financialAccounts.length > 0) {
+      if (!targetAccountId || !financialAccounts.some(a => a.id === targetAccountId)) {
+        setTargetAccountId(financialAccounts[0].id);
+      }
+      if (!fromAccountId || !financialAccounts.some(a => a.id === fromAccountId)) {
+        setFromAccountId(financialAccounts[0].id);
+      }
+      if (!toAccountId || !financialAccounts.some(a => a.id === toAccountId)) {
+        setToAccountId(financialAccounts[1]?.id || financialAccounts[0].id);
+      }
+      if (!withdrawalAccountId || !financialAccounts.some(a => a.id === withdrawalAccountId)) {
+        setWithdrawalAccountId(financialAccounts[0].id);
+      }
+      if (!statementAccountId || !financialAccounts.some(a => a.id === statementAccountId)) {
+        setStatementAccountId(financialAccounts[0].id);
+      }
+      if (!otherIncomeAccountId || !financialAccounts.some(a => a.id === otherIncomeAccountId)) {
+        setOtherIncomeAccountId(financialAccounts[0].id);
+      }
+      if (!newInvestorAccountId || !financialAccounts.some(a => a.id === newInvestorAccountId)) {
+        setNewInvestorAccountId(financialAccounts[0].id);
+      }
+      if (!addCapitalAccountId || !financialAccounts.some(a => a.id === addCapitalAccountId)) {
+        setAddCapitalAccountId(financialAccounts[0].id);
+      }
+    }
+  }, [financialAccounts]);
+
   const handleOtherIncomeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (otherIncomeAmount <= 0) {
@@ -1787,11 +1817,15 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                     onChange={e => setFromAccountId(e.target.value)}
                     required
                   >
-                    {financialAccounts.map(a => (
-                      <option key={a.id} value={a.id}>
-                        {a.name} (Available: ৳{a.balance.toLocaleString()})
-                      </option>
-                    ))}
+                    {financialAccounts.length === 0 ? (
+                      <option value="acc-1">Main Cash Drawer (Default Cash Vault)</option>
+                    ) : (
+                      financialAccounts.map(a => (
+                        <option key={a.id} value={a.id}>
+                          {a.name} (Available: ৳{Number(a.balance || 0).toLocaleString()})
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
 
@@ -1803,11 +1837,15 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                     onChange={e => setToAccountId(e.target.value)}
                     required
                   >
-                    {financialAccounts.map(a => (
-                      <option key={a.id} value={a.id} disabled={a.id === fromAccountId}>
-                        {a.name} (Current: ৳{a.balance.toLocaleString()})
-                      </option>
-                    ))}
+                    {financialAccounts.length === 0 ? (
+                      <option value="acc-2">Bank Asia Current Account</option>
+                    ) : (
+                      financialAccounts.map(a => (
+                        <option key={a.id} value={a.id} disabled={a.id === fromAccountId}>
+                          {a.name} (Current: ৳{Number(a.balance || 0).toLocaleString()})
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
 
@@ -1936,11 +1974,15 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                       onChange={e => setTargetAccountId(e.target.value)}
                       required
                     >
-                      {financialAccounts.map(a => (
-                        <option key={a.id} value={a.id}>
-                          {a.name} ({a.type})
-                        </option>
-                      ))}
+                      {financialAccounts.length === 0 ? (
+                        <option value="acc-1">Main Cash Drawer (Default Cash Vault)</option>
+                      ) : (
+                        financialAccounts.map(a => (
+                          <option key={a.id} value={a.id}>
+                            {a.name} ({a.type}) — Current: ৳{Number(a.balance || 0).toLocaleString()}
+                          </option>
+                        ))
+                      )}
                     </select>
                   </div>
                 </div>
@@ -2075,11 +2117,15 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                       value={newInvestorAccountId}
                       onChange={e => setNewInvestorAccountId(e.target.value)}
                     >
-                      {financialAccounts.map(a => (
-                        <option key={a.id} value={a.id}>
-                          {a.name} ({a.type})
-                        </option>
-                      ))}
+                      {financialAccounts.length === 0 ? (
+                        <option value="acc-1">Main Cash Drawer (Default Cash Vault)</option>
+                      ) : (
+                        financialAccounts.map(a => (
+                          <option key={a.id} value={a.id}>
+                            {a.name} ({a.type})
+                          </option>
+                        ))
+                      )}
                     </select>
                   </div>
                 </div>
@@ -2193,11 +2239,15 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                     onChange={e => setAddCapitalAccountId(e.target.value)}
                     required
                   >
-                    {financialAccounts.map(a => (
-                      <option key={a.id} value={a.id}>
-                        {a.name} ({a.type})
-                      </option>
-                    ))}
+                    {financialAccounts.length === 0 ? (
+                      <option value="acc-1">Main Cash Drawer (Default Cash Vault)</option>
+                    ) : (
+                      financialAccounts.map(a => (
+                        <option key={a.id} value={a.id}>
+                          {a.name} ({a.type})
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
 
@@ -2280,11 +2330,15 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                       onChange={e => setOtherIncomeAccountId(e.target.value)}
                       required
                     >
-                      {financialAccounts.map(a => (
-                        <option key={a.id} value={a.id}>
-                          {a.name} ({a.type})
-                        </option>
-                      ))}
+                      {financialAccounts.length === 0 ? (
+                        <option value="acc-1">Main Cash Drawer (Default Cash Vault)</option>
+                      ) : (
+                        financialAccounts.map(a => (
+                          <option key={a.id} value={a.id}>
+                            {a.name} ({a.type})
+                          </option>
+                        ))
+                      )}
                     </select>
                   </div>
                 </div>
@@ -2402,11 +2456,15 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                       onChange={e => setWithdrawalAccountId(e.target.value)}
                       required
                     >
-                      {financialAccounts.map(a => (
-                        <option key={a.id} value={a.id}>
-                          {a.name} ({a.type}) — Bal: ৳{Number(a.balance).toLocaleString()}
-                        </option>
-                      ))}
+                      {financialAccounts.length === 0 ? (
+                        <option value="acc-1">Main Cash Drawer (Default Cash Vault)</option>
+                      ) : (
+                        financialAccounts.map(a => (
+                          <option key={a.id} value={a.id}>
+                            {a.name} ({a.type}) — Bal: ৳{Number(a.balance || 0).toLocaleString()}
+                          </option>
+                        ))
+                      )}
                     </select>
                   </div>
                 </div>

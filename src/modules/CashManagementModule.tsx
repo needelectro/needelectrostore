@@ -158,6 +158,31 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
     fetchCashData();
   }, [dateRange, customStartDate, customEndDate, methodFilter]);
 
+  // Synchronize modal account selections when financial accounts load
+  useEffect(() => {
+    if (financialAccounts && financialAccounts.length > 0) {
+      if (!invAccountId || !financialAccounts.some(a => a.id === invAccountId)) {
+        setInvAccountId(financialAccounts[0].id);
+      }
+      if (!dueAccountId || !financialAccounts.some(a => a.id === dueAccountId)) {
+        setDueAccountId(financialAccounts[0].id);
+      }
+      if (!transferFromId || !financialAccounts.some(a => a.id === transferFromId)) {
+        setTransferFromId(financialAccounts[0].id);
+      }
+      if (!transferToId || !financialAccounts.some(a => a.id === transferToId)) {
+        setTransferToId(financialAccounts[1]?.id || financialAccounts[0].id);
+      }
+      if (!pettyAccountId || !financialAccounts.some(a => a.id === pettyAccountId)) {
+        const cashAcc = financialAccounts.find(a => a.type === 'CASH');
+        setPettyAccountId(cashAcc ? cashAcc.id : financialAccounts[0].id);
+      }
+      if (!adjAccountId || !financialAccounts.some(a => a.id === adjAccountId)) {
+        setAdjAccountId(financialAccounts[0].id);
+      }
+    }
+  }, [financialAccounts]);
+
   // Set default customer when due modal opens
   const customersWithDue = useMemo(() => {
     return customers.filter(c => Number(c.currentBalance) > 0);
@@ -1973,11 +1998,15 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                   onChange={e => setAdjAccountId(e.target.value)}
                   required
                 >
-                  {financialAccounts.map(a => (
-                    <option key={a.id} value={a.id}>
-                      {a.name} ({a.type}) — Current: ৳{Number(a.balance).toLocaleString('en-IN')}
-                    </option>
-                  ))}
+                  {financialAccounts.length === 0 ? (
+                    <option value="acc-1">Main Cash Drawer (Default Cash Vault)</option>
+                  ) : (
+                    financialAccounts.map(a => (
+                      <option key={a.id} value={a.id}>
+                        {a.name} ({a.type}) — Current: ৳{Number(a.balance || 0).toLocaleString('en-IN')}
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
 
@@ -2103,11 +2132,15 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                       onChange={e => setDueAccountId(e.target.value)}
                       required
                     >
-                      {financialAccounts.map(a => (
-                        <option key={a.id} value={a.id}>
-                          {a.name} ({a.type})
-                        </option>
-                      ))}
+                      {financialAccounts.length === 0 ? (
+                        <option value="acc-1">Main Cash Drawer (Default Cash Vault)</option>
+                      ) : (
+                        financialAccounts.map(a => (
+                          <option key={a.id} value={a.id}>
+                            {a.name} ({a.type})
+                          </option>
+                        ))
+                      )}
                     </select>
                   </div>
 
@@ -2246,11 +2279,15 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                       onChange={e => setInvAccountId(e.target.value)}
                       required
                     >
-                      {financialAccounts.map(a => (
-                        <option key={a.id} value={a.id}>
-                          {a.name} ({a.type}) — Current: ৳{Number(a.balance).toLocaleString('en-IN')}
-                        </option>
-                      ))}
+                      {financialAccounts.length === 0 ? (
+                        <option value="acc-1">Main Cash Drawer (Default Cash Vault)</option>
+                      ) : (
+                        financialAccounts.map(a => (
+                          <option key={a.id} value={a.id}>
+                            {a.name} ({a.type}) — Current: ৳{Number(a.balance || 0).toLocaleString('en-IN')}
+                          </option>
+                        ))
+                      )}
                     </select>
                   </div>
 
@@ -2483,11 +2520,15 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                     onChange={e => setTransferFromId(e.target.value)}
                     required
                   >
-                    {financialAccounts.map(a => (
-                      <option key={a.id} value={a.id}>
-                        {a.name} (৳{Number(a.balance).toLocaleString('en-IN')})
-                      </option>
-                    ))}
+                    {financialAccounts.length === 0 ? (
+                      <option value="acc-1">Main Cash Drawer (Default Cash Vault)</option>
+                    ) : (
+                      financialAccounts.map(a => (
+                        <option key={a.id} value={a.id}>
+                          {a.name} (৳{Number(a.balance || 0).toLocaleString('en-IN')})
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
 
@@ -2499,11 +2540,15 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                     onChange={e => setTransferToId(e.target.value)}
                     required
                   >
-                    {financialAccounts.map(a => (
-                      <option key={a.id} value={a.id}>
-                        {a.name} (৳{Number(a.balance).toLocaleString('en-IN')})
-                      </option>
-                    ))}
+                    {financialAccounts.length === 0 ? (
+                      <option value="acc-2">Bank Asia Current Account</option>
+                    ) : (
+                      financialAccounts.map(a => (
+                        <option key={a.id} value={a.id}>
+                          {a.name} (৳{Number(a.balance || 0).toLocaleString('en-IN')})
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
               </div>
@@ -2952,11 +2997,15 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                   onChange={e => setPettyAccountId(e.target.value)}
                   required
                 >
-                  {financialAccounts.map(a => (
-                    <option key={a.id} value={a.id}>
-                      {a.name} ({a.type}) — Balance: ৳{Number(a.balance).toLocaleString('en-IN')}
-                    </option>
-                  ))}
+                  {financialAccounts.length === 0 ? (
+                    <option value="acc-1">Main Cash Drawer (Default Cash Vault)</option>
+                  ) : (
+                    financialAccounts.map(a => (
+                      <option key={a.id} value={a.id}>
+                        {a.name} ({a.type}) — Balance: ৳{Number(a.balance || 0).toLocaleString('en-IN')}
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
 

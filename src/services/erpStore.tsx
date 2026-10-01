@@ -270,7 +270,10 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [otherIncomes, setOtherIncomes] = useState<OtherIncome[]>(() => getStoredData('other_incomes', []));
   const [ownerWithdrawals, setOwnerWithdrawals] = useState<OwnerWithdrawal[]>(() => getStoredData('owner_withdrawals', []));
   const [purchases, setPurchases] = useState<Purchase[]>(() => getStoredData('purchases', []));
-  const [financialAccounts, setFinancialAccounts] = useState<FinancialAccount[]>(() => getStoredData('financial_accounts', INITIAL_FINANCIAL_ACCOUNTS));
+  const [financialAccounts, setFinancialAccounts] = useState<FinancialAccount[]>(() => {
+    const stored = getStoredData('financial_accounts', INITIAL_FINANCIAL_ACCOUNTS);
+    return (Array.isArray(stored) && stored.length > 0) ? stored : INITIAL_FINANCIAL_ACCOUNTS;
+  });
   const [investments, setInvestments] = useState<Investment[]>(() => getStoredData('investments', []));
   const [employees, setEmployees] = useState<Employee[]>(() => getStoredData('employees', INITIAL_EMPLOYEES));
   const [attendance, setAttendance] = useState<AttendanceRecord[]>(() => getStoredData('attendance', []));
@@ -376,7 +379,10 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (d.setupStatus) setSetupStatus(d.setupStatus);
         if (Array.isArray(d.categoriesConfig)) setCategoriesConfig(d.categoriesConfig);
         if (Array.isArray(d.brandsConfig)) setBrandsConfig(d.brandsConfig);
-        if (Array.isArray(d.paymentMethodsConfig)) setPaymentMethodsConfig(d.paymentMethodsConfig);
+        if (Array.isArray(d.paymentMethodsConfig)) {
+          const pms = d.paymentMethodsConfig.length > 0 ? d.paymentMethodsConfig : INITIAL_PAYMENT_METHODS_CONFIG;
+          setPaymentMethodsConfig(pms);
+        }
         if (Array.isArray(d.expenseCategoriesConfig)) setExpenseCategoriesConfig(d.expenseCategoriesConfig);
         if (Array.isArray(d.serviceCategoriesConfig)) setServiceCategoriesConfig(d.serviceCategoriesConfig);
         if (Array.isArray(d.warrantyRulesConfig)) setWarrantyRulesConfig(d.warrantyRulesConfig);
@@ -398,7 +404,11 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (Array.isArray(d.technicians)) { setTechnicians(d.technicians); setStoredData('technicians', d.technicians); }
         if (Array.isArray(d.warrantyClaims)) { setWarrantyClaims(d.warrantyClaims); setStoredData('warranty_claims', d.warrantyClaims); }
         if (Array.isArray(d.investments)) { setInvestments(d.investments); setStoredData('investments', d.investments); }
-        if (Array.isArray(d.financialAccounts)) { setFinancialAccounts(d.financialAccounts); setStoredData('financial_accounts', d.financialAccounts); }
+        if (Array.isArray(d.financialAccounts)) {
+          const accs = d.financialAccounts.length > 0 ? d.financialAccounts : INITIAL_FINANCIAL_ACCOUNTS;
+          setFinancialAccounts(accs);
+          setStoredData('financial_accounts', accs);
+        }
         if (Array.isArray(d.employees)) { setEmployees(d.employees); setStoredData('employees', d.employees); }
         if (Array.isArray(d.emiPlans)) {
           setEmiPlans(d.emiPlans);

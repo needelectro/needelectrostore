@@ -8,7 +8,7 @@ import {
 } from './mockData';
 
 // Factory Reset Storage Engine
-const STORAGE_PREFIX = 'NEED_ELECTRO_FACTORY_V5_';
+const STORAGE_PREFIX = 'NEED_ELECTRO_FACTORY_V6_';
 
 // Auto-purge any legacy cached business data from users' browser localStorage
 if (typeof window !== 'undefined' && window.localStorage) {
