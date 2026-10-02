@@ -45,7 +45,34 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/api') ||
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/erp') ||
-    pathname.startsWith('/account')
+    pathname.startsWith('/account') ||
+    pathname.startsWith('/sales') ||
+    pathname.startsWith('/pos') ||
+    pathname.startsWith('/returns') ||
+    pathname.startsWith('/emi') ||
+    pathname.startsWith('/inventory') ||
+    pathname.startsWith('/purchases') ||
+    pathname.startsWith('/products') ||
+    pathname.startsWith('/customers') ||
+    pathname.startsWith('/suppliers') ||
+    pathname.startsWith('/service') ||
+    pathname.startsWith('/warranty') ||
+    pathname.startsWith('/accounting') ||
+    pathname.startsWith('/cash-management') ||
+    pathname.startsWith('/cash_management') ||
+    pathname.startsWith('/ledgers') ||
+    pathname.startsWith('/expenses') ||
+    pathname.startsWith('/reports') ||
+    pathname.startsWith('/employees') ||
+    pathname.startsWith('/branches') ||
+    pathname.startsWith('/roles') ||
+    pathname.startsWith('/audit') ||
+    pathname.startsWith('/settings') ||
+    pathname.startsWith('/control-center') ||
+    pathname.startsWith('/control_center') ||
+    pathname.startsWith('/seo-management') ||
+    pathname.startsWith('/seo_management') ||
+    pathname.startsWith('/login')
   ) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
   }

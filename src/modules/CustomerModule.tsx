@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useERP } from '../services/erpStore';
 import { Customer } from '../types';
 import { 
@@ -10,15 +10,31 @@ import {
 
 interface CustomerModuleProps {
   onNavigate: (module: string, targetId?: string) => void;
+  initialCustomerId?: string;
 }
 
-export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate }) => {
+export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate, initialCustomerId }) => {
   const { 
     customers, sales, emiAccounts, services, createCustomer, updateCustomer, 
     deleteCustomer, ledgerEntries, settings, currentUser, financialAccounts, collectCustomerDue 
   } = useERP();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(customers[0]?.id || null);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(() => {
+    if (initialCustomerId) {
+      const match = customers.find(c => c.id === initialCustomerId || c.customerId === initialCustomerId);
+      if (match) return match.id;
+      return initialCustomerId;
+    }
+    return customers[0]?.id || null;
+  });
+
+  useEffect(() => {
+    if (initialCustomerId) {
+      const match = customers.find(c => c.id === initialCustomerId || c.customerId === initialCustomerId);
+      if (match) setSelectedCustomerId(match.id);
+      else setSelectedCustomerId(initialCustomerId);
+    }
+  }, [initialCustomerId, customers]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDueModal, setShowDueModal] = useState(false);
   const [dueAmount, setDueAmount] = useState<number>(0);
@@ -175,7 +191,10 @@ export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate }) =>
                 <div
                   key={c.id}
                   className="erp-card erp-card-interactive"
-                  onClick={() => setSelectedCustomerId(c.id)}
+                  onClick={() => {
+                    setSelectedCustomerId(c.id);
+                    onNavigate('customers', c.id);
+                  }}
                   style={{
                     padding: '0.85rem 1rem',
                     background: isSelected ? 'var(--bg-active)' : 'var(--bg-card-muted)',

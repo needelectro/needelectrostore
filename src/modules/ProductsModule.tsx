@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useERP } from '../services/erpStore';
 import { Product, ProductCategory, LaptopSpecifications } from '../types';
 import { 
@@ -8,15 +8,32 @@ import {
 
 interface ProductsModuleProps {
   onNavigate: (module: string, targetId?: string) => void;
+  initialProductId?: string;
 }
 
-export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate }) => {
+export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, initialProductId }) => {
   const { products, createProduct, updateProduct, deleteProduct, suppliers, serials, setActiveBarcodeToPrint, currentUser } = useERP();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(() => initialProductId || '');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [supplierFilter, setSupplierFilter] = useState('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(() => {
+    if (initialProductId) {
+      return products.find(p => p.id === initialProductId || p.sku === initialProductId) || null;
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (initialProductId) {
+      const match = products.find(p => p.id === initialProductId || p.sku === initialProductId);
+      if (match) {
+        setEditingProduct(match);
+      } else {
+        setSearchQuery(initialProductId);
+      }
+    }
+  }, [initialProductId, products]);
 
   // Form State - No defaults for new products
   const [name, setName] = useState('');

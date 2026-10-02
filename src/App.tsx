@@ -41,6 +41,7 @@ import { ControlCenterModule } from './modules/ControlCenterModule';
 import { InitialSetupModal } from './components/auth/InitialSetupModal';
 import { LandingPage } from './components/landing/LandingPage';
 import { InvestorPortal } from './components/investor/InvestorPortal';
+import { parseRoute, navigateTo, navigateToUrl } from './services/router';
 
 interface AppProps {
   initialMode?: 'landing' | 'admin';
@@ -56,29 +57,82 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
     activeThermalReceiptToPrint, setActiveThermalReceiptToPrint,
     activeEmiAgreementToPrint, setActiveEmiAgreementToPrint,
     activeBarcodeToPrint, setActiveBarcodeToPrint,
-    isAuthenticated, isLocked, currentUser, hasPermission, setupStatus
+    isAuthenticated, isAuthInitializing, isLocked, currentUser, hasPermission, setupStatus
   } = useERP();
+
+  const [activeModule, setActiveModule] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return parseRoute(window.location.pathname, window.location.search).module;
+    }
+    return 'dashboard';
+  });
+
+  const [moduleInitialParam, setModuleInitialParam] = useState<string | undefined>(() => {
+    if (typeof window !== 'undefined') {
+      return parseRoute(window.location.pathname, window.location.search).param;
+    }
+    return undefined;
+  });
 
   // Controls display of public landing page vs staff portal login
   const [showLanding, setShowLanding] = useState<boolean>(() => {
     if (initialMode === 'admin') return false;
     if (typeof window !== 'undefined') {
+      const parsed = parseRoute(window.location.pathname, window.location.search);
+      if (parsed.isProtected || parsed.isLogin || window.location.pathname.startsWith('/admin')) {
+        return false;
+      }
       const urlParams = new URLSearchParams(window.location.search);
       if (
         urlParams.get('portal') === 'true' || 
-        window.location.hash === '#login' ||
-        window.location.pathname.startsWith('/admin')
+        window.location.hash === '#login'
       ) {
         return false;
       }
+      return parsed.isLanding;
     }
     return true;
   });
 
-  const [activeModule, setActiveModule] = useState<string>('dashboard');
-  const [moduleInitialParam, setModuleInitialParam] = useState<string | undefined>(undefined);
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+
+  // Handle browser Back / Forward history navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const parsed = parseRoute(window.location.pathname, window.location.search);
+      setActiveModule(parsed.module);
+      setModuleInitialParam(parsed.param);
+      if (parsed.isProtected || parsed.isLogin || window.location.pathname.startsWith('/admin')) {
+        setShowLanding(false);
+      } else if (parsed.isLanding) {
+        setShowLanding(true);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Redirect authenticated user away from /login back to destination or /dashboard
+  useEffect(() => {
+    if (isAuthenticated && typeof window !== 'undefined') {
+      if (window.location.pathname === '/login') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectParam = urlParams.get('redirect');
+        if (redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
+          const parsed = parseRoute(redirectParam);
+          setActiveModule(parsed.module);
+          setModuleInitialParam(parsed.param);
+          setShowLanding(false);
+          navigateToUrl(redirectParam, true);
+        } else {
+          setActiveModule('dashboard');
+          setShowLanding(false);
+          navigateTo('dashboard', undefined, true);
+        }
+      }
+    }
+  }, [isAuthenticated]);
 
   const isPrintModalOpen = Boolean(
     activeInvoiceToPrint ||
@@ -114,6 +168,8 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
   const handleNavigate = (module: string, targetId?: string) => {
     setActiveModule(module);
     setModuleInitialParam(targetId);
+    setShowLanding(false);
+    navigateTo(module, targetId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -124,6 +180,75 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
         <InitialSetupModal isOpen={true} />
         <ToastContainer />
       </>
+    );
+  }
+
+  // Smooth authentication initialization state: prevents route flashing or premature logout
+  if (isAuthInitializing) {
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#090d16',
+        color: '#f8fafc',
+        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+        gap: '24px',
+      }}>
+        <div style={{ position: 'relative', width: '100px', height: '100px' }}>
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '50%',
+            border: '3px solid transparent',
+            borderTopColor: '#008CFF',
+            borderRightColor: 'rgba(0,140,255,0.35)',
+            animation: 'ne-spin 1s cubic-bezier(0.6,0.05,0.4,0.95) infinite',
+          }} />
+          <div style={{
+            position: 'absolute',
+            inset: '12px',
+            borderRadius: '50%',
+            background: 'linear-gradient(145deg, #0d1526 0%, #111827 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 24px rgba(0,140,255,0.2)',
+          }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-icon.png"
+              alt="NEED ELECTRO"
+              style={{ width: '40px', height: '40px', objectFit: 'contain' }}
+            />
+          </div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            fontSize: '18px',
+            fontWeight: '800',
+            letterSpacing: '1px',
+            background: 'linear-gradient(90deg, #60a5fa, #008CFF, #3b82f6)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            marginBottom: '4px',
+          }}>
+            NEED ELECTRO ERP
+          </div>
+          <div style={{ color: '#64748b', fontSize: '13px', fontWeight: 500 }}>
+            Restoring secure session...
+          </div>
+        </div>
+        <style>{`
+          @keyframes ne-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
     );
   }
 
@@ -163,23 +288,46 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
     );
   }
 
-  // If not authenticated: show Landing Page by default, or Login Screen when requested
+  // If not authenticated: show Landing Page by default, or Login Screen with redirect preservation
   if (!isAuthenticated) {
     if (showLanding) {
       return (
         <>
-          <LandingPage />
+          <LandingPage onOpenLogin={() => {
+            setShowLanding(false);
+            navigateToUrl('/login');
+          }} />
           <ToastContainer />
         </>
       );
     }
+
+    // Preserve the original destination for login redirect
+    if (typeof window !== 'undefined') {
+      const parsed = parseRoute(window.location.pathname, window.location.search);
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/' && (parsed.isProtected || initialMode === 'admin')) {
+        const fullCurrentPath = window.location.pathname + window.location.search;
+        const loginUrl = `/login?redirect=${encodeURIComponent(fullCurrentPath)}`;
+        navigateToUrl(loginUrl, true);
+      }
+    }
+
     return (
       <>
-        <LoginScreen onBackToHome={() => {
-          if (typeof window !== 'undefined') {
-            window.location.href = '/';
-          }
-        }} />
+        <LoginScreen 
+          onSuccessRedirect={(dest) => {
+            const parsed = parseRoute(dest);
+            setActiveModule(parsed.module);
+            setModuleInitialParam(parsed.param);
+            setShowLanding(false);
+            navigateToUrl(dest, true);
+          }}
+          onBackToHome={() => {
+            if (typeof window !== 'undefined') {
+              window.location.href = '/';
+            }
+          }} 
+        />
         <ToastContainer />
       </>
     );
@@ -280,9 +428,9 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
       case 'purchases':
         return <PurchaseModule onNavigate={handleNavigate} />;
       case 'products':
-        return <ProductsModule onNavigate={handleNavigate} />;
+        return <ProductsModule onNavigate={handleNavigate} initialProductId={moduleInitialParam} />;
       case 'customers':
-        return <CustomerModule onNavigate={handleNavigate} />;
+        return <CustomerModule onNavigate={handleNavigate} initialCustomerId={moduleInitialParam} />;
       case 'suppliers':
         return <SupplierModule onNavigate={handleNavigate} />;
       case 'service':

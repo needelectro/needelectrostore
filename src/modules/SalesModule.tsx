@@ -19,15 +19,64 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
     currentUser, updateSale, deleteSale, recordInvoicePayment, refreshSales, refreshFromDatabase, addToast 
   } = useERP();
 
-  // Search & Filtering States
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'DUE' | 'PAID' | 'PARTIALLY_PAID' | 'EMI' | 'CANCELLED' | 'RETURNED'>('ALL');
+  // Search & Filtering States - Initialized from URL query params
+  const [searchQuery, setSearchQuery] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search);
+      return p.get('q') || p.get('search') || '';
+    }
+    return '';
+  });
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'DUE' | 'PAID' | 'PARTIALLY_PAID' | 'EMI' | 'CANCELLED' | 'RETURNED'>(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search);
+      const s = (p.get('status') || '').toUpperCase();
+      if (['DUE', 'PAID', 'PARTIALLY_PAID', 'EMI', 'CANCELLED', 'RETURNED'].includes(s)) {
+        return s as any;
+      }
+      if (s === 'COMPLETED') return 'PAID';
+    }
+    return 'ALL';
+  });
   const [dateFilter, setDateFilter] = useState<'ALL' | 'TODAY' | 'YESTERDAY' | 'WEEK' | 'MONTH' | 'CUSTOM'>('ALL');
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
   const [selectedBranchId, setSelectedBranchId] = useState<string>('ALL');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('ALL');
   const [isSyncing, setIsSyncing] = useState(false);
+
+  // Keep URL search params in sync without replacing other query parameters (e.g. page)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const currentParams = new URLSearchParams(window.location.search);
+    let changed = false;
+
+    if (statusFilter !== 'ALL') {
+      if (currentParams.get('status') !== statusFilter.toLowerCase()) {
+        currentParams.set('status', statusFilter.toLowerCase());
+        changed = true;
+      }
+    } else if (currentParams.has('status')) {
+      currentParams.delete('status');
+      changed = true;
+    }
+
+    if (searchQuery.trim()) {
+      if (currentParams.get('q') !== searchQuery.trim()) {
+        currentParams.set('q', searchQuery.trim());
+        changed = true;
+      }
+    } else if (currentParams.has('q')) {
+      currentParams.delete('q');
+      changed = true;
+    }
+
+    if (changed) {
+      const searchStr = currentParams.toString();
+      const newUrl = searchStr ? `${window.location.pathname}?${searchStr}` : window.location.pathname;
+      window.history.replaceState(window.history.state, '', newUrl);
+    }
+  }, [statusFilter, searchQuery]);
 
   // Modal States
   const [viewingSale, setViewingSale] = useState<Sale | null>(null);

@@ -52,7 +52,10 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
   if (!response.ok || data.success === false) {
     const errorMsg = data.error || `HTTP error ${response.status}: ${response.statusText}`;
-    throw new Error(errorMsg);
+    const err: any = new Error(errorMsg);
+    err.status = response.status;
+    err.data = data;
+    throw err;
   }
 
   return data;

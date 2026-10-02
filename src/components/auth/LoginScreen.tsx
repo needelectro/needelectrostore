@@ -8,9 +8,10 @@ import {
 
 interface LoginScreenProps {
   onBackToHome?: () => void;
+  onSuccessRedirect?: (destination: string) => void;
 }
 
-export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome }) => {
+export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome, onSuccessRedirect }) => {
   const { login, branches, selectedBranch, settings } = useERP();
 
   const [email, setEmail] = useState('');
@@ -34,7 +35,15 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome }) => {
 
     try {
       const res = await login(email.trim(), password, rememberMe, branchId);
-      if (!res.success) {
+      if (res.success) {
+        if (typeof window !== 'undefined') {
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirectParam = urlParams.get('redirect');
+          if (redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
+            onSuccessRedirect?.(redirectParam);
+          }
+        }
+      } else {
         setErrorMessage(res.error || 'Authentication failed. Please verify your credentials.');
       }
     } catch (err: any) {

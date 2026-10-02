@@ -40,6 +40,7 @@ export interface ToastMessage {
 interface ERPContextType {
   // Auth & Session
   isAuthenticated: boolean;
+  isAuthInitializing: boolean;
   isLocked: boolean;
   login: (email: string, password: string, rememberMe?: boolean, branchId?: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
@@ -250,6 +251,14 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [authSession, setAuthSession] = useState<{ isAuthenticated: boolean; userId: string; isLocked: boolean }>(() => 
     getStoredData('auth_session', { isAuthenticated: false, userId: 'user-1', isLocked: false })
   );
+  const [isAuthInitializing, setIsAuthInitializing] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const token = getSessionToken();
+      const storedAuth = getStoredData('auth_session', { isAuthenticated: false });
+      return Boolean(token || storedAuth?.isAuthenticated);
+    }
+    return false;
+  });
   const [currentUserId, setCurrentUserIdState] = useState<string>(() => authSession.userId || users[0]?.id || 'user-1');
 
   useEffect(() => {
@@ -455,33 +464,49 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         const token = getSessionToken();
         if (token) {
-          const sessionRes = await api.auth.getSession().catch(() => null);
-          if (sessionRes?.success && sessionRes.user && isMounted) {
-            setAuthSession({
-              isAuthenticated: true,
-              userId: sessionRes.user.id,
-              isLocked: false
-            });
-            setCurrentUserIdState(sessionRes.user.id);
-            if (sessionRes.user.branchId) {
-              setSelectedBranchIdState(sessionRes.user.branchId);
+          try {
+            const sessionRes = await api.auth.getSession();
+            if (sessionRes?.success && sessionRes.user && isMounted) {
+              setAuthSession({
+                isAuthenticated: true,
+                userId: sessionRes.user.id,
+                isLocked: false
+              });
+              setCurrentUserIdState(sessionRes.user.id);
+              if (sessionRes.user.branchId) {
+                setSelectedBranchIdState(sessionRes.user.branchId);
+              }
             }
-          } else {
-            clearSessionToken();
-            if (isMounted) {
-              setAuthSession({ isAuthenticated: false, userId: '', isLocked: false });
+          } catch (err: any) {
+            // Only invalidate if the server explicitly told us the token is invalid/expired (HTTP 401)
+            if (err?.status === 401) {
+              clearSessionToken();
+              if (isMounted) {
+                setAuthSession({ isAuthenticated: false, userId: '', isLocked: false });
+              }
+            } else {
+              console.warn('Session verification notice (offline/transient):', err?.message);
+              // Do not wipe the token or auth session on transient network or 5xx issues
             }
           }
         } else {
-          // If no token exists, ensure local session reflects unauthenticated state so fresh login is requested
+          // If no token exists, ensure local session reflects unauthenticated state
           if (authSession.isAuthenticated && isMounted) {
             setAuthSession({ isAuthenticated: false, userId: '', isLocked: false });
           }
         }
 
+        if (isMounted) {
+          setIsAuthInitializing(false);
+        }
+
         await refreshFromDatabase();
       } catch (e) {
         console.warn('Backend connection initialization:', e);
+      } finally {
+        if (isMounted) {
+          setIsAuthInitializing(false);
+        }
       }
     };
 
@@ -1000,11 +1025,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return { success: false, error: `Insufficient stock for ${prod.name}. Available: ${prod.currentStock}, Requested: ${item.quantity}` };
       }
 
-      if (item.isSerialized) {
-        if (item.serialNumbers.length !== item.quantity) {
-          return { success: false, error: `Please select exactly ${item.quantity} serial number(s) for ${item.productName}.` };
-        }
-      }
+      // Serial numbers are optional for serialized products
     }
 
     try {
@@ -2509,6 +2530,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     <ERPContext.Provider
       value={{
         isAuthenticated: authSession.isAuthenticated,
+        isAuthInitializing,
         isLocked: authSession.isLocked,
         login,
         logout,
