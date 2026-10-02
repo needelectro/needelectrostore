@@ -1991,75 +1991,15 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                             </span>
                           </td>
                           <td style={{ textAlign: 'center' }}>
-                            <div style={{ display: 'inline-flex', gap: '0.35rem', alignItems: 'center' }}>
-                              {/* EDIT BUTTON */}
-                              <button
-                                className="btn btn-warning btn-sm"
-                                onClick={() => setInvestmentToEdit(inv)}
-                                title="Edit investment details, amounts, account, dates & notes"
-                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.55rem', fontSize: '0.75rem', fontWeight: 700 }}
-                              >
-                                <Edit size={13} />
-                                Edit
-                              </button>
-
-                              {/* PRINT MEMO BUTTON */}
-                              <button
-                                className="btn btn-secondary btn-sm"
-                                onClick={() => {
-                                  setActiveInvestmentMemoToPrint(inv);
-                                  setTimeout(() => window.print(), 350);
-                                }}
-                                title="Print official A4 Investment Memo"
-                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.55rem', fontSize: '0.75rem' }}
-                              >
-                                <Printer size={13} />
-                                Print
-                              </button>
-
-                              {/* VIEW MEMO / PDF BUTTON */}
-                              <button
-                                className="btn btn-outline btn-sm"
-                                onClick={() => setActiveInvestmentMemoToPrint(inv)}
-                                title="View official A4 Investment Memo & Download PDF"
-                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.55rem', fontSize: '0.75rem' }}
-                              >
-                                <FileText size={13} />
-                                Memo
-                              </button>
-
-                              {/* DOWNLOAD PDF BUTTON */}
-                              <button
-                                className="btn btn-success btn-sm"
-                                onClick={() => setActiveInvestmentMemoToPrint(inv)}
-                                title="Download official A4 PDF"
-                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.55rem', fontSize: '0.75rem' }}
-                              >
-                                <Download size={13} />
-                                PDF
-                              </button>
-
-                              {/* REVERSE / CANCEL BUTTON */}
-                              {canReverse && (
-                                <button
-                                  className="btn btn-ghost btn-sm"
-                                  onClick={() => {
-                                    setItemToReverse({
-                                      referenceNumber: inv.referenceNumber || inv.reference,
-                                      referenceType: 'INVESTMENT',
-                                      description: `Capital Investment by ${inv.investorName}`,
-                                      debit: inv.amount,
-                                      credit: 0,
-                                    });
-                                    setShowReversalModal(true);
-                                  }}
-                                  title="Reverse investment transaction (Super Admin)"
-                                  style={{ color: '#ef4444', padding: '0.25rem 0.45rem', fontSize: '0.75rem' }}
-                                >
-                                  <RotateCcw size={13} />
-                                </button>
-                              )}
-                            </div>
+                            <button
+                              className="btn btn-outline btn-sm"
+                              onClick={() => setActiveInvestmentMemoToPrint(inv)}
+                              title="View, Print & Download Official A4 Investment Memo"
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.3rem 0.75rem', fontSize: '0.8rem', fontWeight: 600 }}
+                            >
+                              <FileText size={14} />
+                              Memo
+                            </button>
                           </td>
                         </tr>
                       );
