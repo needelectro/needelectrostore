@@ -515,7 +515,7 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
           onViewLanding={() => setShowLanding(true)}
         />
 
-        <main className={`content-scrollable ${isPrintModalOpen ? 'no-print' : ''}`}>
+        <main className={`content-scrollable ${isPrintModalOpen ? 'no-print' : ''} ${activeModule === 'pos' ? 'pos-active' : ''}`}>
           <ErrorBoundary fallbackTitle="Module Error">
             {renderActiveModule()}
           </ErrorBoundary>

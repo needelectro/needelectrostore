@@ -318,7 +318,7 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, minHeight: 0, overflow: 'hidden' }}>
       {/* Top POS Control Bar */}
       <div className="erp-card" style={{ padding: '0.85rem 1.25rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
         {/* Customer Select */}
@@ -355,10 +355,10 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
       </div>
 
       {/* Main POS Split Screen: Products Catalog (Left) + Billing Cart (Right) */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '1.25rem', flex: 1, minHeight: '620px' }}>
+      <div className="pos-main-grid" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '1.25rem', flex: 1, minHeight: 0, overflow: 'hidden' }}>
         
         {/* LEFT: Product Catalog & Search */}
-        <div className="erp-card" style={{ display: 'flex', flexDirection: 'column', padding: '1.25rem' }}>
+        <div className="erp-card" style={{ display: 'flex', flexDirection: 'column', padding: '1.25rem', minHeight: 0, overflow: 'hidden' }}>
           {/* Search & Category Pills */}
           <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
             <div style={{ position: 'relative', flex: 1 }}>
@@ -486,7 +486,7 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
         </div>
 
         {/* RIGHT: Active Billing Cart */}
-        <div className="erp-card" style={{ display: 'flex', flexDirection: 'column', padding: '1.25rem', background: 'var(--bg-card)' }}>
+        <div className="erp-card pos-billing-panel" style={{ display: 'flex', flexDirection: 'column', padding: '1.25rem', background: 'var(--bg-card)', minHeight: 0, overflow: 'hidden' }}>
           {/* Cart Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '700', fontSize: '1rem' }}>
