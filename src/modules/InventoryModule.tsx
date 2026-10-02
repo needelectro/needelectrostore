@@ -116,7 +116,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
                 <option value="">-- Select Supplier --</option>
                 {suppliers?.map((s: any) => (
                   <option key={s.id} value={s.id}>
-                    {s.name} {s.company && s.company !== s.name ? `(${s.company})` : ''}
+                    {s.company || s.name}
                   </option>
                 ))}
               </select>

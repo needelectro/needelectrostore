@@ -323,21 +323,9 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
                     <td><span className="badge badge-neutral">{p.category}</span></td>
                     <td>
                       {matchedSupplier ? (
-                        <div>
-                          <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-                            {matchedSupplier.name}
-                          </div>
-                          {matchedSupplier.company && matchedSupplier.company !== matchedSupplier.name && (
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                              {matchedSupplier.company}
-                            </div>
-                          )}
-                          {matchedSupplier.phone && (
-                            <div style={{ fontSize: '0.7rem', color: 'var(--brand-primary)', marginTop: '1px' }}>
-                              📞 {matchedSupplier.phone}
-                            </div>
-                          )}
-                        </div>
+                        <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                          {matchedSupplier.company || matchedSupplier.name}
+                        </span>
                       ) : (
                         <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
                           — Direct / None —
@@ -528,7 +516,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
                       <option value="">-- Select Supplier (Optional) --</option>
                       {suppliers.map(s => (
                         <option key={s.id} value={s.id}>
-                          {s.name} {s.company && s.company !== s.name ? `(${s.company})` : ''}
+                          {s.company || s.name}
                         </option>
                       ))}
                     </select>

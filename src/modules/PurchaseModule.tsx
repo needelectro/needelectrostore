@@ -167,7 +167,7 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
         {suppliers.map(s => (
           <div key={s.id} className="kpi-card erp-card-interactive" onClick={() => onNavigate('ledgers')}>
             <div className="kpi-top">
-              <span className="kpi-title">{s.name}</span>
+              <span className="kpi-title">{s.company || s.name}</span>
               <div className="kpi-icon" style={{ background: 'rgba(37, 99, 235, 0.12)', color: '#2563eb' }}>
                 <Truck size={18} />
               </div>
@@ -176,7 +176,7 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
               ৳{s.currentPayable.toLocaleString()}
             </div>
             <div className="kpi-footer" style={{ color: 'var(--text-secondary)' }}>
-              Phone: {s.phone} • {s.category}
+              {s.category} Supplier
             </div>
           </div>
         ))}
@@ -301,7 +301,7 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
                       onChange={e => setSupplierId(e.target.value)}
                     >
                       {suppliers.map(s => (
-                        <option key={s.id} value={s.id}>{s.name} ({s.company})</option>
+                        <option key={s.id} value={s.id}>{s.company || s.name}</option>
                       ))}
                     </select>
                   </div>
@@ -475,7 +475,7 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
                   >
                     {suppliers.map(s => (
                       <option key={s.id} value={s.id}>
-                        {s.name} (Current Payable: ৳{s.currentPayable.toLocaleString()})
+                        {s.company || s.name} — Payable: ৳{s.currentPayable.toLocaleString()}
                       </option>
                     ))}
                   </select>
