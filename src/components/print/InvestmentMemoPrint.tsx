@@ -318,7 +318,7 @@ export const InvestmentMemoPrint: React.FC<InvestmentMemoPrintProps> = ({
                     <div>
                       <strong>Investment No:</strong>{' '}
                       <span style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '12px' }}>
-                        {investment.referenceNumber}
+                        {investment.referenceNumber || investment.reference || investment.id}
                       </span>
                     </div>
                     <div>

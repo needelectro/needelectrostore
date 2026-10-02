@@ -2417,6 +2417,36 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
         />
       )}
 
+      {/* MODAL: EDIT INVESTMENT */}
+      {investmentToEdit && (
+        <EditInvestmentModal
+          investment={investmentToEdit}
+          financialAccounts={financialAccounts}
+          onSave={async (updatedData) => {
+            const res = await updateInvestment(investmentToEdit.id, updatedData);
+            if (res && res.success) {
+              setInvestmentToEdit(null);
+              return true;
+            }
+            return false;
+          }}
+          onPrintMemo={(inv) => {
+            setActiveInvestmentMemoToPrint(inv);
+          }}
+          onClose={() => setInvestmentToEdit(null)}
+        />
+      )}
+
+      {/* MODAL: PRINT INVESTMENT LEDGER REPORT */}
+      {showPrintLedgerModal && (
+        <PrintInvestmentLedgerModal
+          investments={filteredInvestments}
+          financialAccounts={financialAccounts}
+          settings={settings}
+          onClose={() => setShowPrintLedgerModal(false)}
+        />
+      )}
+
       {/* MODAL: CREATE INVESTOR ACCOUNT */}
       {showCreateInvestorModal && (
         <div className="modal-overlay" style={{ zIndex: 10000 }}>
