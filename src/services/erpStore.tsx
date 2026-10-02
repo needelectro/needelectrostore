@@ -233,6 +233,10 @@ interface ERPContextType {
   // Utilities
   exportDatabase: () => string;
   importDatabase: (json: string) => boolean;
+  executeSystemReset: (
+    mode: 'CLEAN_BUSINESS_DATA' | 'FULL_FACTORY_RESET',
+    confirmationKeyword: string
+  ) => Promise<{ success: boolean; message?: string; error?: string }>;
 }
 
 const ERPContext = createContext<ERPContextType | null>(null);
@@ -2368,6 +2372,9 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const e = expenses.find(x => x.id === expenseId);
       const res = await api.expenses.deleteExpense(expenseId);
       if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to delete expense.');
+      const updated = expenses.filter(x => x.id !== expenseId);
+      setExpenses(updated);
+      setStoredData('expenses', updated);
       await refreshFromDatabase();
       logAction('ACCOUNTING', 'SUPER_ADMIN_DELETE_EXPENSE', expenseId, `Deleted expense ${e?.voucherNumber || expenseId}`);
       addToast('info', 'Expense Deleted', `Expense voucher removed.`);
@@ -2461,6 +2468,41 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return true;
     }
     return false;
+  };
+
+  const executeSystemReset = async (
+    mode: 'CLEAN_BUSINESS_DATA' | 'FULL_FACTORY_RESET',
+    confirmationKeyword: string
+  ): Promise<{ success: boolean; message?: string; error?: string }> => {
+    try {
+      const res = await api.systemReset.execute(mode, confirmationKeyword);
+      if (!res || !res.success) {
+        throw new Error((res as any)?.error || 'Reset execution failed.');
+      }
+
+      clearAllStoredData();
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        sessionStorage.clear();
+      }
+
+      if (mode === 'FULL_FACTORY_RESET') {
+        addToast('success', 'Factory Reset Executed', 'Platform has been wiped and reset to Initial Setup.');
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 600);
+      } else {
+        await refreshFromDatabase();
+        addToast('success', 'Business Data Reset Completed', 'All test transactions, sales, and accounts have been zeroed.');
+        setTimeout(() => {
+          window.location.reload();
+        }, 800);
+      }
+
+      return { success: true, message: res.message };
+    } catch (err: any) {
+      addToast('error', 'Reset Failed', err.message);
+      return { success: false, error: err.message };
+    }
   };
 
   return (
@@ -2619,7 +2661,8 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteWarrantyClaim,
         deleteEmployee,
         exportDatabase,
-        importDatabase
+        importDatabase,
+        executeSystemReset
       }}
     >
       {children}

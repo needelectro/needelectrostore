@@ -31,6 +31,7 @@ export const ExpenseModule: React.FC<ExpenseModuleProps> = ({ onNavigate }) => {
   ];
 
   const filteredExpenses = expenses.filter(e => {
+    if ((e as any).status === 'CANCELLED') return false;
     const matchesCat = categoryFilter === 'ALL' || e.category === categoryFilter;
     const q = searchQuery.toLowerCase();
     const matchesQuery = e.description.toLowerCase().includes(q) ||

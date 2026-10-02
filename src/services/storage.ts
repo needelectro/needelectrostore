@@ -8,7 +8,7 @@ import {
 } from './mockData';
 
 // Factory Reset Storage Engine
-const STORAGE_PREFIX = 'NEED_ELECTRO_FACTORY_V6_';
+const STORAGE_PREFIX = 'NEED_ELECTRO_FACTORY_V8_';
 
 // Auto-purge any legacy cached business data from users' browser localStorage
 if (typeof window !== 'undefined' && window.localStorage) {
@@ -50,11 +50,14 @@ export function setStoredData<T>(key: string, value: T): void {
 
 export function clearAllStoredData(): void {
   try {
-    Object.keys(localStorage).forEach(k => {
-      if (k.startsWith(STORAGE_PREFIX)) {
-        localStorage.removeItem(k);
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && (k.startsWith('NEED_ELECTRO') || k.startsWith(STORAGE_PREFIX))) {
+        keysToRemove.push(k);
       }
-    });
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
   } catch (err) {
     console.error('Error clearing storage:', err);
   }

@@ -7,7 +7,7 @@ import {
   Download, Upload, Search, Filter, Eye, Users, 
   ArrowRight, Check, X, Smartphone, Globe, Mail, Phone, Calendar, 
   Hash, Tag, FileText, ChevronRight, Laptop, Monitor, Wifi, Zap,
-  Key, Database, UserCheck, Moon, Sun, ArrowLeftRight
+  Key, Database, UserCheck, Moon, Sun, ArrowLeftRight, RotateCcw, RefreshCw
 } from 'lucide-react';
 import { 
   ProductCategoryConfig, BrandConfig, ConfigurablePaymentMethod, 
@@ -54,7 +54,7 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
     priceAuditLog, updateProductPrice, customerMergeAudit, mergeCustomers,
     posSettings, updatePosSettings, inventoryRules, updateInventoryRules,
     emiPlans, saveEMIPlanWithVersioning, currentUser, addToast,
-    exportDatabase, importDatabase, setupStatus
+    exportDatabase, importDatabase, setupStatus, executeSystemReset
   } = useERP();
 
   const [activeTab, setActiveTab] = useState<ControlCenterTab>(
@@ -597,6 +597,42 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
       }
     };
     reader.readAsText(file);
+  };
+
+  // SYSTEM DATA RESET & PURGE STATE & ACTIONS
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [resetMode, setResetMode] = useState<'CLEAN_BUSINESS_DATA' | 'FULL_FACTORY_RESET'>('CLEAN_BUSINESS_DATA');
+  const [resetConfirmText, setResetConfirmText] = useState('');
+  const [resetAcknowledge, setResetAcknowledge] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleOpenResetModal = (mode: 'CLEAN_BUSINESS_DATA' | 'FULL_FACTORY_RESET') => {
+    setResetMode(mode);
+    setResetConfirmText('');
+    setResetAcknowledge(false);
+    setResetModalOpen(true);
+  };
+
+  const handleExecuteReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (resetConfirmText.trim() !== 'CONFIRM RESET') {
+      addToast('error', 'Confirmation Mismatch', 'You must type "CONFIRM RESET" to proceed.');
+      return;
+    }
+    if (!resetAcknowledge) {
+      addToast('error', 'Acknowledgment Required', 'Please confirm acknowledgment by checking the safety checkbox.');
+      return;
+    }
+
+    setIsResetting(true);
+    try {
+      const res = await executeSystemReset(resetMode, resetConfirmText.trim());
+      if (res.success) {
+        setResetModalOpen(false);
+      }
+    } finally {
+      setIsResetting(false);
+    }
   };
 
   return (
@@ -2408,6 +2444,171 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
               </label>
             </div>
           </div>
+
+          {/* ========================================================================= */}
+          {/* PERMANENT PLATFORM DATA RESET & CLEAN SLATE SYSTEM */}
+          {/* ========================================================================= */}
+          <div className="card" style={{
+            padding: '1.75rem',
+            border: '2px solid rgba(239, 68, 68, 0.4)',
+            background: 'linear-gradient(180deg, rgba(239, 68, 68, 0.04) 0%, rgba(15, 23, 42, 0.6) 100%)',
+            borderRadius: 'var(--radius-lg)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '10px',
+                  background: 'rgba(239, 68, 68, 0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ef4444',
+                  border: '1px solid rgba(239, 68, 68, 0.3)'
+                }}>
+                  <RotateCcw size={22} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: '#f87171' }}>
+                    Platform Data Reset & Clean Slate System
+                  </h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '0.2rem 0 0' }}>
+                    Safely wipe test transactions, invoices, products, and customer records before go-live. Strictly Super Admin clearance.
+                  </p>
+                </div>
+              </div>
+
+              <span style={{
+                background: 'rgba(239, 68, 68, 0.2)',
+                color: '#f87171',
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                padding: '0.3rem 0.75rem',
+                borderRadius: '999px',
+                border: '1px solid rgba(239, 68, 68, 0.4)'
+              }}>
+                SUPER ADMIN CLEARANCE
+              </span>
+            </div>
+
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-md)',
+              padding: '1rem',
+              marginBottom: '1.5rem',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+              gap: '0.75rem',
+              textAlign: 'center'
+            }}>
+              <div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Products in DB</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>{products.length}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Customer Profiles</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>{customers.length}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Active Bank/Cash Balances</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#10b981' }}>
+                  ৳{financialAccounts.reduce((sum, a) => sum + Number(a.balance || 0), 0).toLocaleString()}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Audit Log Records</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>{auditLogs.length}</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
+              {/* Option 1: Clean Business Data Reset */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: 'var(--radius-md)',
+                padding: '1.25rem',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
+              }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                      1. Clean Business Reset (Production Slate)
+                    </h4>
+                    <span className="badge badge-success" style={{ fontSize: '0.65rem' }}>RECOMMENDED</span>
+                  </div>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', lineHeight: '1.4' }}>
+                    Zeroes out all test invoices, customers, suppliers, inventory, serials, expenses, and ledger entries. Sets all cash & bank accounts to ৳0.00.
+                  </p>
+                  <ul style={{ fontSize: '0.75rem', color: 'var(--text-muted)', paddingLeft: '1.2rem', margin: '0 0 1rem 0', lineHeight: '1.5' }}>
+                    <li>Wipes: Sales, purchases, returns, expenses, customers, suppliers, stock</li>
+                    <li>Accounts: Main cash drawer & bank accounts reset to ৳0</li>
+                    <li>Preserved: Super Admin login, branches, catalog categories, settings</li>
+                  </ul>
+                </div>
+
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => handleOpenResetModal('CLEAN_BUSINESS_DATA')}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%' }}
+                >
+                  <RotateCcw size={16} />
+                  Launch Clean Business Reset
+                </button>
+              </div>
+
+              {/* Option 2: Full Factory Reset */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(239, 68, 68, 0.5)',
+                borderRadius: 'var(--radius-md)',
+                padding: '1.25rem',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
+              }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, color: '#f87171' }}>
+                      2. Complete Factory Reset
+                    </h4>
+                    <span className="badge badge-danger" style={{ fontSize: '0.65rem' }}>TOTAL PURGE</span>
+                  </div>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', lineHeight: '1.4' }}>
+                    Completely resets the database back to brand-new installation state. Wipes users and returns platform to the Initial Setup Wizard.
+                  </p>
+                  <ul style={{ fontSize: '0.75rem', color: 'var(--text-muted)', paddingLeft: '1.2rem', margin: '0 0 1rem 0', lineHeight: '1.5' }}>
+                    <li>Wipes: Everything including user accounts, roles, and branch data</li>
+                    <li>Setup Mode: Re-enables initial setup wizard for new admin creation</li>
+                    <li>Requires: Re-initializing the platform from scratch</li>
+                  </ul>
+                </div>
+
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={() => handleOpenResetModal('FULL_FACTORY_RESET')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    width: '100%',
+                    borderColor: 'rgba(239, 68, 68, 0.6)',
+                    color: '#f87171'
+                  }}
+                >
+                  <Trash2 size={16} />
+                  Launch Complete Factory Reset
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -3061,6 +3262,119 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsWrModalOpen(false)}>Cancel</button>
                 <button type="submit" className="btn btn-primary">Save Warranty Policy</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 9. DATA RESET CONFIRMATION MODAL */}
+      {resetModalOpen && (
+        <div className="modal-overlay" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000 }}>
+          <div className="modal-content" style={{ maxWidth: '560px', width: '92%', padding: '1.75rem', border: '2px solid #ef4444' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <AlertTriangle size={24} color="#ef4444" />
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: '#f87171' }}>
+                  {resetMode === 'FULL_FACTORY_RESET' ? 'Authorize Complete Factory Reset' : 'Authorize Clean Business Reset'}
+                </h3>
+              </div>
+              <button 
+                type="button" 
+                className="btn-close" 
+                onClick={() => setResetModalOpen(false)}
+                disabled={isResetting}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div style={{
+              background: 'rgba(239, 68, 68, 0.08)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              borderRadius: 'var(--radius-md)',
+              padding: '1rem',
+              fontSize: '0.85rem',
+              color: '#f87171',
+              marginBottom: '1.25rem',
+              lineHeight: '1.5'
+            }}>
+              <strong>High-Impact Operation:</strong> {resetMode === 'FULL_FACTORY_RESET' 
+                ? 'This will completely erase all databases, user accounts, and operational records. The system will return to the Initial Setup Wizard.'
+                : 'This will permanently remove all business sales, customers, suppliers, inventory, serials, expenses, and ledger history. Financial account balances will be set to ৳0.00.'}
+            </div>
+
+            <div style={{ marginBottom: '1.25rem' }}>
+              <div style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                Recommended: Download a complete offline backup before proceeding.
+              </div>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={handleExportJSON}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <Download size={14} /> Download Offline Backup JSON
+              </button>
+            </div>
+
+            <form onSubmit={handleExecuteReset} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                <input 
+                  type="checkbox"
+                  checked={resetAcknowledge}
+                  onChange={e => setResetAcknowledge(e.target.checked)}
+                  style={{ marginTop: '0.2rem' }}
+                  required
+                />
+                <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
+                  I confirm that I understand this action cannot be undone and will permanently wipe operational records.
+                </span>
+              </label>
+
+              <div>
+                <label className="form-label" style={{ fontSize: '0.825rem', fontWeight: 700 }}>
+                  To authorize, type <span style={{ color: '#ef4444', letterSpacing: '0.05em' }}>CONFIRM RESET</span> below:
+                </label>
+                <input 
+                  type="text"
+                  className="form-control"
+                  value={resetConfirmText}
+                  onChange={e => setResetConfirmText(e.target.value)}
+                  placeholder="CONFIRM RESET"
+                  required
+                  autoFocus
+                  style={{ fontWeight: 700, borderColor: resetConfirmText === 'CONFIRM RESET' ? '#10b981' : 'rgba(239, 68, 68, 0.4)' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  onClick={() => setResetModalOpen(false)}
+                  disabled={isResetting}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-danger"
+                  disabled={isResetting || resetConfirmText !== 'CONFIRM RESET' || !resetAcknowledge}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700 }}
+                >
+                  {isResetting ? (
+                    <>
+                      <RefreshCw size={16} className="spin" />
+                      Executing Reset...
+                    </>
+                  ) : (
+                    <>
+                      <RotateCcw size={16} />
+                      {resetMode === 'FULL_FACTORY_RESET' ? 'Execute Factory Reset' : 'Execute Clean Business Reset'}
+                    </>
+                  )}
+                </button>
               </div>
             </form>
           </div>

@@ -590,5 +590,14 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ entityType, validRows })
       })
+  },
+
+  // 18. Platform Data Reset System
+  systemReset: {
+    execute: (mode: 'CLEAN_BUSINESS_DATA' | 'FULL_FACTORY_RESET', confirmationKeyword: string) =>
+      request<{ success: boolean; message: string; mode: string; purgedTables: string[]; timestamp?: string }>('/api/admin/reset-system', {
+        method: 'POST',
+        body: JSON.stringify({ mode, confirmationKeyword })
+      })
   }
 };

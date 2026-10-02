@@ -113,12 +113,9 @@ export async function DELETE(
         performedBy: user.name,
       });
 
-      // 2. Soft cancel expense record (Strict reversal logic, no hard deletion)
-      await tx.expense.update({
+      // 2. Permanently delete expense record from database
+      await tx.expense.delete({
         where: { id: params.id },
-        data: {
-          status: 'CANCELLED',
-        },
       });
 
       // 3. Audit trail

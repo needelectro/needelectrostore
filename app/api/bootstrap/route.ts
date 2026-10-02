@@ -421,7 +421,7 @@ export async function GET(req: NextRequest) {
         take: 200,
       }),
       prisma.productReturn.findMany({ orderBy: { date: 'desc' } }),
-      prisma.expense.findMany({ orderBy: { date: 'desc' }, take: 300 }),
+      prisma.expense.findMany({ where: { status: { not: 'CANCELLED' } }, orderBy: { date: 'desc' }, take: 300 }),
       prisma.serviceJob.findMany({ orderBy: { createdAt: 'desc' } }),
       prisma.technician.findMany({ orderBy: { name: 'asc' } }),
       prisma.warrantyClaim.findMany({ orderBy: { claimDate: 'desc' } }),

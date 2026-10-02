@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
   if (user instanceof NextResponse) return user;
 
   const expenses = await prisma.expense.findMany({
+    where: { status: { not: 'CANCELLED' } },
     orderBy: { date: 'desc' },
     take: 200,
   });
