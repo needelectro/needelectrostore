@@ -210,7 +210,7 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
             >
               <option value="ALL">All Suppliers</option>
               {suppliers.map(s => (
-                <option key={s.id} value={s.id}>{s.name}</option>
+                <option key={s.id} value={s.id}>{s.company || s.name}</option>
               ))}
             </select>
           </div>

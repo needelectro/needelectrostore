@@ -243,7 +243,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
               <option value="ALL">All Suppliers ({suppliers.length})</option>
               {suppliers.map(s => (
                 <option key={s.id} value={s.id}>
-                  {s.name}
+                  {s.company || s.name}
                 </option>
               ))}
             </select>
