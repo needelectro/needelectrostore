@@ -501,6 +501,7 @@ export const INITIAL_EXPENSE_CATEGORIES: ExpenseCategoryConfig[] = [
   { id: 'exp-mkt', name: 'Marketing & Advertising', code: 'MARKETING', description: 'Facebook ads & banners', isTaxDeductible: true, isActive: true },
   { id: 'exp-maint', name: 'Maintenance & Repairs', code: 'MAINTENANCE', description: 'Showroom equipment repair', isTaxDeductible: true, isActive: true },
   { id: 'exp-snack', name: 'Office Supplies & Hospitality', code: 'OFFICE_SUPPLIES', description: 'Tea, snacks, stationary', isTaxDeductible: true, isActive: true },
+  { id: 'exp-assets', name: 'Shop Assets & Equipment', code: 'SHOP_ASSETS', description: 'Showroom assets, furniture, machinery and tools', isTaxDeductible: true, isActive: true },
   { id: 'exp-other', name: 'Other Operating Expenses', code: 'OTHER', description: 'Miscellaneous operating costs', isTaxDeductible: true, isActive: true }
 ];
 

@@ -574,7 +574,11 @@ export type ExpenseCategory =
   | 'Purchase Expenses'
   | 'Service Expenses'
   | 'Office Supplies & Snacks'
-  | 'Couriers & Logistics'
+  | 'Shop Assets & Equipment'
+  | 'Office Supplies & Hospitality'
+  | 'Marketing & Advertising'
+  | 'Internet & Communications'
+  | 'Other Operating Expenses'
   | 'Other'
   | string;
 

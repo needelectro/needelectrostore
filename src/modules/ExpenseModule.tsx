@@ -8,7 +8,7 @@ interface ExpenseModuleProps {
 }
 
 export const ExpenseModule: React.FC<ExpenseModuleProps> = ({ onNavigate }) => {
-  const { expenses, createExpense, updateExpense, deleteExpense, selectedBranch, currentUser } = useERP();
+  const { expenses, createExpense, updateExpense, deleteExpense, selectedBranch, currentUser, expenseCategoriesConfig } = useERP();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [editForm, setEditForm] = useState<any>({});
@@ -19,16 +19,42 @@ export const ExpenseModule: React.FC<ExpenseModuleProps> = ({ onNavigate }) => {
   const isSuperAdmin = currentUser.role === 'SUPER_ADMIN';
 
   // Form State
-  const [category, setCategory] = useState<ExpenseCategory>('Office Supplies & Snacks');
+  const [category, setCategory] = useState<ExpenseCategory>('Shop Assets & Equipment');
   const [amount, setAmount] = useState<number>(1500);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('Cash');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
-  const categories: ExpenseCategory[] = [
-    'Office Rent', 'Electricity', 'Transport', 'Salary', 'Marketing',
-    'Purchase Expenses', 'Service Expenses', 'Office Supplies & Snacks', 'Other'
-  ];
+  const categories: ExpenseCategory[] = Array.from(
+    new Set([
+      'Shop Assets & Equipment',
+      'Office Supplies & Hospitality',
+      'Marketing & Advertising',
+      'Internet & Communications',
+      'Office Rent',
+      'Electricity & Utility',
+      'Staff Salaries & Commission',
+      'Transport & Courier',
+      'Maintenance & Repairs',
+      'Other Operating Expenses',
+      'Office Supplies & Snacks',
+      'Marketing',
+      'Other',
+      ...(expenseCategoriesConfig || []).map(c => c.name),
+      ...expenses.map(e => e.category),
+    ])
+  ).filter(Boolean) as ExpenseCategory[];
+
+  const filterTabs = ['ALL', ...Array.from(
+    new Set([
+      'Shop Assets & Equipment',
+      'Office Supplies & Hospitality',
+      'Marketing & Advertising',
+      'Internet & Communications',
+      'Other Operating Expenses',
+      ...expenses.map(e => e.category)
+    ])
+  ).filter(Boolean)];
 
   const filteredExpenses = expenses.filter(e => {
     if ((e as any).status === 'CANCELLED') return false;
@@ -130,8 +156,8 @@ export const ExpenseModule: React.FC<ExpenseModuleProps> = ({ onNavigate }) => {
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '0.4rem', overflowX: 'auto' }}>
-            {['ALL', 'Office Rent', 'Electricity', 'Transport', 'Office Supplies & Snacks'].map(c => (
+          <div style={{ display: 'flex', gap: '0.4rem', overflowX: 'auto', flexWrap: 'wrap' }}>
+            {filterTabs.map(c => (
               <button
                 key={c}
                 className={`btn btn-sm ${categoryFilter === c ? 'btn-primary' : 'btn-secondary'}`}
