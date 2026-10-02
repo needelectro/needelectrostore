@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useERP } from '../services/erpStore';
 import { 
   PieChart as PieChartIcon, TrendingUp, TrendingDown, 
@@ -7,7 +7,7 @@ import {
   Landmark, ShieldAlert, CheckCircle2, X, Users, Percent,
   Lock, Unlock, ShieldCheck, Sparkles, Clock, FileText,
   RefreshCw, AlertCircle, ArrowDown, ArrowUp, Info, RotateCcw, Check, CreditCard,
-  Download
+  Download, Edit, Search, Filter, Building
 } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
@@ -16,6 +16,8 @@ import {
 import { InvestmentType, AccountType, Investment } from '../types';
 import { api } from '../services/api';
 import { InvestmentSuccessModal } from '../components/accounting/InvestmentSuccessModal';
+import { EditInvestmentModal } from '../components/accounting/EditInvestmentModal';
+import { PrintInvestmentLedgerModal } from '../components/accounting/PrintInvestmentLedgerModal';
 
 interface AccountingModuleProps {
   onNavigate: (module: string, targetId?: string) => void;
@@ -25,9 +27,10 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
   const { 
     sales, emiPayments, expenses, suppliers, customers, emiAccounts, 
     products, services, selectedBranch, financialAccounts, investments,
-    recordInvestment, transferFunds, recordOtherIncome, recordOwnerWithdrawal,
-    reverseTransaction, addToast, otherIncomes, ownerWithdrawals, ledgerEntries,
-    setActiveInvestmentMemoToPrint, currentUser
+    recordInvestment, updateInvestment, deleteInvestment, transferFunds, 
+    recordOtherIncome, recordOwnerWithdrawal, reverseTransaction, addToast, 
+    otherIncomes, ownerWithdrawals, ledgerEntries, setActiveInvestmentMemoToPrint, 
+    currentUser, settings
   } = useERP();
 
   const [activeTab, setActiveTab] = useState<'pnl' | 'accounts' | 'statements' | 'cash_flow' | 'investments'>('pnl');
@@ -102,6 +105,40 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
   const [isSubmittingInvest, setIsSubmittingInvest] = useState(false);
   const [newlyCreatedInvestment, setNewlyCreatedInvestment] = useState<Investment | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  // Investment Edit, Search, & Ledger Print States
+  const [investmentToEdit, setInvestmentToEdit] = useState<Investment | null>(null);
+  const [showPrintLedgerModal, setShowPrintLedgerModal] = useState(false);
+  const [investmentSearch, setInvestmentSearch] = useState('');
+  const [investmentTypeFilter, setInvestmentTypeFilter] = useState('ALL');
+  const [investmentStatusFilter, setInvestmentStatusFilter] = useState('ALL');
+
+  const filteredInvestments = useMemo(() => {
+    return investments.filter(inv => {
+      if (investmentStatusFilter !== 'ALL' && inv.status !== investmentStatusFilter) {
+        return false;
+      }
+      if (investmentTypeFilter !== 'ALL') {
+        const invType = inv.investmentType || inv.type || 'EQUITY';
+        if (invType !== investmentTypeFilter) return false;
+      }
+      if (investmentSearch.trim()) {
+        const q = investmentSearch.toLowerCase().trim();
+        const ref = (inv.referenceNumber || inv.reference || inv.id || '').toLowerCase();
+        const name = (inv.investorName || '').toLowerCase();
+        const phone = (inv.investorPhone || '').toLowerCase();
+        const org = (inv.organization || '').toLowerCase();
+        const purpose = (inv.purpose || '').toLowerCase();
+        const notes = (inv.notes || '').toLowerCase();
+        const acc = financialAccounts.find(a => a.id === inv.depositAccountId)?.name?.toLowerCase() || '';
+
+        if (!ref.includes(q) && !name.includes(q) && !phone.includes(q) && !org.includes(q) && !purpose.includes(q) && !notes.includes(q) && !acc.includes(q)) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [investments, investmentStatusFilter, investmentTypeFilter, investmentSearch, financialAccounts]);
 
   // Super Admin Investor Management State
   const [adminInvestorData, setAdminInvestorData] = useState<any>(null);
@@ -1782,12 +1819,79 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
             </div>
           </div>
 
-          {/* SECTION 3: ORIGINAL CAPITAL DEPOSIT REGISTRY */}
+          {/* SECTION 3: CAPITAL INJECTIONS & INVESTMENT LEDGER */}
           <div className="erp-card" style={{ padding: '1.25rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
               <div>
-                <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>Capital Injections & Investment Ledger</h3>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>All historical capital deposits recorded into business cash/bank accounts</p>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.45rem', margin: 0 }}>
+                  <Building size={18} color="var(--brand-primary)" />
+                  Capital Injections & Investment Ledger
+                </h3>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '3px 0 0 0' }}>
+                  All historical capital deposits recorded into business cash/bank accounts with full audit & edit control
+                </p>
+              </div>
+
+              {/* Action Toolbar */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                {/* Search */}
+                <div style={{ position: 'relative', width: '220px' }}>
+                  <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search ref, investor..."
+                    value={investmentSearch}
+                    onChange={e => setInvestmentSearch(e.target.value)}
+                    style={{ paddingLeft: '2rem', height: '34px', fontSize: '0.8rem' }}
+                  />
+                </div>
+
+                {/* Type Filter */}
+                <select
+                  className="form-control"
+                  value={investmentTypeFilter}
+                  onChange={e => setInvestmentTypeFilter(e.target.value)}
+                  style={{ width: '135px', height: '34px', fontSize: '0.8rem' }}
+                >
+                  <option value="ALL">All Types</option>
+                  <option value="EQUITY">Equity</option>
+                  <option value="SEED_FUNDING">Seed Funding</option>
+                  <option value="DIRECTOR_LOAN">Director Loan</option>
+                  <option value="WORKING_CAPITAL">Working Capital</option>
+                  <option value="OTHER">Other</option>
+                </select>
+
+                {/* Status Filter */}
+                <select
+                  className="form-control"
+                  value={investmentStatusFilter}
+                  onChange={e => setInvestmentStatusFilter(e.target.value)}
+                  style={{ width: '115px', height: '34px', fontSize: '0.8rem' }}
+                >
+                  <option value="ALL">All Status</option>
+                  <option value="ACTIVE">Active</option>
+                  <option value="REVERSED">Reversed</option>
+                </select>
+
+                {/* Print Ledger */}
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setShowPrintLedgerModal(true)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', height: '34px', fontSize: '0.8rem' }}
+                  title="Print official Capital Investment Ledger Statement"
+                >
+                  <Printer size={14} /> Print Ledger
+                </button>
+
+                {/* Add Capital */}
+                <button
+                  className="btn btn-warning btn-sm"
+                  onClick={() => setShowInvestmentModal(true)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', height: '34px', fontSize: '0.8rem', fontWeight: 700 }}
+                >
+                  <Plus size={14} /> Add Capital
+                </button>
               </div>
             </div>
 
@@ -1795,28 +1899,36 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
               <table className="erp-table">
                 <thead>
                   <tr>
-                    <th>Investment No</th>
-                    <th>Investor</th>
-                    <th style={{ textAlign: 'right' }}>Amount</th>
+                    <th>Ref ID</th>
+                    <th>Investor Name</th>
+                    <th>Type</th>
                     <th>Date</th>
-                    <th>Account</th>
-                    <th>Status</th>
+                    <th>Target Account</th>
+                    <th style={{ textAlign: 'right' }}>Capital Amount (৳)</th>
+                    <th>Notes / Purpose</th>
+                    <th style={{ textAlign: 'center' }}>Status</th>
                     <th style={{ textAlign: 'center' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {investments.length === 0 ? (
+                  {filteredInvestments.length === 0 ? (
                     <tr>
-                      <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem 1rem', color: 'var(--text-muted)' }}>
-                        <div style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.25rem' }}>No investments recorded yet.</div>
-                        <div style={{ fontSize: '0.8rem' }}>Click &quot;Add Capital / Investment&quot; to deposit capital with automatic A4 Investment Memo generation.</div>
+                      <td colSpan={9} style={{ textAlign: 'center', padding: '2.5rem 1rem', color: 'var(--text-muted)' }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.25rem' }}>
+                          {investments.length === 0 ? 'No investments recorded yet.' : 'No investments matching your filter criteria.'}
+                        </div>
+                        <div style={{ fontSize: '0.8rem' }}>
+                          Click &quot;Add Capital&quot; to deposit capital with automatic A4 Investment Memo generation.
+                        </div>
                       </td>
                     </tr>
                   ) : (
-                    investments.map(inv => {
+                    filteredInvestments.map(inv => {
                       const acc = financialAccounts.find(a => a.id === inv.depositAccountId);
                       const isRev = inv.status === 'REVERSED';
                       const canReverse = (currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN') && !isRev;
+                      const invType = inv.investmentType || inv.type || 'EQUITY';
+                      const cleanNote = inv.purpose || (inv.notes && inv.notes !== '{}' && !inv.notes.startsWith('{') ? inv.notes : '—');
 
                       return (
                         <tr key={inv.id}>
@@ -1826,20 +1938,42 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                           <td>
                             <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{inv.investorName}</div>
                             {inv.organization && (
-                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{inv.organization}</div>
+                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{inv.organization}</div>
+                            )}
+                            {inv.investorPhone && (
+                              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>{inv.investorPhone}</div>
                             )}
                           </td>
-                          <td style={{ textAlign: 'right', fontWeight: 800, color: isRev ? '#ef4444' : '#10b981' }}>
-                            BDT {Number(inv.amount).toLocaleString()}
+                          <td>
+                            <span
+                              style={{
+                                display: 'inline-block',
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                background: invType === 'SEED_FUNDING' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(56, 189, 248, 0.15)',
+                                color: invType === 'SEED_FUNDING' ? '#f59e0b' : '#38bdf8',
+                                border: `1px solid ${invType === 'SEED_FUNDING' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(56, 189, 248, 0.3)'}`,
+                              }}
+                            >
+                              {invType}
+                            </span>
                           </td>
                           <td>
                             {inv.date ? new Date(inv.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
                           </td>
                           <td>
-                            <div style={{ fontWeight: 600 }}>{acc?.name || 'Main Cash'}</div>
+                            <div style={{ fontWeight: 600 }}>{acc?.name || 'Main Cash Drawer'}</div>
                             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{inv.paymentMethod || 'Cash'}</div>
                           </td>
-                          <td>
+                          <td style={{ textAlign: 'right', fontWeight: 800, fontSize: '0.95rem', color: isRev ? '#ef4444' : '#10b981' }}>
+                            ৳{Number(inv.amount || 0).toLocaleString()}
+                          </td>
+                          <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={cleanNote !== '—' ? cleanNote : ''}>
+                            {cleanNote}
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
                             <span
                               style={{
                                 display: 'inline-block',
@@ -1858,39 +1992,54 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                           </td>
                           <td style={{ textAlign: 'center' }}>
                             <div style={{ display: 'inline-flex', gap: '0.35rem', alignItems: 'center' }}>
+                              {/* EDIT BUTTON */}
                               <button
-                                className="btn btn-outline btn-sm"
-                                onClick={() => setActiveInvestmentMemoToPrint(inv)}
-                                title="View official A4 Investment Memo"
-                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                                className="btn btn-warning btn-sm"
+                                onClick={() => setInvestmentToEdit(inv)}
+                                title="Edit investment details, amounts, account, dates & notes"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.55rem', fontSize: '0.75rem', fontWeight: 700 }}
                               >
-                                <FileText size={13} />
-                                View Memo
+                                <Edit size={13} />
+                                Edit
                               </button>
 
+                              {/* PRINT MEMO BUTTON */}
                               <button
                                 className="btn btn-secondary btn-sm"
                                 onClick={() => {
                                   setActiveInvestmentMemoToPrint(inv);
-                                  setTimeout(() => window.print(), 300);
+                                  setTimeout(() => window.print(), 350);
                                 }}
-                                title="Print A4 Investment Memo"
-                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                                title="Print official A4 Investment Memo"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.55rem', fontSize: '0.75rem' }}
                               >
                                 <Printer size={13} />
                                 Print
                               </button>
 
+                              {/* VIEW MEMO / PDF BUTTON */}
+                              <button
+                                className="btn btn-outline btn-sm"
+                                onClick={() => setActiveInvestmentMemoToPrint(inv)}
+                                title="View official A4 Investment Memo & Download PDF"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.55rem', fontSize: '0.75rem' }}
+                              >
+                                <FileText size={13} />
+                                Memo
+                              </button>
+
+                              {/* DOWNLOAD PDF BUTTON */}
                               <button
                                 className="btn btn-success btn-sm"
                                 onClick={() => setActiveInvestmentMemoToPrint(inv)}
                                 title="Download official A4 PDF"
-                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.55rem', fontSize: '0.75rem' }}
                               >
                                 <Download size={13} />
                                 PDF
                               </button>
 
+                              {/* REVERSE / CANCEL BUTTON */}
                               {canReverse && (
                                 <button
                                   className="btn btn-ghost btn-sm"
