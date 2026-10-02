@@ -120,11 +120,20 @@ export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, 
             <div style={{ fontSize: '10px' }}>
               {items.length > 0 ? (
                 items.map((item: any, idx: number) => {
-                  const itemSerials = Array.isArray(item.serialNumbers)
-                    ? item.serialNumbers
-                    : typeof item.serialNumbers === 'string'
-                      ? item.serialNumbers.split(',').map((s: string) => s.trim()).filter(Boolean)
-                      : safeArray<string>(item.serials);
+                  let itemSerials: string[] = [];
+                  if (Array.isArray(item.serialNumbers) && item.serialNumbers.length > 0) {
+                    itemSerials = item.serialNumbers;
+                  } else if (typeof item.serialNumbers === 'string' && item.serialNumbers.trim()) {
+                    itemSerials = item.serialNumbers.split(',').map((s: string) => s.trim()).filter(Boolean);
+                  } else if (Array.isArray(item.serials) && item.serials.length > 0) {
+                    itemSerials = item.serials;
+                  } else if (typeof item.serials === 'string' && item.serials.trim()) {
+                    itemSerials = item.serials.split(',').map((s: string) => s.trim()).filter(Boolean);
+                  } else if (item.serialNumber && typeof item.serialNumber === 'string' && item.serialNumber.trim()) {
+                    itemSerials = [item.serialNumber.trim()];
+                  } else if (item.serial && typeof item.serial === 'string' && item.serial.trim()) {
+                    itemSerials = [item.serial.trim()];
+                  }
                   const itemPrice = Number(item.unitPrice || item.price || item.rate || 0);
                   const itemQty = Number(item.quantity || item.qty || 1);
                   const itemTotal = Number(item.total || (itemPrice * itemQty) - Number(item.discount || 0));
@@ -133,8 +142,8 @@ export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, 
                   return (
                     <div key={item.id || idx} style={{ marginBottom: '6px' }}>
                       <div style={{ fontWeight: 'bold' }}>{itemName}</div>
-                      {(item.isSerialized || itemSerials.length > 0) && itemSerials.length > 0 && (
-                        <div style={{ fontSize: '9px' }}>SN: {itemSerials.join(', ')}</div>
+                      {itemSerials.length > 0 && (
+                        <div style={{ fontSize: '9px', fontWeight: 'bold', margin: '1px 0' }}>SN: {itemSerials.join(', ')}</div>
                       )}
                       <div className="thermal-item-row">
                         <span>{itemQty} x ৳{itemPrice.toLocaleString()}</span>

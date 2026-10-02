@@ -52,6 +52,7 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
   ]);
   const [transactionRef, setTransactionRef] = useState('');
   const [saleNotes, setSaleNotes] = useState('');
+  const [customSerialInput, setCustomSerialInput] = useState<string>('');
 
   // Auto-load cloned invoice if duplicated from SalesModule
   React.useEffect(() => {
@@ -193,15 +194,7 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
       return;
     }
 
-    // Check serial numbers
-    for (const item of cart) {
-      if (item.isSerialized) {
-        if (item.serialNumbers.length !== item.quantity) {
-          alert(`Please select ${item.quantity} serial number(s) for "${item.productName}". Currently selected: ${item.serialNumbers.length}`);
-          return;
-        }
-      }
-    }
+    // Serial numbers are optional for all products - no checkout block
 
     setPaidAmount(grandTotal);
     setShowPaymentModal(true);
@@ -519,26 +512,33 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
                       </button>
                     </div>
 
-                    {/* Serial Number Picker Trigger (for serialized products) */}
-                    {item.isSerialized && (
+                    {/* Serial Number Picker Trigger (for serialized products or items with serials) */}
+                    {(item.isSerialized || item.serialNumbers.length > 0) && (
                       <div style={{
-                        background: item.serialNumbers.length === item.quantity ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.15)',
-                        border: `1px solid ${item.serialNumbers.length === item.quantity ? '#10b981' : '#f59e0b'}`,
+                        background: item.serialNumbers.length > 0 ? 'rgba(16, 185, 129, 0.08)' : 'rgba(0, 140, 255, 0.06)',
+                        border: `1px solid ${item.serialNumbers.length > 0 ? '#10b981' : 'var(--border-color)'}`,
                         borderRadius: 'var(--radius-sm)',
                         padding: '4px 8px',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'space-between'
+                        justifyContent: 'space-between',
+                        gap: '6px'
                       }}>
-                        <div style={{ fontSize: '0.75rem', fontWeight: '600' }}>
-                          Serial: {item.serialNumbers.length > 0 ? item.serialNumbers.join(', ') : 'None Selected!'}
+                        <div style={{ fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '5px', overflow: 'hidden' }}>
+                          <Hash size={13} color="var(--brand-primary)" />
+                          <span style={{ fontWeight: 600, color: item.serialNumbers.length > 0 ? '#10b981' : 'var(--text-secondary)' }}>
+                            {item.serialNumbers.length > 0 ? `S/N: ${item.serialNumbers.join(', ')}` : 'Serial No (Optional)'}
+                          </span>
                         </div>
                         <button 
                           className="btn btn-sm btn-ghost" 
-                          onClick={() => setSerialModalItemIndex(idx)}
-                          style={{ fontSize: '0.7rem', color: 'var(--brand-primary)', fontWeight: 'bold', padding: '1px 6px' }}
+                          onClick={() => {
+                            setCustomSerialInput('');
+                            setSerialModalItemIndex(idx);
+                          }}
+                          style={{ fontSize: '0.72rem', color: 'var(--brand-primary)', fontWeight: 'bold', padding: '2px 8px' }}
                         >
-                          Change Serial
+                          {item.serialNumbers.length > 0 ? 'Edit' : '+ Add Serial'}
                         </button>
                       </div>
                     )}
@@ -635,67 +635,217 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
       {/* MODAL 1: Serial Number Picker */}
       {serialModalItemIndex !== null && cart[serialModalItemIndex] && (
         <div className="modal-overlay" style={{ zIndex: 10000 }}>
-          <div className="modal-content" style={{ maxWidth: '480px' }}>
+          <div className="modal-content" style={{ maxWidth: '500px' }}>
             <div className="modal-header">
               <div className="modal-title">
                 <Hash size={18} color="var(--brand-primary)" />
-                Select Serial Number ({cart[serialModalItemIndex].productName})
+                Manage Serial Numbers ({cart[serialModalItemIndex].productName})
               </div>
               <button className="btn btn-ghost btn-sm" onClick={() => setSerialModalItemIndex(null)}>
                 <X size={16} />
               </button>
             </div>
             <div className="modal-body">
-              <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
-                Please pick <strong>{cart[serialModalItemIndex].quantity}</strong> available serial number(s). Each serialized laptop/device is uniquely mapped and cannot be sold twice.
-              </p>
+              <div style={{
+                background: 'rgba(0, 140, 255, 0.08)',
+                border: '1px solid rgba(0, 140, 255, 0.2)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '8px 12px',
+                fontSize: '0.8rem',
+                color: 'var(--text-primary)',
+                marginBottom: '0.85rem'
+              }}>
+                <strong>Optional:</strong> You can assign serial numbers (quantity: <strong>{cart[serialModalItemIndex].quantity}</strong>) for warranty coverage or leave empty to complete the sale without serial numbers.
+              </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '250px', overflowY: 'auto' }}>
-                {cart[serialModalItemIndex].availableSerials.map(sn => {
-                  const isSelected = cart[serialModalItemIndex].serialNumbers.includes(sn);
-                  return (
-                    <div
-                      key={sn}
-                      onClick={() => {
-                        const current = [...cart[serialModalItemIndex].serialNumbers];
-                        let updated: string[];
-                        if (isSelected) {
-                          updated = current.filter(s => s !== sn);
-                        } else {
-                          if (current.length >= cart[serialModalItemIndex].quantity) {
-                            updated = [...current.slice(1), sn];
-                          } else {
-                            updated = [...current, sn];
+              {/* Currently Selected Serials */}
+              <div style={{ marginBottom: '0.85rem' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                  Selected Serials ({cart[serialModalItemIndex].serialNumbers.length}):
+                </div>
+                {cart[serialModalItemIndex].serialNumbers.length > 0 ? (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {cart[serialModalItemIndex].serialNumbers.map((sn, snIdx) => (
+                      <span
+                        key={snIdx}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: 'rgba(16, 185, 129, 0.15)',
+                          border: '1px solid #10b981',
+                          color: 'var(--text-primary)',
+                          borderRadius: '4px',
+                          padding: '3px 8px',
+                          fontSize: '0.8rem',
+                          fontFamily: 'monospace',
+                          fontWeight: 700
+                        }}
+                      >
+                        {sn}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = cart[serialModalItemIndex].serialNumbers.filter((_, i) => i !== snIdx);
+                            const updatedCart = [...cart];
+                            updatedCart[serialModalItemIndex] = {
+                              ...cart[serialModalItemIndex],
+                              serialNumbers: updated
+                            };
+                            setCart(updatedCart);
+                          }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: '#ef4444',
+                            padding: 0,
+                            lineHeight: 1
+                          }}
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                    No serial numbers added (Sale will proceed normally)
+                  </div>
+                )}
+              </div>
+
+              {/* Add Custom / Barcode Scan Input */}
+              <div style={{ marginBottom: '1rem' }}>
+                <label className="form-label" style={{ fontSize: '0.75rem' }}>
+                  Scan Barcode or Type Serial Number:
+                </label>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g. SN-892301 (Press Enter to add)"
+                    value={customSerialInput}
+                    onChange={e => setCustomSerialInput(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const val = customSerialInput.trim();
+                        if (val) {
+                          if (cart[serialModalItemIndex].serialNumbers.includes(val)) {
+                            alert('This serial number is already in the list.');
+                            return;
                           }
+                          const updated = [...cart[serialModalItemIndex].serialNumbers, val];
+                          const updatedCart = [...cart];
+                          updatedCart[serialModalItemIndex] = {
+                            ...cart[serialModalItemIndex],
+                            serialNumbers: updated
+                          };
+                          setCart(updatedCart);
+                          setCustomSerialInput('');
                         }
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => {
+                      const val = customSerialInput.trim();
+                      if (val) {
+                        if (cart[serialModalItemIndex].serialNumbers.includes(val)) {
+                          alert('This serial number is already in the list.');
+                          return;
+                        }
+                        const updated = [...cart[serialModalItemIndex].serialNumbers, val];
                         const updatedCart = [...cart];
                         updatedCart[serialModalItemIndex] = {
                           ...cart[serialModalItemIndex],
                           serialNumbers: updated
                         };
                         setCart(updatedCart);
-                      }}
-                      style={{
-                        padding: '0.65rem 0.85rem',
-                        borderRadius: 'var(--radius-md)',
-                        background: isSelected ? 'var(--bg-active)' : 'var(--bg-card-muted)',
-                        border: `1px solid ${isSelected ? 'var(--brand-primary)' : 'var(--border-color)'}`,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between'
-                      }}
-                    >
-                      <span style={{ fontWeight: '700', fontSize: '0.875rem' }}>{sn}</span>
-                      {isSelected ? <Check size={16} color="var(--brand-primary)" /> : <span style={{ fontSize: '0.75rem', color: '#10b981' }}>AVAILABLE</span>}
-                    </div>
-                  );
-                })}
+                        setCustomSerialInput('');
+                      }
+                    }}
+                  >
+                    Add
+                  </button>
+                </div>
               </div>
+
+              {/* In-Stock Available Serials (Click to toggle) */}
+              {cart[serialModalItemIndex].availableSerials.length > 0 && (
+                <div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                    Available Units in Stock (Click to toggle):
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '160px', overflowY: 'auto' }}>
+                    {cart[serialModalItemIndex].availableSerials.map(sn => {
+                      const isSelected = cart[serialModalItemIndex].serialNumbers.includes(sn);
+                      return (
+                        <div
+                          key={sn}
+                          onClick={() => {
+                            const current = [...cart[serialModalItemIndex].serialNumbers];
+                            let updated: string[];
+                            if (isSelected) {
+                              updated = current.filter(s => s !== sn);
+                            } else {
+                              updated = [...current, sn];
+                            }
+                            const updatedCart = [...cart];
+                            updatedCart[serialModalItemIndex] = {
+                              ...cart[serialModalItemIndex],
+                              serialNumbers: updated
+                            };
+                            setCart(updatedCart);
+                          }}
+                          style={{
+                            padding: '0.5rem 0.75rem',
+                            borderRadius: 'var(--radius-sm)',
+                            background: isSelected ? 'var(--bg-active)' : 'var(--bg-card-muted)',
+                            border: `1px solid ${isSelected ? 'var(--brand-primary)' : 'var(--border-color)'}`,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between'
+                          }}
+                        >
+                          <span style={{ fontWeight: '700', fontSize: '0.82rem', fontFamily: 'monospace' }}>{sn}</span>
+                          {isSelected ? (
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--brand-primary)', fontSize: '0.75rem', fontWeight: 700 }}>
+                              <Check size={14} /> SELECTED
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: '0.72rem', color: '#10b981' }}>AVAILABLE</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="modal-footer">
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => {
+                  const updatedCart = [...cart];
+                  updatedCart[serialModalItemIndex] = {
+                    ...cart[serialModalItemIndex],
+                    serialNumbers: []
+                  };
+                  setCart(updatedCart);
+                  setSerialModalItemIndex(null);
+                }}
+                style={{ color: '#ef4444' }}
+              >
+                Clear / Skip (Optional)
+              </button>
               <button className="btn btn-primary btn-sm" onClick={() => setSerialModalItemIndex(null)}>
-                Confirm Selection
+                Done
               </button>
             </div>
           </div>

@@ -675,11 +675,20 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
                       <div style={{ fontSize: '0.82rem', fontWeight: 600, maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {(sale.items || []).map(i => `${i.productName} (x${i.quantity})`).join(', ') || 'Commercial Sale'}
                       </div>
-                      {sale.items && sale.items.some(i => i.isSerialized) && (
-                        <div style={{ fontSize: '0.7rem', color: '#008CFF', fontFamily: 'monospace' }}>
-                          S/N: {sale.items.flatMap(i => i.serialNumbers || []).join(', ')}
-                        </div>
-                      )}
+                      {(() => {
+                        const serialsList = (sale.items || []).flatMap(i => {
+                          if (Array.isArray(i.serialNumbers)) return i.serialNumbers;
+                          if (typeof (i as any).serials === 'string') return (i as any).serials.split(',').map((s: string) => s.trim()).filter(Boolean);
+                          if (Array.isArray((i as any).serials)) return (i as any).serials;
+                          if ((i as any).serialNumber) return [(i as any).serialNumber];
+                          return [];
+                        });
+                        return serialsList.length > 0 ? (
+                          <div style={{ fontSize: '0.72rem', color: '#008CFF', fontFamily: 'monospace', fontWeight: 600 }}>
+                            S/N: {serialsList.join(', ')}
+                          </div>
+                        ) : null;
+                      })()}
                     </td>
 
                     <td style={{ textAlign: 'right', fontWeight: 800 }}>
@@ -910,23 +919,37 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {(viewingSale.items || []).map((item, idx) => (
-                        <tr key={item.id || idx}>
-                          <td>{idx + 1}</td>
-                          <td>
-                            <div style={{ fontWeight: 700 }}>{item.productName}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>SKU: {item.sku}</div>
-                            {item.serialNumbers && item.serialNumbers.length > 0 && (
-                              <div style={{ fontSize: '0.72rem', color: '#008CFF', fontFamily: 'monospace' }}>
-                                S/N: {item.serialNumbers.join(', ')}
-                              </div>
-                            )}
-                          </td>
-                          <td style={{ textAlign: 'center' }}>{item.quantity}</td>
-                          <td style={{ textAlign: 'right' }}>৳{Number(item.unitPrice).toLocaleString()}</td>
-                          <td style={{ textAlign: 'right', fontWeight: 700 }}>৳{Number(item.total).toLocaleString()}</td>
-                        </tr>
-                      ))}
+                      {(viewingSale.items || []).map((item, idx) => {
+                        let itemSerials: string[] = [];
+                        if (Array.isArray(item.serialNumbers) && item.serialNumbers.length > 0) {
+                          itemSerials = item.serialNumbers;
+                        } else if (typeof (item as any).serials === 'string' && (item as any).serials.trim()) {
+                          itemSerials = (item as any).serials.split(',').map((s: string) => s.trim()).filter(Boolean);
+                        } else if (Array.isArray((item as any).serials) && (item as any).serials.length > 0) {
+                          itemSerials = (item as any).serials;
+                        } else if ((item as any).serialNumber && typeof (item as any).serialNumber === 'string') {
+                          itemSerials = [(item as any).serialNumber.trim()];
+                        }
+
+                        return (
+                          <tr key={item.id || idx}>
+                            <td>{idx + 1}</td>
+                            <td>
+                              <div style={{ fontWeight: 700 }}>{item.productName}</div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>SKU: {item.sku}</div>
+                              {itemSerials.length > 0 && (
+                                <div style={{ marginTop: '2px', fontSize: '0.75rem', color: '#008CFF', fontFamily: 'monospace', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <span style={{ background: 'rgba(0, 140, 255, 0.1)', padding: '1px 5px', borderRadius: '3px', fontSize: '0.7rem' }}>S/N:</span>
+                                  <span>{itemSerials.join(', ')}</span>
+                                </div>
+                              )}
+                            </td>
+                            <td style={{ textAlign: 'center' }}>{item.quantity}</td>
+                            <td style={{ textAlign: 'right' }}>৳{Number(item.unitPrice).toLocaleString()}</td>
+                            <td style={{ textAlign: 'right', fontWeight: 700 }}>৳{Number(item.total).toLocaleString()}</td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

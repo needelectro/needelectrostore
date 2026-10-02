@@ -284,11 +284,21 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
               <tbody>
                 {items.length > 0 ? (
                   items.map((item: any, idx: number) => {
-                    const itemSerials = Array.isArray(item.serialNumbers)
-                      ? item.serialNumbers
-                      : typeof item.serialNumbers === 'string'
-                        ? item.serialNumbers.split(',').map((s: string) => s.trim()).filter(Boolean)
-                        : safeArray<string>(item.serials);
+                    let itemSerials: string[] = [];
+                    if (Array.isArray(item.serialNumbers) && item.serialNumbers.length > 0) {
+                      itemSerials = item.serialNumbers;
+                    } else if (typeof item.serialNumbers === 'string' && item.serialNumbers.trim()) {
+                      itemSerials = item.serialNumbers.split(',').map((s: string) => s.trim()).filter(Boolean);
+                    } else if (Array.isArray(item.serials) && item.serials.length > 0) {
+                      itemSerials = item.serials;
+                    } else if (typeof item.serials === 'string' && item.serials.trim()) {
+                      itemSerials = item.serials.split(',').map((s: string) => s.trim()).filter(Boolean);
+                    } else if (item.serialNumber && typeof item.serialNumber === 'string' && item.serialNumber.trim()) {
+                      itemSerials = [item.serialNumber.trim()];
+                    } else if (item.serial && typeof item.serial === 'string' && item.serial.trim()) {
+                      itemSerials = [item.serial.trim()];
+                    }
+
                     const itemPrice = Number(item.unitPrice || item.price || item.rate || 0);
                     const itemQty = Number(item.quantity || item.qty || 1);
                     const itemTotal = Number(item.total || (itemPrice * itemQty) - Number(item.discount || 0));
@@ -302,9 +312,14 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
                           <div style={{ fontSize: '10.5px', color: '#1e293b', marginTop: '1px' }}>
                             SKU: <strong>{item.sku || 'N/A'}</strong> | Category: {item.category || 'General'}
                           </div>
-                          {(item.isSerialized || itemSerials.length > 0) && itemSerials.length > 0 && (
-                            <div style={{ marginTop: '2px', fontSize: '10.5px', color: '#002b5b' }}>
-                              <strong>S/N:</strong> {itemSerials.join(', ')}
+                          {itemSerials.length > 0 && (
+                            <div style={{ marginTop: '3px', fontSize: '10.5px', color: '#002b5b', display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
+                              <span style={{ fontWeight: 800, background: '#e0f2fe', color: '#0369a1', padding: '1px 5px', borderRadius: '3px', fontSize: '9.5px', letterSpacing: '0.03em' }}>
+                                S/N:
+                              </span>
+                              <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0f172a' }}>
+                                {itemSerials.join(', ')}
+                              </span>
                             </div>
                           )}
                         </td>

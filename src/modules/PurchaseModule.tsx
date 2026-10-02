@@ -86,9 +86,8 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
       formattedItems = items.map(item => {
         const prod = products.find(p => p.id === item.productId);
         const serialArr = item.serials ? item.serials.split(',').map(s => s.trim()).filter(Boolean) : [];
-        if (prod?.isSerialized && serialArr.length !== item.quantity) {
-          throw new Error(`Product "${prod.name}" requires exactly ${item.quantity} serial number(s). You entered ${serialArr.length}.`);
-        }
+        // Serial numbers are optional:
+        // If provided, they will be registered; otherwise stock is still received normally.
         return {
           productId: item.productId,
           productName: prod?.name || '',
@@ -379,8 +378,7 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
                           <input
                             type="text"
                             className="form-input"
-                            placeholder={prod?.isSerialized ? "Comma-separated Serials (e.g. SN1, SN2)" : "N/A (Non-serialized)"}
-                            disabled={!prod?.isSerialized}
+                            placeholder={prod?.isSerialized ? "Serials (Optional — e.g. SN1, SN2)" : "Serials (Optional)"}
                             value={row.serials}
                             onChange={e => {
                               const updated = [...items];

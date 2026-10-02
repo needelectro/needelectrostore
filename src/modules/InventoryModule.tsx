@@ -358,7 +358,7 @@ const StockAdjustModal: React.FC<StockAdjustModalProps> = ({ product, onClose, o
 
           {product.isSerialized && (
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Serial Numbers (comma-separated, if applicable)</label>
+              <label className="form-label">Serial Numbers (Optional — comma-separated)</label>
               <input
                 className="form-input"
                 placeholder="e.g. SN123456, SN789012"
@@ -924,7 +924,7 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({ onNavigate }) 
               <input type="number" min="1" className="form-input" value={transferQty} onChange={e => setTransferQty(Number(e.target.value) || 1)} />
             </div>
             <div className="form-group">
-              <label className="form-label">Serial Numbers (comma-separated, if serialized)</label>
+              <label className="form-label">Serial Numbers (Optional — comma-separated, if serialized)</label>
               <input type="text" className="form-input" placeholder="e.g. HP840-78192-BD, HP840-78193-BD" value={transferSerialsInput} onChange={e => setTransferSerialsInput(e.target.value)} />
             </div>
             <button type="submit" className="btn btn-primary btn-lg" style={{ marginTop: '0.5rem' }}>
@@ -959,7 +959,7 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({ onNavigate }) 
               <input type="text" className="form-input" placeholder="e.g. Broken display during shipment or physical audit variance" value={adjustReason} onChange={e => setAdjustReason(e.target.value)} />
             </div>
             <div className="form-group">
-              <label className="form-label">Serial Numbers Involved (if applicable)</label>
+              <label className="form-label">Serial Numbers Involved (Optional — comma-separated)</label>
               <input type="text" className="form-input" placeholder="e.g. HP840-78192-BD" value={adjustSerialsInput} onChange={e => setAdjustSerialsInput(e.target.value)} />
             </div>
             <button type="submit" className="btn btn-warning btn-lg" style={{ marginTop: '0.5rem' }}>

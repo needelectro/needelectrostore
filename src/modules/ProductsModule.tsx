@@ -52,6 +52,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
   const [supplierId, setSupplierId] = useState<string>('');
   const [warrantyMonths, setWarrantyMonths] = useState<number | ''>('');
   const [isSerialized, setIsSerialized] = useState<boolean>(false);
+  const [initialSerialsText, setInitialSerialsText] = useState<string>('');
 
   // Tech Specs
   const [cpu, setCpu] = useState('');
@@ -96,6 +97,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
     setSupplierId('');
     setWarrantyMonths('');
     setIsSerialized(false);
+    setInitialSerialsText('');
     setCpu('');
     setRam('');
     setStorage('');
@@ -185,7 +187,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
         isSerialized,
         status: 'ACTIVE',
         specs
-      });
+      }, initialSerialsText ? initialSerialsText.split(',').map(s => s.trim()).filter(Boolean) : undefined);
     }
 
     if (res?.success) {
@@ -365,6 +367,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
                           setSupplierId(p.supplierId || '');
                           setWarrantyMonths(p.warrantyPeriodMonths || '');
                           setIsSerialized(p.isSerialized || false);
+                          setInitialSerialsText('');
                           if (p.specs && 'processor' in p.specs) {
                             const s = p.specs as LaptopSpecifications;
                             setCpu(s.processor || '');
@@ -648,6 +651,26 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
                     </label>
                   </div>
                 </div>
+
+                {/* Optional Initial Serial Numbers when Serialized */}
+                {isSerialized && (
+                  <div className="form-group" style={{ marginTop: '0.25rem', background: 'rgba(0, 140, 255, 0.05)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px dashed var(--border-color)' }}>
+                    <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>Initial Serial Numbers</span>
+                      <span style={{ fontSize: '0.75rem', color: '#008CFF', fontWeight: 600 }}>Optional</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g. SN1001, SN1002, SN1003 (Optional — comma-separated)"
+                      value={initialSerialsText}
+                      onChange={e => setInitialSerialsText(e.target.value)}
+                    />
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                      Serial numbers are optional. You can enter them now or leave empty and assign later in Purchases or POS.
+                    </div>
+                  </div>
+                )}
 
                 {/* Tech Specs if Laptop */}
                 {category === 'Laptop' && (
