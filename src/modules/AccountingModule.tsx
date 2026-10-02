@@ -6,14 +6,16 @@ import {
   Receipt, BookOpen, Calendar, Printer, Plus, ArrowLeftRight,
   Landmark, ShieldAlert, CheckCircle2, X, Users, Percent,
   Lock, Unlock, ShieldCheck, Sparkles, Clock, FileText,
-  RefreshCw, AlertCircle, ArrowDown, ArrowUp, Info, RotateCcw, Check, CreditCard
+  RefreshCw, AlertCircle, ArrowDown, ArrowUp, Info, RotateCcw, Check, CreditCard,
+  Download
 } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
   ResponsiveContainer, Legend 
 } from 'recharts';
-import { InvestmentType, AccountType } from '../types';
+import { InvestmentType, AccountType, Investment } from '../types';
 import { api } from '../services/api';
+import { InvestmentSuccessModal } from '../components/accounting/InvestmentSuccessModal';
 
 interface AccountingModuleProps {
   onNavigate: (module: string, targetId?: string) => void;
@@ -24,7 +26,8 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
     sales, emiPayments, expenses, suppliers, customers, emiAccounts, 
     products, services, selectedBranch, financialAccounts, investments,
     recordInvestment, transferFunds, recordOtherIncome, recordOwnerWithdrawal,
-    reverseTransaction, addToast, otherIncomes, ownerWithdrawals, ledgerEntries
+    reverseTransaction, addToast, otherIncomes, ownerWithdrawals, ledgerEntries,
+    setActiveInvestmentMemoToPrint, currentUser
   } = useERP();
 
   const [activeTab, setActiveTab] = useState<'pnl' | 'accounts' | 'statements' | 'cash_flow' | 'investments'>('pnl');
@@ -83,12 +86,22 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
 
   // Investment Form State
   const [investorName, setInvestorName] = useState('');
-  const [investAmount, setInvestAmount] = useState<number>(100000);
+  const [investorPhone, setInvestorPhone] = useState('');
+  const [investorEmail, setInvestorEmail] = useState('');
+  const [investorAddress, setInvestorAddress] = useState('');
+  const [investorOrganization, setInvestorOrganization] = useState('');
+  const [investAmount, setInvestAmount] = useState<number>(300000);
   const [investDate, setInvestDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [investType, setInvestType] = useState<InvestmentType>('EQUITY');
   const [targetAccountId, setTargetAccountId] = useState(financialAccounts[0]?.id || '');
+  const [investPaymentMethod, setInvestPaymentMethod] = useState('Cash');
+  const [investPurpose, setInvestPurpose] = useState('Business Capital');
+  const [investDescription, setInvestDescription] = useState('');
   const [investRef, setInvestRef] = useState('');
   const [investNotes, setInvestNotes] = useState('');
+  const [isSubmittingInvest, setIsSubmittingInvest] = useState(false);
+  const [newlyCreatedInvestment, setNewlyCreatedInvestment] = useState<Investment | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Super Admin Investor Management State
   const [adminInvestorData, setAdminInvestorData] = useState<any>(null);
@@ -549,29 +562,52 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
       return;
     }
 
-    const targetAcc = financialAccounts.find(a => a.id === targetAccountId);
-    const paymentMethod = targetAcc?.type === 'CASH' ? 'Cash' : 'Bank Transfer';
+    const targetAcc = financialAccounts.find(a => a.id === targetAccountId) || financialAccounts[0];
+    const resolvedMethod = investPaymentMethod || (targetAcc?.type === 'CASH' ? 'Cash' : 'Bank Transfer');
 
-    const res = await recordInvestment({
-      investorName: investorName.trim(),
-      amount: investAmount,
-      date: investDate || new Date().toISOString().split('T')[0],
-      investmentType: investType,
-      depositAccountId: targetAccountId,
-      paymentMethod,
-      reference: investRef || `INV-${Date.now().toString().slice(-4)}`,
-      status: 'ACTIVE',
-      notes: investNotes
-    });
+    setIsSubmittingInvest(true);
+    try {
+      const res = await recordInvestment({
+        investorName: investorName.trim(),
+        amount: investAmount,
+        date: investDate || new Date().toISOString().split('T')[0],
+        investmentType: investType,
+        depositAccountId: targetAcc?.id || 'acc-1',
+        paymentMethod: resolvedMethod as any,
+        reference: investRef.trim() || undefined,
+        status: 'ACTIVE',
+        notes: investNotes.trim() || undefined,
+        investorPhone: investorPhone.trim() || undefined,
+        investorEmail: investorEmail.trim() || undefined,
+        investorAddress: investorAddress.trim() || undefined,
+        organization: investorOrganization.trim() || undefined,
+        purpose: investPurpose.trim() || undefined,
+        description: investDescription.trim() || undefined,
+      });
 
-    if (res.success) {
-      setShowInvestmentModal(false);
-      setInvestorName('');
-      setInvestAmount(100000);
-      setInvestRef('');
-      setInvestNotes('');
-    } else {
-      alert(`Failed to record investment: ${res.error}`);
+      if (res.success && res.investment) {
+        setShowInvestmentModal(false);
+        setNewlyCreatedInvestment(res.investment);
+        setShowSuccessModal(true);
+
+        // Reset form
+        setInvestorName('');
+        setInvestorPhone('');
+        setInvestorEmail('');
+        setInvestorAddress('');
+        setInvestorOrganization('');
+        setInvestAmount(300000);
+        setInvestPurpose('Business Capital');
+        setInvestDescription('');
+        setInvestRef('');
+        setInvestNotes('');
+      } else {
+        alert(`Failed to record investment: ${res.error || 'Unknown error'}`);
+      }
+    } catch (err: any) {
+      alert(`Error recording investment: ${err.message}`);
+    } finally {
+      setIsSubmittingInvest(false);
     }
   };
 
@@ -1749,13 +1785,13 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
               <table className="erp-table">
                 <thead>
                   <tr>
-                    <th>Ref ID</th>
-                    <th>Investor Name</th>
-                    <th>Type</th>
+                    <th>Investment No</th>
+                    <th>Investor</th>
+                    <th style={{ textAlign: 'right' }}>Amount</th>
                     <th>Date</th>
-                    <th>Target Account</th>
-                    <th style={{ textAlign: 'right' }}>Capital Amount (৳)</th>
-                    <th>Notes</th>
+                    <th>Account</th>
+                    <th>Status</th>
+                    <th style={{ textAlign: 'center' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1763,25 +1799,109 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                     <tr>
                       <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem 1rem', color: 'var(--text-muted)' }}>
                         <div style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.25rem' }}>No investments recorded yet.</div>
-                        <div style={{ fontSize: '0.8rem' }}>Click &quot;Add Capital / Investment&quot; or select an investor from the roster above to record capital with accurate dates and details.</div>
+                        <div style={{ fontSize: '0.8rem' }}>Click &quot;Add Capital / Investment&quot; to deposit capital with automatic A4 Investment Memo generation.</div>
                       </td>
                     </tr>
                   ) : (
                     investments.map(inv => {
                       const acc = financialAccounts.find(a => a.id === inv.depositAccountId);
+                      const isRev = inv.status === 'REVERSED';
+                      const canReverse = (currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN') && !isRev;
+
                       return (
                         <tr key={inv.id}>
-                          <td style={{ fontWeight: 700, color: 'var(--brand-primary)' }}>{inv.reference || inv.id}</td>
-                          <td style={{ fontWeight: 700 }}>{inv.investorName}</td>
+                          <td style={{ fontWeight: 700, fontFamily: 'monospace', color: 'var(--brand-primary)' }}>
+                            {inv.referenceNumber || inv.reference || inv.id}
+                          </td>
                           <td>
-                            <span className="badge badge-warning">{inv.investmentType}</span>
+                            <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{inv.investorName}</div>
+                            {inv.organization && (
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{inv.organization}</div>
+                            )}
                           </td>
-                          <td>{inv.date ? new Date(inv.date).toLocaleDateString() : '—'}</td>
-                          <td>{acc?.name || 'Cash/Bank Account'}</td>
-                          <td style={{ textAlign: 'right', fontWeight: 800, color: '#10b981' }}>
-                            ৳{inv.amount.toLocaleString()}
+                          <td style={{ textAlign: 'right', fontWeight: 800, color: isRev ? '#ef4444' : '#10b981' }}>
+                            BDT {Number(inv.amount).toLocaleString()}
                           </td>
-                          <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{inv.notes || '—'}</td>
+                          <td>
+                            {inv.date ? new Date(inv.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 600 }}>{acc?.name || 'Main Cash'}</div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{inv.paymentMethod || 'Cash'}</div>
+                          </td>
+                          <td>
+                            <span
+                              style={{
+                                display: 'inline-block',
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                textTransform: 'uppercase',
+                                background: isRev ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                                color: isRev ? '#ef4444' : '#10b981',
+                                border: `1px solid ${isRev ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`,
+                              }}
+                            >
+                              {isRev ? 'REVERSED' : 'ACTIVE'}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <div style={{ display: 'inline-flex', gap: '0.35rem', alignItems: 'center' }}>
+                              <button
+                                className="btn btn-outline btn-sm"
+                                onClick={() => setActiveInvestmentMemoToPrint(inv)}
+                                title="View official A4 Investment Memo"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                              >
+                                <FileText size={13} />
+                                View Memo
+                              </button>
+
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => {
+                                  setActiveInvestmentMemoToPrint(inv);
+                                  setTimeout(() => window.print(), 300);
+                                }}
+                                title="Print A4 Investment Memo"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                              >
+                                <Printer size={13} />
+                                Print
+                              </button>
+
+                              <button
+                                className="btn btn-success btn-sm"
+                                onClick={() => setActiveInvestmentMemoToPrint(inv)}
+                                title="Download official A4 PDF"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                              >
+                                <Download size={13} />
+                                PDF
+                              </button>
+
+                              {canReverse && (
+                                <button
+                                  className="btn btn-ghost btn-sm"
+                                  onClick={() => {
+                                    setItemToReverse({
+                                      referenceNumber: inv.referenceNumber || inv.reference,
+                                      referenceType: 'INVESTMENT',
+                                      description: `Capital Investment by ${inv.investorName}`,
+                                      debit: inv.amount,
+                                      credit: 0,
+                                    });
+                                    setShowReversalModal(true);
+                                  }}
+                                  title="Reverse investment transaction (Super Admin)"
+                                  style={{ color: '#ef4444', padding: '0.25rem 0.45rem', fontSize: '0.75rem' }}
+                                >
+                                  <RotateCcw size={13} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
                         </tr>
                       );
                     })
@@ -1900,9 +2020,9 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
       {/* MODAL: ADD CAPITAL / INVESTMENT */}
       {showInvestmentModal && (
         <div className="modal-overlay" style={{ zIndex: 10000 }}>
-          <div className="modal-content modal-content-md">
+          <div className="modal-content modal-content-lg" style={{ maxWidth: '640px' }}>
             <div className="modal-header">
-              <div className="modal-title">
+              <div className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Plus size={20} color="var(--brand-primary)" />
                 Record Capital / Investment Addition
               </div>
@@ -1912,37 +2032,72 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
             </div>
 
             <form onSubmit={handleInvestmentSubmit}>
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', maxHeight: '72vh', overflowY: 'auto' }}>
+                <div style={{ background: 'rgba(59, 130, 246, 0.08)', padding: '0.75rem', borderRadius: '6px', border: '1px solid rgba(59, 130, 246, 0.2)', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  💎 Capital investments automatically credit the target cash/bank account and post to the Central Account Ledger. A certified <strong>A4 Investment Memo</strong> is immediately generated upon saving.
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.75rem' }}>
+                  <div>
+                    <label className="form-label">Investor / Partner Name *</label>
+                    <input 
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Amdadur Rahman"
+                      value={investorName}
+                      onChange={e => setInvestorName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label">Phone Number</label>
+                    <input 
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. 01733-983752"
+                      value={investorPhone}
+                      onChange={e => setInvestorPhone(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div>
+                    <label className="form-label">Email Address</label>
+                    <input 
+                      type="email"
+                      className="form-control"
+                      placeholder="e.g. investor@example.com"
+                      value={investorEmail}
+                      onChange={e => setInvestorEmail(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label">Organization / Entity</label>
+                    <input 
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Need Electro Capital"
+                      value={investorOrganization}
+                      onChange={e => setInvestorOrganization(e.target.value)}
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="form-label">Investor / Partner Name</label>
+                  <label className="form-label">Investor Address</label>
                   <input 
                     type="text"
                     className="form-control"
-                    placeholder="e.g. Amdadur Rahman (Founder)"
-                    value={investorName}
-                    onChange={e => setInvestorName(e.target.value)}
-                    required
+                    placeholder="e.g. Kusumbag, Moulvibazar, Sylhet, Bangladesh"
+                    value={investorAddress}
+                    onChange={e => setInvestorAddress(e.target.value)}
                   />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <div>
-                    <label className="form-label">Investment Type</label>
-                    <select 
-                      className="form-control"
-                      value={investType}
-                      onChange={e => setInvestType(e.target.value as InvestmentType)}
-                    >
-                      <option value="EQUITY">Equity (Owner Capital)</option>
-                      <option value="SEED_FUNDING">Seed Funding (Startup Capital)</option>
-                      <option value="LOAN">Director Loan</option>
-                      <option value="PARTNER">Partner Contribution</option>
-                      <option value="RETAINED_EARNING">Retained Earning</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="form-label">Capital Amount (৳)</label>
+                    <label className="form-label">Capital Amount (৳) *</label>
                     <input 
                       type="number"
                       className="form-control"
@@ -1952,9 +2107,24 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                       required
                     />
                   </div>
+
+                  <div>
+                    <label className="form-label">Investment Type</label>
+                    <select 
+                      className="form-control"
+                      value={investType}
+                      onChange={e => setInvestType(e.target.value as InvestmentType)}
+                    >
+                      <option value="EQUITY">Equity (Owner Capital)</option>
+                      <option value="SEED_FUNDING">Seed Funding (Startup Capital)</option>
+                      <option value="DIRECTOR_LOAN">Director Loan</option>
+                      <option value="WORKING_CAPITAL">Working Capital</option>
+                      <option value="OTHER">Other Investment</option>
+                    </select>
+                  </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.75rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <div>
                     <label className="form-label">Investment Date *</label>
                     <input 
@@ -1966,6 +2136,23 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                     />
                   </div>
 
+                  <div>
+                    <label className="form-label">Payment Method *</label>
+                    <select
+                      className="form-control"
+                      value={investPaymentMethod}
+                      onChange={e => setInvestPaymentMethod(e.target.value)}
+                    >
+                      <option value="Cash">Cash</option>
+                      <option value="Bank Transfer">Bank Transfer</option>
+                      <option value="bKash">bKash Business</option>
+                      <option value="Nagad">Nagad</option>
+                      <option value="Cheque">Cheque</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.75rem' }}>
                   <div>
                     <label className="form-label">Deposit Target Account *</label>
                     <select 
@@ -1985,25 +2172,49 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                       )}
                     </select>
                   </div>
+
+                  <div>
+                    <label className="form-label">External Reference (Optional)</label>
+                    <input 
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. CHQ-883921 / SLIP-102"
+                      value={investRef}
+                      onChange={e => setInvestRef(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div>
+                    <label className="form-label">Purpose</label>
+                    <input 
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Business Capital / Bulk Procurement"
+                      value={investPurpose}
+                      onChange={e => setInvestPurpose(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Description</label>
+                    <input 
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Working capital injection"
+                      value={investDescription}
+                      onChange={e => setInvestDescription(e.target.value)}
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <label className="form-label">Reference Number (Optional)</label>
+                  <label className="form-label">Notes / Terms</label>
                   <input 
                     type="text"
                     className="form-control"
-                    placeholder="e.g. CHQ-883921"
-                    value={investRef}
-                    onChange={e => setInvestRef(e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <label className="form-label">Notes</label>
-                  <input 
-                    type="text"
-                    className="form-control"
-                    placeholder="e.g. Working capital injection for laptop bulk procurement"
+                    placeholder="e.g. Special terms or agreements"
                     value={investNotes}
                     onChange={e => setInvestNotes(e.target.value)}
                   />
@@ -2014,13 +2225,37 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
                 <button type="button" className="btn btn-secondary" onClick={() => setShowInvestmentModal(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-warning">
-                  Deposit Capital
+                <button type="submit" className="btn btn-warning" disabled={isSubmittingInvest}>
+                  {isSubmittingInvest ? 'Recording Capital...' : 'Deposit Capital & Generate Memo'}
                 </button>
               </div>
             </form>
           </div>
         </div>
+      )}
+
+      {/* SUCCESS MODAL: INVESTMENT ADDED & MEMO READY */}
+      {showSuccessModal && newlyCreatedInvestment && (
+        <InvestmentSuccessModal
+          investment={newlyCreatedInvestment}
+          onViewMemo={() => {
+            setActiveInvestmentMemoToPrint(newlyCreatedInvestment);
+            setShowSuccessModal(false);
+          }}
+          onPrintMemo={() => {
+            setActiveInvestmentMemoToPrint(newlyCreatedInvestment);
+            setShowSuccessModal(false);
+            setTimeout(() => window.print(), 350);
+          }}
+          onDownloadPDF={() => {
+            setActiveInvestmentMemoToPrint(newlyCreatedInvestment);
+            setShowSuccessModal(false);
+          }}
+          onClose={() => {
+            setShowSuccessModal(false);
+            setNewlyCreatedInvestment(null);
+          }}
+        />
       )}
 
       {/* MODAL: CREATE INVESTOR ACCOUNT */}

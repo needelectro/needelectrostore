@@ -8,6 +8,7 @@ import { A4InvoicePrint } from './components/print/A4InvoicePrint';
 import { ThermalReceiptPrint } from './components/print/ThermalReceiptPrint';
 import { EMIAgreementPrint } from './components/print/EMIAgreementPrint';
 import { BarcodeLabelPrint } from './components/print/BarcodeLabelPrint';
+import { InvestmentMemoPrint } from './components/print/InvestmentMemoPrint';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { LockScreenModal } from './components/auth/LockScreenModal';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
@@ -57,6 +58,7 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
     activeThermalReceiptToPrint, setActiveThermalReceiptToPrint,
     activeEmiAgreementToPrint, setActiveEmiAgreementToPrint,
     activeBarcodeToPrint, setActiveBarcodeToPrint,
+    activeInvestmentMemoToPrint, setActiveInvestmentMemoToPrint,
     isAuthenticated, isAuthInitializing, isLocked, currentUser, hasPermission, setupStatus
   } = useERP();
 
@@ -634,6 +636,17 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
           serials={activeBarcodeToPrint.serials}
           settings={settings}
           onClose={() => setActiveBarcodeToPrint(null)}
+        />
+      </ErrorBoundary>
+    )}
+
+    {/* Investment Memo Print & PDF Overlay */}
+    {activeInvestmentMemoToPrint && (
+      <ErrorBoundary onReset={() => setActiveInvestmentMemoToPrint(null)}>
+        <InvestmentMemoPrint
+          investment={activeInvestmentMemoToPrint}
+          settings={settings}
+          onClose={() => setActiveInvestmentMemoToPrint(null)}
         />
       </ErrorBoundary>
     )}

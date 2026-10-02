@@ -11,8 +11,9 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
   CartesianGrid, Tooltip, Legend 
 } from 'recharts';
-import { CashSummary, CashMovementRecord, PaymentMethod, CashAdjustmentReason } from '../types';
+import { CashSummary, CashMovementRecord, PaymentMethod, CashAdjustmentReason, Investment } from '../types';
 import { api } from '../services/api';
+import { InvestmentSuccessModal } from '../components/accounting/InvestmentSuccessModal';
 
 interface CashManagementModuleProps {
   onNavigate: (module: string, targetId?: string) => void;
@@ -22,7 +23,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
   const { 
     currentUser, financialAccounts, customers, recordCashAdjustment,
     collectCustomerDue, addToast, settings, selectedBranch, recordInvestment,
-    transferFunds, createExpense
+    transferFunds, createExpense, setActiveInvestmentMemoToPrint
   } = useERP();
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN';
@@ -97,7 +98,12 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
   const [investorEmail, setInvestorEmail] = useState('');
   const [investorNid, setInvestorNid] = useState('');
   const [investorAddress, setInvestorAddress] = useState('');
+  const [investOrganization, setInvestOrganization] = useState('');
+  const [investPurpose, setInvestPurpose] = useState('Business Capital');
+  const [investDescription, setInvestDescription] = useState('');
   const [sharePercentage, setSharePercentage] = useState<string>('');
+  const [cashInvestCreated, setCashInvestCreated] = useState<Investment | null>(null);
+  const [showCashInvestSuccessModal, setShowCashInvestSuccessModal] = useState(false);
   const [isSubmittingInv, setIsSubmittingInv] = useState(false);
 
   // Adjustment Form State
@@ -496,16 +502,25 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
         investorEmail: investorEmail.trim() || undefined,
         investorNid: investorNid.trim() || undefined,
         investorAddress: investorAddress.trim() || undefined,
+        organization: investOrganization.trim() || undefined,
+        purpose: investPurpose.trim() || undefined,
+        description: investDescription.trim() || undefined,
         sharePercentage: sharePercentage ? Number(sharePercentage) : undefined,
       });
 
-      if (res.success) {
+      if (res.success && res.investment) {
         setShowInvestmentModal(false);
+        setCashInvestCreated(res.investment);
+        setShowCashInvestSuccessModal(true);
+
         setInvestorName('');
         setInvestorPhone('');
         setInvestorEmail('');
         setInvestorNid('');
         setInvestorAddress('');
+        setInvestOrganization('');
+        setInvestPurpose('Business Capital');
+        setInvestDescription('');
         setSharePercentage('');
         setInvAmount(50000);
         setInvReference('');
@@ -2412,6 +2427,39 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                       step="any"
                     />
                   </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Organization / Company</label>
+                    <input 
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Needle Capital / Amdad Group"
+                      value={investOrganization}
+                      onChange={e => setInvestOrganization(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Investment Purpose</label>
+                    <input 
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Business Capital / Bulk Procurement"
+                      value={investPurpose}
+                      onChange={e => setInvestPurpose(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Investment Description</label>
+                    <input 
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Capital injection for hardware expansion"
+                      value={investDescription}
+                      onChange={e => setInvestDescription(e.target.value)}
+                    />
+                  </div>
                 </div>
 
                 <div className="form-group" style={{ marginTop: '0.85rem' }}>
@@ -2479,6 +2527,30 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
             </form>
           </div>
         </div>
+      )}
+
+      {/* SUCCESS MODAL: INVESTMENT ADDED & MEMO READY */}
+      {showCashInvestSuccessModal && cashInvestCreated && (
+        <InvestmentSuccessModal
+          investment={cashInvestCreated}
+          onViewMemo={() => {
+            setActiveInvestmentMemoToPrint(cashInvestCreated);
+            setShowCashInvestSuccessModal(false);
+          }}
+          onPrintMemo={() => {
+            setActiveInvestmentMemoToPrint(cashInvestCreated);
+            setShowCashInvestSuccessModal(false);
+            setTimeout(() => window.print(), 350);
+          }}
+          onDownloadPDF={() => {
+            setActiveInvestmentMemoToPrint(cashInvestCreated);
+            setShowCashInvestSuccessModal(false);
+          }}
+          onClose={() => {
+            setShowCashInvestSuccessModal(false);
+            setCashInvestCreated(null);
+          }}
+        />
       )}
 
       {/* -------------------------------------------------------------

@@ -278,6 +278,7 @@
 
   /* Completely eliminate background ERP application from print whenever any print modal is active */
   body.is-printing-invoice .app-container,
+  body.is-printing-memo .app-container,
   body.is-printing-thermal .app-container,
   body.is-printing-emi .app-container,
   body.is-printing-barcode .app-container,
