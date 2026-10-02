@@ -14,7 +14,6 @@ const PERMANENT_REDIRECTS: Record<string, string> = {
   '/electrical': '/electrical-products',
   '/electrician': '/services/electrician',
   '/electricians': '/services/electrician',
-  '/emi': '/laptop-emi',
   '/installments': '/laptop-emi',
   '/moulvibazar-laptop': '/moulvibazar',
   '/moulvibazar-computer': '/moulvibazar',
