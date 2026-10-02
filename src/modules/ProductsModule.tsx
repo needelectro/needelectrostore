@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useERP } from '../services/erpStore';
 import { Product, ProductCategory, LaptopSpecifications } from '../types';
+import { isProductInCategory, SHOWROOM_CATEGORIES } from '../services/categoryMatcher';
 import { 
   PackageSearch, Plus, Search, Edit2, Laptop, 
   Tag, Layers, Hash, Check, X, ShieldAlert, Trash2 
@@ -69,7 +70,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
   ];
 
   const filteredProducts = products.filter(p => {
-    const matchesCat = categoryFilter === 'ALL' || p.category === categoryFilter;
+    const matchesCat = isProductInCategory(p, categoryFilter);
     const matchesSup = supplierFilter === 'ALL' || p.supplierId === supplierFilter;
     const q = searchQuery.toLowerCase();
     const sup = suppliers.find(s => s.id === p.supplierId);
@@ -248,16 +249,42 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
             </select>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.4rem', overflowX: 'auto' }}>
-            {['ALL', 'Laptop', 'CCTV', 'Router', 'Electrical Products', 'Cables'].map(c => (
-              <button
-                key={c}
-                className={`btn btn-sm ${categoryFilter === c ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => setCategoryFilter(c)}
-              >
-                {c}
-              </button>
-            ))}
+          <div style={{ display: 'flex', gap: '0.4rem', overflowX: 'auto', paddingBottom: '4px' }}>
+            {['ALL', ...SHOWROOM_CATEGORIES].map(c => {
+              const count = c === 'ALL'
+                ? products.length
+                : products.filter(p => isProductInCategory(p, c)).length;
+
+              return (
+                <button
+                  key={c}
+                  className={`btn btn-sm ${categoryFilter === c ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setCategoryFilter(c)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    whiteSpace: 'nowrap',
+                    fontWeight: categoryFilter === c ? 700 : 500
+                  }}
+                >
+                  <span>{c}</span>
+                  {count > 0 && (
+                    <span
+                      style={{
+                        fontSize: '0.7rem',
+                        padding: '1px 5px',
+                        borderRadius: '999px',
+                        background: categoryFilter === c ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.08)',
+                        fontWeight: 700
+                      }}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 

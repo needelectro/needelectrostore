@@ -41,7 +41,7 @@ import { ControlCenterModule } from './modules/ControlCenterModule';
 import { InitialSetupModal } from './components/auth/InitialSetupModal';
 import { LandingPage } from './components/landing/LandingPage';
 import { InvestorPortal } from './components/investor/InvestorPortal';
-import { parseRoute, navigateTo, navigateToUrl } from './services/router';
+import { parseRoute, navigateTo, navigateToUrl, getSavedActiveRoute, saveActiveRoute } from './services/router';
 
 interface AppProps {
   initialMode?: 'landing' | 'admin';
@@ -62,14 +62,26 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
 
   const [activeModule, setActiveModule] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      return parseRoute(window.location.pathname, window.location.search).module;
+      const parsed = parseRoute(window.location.pathname, window.location.search);
+      if (parsed.module && parsed.module !== 'dashboard' && !parsed.isLanding) {
+        return parsed.module;
+      }
+      const saved = getSavedActiveRoute();
+      if (saved?.module) {
+        return saved.module;
+      }
+      return parsed.module || 'dashboard';
     }
     return 'dashboard';
   });
 
   const [moduleInitialParam, setModuleInitialParam] = useState<string | undefined>(() => {
     if (typeof window !== 'undefined') {
-      return parseRoute(window.location.pathname, window.location.search).param;
+      const parsed = parseRoute(window.location.pathname, window.location.search);
+      if (parsed.param) return parsed.param;
+      const saved = getSavedActiveRoute();
+      if (saved?.param) return saved.param;
+      return undefined;
     }
     return undefined;
   });
@@ -79,7 +91,8 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
     if (initialMode === 'admin') return false;
     if (typeof window !== 'undefined') {
       const parsed = parseRoute(window.location.pathname, window.location.search);
-      if (parsed.isProtected || parsed.isLogin || window.location.pathname.startsWith('/admin')) {
+      const saved = getSavedActiveRoute();
+      if (parsed.isProtected || parsed.isLogin || window.location.pathname.startsWith('/admin') || (saved && saved.module && saved.module !== 'dashboard')) {
         return false;
       }
       const urlParams = new URLSearchParams(window.location.search);
@@ -96,6 +109,21 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
 
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+
+  // Sync active module and URL when authenticated so refresh always lands on exact same page
+  useEffect(() => {
+    if (isAuthenticated && typeof window !== 'undefined' && !showLanding) {
+      const parsed = parseRoute(window.location.pathname, window.location.search);
+      if (parsed.isLanding || window.location.pathname === '/admin') {
+        const saved = getSavedActiveRoute();
+        const targetModule = saved?.module || activeModule || 'dashboard';
+        const targetParam = saved?.param || moduleInitialParam;
+        navigateTo(targetModule, targetParam, true);
+      } else {
+        saveActiveRoute(activeModule, moduleInitialParam);
+      }
+    }
+  }, [isAuthenticated, showLanding, activeModule, moduleInitialParam]);
 
   // Handle browser Back / Forward history navigation
   useEffect(() => {

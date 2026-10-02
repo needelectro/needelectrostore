@@ -7,12 +7,13 @@ import {
   Save, RefreshCw, Settings
 } from 'lucide-react';
 import { api } from '../services/api';
+import { isProductInCategory, SHOWROOM_CATEGORIES } from '../services/categoryMatcher';
 
 interface InventoryModuleProps {
   onNavigate: (module: string, targetId?: string) => void;
 }
 
-const CATEGORIES = ['Laptop', 'Desktop', 'CCTV', 'Router', 'Electrical Products', 'Cables', 'Chargers', 'Accessories', 'Services', 'Others'];
+const CATEGORIES = SHOWROOM_CATEGORIES;
 
 // ─── Edit Product Modal ────────────────────────────────────────────────────────
 interface EditProductModalProps {
@@ -420,9 +421,10 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({ onNavigate }) 
   const availableSerialsCount = serials.filter((s: ProductSerial) => s.status === 'AVAILABLE').length;
 
   const filteredProducts = products.filter((p: Product) => {
-    const matchesCat = categoryFilter === 'ALL' || p.category === categoryFilter;
+    const matchesCat = isProductInCategory(p, categoryFilter);
     const matchesQuery = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.sku.toLowerCase().includes(searchQuery.toLowerCase());
+      p.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.brand && p.brand.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCat && matchesQuery;
   });
 
@@ -580,16 +582,42 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({ onNavigate }) 
                 onChange={e => setSearchQuery(e.target.value)}
               />
             </div>
-            <div style={{ display: 'flex', gap: '0.4rem', overflowX: 'auto' }}>
-              {categories.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setCategoryFilter(cat)}
-                  className={`btn btn-sm ${categoryFilter === cat ? 'btn-primary' : 'btn-secondary'}`}
-                >
-                  {cat}
-                </button>
-              ))}
+            <div style={{ display: 'flex', gap: '0.4rem', overflowX: 'auto', paddingBottom: '4px' }}>
+              {categories.map(cat => {
+                const count = cat === 'ALL'
+                  ? products.length
+                  : products.filter(p => isProductInCategory(p, cat)).length;
+
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setCategoryFilter(cat)}
+                    className={`btn btn-sm ${categoryFilter === cat ? 'btn-primary' : 'btn-secondary'}`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      whiteSpace: 'nowrap',
+                      fontWeight: categoryFilter === cat ? 700 : 500
+                    }}
+                  >
+                    <span>{cat}</span>
+                    {count > 0 && (
+                      <span
+                        style={{
+                          fontSize: '0.7rem',
+                          padding: '1px 5px',
+                          borderRadius: '999px',
+                          background: categoryFilter === cat ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.08)',
+                          fontWeight: 700
+                        }}
+                      >
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

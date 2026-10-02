@@ -28,6 +28,7 @@ import {
 import { getStoredData, setStoredData, clearAllStoredData, exportAllDataJSON, importAllDataJSON } from './storage';
 import { hashPassword, verifyPassword } from './authCrypto';
 import { api, getSessionToken, setSessionToken, clearSessionToken } from './api';
+import { clearSavedActiveRoute } from './router';
 
 export interface ToastMessage {
   id: string;
@@ -654,6 +655,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const logout = () => {
     api.auth.logout().catch(() => {});
     clearSessionToken();
+    clearSavedActiveRoute();
     logAction('SETTINGS', 'LOGOUT', currentUser.id, `User ${currentUser.name} signed out.`);
     setAuthSession({ isAuthenticated: false, userId: '', isLocked: false });
     addToast('info', 'Signed Out', 'You have been logged out of NEED ELECTRO ERP.');

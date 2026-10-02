@@ -7,27 +7,9 @@ import {
   INITIAL_AUDIT_LOGS, INITIAL_INVENTORY_TRANSACTIONS
 } from './mockData';
 
-// Factory Reset Storage Engine
+// Factory Reset Storage Engine Prefix
 const STORAGE_PREFIX = 'NEED_ELECTRO_FACTORY_V8_';
 
-// Auto-purge any legacy cached business data from users' browser localStorage
-if (typeof window !== 'undefined' && window.localStorage) {
-  try {
-    const keysToRemove: string[] = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && !key.startsWith(STORAGE_PREFIX)) {
-        keysToRemove.push(key);
-      }
-    }
-    keysToRemove.forEach(k => localStorage.removeItem(k));
-    if (window.sessionStorage) {
-      sessionStorage.clear();
-    }
-  } catch (e) {
-    console.warn('LocalStorage factory reset notice:', e);
-  }
-}
 
 export function getStoredData<T>(key: string, defaultValue: T): T {
   try {

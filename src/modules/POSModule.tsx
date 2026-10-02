@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useERP } from '../services/erpStore';
 import { Sale, Product, ProductCategory, Customer, SaleItem, PaymentMethod, PaymentBreakdown } from '../types';
+import { isProductInCategory, SHOWROOM_CATEGORIES } from '../services/categoryMatcher';
 import { 
   ShoppingCart, Search, Plus, Trash2, CreditCard, 
   Printer, UserPlus, Hash, Percent, Tag, Check, X, 
@@ -77,11 +78,11 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
   }, [serials]);
 
   // Categories list
-  const categories = ['ALL', 'Laptop', 'Desktop', 'CCTV', 'Router', 'Electrical Products', 'Cables', 'Chargers', 'Accessories'];
+  const categories = ['ALL', ...SHOWROOM_CATEGORIES];
 
   // Filtered Products
   const filteredProducts = products.filter(p => {
-    const matchesCat = selectedCategory === 'ALL' || p.category.toLowerCase().includes(selectedCategory.toLowerCase());
+    const matchesCat = isProductInCategory(p, selectedCategory);
     const matchesQuery = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          p.sku.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          p.brand.toLowerCase().includes(searchQuery.toLowerCase());
@@ -380,26 +381,48 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
 
           {/* Category Filter Pills */}
           <div style={{ display: 'flex', gap: '0.4rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                style={{
-                  padding: '0.35rem 0.75rem',
-                  fontSize: '0.75rem',
-                  fontWeight: '600',
-                  borderRadius: 'var(--radius-full)',
-                  border: '1px solid var(--border-color)',
-                  background: selectedCategory === cat ? 'var(--brand-primary)' : 'var(--bg-card-muted)',
-                  color: selectedCategory === cat ? '#ffffff' : 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all var(--transition-fast)'
-                }}
-              >
-                {cat}
-              </button>
-            ))}
+            {categories.map(cat => {
+              const count = cat === 'ALL'
+                ? products.filter(p => p.status === 'ACTIVE').length
+                : products.filter(p => p.status === 'ACTIVE' && isProductInCategory(p, cat)).length;
+
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  style={{
+                    padding: '0.35rem 0.75rem',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    borderRadius: 'var(--radius-full)',
+                    border: '1px solid var(--border-color)',
+                    background: selectedCategory === cat ? 'var(--brand-primary)' : 'var(--bg-card-muted)',
+                    color: selectedCategory === cat ? '#ffffff' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all var(--transition-fast)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}
+                >
+                  <span>{cat}</span>
+                  {count > 0 && (
+                    <span
+                      style={{
+                        fontSize: '0.68rem',
+                        padding: '1px 5px',
+                        borderRadius: '999px',
+                        background: selectedCategory === cat ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.08)',
+                        fontWeight: 700
+                      }}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Products Grid */}

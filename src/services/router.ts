@@ -620,10 +620,56 @@ export function parseRoute(pathname: string = '', search: string = ''): ParsedRo
   };
 }
 
+const STORAGE_LAST_MODULE = 'NEED_ELECTRO_LAST_ACTIVE_MODULE_V1';
+const STORAGE_LAST_PARAM = 'NEED_ELECTRO_LAST_ACTIVE_PARAM_V1';
+const STORAGE_LAST_URL = 'NEED_ELECTRO_LAST_ACTIVE_URL_V1';
+
+// Save currently active route to localStorage so refresh ALWAYS returns to the exact same page
+export function saveActiveRoute(module: string, param?: string, url?: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const targetUrl = url || getModuleUrl(module, param);
+    localStorage.setItem(STORAGE_LAST_MODULE, module);
+    if (param) {
+      localStorage.setItem(STORAGE_LAST_PARAM, param);
+    } else {
+      localStorage.removeItem(STORAGE_LAST_PARAM);
+    }
+    localStorage.setItem(STORAGE_LAST_URL, targetUrl);
+  } catch (e) {
+    // ignore local storage errors
+  }
+}
+
+// Retrieve last saved active route
+export function getSavedActiveRoute(): { module: string; param?: string; url: string } | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const module = localStorage.getItem(STORAGE_LAST_MODULE);
+    if (!module) return null;
+    const param = localStorage.getItem(STORAGE_LAST_PARAM) || undefined;
+    const url = localStorage.getItem(STORAGE_LAST_URL) || getModuleUrl(module, param);
+    return { module, param, url };
+  } catch (e) {
+    return null;
+  }
+}
+
+// Clear saved active route on explicit user sign-out
+export function clearSavedActiveRoute(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(STORAGE_LAST_MODULE);
+    localStorage.removeItem(STORAGE_LAST_PARAM);
+    localStorage.removeItem(STORAGE_LAST_URL);
+  } catch (e) {}
+}
+
 // Push route to browser history and update URL bar without reload
 export function navigateTo(module: string, param?: string, replace = false): void {
   if (typeof window === 'undefined') return;
   const targetUrl = getModuleUrl(module, param);
+  saveActiveRoute(module, param, targetUrl);
   const currentUrl = window.location.pathname;
   if (currentUrl !== targetUrl) {
     if (replace) {
@@ -637,6 +683,8 @@ export function navigateTo(module: string, param?: string, replace = false): voi
 // Push raw URL to browser history
 export function navigateToUrl(url: string, replace = false): void {
   if (typeof window === 'undefined') return;
+  const parsed = parseRoute(url);
+  saveActiveRoute(parsed.module, parsed.param, url);
   const currentUrl = window.location.pathname + window.location.search;
   if (currentUrl !== url) {
     if (replace) {
@@ -646,3 +694,4 @@ export function navigateToUrl(url: string, replace = false): void {
     }
   }
 }
+
