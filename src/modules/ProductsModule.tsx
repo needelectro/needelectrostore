@@ -434,7 +434,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
       {/* CREATE / EDIT PRODUCT MODAL */}
       {showAddModal && (
         <div className="modal-overlay" style={{ zIndex: 10000 }}>
-          <div className="modal-content modal-content-xl" style={{ maxHeight: '92vh' }}>
+          <div className="modal-content modal-content-xl" style={{ maxHeight: '92vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <div className="modal-header">
               <div className="modal-title">
                 <PackageSearch size={20} color="var(--brand-primary)" />
@@ -445,7 +445,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
               </button>
             </div>
 
-            <form onSubmit={handleSaveProduct}>
+            <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem' }}>
                   <div className="form-group">
