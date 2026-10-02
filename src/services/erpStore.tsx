@@ -2691,6 +2691,8 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         collectCustomerDue,
         recordCashAdjustment,
         recordInvestment,
+        updateInvestment,
+        deleteInvestment,
         transferFunds,
         recordOtherIncome,
         recordOwnerWithdrawal,
