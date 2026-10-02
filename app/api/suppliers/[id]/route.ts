@@ -28,6 +28,9 @@ export async function PUT(
         data: {
           ...(body.name && { name: body.name }),
           ...(body.company && { company: body.company }),
+          ...(body.code !== undefined && { code: body.code }),
+          ...(body.representative !== undefined && { representative: body.representative }),
+          ...(body.contactBy !== undefined && { contactBy: body.contactBy }),
           ...(body.phone !== undefined && { phone: body.phone }),
           ...(body.email !== undefined && { email: body.email }),
           ...(body.address !== undefined && { address: body.address }),

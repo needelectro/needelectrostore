@@ -257,6 +257,7 @@ export interface Supplier {
   createdAt?: string;
   code?: string;
   representative?: string;
+  contactBy?: string;
 }
 
 export interface PurchaseItem {

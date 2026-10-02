@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: 'Access denied' }, { status: 403 });
   }
 
-  const { name, company, phone, email, address, category, openingBalance } = await req.json();
+  const { name, company, phone, email, address, category, openingBalance, code, representative, contactBy } = await req.json();
 
   if (!name || !company) {
     return NextResponse.json({ success: false, error: 'Name and Company are required' }, { status: 400 });
@@ -34,6 +34,9 @@ export async function POST(req: NextRequest) {
       id: 'sup-' + Date.now(),
       name,
       company,
+      code,
+      representative,
+      contactBy,
       phone,
       email,
       address,

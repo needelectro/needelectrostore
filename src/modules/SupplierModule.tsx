@@ -17,41 +17,53 @@ export const SupplierModule: React.FC<SupplierModuleProps> = ({ onNavigate }) =>
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
 
   // Form
-  const [name, setName] = useState('');
   const [company, setCompany] = useState('');
+  const [code, setCode] = useState('');
+  const [representative, setRepresentative] = useState('');
+  const [contactBy, setContactBy] = useState('Amdadur');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
-  const [category, setCategory] = useState('Laptops & Computer Components');
+  const [category, setCategory] = useState('Laptop');
 
   const filteredSuppliers = suppliers.filter(s =>
-    s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.phone.includes(searchQuery)
+    (s.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (s.company || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (s.code || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (s.representative || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (s.category || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (s.contactBy || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (s.phone || '').includes(searchQuery)
   );
 
   const totalPayables = suppliers.reduce((sum, s) => sum + s.currentPayable, 0);
 
   const handleSaveSupplier = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !company.trim()) {
-      alert('Supplier Name and Company are required.');
+    if (!company.trim()) {
+      alert('Company Name is required.');
       return;
     }
 
+    const rep = representative.trim() || 'Unknown';
     createSupplier({
-      name: name.trim(),
+      name: rep,
       company: company.trim(),
+      code: code.trim().toUpperCase(),
+      representative: rep,
+      contactBy: contactBy.trim() || 'Amdadur',
       phone: phone.trim(),
-      email: email.trim(),
+      email: email.trim() || (code.trim() ? `${code.trim().toLowerCase()}@needelectro.com` : ''),
       address: address.trim() || 'Dhaka, Bangladesh',
       category,
       openingBalance: 0
     });
 
     setShowAddModal(false);
-    setName('');
     setCompany('');
+    setCode('');
+    setRepresentative('');
+    setContactBy('Amdadur');
     setPhone('');
     setEmail('');
     setAddress('');
@@ -63,8 +75,11 @@ export const SupplierModule: React.FC<SupplierModuleProps> = ({ onNavigate }) =>
     setIsSaving(true);
     try {
       const res = await updateSupplier(editingSupplier.id, {
-        name: editForm.name,
+        name: editForm.representative || editForm.name,
         company: editForm.company,
+        code: editForm.code,
+        representative: editForm.representative || editForm.name,
+        contactBy: editForm.contactBy,
         phone: editForm.phone,
         email: editForm.email,
         address: editForm.address,
@@ -146,16 +161,30 @@ export const SupplierModule: React.FC<SupplierModuleProps> = ({ onNavigate }) =>
               {filteredSuppliers.map(s => (
                 <tr key={s.id}>
                   <td>
-                    <div style={{ fontWeight: '700', fontSize: '0.9rem' }}>{s.company}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Registered Partner</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <div style={{ fontWeight: '700', fontSize: '0.9rem' }}>{s.company || s.name}</div>
+                      {s.code && (
+                        <span className="badge badge-primary" style={{ fontSize: '0.65rem', padding: '0.1rem 0.4rem', fontWeight: 'bold' }}>
+                          {s.code}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Registered Wholesale Partner</div>
                   </td>
-                  <td style={{ fontWeight: '600' }}>{s.name}</td>
+                  <td>
+                    <div style={{ fontWeight: '600' }}>{s.representative || s.name}</div>
+                    {s.contactBy && (
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>
+                        Contact by: <span style={{ color: 'var(--text-primary)', fontWeight: '500' }}>{s.contactBy}</span>
+                      </div>
+                    )}
+                  </td>
                   <td><span className="badge badge-neutral">{s.category}</span></td>
                   <td style={{ fontSize: '0.8rem' }}>
-                    <div>{s.phone}</div>
-                    <div style={{ color: 'var(--text-muted)' }}>{s.email}</div>
+                    <div style={{ fontWeight: '600' }}>{s.phone}</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{s.email}</div>
                   </td>
-                  <td style={{ fontSize: '0.8rem' }}>{s.address}</td>
+                  <td style={{ fontSize: '0.8rem', maxWidth: '240px' }}>{s.address}</td>
                   <td style={{ textAlign: 'right', fontWeight: '800', color: s.currentPayable > 0 ? '#ef4444' : '#10b981' }}>
                     ৳{s.currentPayable.toLocaleString()}
                   </td>
@@ -214,27 +243,51 @@ export const SupplierModule: React.FC<SupplierModuleProps> = ({ onNavigate }) =>
 
             <form onSubmit={handleSaveSupplier}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div className="form-group">
-                  <label className="form-label">Company Name *</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="e.g. Smart Technologies BD Ltd"
-                    value={company}
-                    onChange={e => setCompany(e.target.value)}
-                    required
-                  />
+                <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '0.75rem' }}>
+                  <div className="form-group">
+                    <label className="form-label">Company Name *</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g. Green View Computer"
+                      value={company}
+                      onChange={e => setCompany(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Source Code *</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g. GB, AT"
+                      value={code}
+                      onChange={e => setCode(e.target.value)}
+                    />
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Contact Person *</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="e.g. Tanvir Alam (Corporate Manager)"
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    required
-                  />
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.75rem' }}>
+                  <div className="form-group">
+                    <label className="form-label">Contact Representative</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g. Imran Hossain"
+                      value={representative}
+                      onChange={e => setRepresentative(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Contact By</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g. Amdadur"
+                      value={contactBy}
+                      onChange={e => setContactBy(e.target.value)}
+                    />
+                  </div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <div className="form-group">
@@ -313,25 +366,47 @@ export const SupplierModule: React.FC<SupplierModuleProps> = ({ onNavigate }) =>
 
             <form onSubmit={handleSaveEdit}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div className="form-group">
-                  <label className="form-label">Company Name *</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={editForm.company || ''}
-                    onChange={e => setEditForm({ ...editForm, company: e.target.value })}
-                    required
-                  />
+                <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '0.75rem' }}>
+                  <div className="form-group">
+                    <label className="form-label">Company Name *</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={editForm.company || ''}
+                      onChange={e => setEditForm({ ...editForm, company: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Source Code</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={editForm.code || ''}
+                      onChange={e => setEditForm({ ...editForm, code: e.target.value })}
+                    />
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Contact Person *</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={editForm.name || ''}
-                    onChange={e => setEditForm({ ...editForm, name: e.target.value })}
-                    required
-                  />
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.75rem' }}>
+                  <div className="form-group">
+                    <label className="form-label">Contact Representative</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={editForm.representative || editForm.name || ''}
+                      onChange={e => setEditForm({ ...editForm, representative: e.target.value, name: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Contact By</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={editForm.contactBy || ''}
+                      onChange={e => setEditForm({ ...editForm, contactBy: e.target.value })}
+                    />
+                  </div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <div className="form-group">

@@ -351,6 +351,9 @@ model Supplier {
   id             String   @id
   name           String
   company        String
+  code           String?
+  representative String?
+  contactBy      String?  @map("contact_by")
   phone          String?
   email          String?
   address        String?
