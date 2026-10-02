@@ -4,6 +4,8 @@ import { Printer, X, Receipt, Download, Loader2 } from 'lucide-react';
 import { NeedElectroLogo } from '../NeedElectroLogo';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import { useERP } from '../../services/erpStore';
+import { getInvoiceItemSpecs, formatWarrantyInfo, isLaptopItem } from '../../services/invoiceSpecsHelper';
 
 interface A4InvoicePrintProps {
   sale: Sale;
@@ -26,6 +28,7 @@ const safeArray = <T,>(val: any): T[] => {
 };
 
 export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, onClose, onSwitchToThermal }) => {
+  const { products } = useERP();
   if (!sale) return null;
 
   const handlePrint = () => {
@@ -304,14 +307,49 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
                     const itemTotal = Number(item.total || (itemPrice * itemQty) - Number(item.discount || 0));
                     const itemName = item.productName || item.name || item.title || 'Product Item';
 
+                    const specs = getInvoiceItemSpecs(item, products);
+                    const isLaptop = isLaptopItem(item, item.product || products?.find(p => p.id === item.productId || p.sku === item.sku));
+                    const warrantyInfo = formatWarrantyInfo(item.warrantyMonths, sale.date || sale.createdAt);
+
                     return (
                       <tr key={item.id || idx}>
                         <td style={{ textAlign: 'center', fontWeight: 700 }}>{idx + 1}</td>
                         <td>
-                          <div style={{ fontWeight: 700, color: '#000000' }}>{itemName}</div>
-                          <div style={{ fontSize: '10.5px', color: '#1e293b', marginTop: '1px' }}>
-                            SKU: <strong>{item.sku || 'N/A'}</strong> | Category: {item.category || 'General'}
+                          <div style={{ fontWeight: 700, color: '#000000', fontSize: '11.5px' }}>{itemName}</div>
+                          <div style={{ fontSize: '10px', color: '#1e293b', marginTop: '1px' }}>
+                            SKU: <strong>{item.sku || 'N/A'}</strong> | Category: <strong>{item.category || 'General'}</strong>
                           </div>
+
+                          {/* Laptop & Device Product Specifications Section */}
+                          {specs.length > 0 && (
+                            <div style={{
+                              marginTop: '4px',
+                              padding: '4px 8px',
+                              background: '#f8fafc',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '4px',
+                              fontSize: '9.5px',
+                              lineHeight: '1.4'
+                            }}>
+                              <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: specs.length > 2 ? 'repeat(2, 1fr)' : '1fr',
+                                gap: '2px 10px'
+                              }}>
+                                {specs.map((s, sIdx) => (
+                                  <div key={sIdx} style={{ display: 'flex', alignItems: 'baseline', gap: '5px' }}>
+                                    <span style={{ fontWeight: 800, color: '#002b5b', minWidth: '62px', fontSize: '8.5px', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                                      {s.label}:
+                                    </span>
+                                    <span style={{ color: '#0f172a', fontWeight: 600 }}>
+                                      {s.value}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
                           {itemSerials.length > 0 && (
                             <div style={{ marginTop: '3px', fontSize: '10.5px', color: '#002b5b', display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
                               <span style={{ fontWeight: 800, background: '#e0f2fe', color: '#0369a1', padding: '1px 5px', borderRadius: '3px', fontSize: '9.5px', letterSpacing: '0.03em' }}>
@@ -323,8 +361,13 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
                             </div>
                           )}
                         </td>
-                        <td style={{ textAlign: 'center', fontWeight: 600 }}>
-                          {item.warrantyMonths && Number(item.warrantyMonths) > 0 ? `${item.warrantyMonths} Months` : 'Official Warranty'}
+                        <td style={{ textAlign: 'center', fontWeight: 600, fontSize: '10.5px' }}>
+                          <div style={{ fontWeight: 700, color: '#0f172a' }}>{warrantyInfo.durationText}</div>
+                          {warrantyInfo.expiryText && (
+                            <div style={{ fontSize: '9px', color: '#0369a1', marginTop: '2px', fontWeight: 600 }}>
+                              Until: {warrantyInfo.expiryText}
+                            </div>
+                          )}
                         </td>
                         <td style={{ textAlign: 'center', fontWeight: 700 }}>{itemQty}</td>
                         <td style={{ textAlign: 'right', fontWeight: 600 }}>৳{itemPrice.toLocaleString()}</td>

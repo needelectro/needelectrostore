@@ -89,7 +89,11 @@ export async function GET(req: NextRequest) {
     prisma.sale.findMany({
       where,
       include: {
-        items: true,
+        items: {
+          include: {
+            product: true,
+          },
+        },
         customer: true,
         branch: true,
       },
@@ -170,6 +174,10 @@ export async function GET(req: NextRequest) {
         productName: item.productName,
         sku: item.sku,
         category: item.category,
+        brand: (item as any).product?.brand || '',
+        model: (item as any).product?.model || '',
+        specs: (item as any).product?.specs || (item as any).specs || null,
+        product: (item as any).product || null,
         quantity: item.quantity,
         unitPrice: Number(item.unitPrice),
         discount: Number(item.discount),
@@ -658,7 +666,15 @@ export async function POST(req: NextRequest) {
       // Fetch complete sale with its newly created items and customer details
       const fullSale = await tx.sale.findUnique({
         where: { id: sale.id },
-        include: { items: true, customer: true, branch: true },
+        include: {
+          items: {
+            include: {
+              product: true,
+            },
+          },
+          customer: true,
+          branch: true,
+        },
       });
 
       return fullSale || sale;

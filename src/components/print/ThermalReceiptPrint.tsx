@@ -2,6 +2,8 @@ import React from 'react';
 import { Sale, SystemSettings } from '../../types';
 import { Printer, X, FileText } from 'lucide-react';
 import { NeedElectroLogo } from '../NeedElectroLogo';
+import { useERP } from '../../services/erpStore';
+import { getInvoiceItemSpecs, formatWarrantyInfo } from '../../services/invoiceSpecsHelper';
 
 interface ThermalReceiptPrintProps {
   sale: Sale;
@@ -24,6 +26,7 @@ const safeArray = <T,>(val: any): T[] => {
 };
 
 export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, settings, onClose, onSwitchToA4 }) => {
+  const { products } = useERP();
   if (!sale) return null;
 
   const handlePrint = () => {
@@ -139,13 +142,46 @@ export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, 
                   const itemTotal = Number(item.total || (itemPrice * itemQty) - Number(item.discount || 0));
                   const itemName = item.productName || item.name || item.title || 'Product Item';
 
+                  const specs = getInvoiceItemSpecs(item, products);
+                  const warrantyInfo = formatWarrantyInfo(item.warrantyMonths, sale.date || sale.createdAt);
+
                   return (
                     <div key={item.id || idx} style={{ marginBottom: '6px' }}>
-                      <div style={{ fontWeight: 'bold' }}>{itemName}</div>
-                      {itemSerials.length > 0 && (
-                        <div style={{ fontSize: '9px', fontWeight: 'bold', margin: '1px 0' }}>SN: {itemSerials.join(', ')}</div>
+                      <div style={{ fontWeight: 'bold', fontSize: '10.5px' }}>{itemName}</div>
+                      
+                      {/* Compact Specifications for 80mm Thermal Print */}
+                      {specs.length > 0 && (
+                        <div style={{ 
+                          fontSize: '8.5px', 
+                          color: '#334155', 
+                          margin: '2px 0 3px 0', 
+                          lineHeight: '1.3',
+                          paddingLeft: '4px',
+                          borderLeft: '2px solid #94a3b8'
+                        }}>
+                          {specs.map((s, sIdx) => (
+                            <span key={sIdx}>
+                              <strong style={{ color: '#0f172a' }}>{s.label}:</strong> {s.value}
+                              {sIdx < specs.length - 1 ? ' • ' : ''}
+                            </span>
+                          ))}
+                        </div>
                       )}
-                      <div className="thermal-item-row">
+
+                      {itemSerials.length > 0 && (
+                        <div style={{ fontSize: '9px', fontWeight: 'bold', margin: '1px 0', color: '#0369a1' }}>
+                          SN: <span style={{ fontFamily: 'monospace' }}>{itemSerials.join(', ')}</span>
+                        </div>
+                      )}
+
+                      {item.warrantyMonths && Number(item.warrantyMonths) > 0 && (
+                        <div style={{ fontSize: '8.5px', color: '#475569', margin: '1px 0' }}>
+                          Warranty: <strong>{warrantyInfo.durationText}</strong>
+                          {warrantyInfo.expiryText && <span> (Until: {warrantyInfo.expiryText})</span>}
+                        </div>
+                      )}
+
+                      <div className="thermal-item-row" style={{ marginTop: '2px' }}>
                         <span>{itemQty} x ৳{itemPrice.toLocaleString()}</span>
                         <span>৳{itemTotal.toLocaleString()}</span>
                       </div>

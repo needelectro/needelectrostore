@@ -125,6 +125,8 @@ interface ERPContextType {
   setActiveThermalReceiptToPrint: (sale: Sale | null) => void;
   activeBarcodeToPrint: { product: Product; serials?: string[] } | null;
   setActiveBarcodeToPrint: (data: { product: Product; serials?: string[] } | null) => void;
+  activeInvestmentMemoToPrint: Investment | null;
+  setActiveInvestmentMemoToPrint: (inv: Investment | null) => void;
 
   // Core Business Actions
   createSale: (saleData: Omit<Sale, 'id' | 'invoiceNumber' | 'createdAt'>, emiPlanConfig?: { planId: string; downPayment: number; durationMonths: number }, paymentAccountId?: string) => Promise<{ success: boolean; sale?: Sale; error?: string }>;
@@ -153,8 +155,11 @@ interface ERPContextType {
     investorEmail?: string;
     investorNid?: string;
     investorAddress?: string;
+    organization?: string;
+    purpose?: string;
+    description?: string;
     sharePercentage?: number;
-  }) => Promise<{ success: boolean; error?: string }>;
+  }) => Promise<{ success: boolean; error?: string; investment?: Investment }>;
   transferFunds: (fromAccountId: string, toAccountId: string, amount: number, fee?: number, notes?: string) => Promise<{ success: boolean; error?: string }>;
   recordOtherIncome: (incomeData: { category: string; amount: number; date: string; accountId?: string; paymentMethod?: string; reference?: string; description: string; receivedFrom?: string; branchId?: string }) => Promise<{ success: boolean; error?: string; income?: OtherIncome }>;
   recordOwnerWithdrawal: (withdrawalData: { ownerName: string; amount: number; date: string; sourceAccountId?: string; paymentMethod?: string; reference?: string; purpose?: string }) => Promise<{ success: boolean; error?: string; withdrawal?: OwnerWithdrawal }>;
@@ -315,6 +320,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeEmiAgreementToPrint, setActiveEmiAgreementToPrint] = useState<EMIAccount | null>(null);
   const [activeThermalReceiptToPrint, setActiveThermalReceiptToPrint] = useState<Sale | null>(null);
   const [activeBarcodeToPrint, setActiveBarcodeToPrint] = useState<{ product: Product; serials?: string[] } | null>(null);
+  const [activeInvestmentMemoToPrint, setActiveInvestmentMemoToPrint] = useState<Investment | null>(null);
 
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -1287,9 +1293,12 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       investorEmail?: string;
       investorNid?: string;
       investorAddress?: string;
+      organization?: string;
+      purpose?: string;
+      description?: string;
       sharePercentage?: number;
     }
-  ): Promise<{ success: boolean; error?: string }> => {
+  ): Promise<{ success: boolean; error?: string; investment?: Investment }> => {
     try {
       const res = await api.accounting.recordInvestment(investmentData);
       if (!res || !res.success) {
@@ -1299,9 +1308,10 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       await refreshFromDatabase();
-      logAction('ACCOUNTING', 'RECORD_INVESTMENT', investmentData.depositAccountId, `Recorded ৳${investmentData.amount.toLocaleString()} investment from ${investmentData.investorName}`);
+      const createdInv: Investment = (res as any)?.data;
+      logAction('ACCOUNTING', 'RECORD_INVESTMENT', investmentData.depositAccountId, `Recorded ৳${investmentData.amount.toLocaleString()} investment from ${investmentData.investorName} [${createdInv?.referenceNumber || ''}]`);
       addToast('success', 'Capital Inflow Recorded', `Investment of ৳${investmentData.amount.toLocaleString()} from ${investmentData.investorName} deposited.`);
-      return { success: true };
+      return { success: true, investment: createdInv };
     } catch (err: any) {
       const errMsg = err.message || 'Error recording investment.';
       addToast('error', 'Investment Failed', errMsg);
@@ -2602,6 +2612,8 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setActiveThermalReceiptToPrint,
         activeBarcodeToPrint,
         setActiveBarcodeToPrint,
+        activeInvestmentMemoToPrint,
+        setActiveInvestmentMemoToPrint,
         createSale,
         collectEMIPayment,
         createProduct,

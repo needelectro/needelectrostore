@@ -487,6 +487,14 @@ select:-webkit-autofill:focus {
   overflow: hidden;
 }
 
+.modal-content > form:not(.modal-body) {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .modal-content-lg {
   max-width: 900px;
 }

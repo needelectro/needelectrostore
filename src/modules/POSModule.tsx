@@ -129,7 +129,11 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
         warrantyMonths: prod.warrantyPeriodMonths,
         isSerialized: prod.isSerialized,
         serialNumbers: prod.isSerialized && availableSerialsForProd.length > 0 ? [availableSerialsForProd[0]] : [],
-        availableSerials: availableSerialsForProd
+        availableSerials: availableSerialsForProd,
+        brand: prod.brand,
+        model: prod.model,
+        specs: prod.specs,
+        product: prod
       };
       setCart([...cart, newItem]);
     }
@@ -303,7 +307,11 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
               total: c.total,
               warrantyMonths: c.warrantyMonths,
               isSerialized: c.isSerialized,
-              serialNumbers: c.serialNumbers || []
+              serialNumbers: c.serialNumbers || [],
+              brand: c.brand,
+              model: c.model,
+              specs: c.specs,
+              product: c.product
             })),
         payments: (saleResult.sale.payments && Array.isArray(saleResult.sale.payments) && saleResult.sale.payments.length > 0)
           ? saleResult.sale.payments

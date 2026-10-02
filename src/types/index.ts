@@ -347,6 +347,10 @@ export interface SaleItem {
   description?: string;
   taxPercent?: number;
   taxAmount?: number;
+  specs?: LaptopSpecifications | ElectricalSpecifications | CCTVSpecifications | Record<string, any>;
+  brand?: string;
+  model?: string;
+  product?: Product;
 }
 
 export interface Sale {
@@ -741,10 +745,18 @@ export interface Investment {
   depositAccountId: string;
   paymentMethod: PaymentMethod;
   reference?: string;
-  status: 'ACTIVE' | 'RETURNED' | 'CONVERTED';
+  status: 'ACTIVE' | 'RETURNED' | 'CONVERTED' | 'REVERSED' | string;
   notes?: string;
   createdBy: string;
   createdAt?: string;
+  investorPhone?: string;
+  investorEmail?: string;
+  investorAddress?: string;
+  organization?: string;
+  purpose?: string;
+  description?: string;
+  investorNid?: string;
+  sharePercentage?: number;
 }
 
 export type AccountType = 'CASH' | 'BANK' | 'MOBILE_BANKING';

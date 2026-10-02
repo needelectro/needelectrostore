@@ -9,13 +9,15 @@ import {
   Clock, DollarSign, User, Phone, MapPin, Tag, ShoppingCart
 } from 'lucide-react';
 
+import { getInvoiceItemSpecs, formatWarrantyInfo } from '../services/invoiceSpecsHelper';
+
 interface SalesModuleProps {
   onNavigate: (module: string, targetId?: string) => void;
 }
 
 export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
   const { 
-    sales, branches, financialAccounts, setActiveInvoiceToPrint, setActiveThermalReceiptToPrint,
+    sales, products, branches, financialAccounts, setActiveInvoiceToPrint, setActiveThermalReceiptToPrint,
     currentUser, updateSale, deleteSale, recordInvoicePayment, refreshSales, refreshFromDatabase, addToast 
   } = useERP();
 
@@ -880,7 +882,8 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
                     <thead>
                       <tr>
                         <th>#</th>
-                        <th>Product & Serial</th>
+                        <th>Product & Specifications</th>
+                        <th style={{ textAlign: 'center' }}>Warranty</th>
                         <th style={{ textAlign: 'center' }}>Qty</th>
                         <th style={{ textAlign: 'right' }}>Unit Price</th>
                         <th style={{ textAlign: 'right' }}>Total</th>
@@ -899,16 +902,56 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
                           itemSerials = [(item as any).serialNumber.trim()];
                         }
 
+                        const specs = getInvoiceItemSpecs(item, products);
+                        const warrantyInfo = formatWarrantyInfo(item.warrantyMonths, viewingSale.date || viewingSale.createdAt);
+
                         return (
                           <tr key={item.id || idx}>
                             <td>{idx + 1}</td>
                             <td>
                               <div style={{ fontWeight: 700 }}>{item.productName}</div>
-                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>SKU: {item.sku}</div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                SKU: {item.sku} | Category: {item.category}
+                              </div>
+
+                              {/* Product Specifications Badge Container */}
+                              {specs.length > 0 && (
+                                <div style={{
+                                  marginTop: '4px',
+                                  padding: '4px 8px',
+                                  background: 'rgba(0, 140, 255, 0.05)',
+                                  border: '1px solid rgba(0, 140, 255, 0.18)',
+                                  borderRadius: '4px',
+                                  fontSize: '0.72rem',
+                                  lineHeight: '1.4'
+                                }}>
+                                  <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: specs.length > 2 ? 'repeat(2, 1fr)' : '1fr',
+                                    gap: '2px 8px'
+                                  }}>
+                                    {specs.map((s, sIdx) => (
+                                      <div key={sIdx} style={{ display: 'flex', gap: '4px' }}>
+                                        <span style={{ fontWeight: 700, color: 'var(--brand-primary, #008CFF)' }}>{s.label}:</span>
+                                        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{s.value}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
                               {itemSerials.length > 0 && (
                                 <div style={{ marginTop: '2px', fontSize: '0.75rem', color: '#008CFF', fontFamily: 'monospace', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
                                   <span style={{ background: 'rgba(0, 140, 255, 0.1)', padding: '1px 5px', borderRadius: '3px', fontSize: '0.7rem' }}>S/N:</span>
                                   <span>{itemSerials.join(', ')}</span>
+                                </div>
+                              )}
+                            </td>
+                            <td style={{ textAlign: 'center', fontSize: '0.8rem' }}>
+                              <div style={{ fontWeight: 700 }}>{warrantyInfo.durationText}</div>
+                              {warrantyInfo.expiryText && (
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                  Until: {warrantyInfo.expiryText}
                                 </div>
                               )}
                             </td>

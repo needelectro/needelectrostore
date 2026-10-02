@@ -260,6 +260,12 @@ export async function reverseTransaction(
     }
   }
 
+  // Update status of corresponding investment if this referenceNumber is an investment
+  await tx.investment.updateMany({
+    where: { referenceNumber },
+    data: { status: 'REVERSED' },
+  });
+
   return reversals;
 }
 

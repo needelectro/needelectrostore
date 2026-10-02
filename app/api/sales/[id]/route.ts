@@ -26,7 +26,11 @@ export async function GET(
       ]
     },
     include: {
-      items: true,
+      items: {
+        include: {
+          product: true,
+        },
+      },
       customer: true,
       branch: true,
       emiAccount: {
@@ -86,6 +90,10 @@ export async function GET(
       productName: item.productName,
       sku: item.sku,
       category: item.category,
+      brand: (item as any).product?.brand || '',
+      model: (item as any).product?.model || '',
+      specs: (item as any).product?.specs || (item as any).specs || null,
+      product: (item as any).product || null,
       quantity: item.quantity,
       unitPrice: Number(item.unitPrice),
       discount: Number(item.discount),
