@@ -35,6 +35,7 @@
 
 /* Dark Theme (Default) */
 [data-theme='dark'], :root:not([data-theme='light']) {
+  color-scheme: dark;
   --bg-app: #090d16;
   --bg-card: #0f172a;
   --bg-card-hover: #162038;
@@ -47,9 +48,9 @@
   --bg-active: rgba(37, 99, 235, 0.18);
   --bg-hover: rgba(255, 255, 255, 0.05);
 
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-focus: #3b82f6;
-  --border-subtle: rgba(255, 255, 255, 0.04);
+  --border-color: rgba(255, 255, 255, 0.12);
+  --border-focus: #008CFF;
+  --border-subtle: rgba(255, 255, 255, 0.06);
 
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
@@ -67,6 +68,7 @@
 
 /* Light Theme */
 [data-theme='light'] {
+  color-scheme: light;
   --bg-app: #F4F6F8;
   --bg-card: #ffffff;
   --bg-card-hover: #f8fafc;
