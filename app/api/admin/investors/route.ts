@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireSuperAdmin, hashPassword } from '@/lib/auth';
-import { recordAccountMovement, reverseTransaction } from '@/lib/accounting';
+import { recordAccountMovement, reverseTransaction, parseInvestmentMetadata } from '@/lib/accounting';
 
 export async function GET(req: NextRequest) {
   const user = await requireSuperAdmin(req);
@@ -41,17 +41,7 @@ export async function GET(req: NextRequest) {
         status: inv.status,
         notes: inv.notes,
         totalInvestment: totalAmount,
-        investments: inv.investments.map(i => ({
-          id: i.id,
-          referenceNumber: i.referenceNumber,
-          amount: Number(i.amount),
-          date: i.date,
-          status: i.status,
-          investmentType: i.investmentType,
-          paymentMethod: i.paymentMethod,
-          reference: i.reference,
-          notes: i.notes,
-        })),
+        investments: inv.investments.map(i => parseInvestmentMetadata(i)),
         user: inv.user,
       };
     });
@@ -241,12 +231,42 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // Generate Investor ID
+      // Ensure INVESTOR role exists in the database
+      let investorRole = await prisma.role.findFirst({
+        where: { code: 'INVESTOR' },
+      });
+      if (!investorRole) {
+        investorRole = await prisma.role.upsert({
+          where: { code: 'INVESTOR' },
+          update: {},
+          create: {
+            id: 'role-investor',
+            name: 'Investor',
+            code: 'INVESTOR',
+            description: 'Dedicated Investor Portal access for viewing investments and returns',
+            isSystem: true,
+            permissions: ['investor.portal', 'investor.view'],
+            isActive: true,
+          },
+        }).catch(async () => {
+          return await prisma.role.findFirst({ where: { code: 'INVESTOR' } });
+        });
+      }
+
+      // Generate unique Investor ID
       const count = await prisma.investor.count();
-      const investorCode = `INV-${1001 + count}`;
+      let seq = 1001 + count;
+      let investorCode = `INV-${seq}`;
+      while (
+        await prisma.investor.findFirst({ where: { investorId: investorCode } }) ||
+        await prisma.user.findFirst({ where: { username: investorCode.toLowerCase() } })
+      ) {
+        seq++;
+        investorCode = `INV-${seq}`;
+      }
 
       const branch = await prisma.branch.findFirst();
-      const branchId = branch?.id || 'branch-main-1';
+      const branchId = branch?.id || null;
 
       // 1. Create User
       const newUser = await prisma.user.create({
@@ -256,10 +276,10 @@ export async function POST(req: NextRequest) {
           email: email.toLowerCase(),
           username: investorCode.toLowerCase(),
           role: 'INVESTOR',
-          roleId: 'role-investor',
+          roleId: investorRole?.id || null,
           branchId,
           primaryBranchId: branchId,
-          allowedBranchIds: [branchId],
+          allowedBranchIds: branchId ? [branchId] : [],
           phone: phone || null,
           passwordHash: hashPassword(password),
           status: 'ACTIVE',
@@ -280,10 +300,28 @@ export async function POST(req: NextRequest) {
         },
       });
 
+      // Auto-link any previous unlinked investments matching name or email
+      await prisma.investment.updateMany({
+        where: {
+          investorId: null,
+          OR: [
+            { investorName: { equals: name, mode: 'insensitive' } },
+            { notes: { contains: email.toLowerCase(), mode: 'insensitive' } },
+          ],
+        },
+        data: {
+          investorId: newInvestor.id,
+        },
+      });
+
       // 3. Create Initial Investment if provided
+      let createdInitialInvestment: any = null;
       const amount = Number(initialAmount || 0);
       if (amount > 0) {
         const invDate = date || initialDate ? new Date(date || initialDate) : new Date();
+        const year = invDate.getFullYear();
+        const defaultPrefix = `INV-${year}-`;
+
         let targetAccId = depositAccountId || 'acc-1';
         let account = await prisma.financialAccount.findFirst({
           where: { id: targetAccId },
@@ -297,10 +335,45 @@ export async function POST(req: NextRequest) {
         
         targetAccId = account?.id || targetAccId;
         const targetAcc = await prisma.financialAccount.findUnique({ where: { id: targetAccId } });
-        const investmentNumber = `INV-REF-${Date.now().toString().slice(-6)}`;
         const pMethod = targetAcc?.type === 'CASH' ? 'Cash' : 'Bank Transfer';
 
-        await prisma.$transaction(async (tx) => {
+        const rawInv = await prisma.$transaction(async (tx) => {
+          const existingInvs = await tx.investment.findMany({
+            where: { referenceNumber: { startsWith: defaultPrefix } },
+            select: { referenceNumber: true },
+            orderBy: { referenceNumber: 'desc' },
+            take: 100,
+          });
+
+          let highestSeq = 0;
+          for (const item of existingInvs) {
+            const numPart = item.referenceNumber.replace(defaultPrefix, '');
+            const parsed = parseInt(numPart, 10);
+            if (!isNaN(parsed) && parsed > highestSeq) {
+              highestSeq = parsed;
+            }
+          }
+
+          if (highestSeq === 0) {
+            const totalCount = await tx.investment.count();
+            highestSeq = totalCount;
+          }
+
+          let nextNum = highestSeq + 1;
+          let investmentNumber = `${defaultPrefix}${String(nextNum).padStart(6, '0')}`;
+          while (await tx.investment.findUnique({ where: { referenceNumber: investmentNumber } })) {
+            nextNum++;
+            investmentNumber = `${defaultPrefix}${String(nextNum).padStart(6, '0')}`;
+          }
+
+          const metadata = {
+            investorPhone: phone || undefined,
+            investorEmail: email.toLowerCase(),
+            purpose: 'Initial Capital Injection',
+            description: `Initial equity investment on investor account creation (${investorCode})`,
+            userNotes: notes && String(notes).trim() ? String(notes).trim() : undefined,
+          };
+
           const inv = await tx.investment.create({
             data: {
               id: `inv-${Date.now()}`,
@@ -312,7 +385,7 @@ export async function POST(req: NextRequest) {
               depositAccountId: targetAccId,
               paymentMethod: pMethod,
               reference: `Initial Capital Injection (${investorCode})`,
-              notes: notes || `Initial investment recorded for ${name}`,
+              notes: JSON.stringify(metadata),
               status: 'ACTIVE',
               createdBy: user.name,
               investorId: newInvestor.id,
@@ -331,7 +404,11 @@ export async function POST(req: NextRequest) {
             relatedTransactionId: inv.id,
             date: invDate,
           });
+
+          return inv;
         });
+
+        createdInitialInvestment = parseInvestmentMetadata(rawInv);
       }
 
       // Audit Log
@@ -350,7 +427,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         message: `Investor ${name} (${investorCode}) created successfully.`,
-        data: newInvestor,
+        data: {
+          ...newInvestor,
+          initialInvestment: createdInitialInvestment,
+        },
       });
     }
 
@@ -377,6 +457,8 @@ export async function POST(req: NextRequest) {
       }
 
       const invDate = date ? new Date(date) : new Date();
+      const year = invDate.getFullYear();
+      const defaultPrefix = `INV-${year}-`;
 
       let targetAccId = depositAccountId || 'acc-1';
       let account = await prisma.financialAccount.findFirst({
@@ -391,10 +473,45 @@ export async function POST(req: NextRequest) {
       
       targetAccId = account?.id || targetAccId;
       const targetAcc = await prisma.financialAccount.findUnique({ where: { id: targetAccId } });
-      const investmentNumber = `INV-ADD-${Date.now().toString().slice(-6)}`;
       const pMethod = paymentMethod || (targetAcc?.type === 'CASH' ? 'Cash' : 'Bank Transfer');
 
-      const investment = await prisma.$transaction(async (tx) => {
+      const rawInv = await prisma.$transaction(async (tx) => {
+        const existingInvs = await tx.investment.findMany({
+          where: { referenceNumber: { startsWith: defaultPrefix } },
+          select: { referenceNumber: true },
+          orderBy: { referenceNumber: 'desc' },
+          take: 100,
+        });
+
+        let highestSeq = 0;
+        for (const item of existingInvs) {
+          const numPart = item.referenceNumber.replace(defaultPrefix, '');
+          const parsed = parseInt(numPart, 10);
+          if (!isNaN(parsed) && parsed > highestSeq) {
+            highestSeq = parsed;
+          }
+        }
+
+        if (highestSeq === 0) {
+          const totalCount = await tx.investment.count();
+          highestSeq = totalCount;
+        }
+
+        let nextNum = highestSeq + 1;
+        let investmentNumber = `${defaultPrefix}${String(nextNum).padStart(6, '0')}`;
+        while (await tx.investment.findUnique({ where: { referenceNumber: investmentNumber } })) {
+          nextNum++;
+          investmentNumber = `${defaultPrefix}${String(nextNum).padStart(6, '0')}`;
+        }
+
+        const metadata = {
+          investorPhone: investor.phone || undefined,
+          investorEmail: investor.email || undefined,
+          purpose: 'Additional Capital Contribution',
+          description: `Additional capital injected by ${investor.name} (${investor.investorId})`,
+          userNotes: notes && String(notes).trim() ? String(notes).trim() : undefined,
+        };
+
         const inv = await tx.investment.create({
           data: {
             id: `inv-${Date.now()}`,
@@ -406,7 +523,7 @@ export async function POST(req: NextRequest) {
             depositAccountId: targetAccId,
             paymentMethod: pMethod,
             reference: reference || `Additional Capital (${investor.investorId})`,
-            notes: notes || `Additional capital injected by ${investor.name}`,
+            notes: JSON.stringify(metadata),
             status: 'ACTIVE',
             createdBy: user.name,
             investorId: investor.id,
@@ -441,10 +558,12 @@ export async function POST(req: NextRequest) {
         return inv;
       });
 
+      const formattedInvestment = parseInvestmentMetadata(rawInv);
+
       return NextResponse.json({
         success: true,
         message: `Successfully added ৳${numAmount.toLocaleString()} capital for ${investor.name}.`,
-        data: investment,
+        data: formattedInvestment,
       });
     }
 

@@ -396,6 +396,15 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(payload)
       }),
+    updateInvestment: (payload: any) =>
+      request<{ success: boolean; message: string; data: any }>('/api/accounting/investments', {
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      }),
+    deleteInvestment: (id: string) =>
+      request<{ success: boolean; message: string }>(`/api/accounting/investments?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      }),
     getInvestments: () =>
       request<{ success: boolean; data: any[] }>('/api/accounting/investments'),
     recordOpeningBalance: (payload: any) =>

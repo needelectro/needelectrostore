@@ -353,7 +353,6 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
       });
       const json = await res.json();
       if (json.success) {
-        alert(json.message);
         setShowCreateInvestorModal(false);
         setNewInvestorName('');
         setNewInvestorEmail('');
@@ -362,6 +361,12 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
         setNewInvestorInitialAmount(50000);
         setNewInvestorNotes('');
         loadAdminInvestorData();
+        if (json.data?.initialInvestment) {
+          setNewlyCreatedInvestment(json.data.initialInvestment);
+          setShowSuccessModal(true);
+        } else {
+          alert(json.message);
+        }
       } else {
         alert(`Error: ${json.error}`);
       }
@@ -392,12 +397,17 @@ export const AccountingModule: React.FC<AccountingModuleProps> = ({ onNavigate }
       });
       const json = await res.json();
       if (json.success) {
-        alert(json.message);
         setShowAddCapitalToInvestorModal(false);
         setSelectedInvestorForCapital(null);
         setAddCapitalAmount(20000);
         setAddCapitalNotes('');
         loadAdminInvestorData();
+        if (json.data) {
+          setNewlyCreatedInvestment(json.data);
+          setShowSuccessModal(true);
+        } else {
+          alert(json.message);
+        }
       } else {
         alert(`Error: ${json.error}`);
       }

@@ -65,6 +65,21 @@ async function main() {
     },
   });
 
+  // 3b. Ensure Investor Role exists for dedicated investor portal logins
+  await prisma.role.upsert({
+    where: { code: 'INVESTOR' },
+    update: {},
+    create: {
+      id: 'role-investor',
+      name: 'Investor',
+      code: 'INVESTOR',
+      description: 'Dedicated Investor Portal access for viewing investments and returns',
+      isSystem: true,
+      permissions: ['investor.portal', 'investor.view'],
+      isActive: true,
+    },
+  });
+
   // 4. Initialize Super Admin Account
   const superAdminEmail = process.env.SUPER_ADMIN_EMAIL || 'contact.amdadur@gmail.com';
   const superAdminName = process.env.SUPER_ADMIN_NAME || 'Amdadur Rahman';

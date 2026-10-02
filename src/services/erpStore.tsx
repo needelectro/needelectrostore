@@ -160,6 +160,20 @@ interface ERPContextType {
     description?: string;
     sharePercentage?: number;
   }) => Promise<{ success: boolean; error?: string; investment?: Investment }>;
+  updateInvestment: (
+    id: string,
+    data: Partial<Investment> & {
+      investorPhone?: string;
+      investorEmail?: string;
+      investorNid?: string;
+      investorAddress?: string;
+      organization?: string;
+      purpose?: string;
+      description?: string;
+      sharePercentage?: number;
+    }
+  ) => Promise<{ success: boolean; error?: string; investment?: Investment }>;
+  deleteInvestment: (id: string) => Promise<{ success: boolean; error?: string }>;
   transferFunds: (fromAccountId: string, toAccountId: string, amount: number, fee?: number, notes?: string) => Promise<{ success: boolean; error?: string }>;
   recordOtherIncome: (incomeData: { category: string; amount: number; date: string; accountId?: string; paymentMethod?: string; reference?: string; description: string; receivedFrom?: string; branchId?: string }) => Promise<{ success: boolean; error?: string; income?: OtherIncome }>;
   recordOwnerWithdrawal: (withdrawalData: { ownerName: string; amount: number; date: string; sourceAccountId?: string; paymentMethod?: string; reference?: string; purpose?: string }) => Promise<{ success: boolean; error?: string; withdrawal?: OwnerWithdrawal }>;
@@ -1315,6 +1329,59 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (err: any) {
       const errMsg = err.message || 'Error recording investment.';
       addToast('error', 'Investment Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  const updateInvestment = async (
+    id: string,
+    data: Partial<Investment> & {
+      investorPhone?: string;
+      investorEmail?: string;
+      investorNid?: string;
+      investorAddress?: string;
+      organization?: string;
+      purpose?: string;
+      description?: string;
+      sharePercentage?: number;
+    }
+  ): Promise<{ success: boolean; error?: string; investment?: Investment }> => {
+    try {
+      const res = await api.accounting.updateInvestment({ id, ...data });
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to update investment.';
+        addToast('error', 'Update Failed', err);
+        return { success: false, error: err };
+      }
+
+      await refreshFromDatabase();
+      const updatedInv: Investment = (res as any)?.data;
+      logAction('ACCOUNTING', 'UPDATE_INVESTMENT', id, `Updated investment ${updatedInv?.referenceNumber || id} for ${updatedInv?.investorName}`);
+      addToast('success', 'Investment Updated', `Investment record ${updatedInv?.referenceNumber || ''} has been updated.`);
+      return { success: true, investment: updatedInv };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error updating investment.';
+      addToast('error', 'Update Failed', errMsg);
+      return { success: false, error: errMsg };
+    }
+  };
+
+  const deleteInvestment = async (id: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.accounting.deleteInvestment(id);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || 'Failed to delete investment.';
+        addToast('error', 'Delete Failed', err);
+        return { success: false, error: err };
+      }
+
+      await refreshFromDatabase();
+      logAction('ACCOUNTING', 'DELETE_INVESTMENT', id, `Deleted investment record ${id}`);
+      addToast('success', 'Investment Deleted', `Investment record has been removed and ledger reconciled.`);
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err.message || 'Error deleting investment.';
+      addToast('error', 'Delete Failed', errMsg);
       return { success: false, error: errMsg };
     }
   };

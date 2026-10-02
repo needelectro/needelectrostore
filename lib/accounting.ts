@@ -4,6 +4,67 @@ import { Prisma } from '@prisma/client';
 
 export type TransactionDirection = 'INFLOW' | 'OUTFLOW';
 
+export function parseInvestmentMetadata(inv: any) {
+  if (!inv) return null;
+  let meta: any = {};
+  if (inv.notes) {
+    try {
+      meta = JSON.parse(inv.notes);
+    } catch {
+      const phoneMatch = inv.notes.match(/Phone:\s*([^|]+)/i);
+      const emailMatch = inv.notes.match(/Email:\s*([^|]+)/i);
+      const addressMatch = inv.notes.match(/Address:\s*([^|]+)/i);
+      const nidMatch = inv.notes.match(/NID:\s*([^|]+)/i);
+      const equityMatch = inv.notes.match(/Equity:\s*([0-9.]+)%/i);
+
+      meta = {
+        investorPhone: phoneMatch ? phoneMatch[1].trim() : undefined,
+        investorEmail: emailMatch ? emailMatch[1].trim() : undefined,
+        investorAddress: addressMatch ? addressMatch[1].trim() : undefined,
+        investorNid: nidMatch ? nidMatch[1].trim() : undefined,
+        sharePercentage: equityMatch ? Number(equityMatch[1]) : undefined,
+        userNotes: inv.notes,
+      };
+    }
+  }
+
+  let cleanUserNotes = '';
+  if (meta && meta.userNotes) {
+    cleanUserNotes = meta.userNotes;
+  } else if (typeof inv.notes === 'string') {
+    const trimmed = inv.notes.trim();
+    if (trimmed !== '{}' && !trimmed.startsWith('{"')) {
+      cleanUserNotes = trimmed;
+    }
+  }
+
+  return {
+    id: inv.id,
+    referenceNumber: inv.referenceNumber || inv.reference || inv.id,
+    investorName: inv.investorName,
+    amount: Number(inv.amount),
+    date: inv.date instanceof Date ? inv.date.toISOString() : String(inv.date),
+    investmentType: inv.investmentType || inv.type || 'EQUITY',
+    type: inv.investmentType || inv.type || 'EQUITY',
+    depositAccountId: inv.depositAccountId,
+    paymentMethod: inv.paymentMethod || 'Cash',
+    reference: inv.reference || inv.referenceNumber,
+    status: inv.status || 'ACTIVE',
+    notes: cleanUserNotes,
+    createdBy: inv.createdBy,
+    createdAt: inv.createdAt instanceof Date ? inv.createdAt.toISOString() : String(inv.createdAt),
+    investorPhone: meta.investorPhone || '',
+    investorEmail: meta.investorEmail || '',
+    investorAddress: meta.investorAddress || '',
+    investorNid: meta.investorNid || '',
+    organization: meta.organization || '',
+    purpose: meta.purpose || '',
+    description: meta.description || '',
+    sharePercentage: meta.sharePercentage !== undefined ? meta.sharePercentage : undefined,
+    investorId: inv.investorId || null,
+  };
+}
+
 export interface RecordMovementOptions {
   accountId?: string | null;
   paymentMethod?: string | null;

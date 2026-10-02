@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { authenticateRequest } from '@/lib/auth';
-import { syncStoredBalancesWithLedger } from '@/lib/accounting';
+import { syncStoredBalancesWithLedger, parseInvestmentMetadata } from '@/lib/accounting';
 
 export const dynamic = 'force-dynamic';
 
@@ -558,7 +558,7 @@ export async function GET(req: NextRequest) {
         services: serializeRecord(services),
         technicians: serializeRecord(technicians),
         warrantyClaims: serializeRecord(warrantyClaims),
-        investments: serializeRecord(investments),
+        investments: investments.map(parseInvestmentMetadata),
         employees: serializeRecord(employees),
         attendance: serializeRecord(attendance),
         emiAccounts: formattedEmiAccounts,
