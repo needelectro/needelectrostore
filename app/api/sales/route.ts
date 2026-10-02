@@ -467,7 +467,31 @@ export async function POST(req: NextRequest) {
             });
 
             if (serialUpdate.count === 0) {
-              throw new Error(`Serial number "${sn}" for ${item.productName} is unavailable or already sold.`);
+              await tx.productSerial.upsert({
+                where: { serialNumber: sn },
+                update: {
+                  status: 'SOLD',
+                  productId: item.productId,
+                  saleInvoiceId: sale.id,
+                  saleDate: new Date(),
+                  customerId: saleData.customerId,
+                  warrantyStartDate: warrantyMonths > 0 ? warrantyStart : null,
+                  warrantyEndDate: warrantyMonths > 0 ? warrantyEnd : null,
+                },
+                create: {
+                  id: 'sn-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+                  serialNumber: sn,
+                  productId: item.productId,
+                  branchId: saleData.branchId,
+                  status: 'SOLD',
+                  saleInvoiceId: sale.id,
+                  saleDate: new Date(),
+                  customerId: saleData.customerId,
+                  warrantyStartDate: warrantyMonths > 0 ? warrantyStart : null,
+                  warrantyEndDate: warrantyMonths > 0 ? warrantyEnd : null,
+                  purchaseCost: product.costPrice,
+                },
+              });
             }
           }
         }
