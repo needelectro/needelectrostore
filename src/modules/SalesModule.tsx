@@ -743,16 +743,6 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
                           <Printer size={13} /> A4
                         </button>
 
-                        {/* Print Receipt */}
-                        <button 
-                          className="btn btn-ghost btn-sm"
-                          onClick={() => setActiveThermalReceiptToPrint(sale)}
-                          title="Print 80mm POS Thermal Receipt"
-                          style={{ padding: '0.25rem 0.45rem', fontSize: '0.78rem' }}
-                        >
-                          80mm
-                        </button>
-
                         {/* Record Payment (if due > 0) */}
                         {due > 0 && !isCancelled && canRecordPayment && (
                           <button
@@ -762,28 +752,6 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
                             style={{ padding: '0.25rem 0.45rem', fontSize: '0.75rem', fontWeight: 700 }}
                           >
                             <CreditCard size={13} /> Pay
-                          </button>
-                        )}
-
-                        {/* Clone / Duplicate into POS */}
-                        <button
-                          className="btn btn-ghost btn-sm"
-                          onClick={() => handleDuplicateInvoice(sale)}
-                          title="Clone Invoice into POS Terminal"
-                          style={{ padding: '0.25rem 0.4rem', color: '#64748b' }}
-                        >
-                          <Copy size={13} />
-                        </button>
-
-                        {/* Create Return */}
-                        {!isCancelled && (
-                          <button
-                            className="btn btn-ghost btn-sm"
-                            onClick={() => onNavigate('returns', sale.invoiceNumber)}
-                            title="Create Return / RMA for this invoice"
-                            style={{ padding: '0.25rem 0.4rem', color: '#8b5cf6' }}
-                          >
-                            <RotateCcw size={13} />
                           </button>
                         )}
 
