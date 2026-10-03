@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useERP } from '../services/erpStore';
-import { Truck, Plus, Search, Check, X, Hash, DollarSign, Building } from 'lucide-react';
+import { Truck, Plus, Search, Check, X, Hash, DollarSign, Building, Loader2 } from 'lucide-react';
 import { PaymentMethod } from '../types';
 
 interface PurchaseModuleProps {
@@ -17,6 +17,8 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
   const [showPayModal, setShowPayModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterSupplier, setFilterSupplier] = useState('ALL');
+  const [isSubmittingPurchase, setIsSubmittingPurchase] = useState(false);
+  const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
 
   // Form State: Purchase
   const [supplierId, setSupplierId] = useState<string>(suppliers[0]?.id || '');
@@ -50,31 +52,38 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
 
   const handleSupplierPaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmittingPayment) return;
     if (payAmount <= 0) {
       alert('Please enter a valid payment amount.');
       return;
     }
 
-    const res = await recordSupplierPayment(
-      paySupplierId,
-      payAmount,
-      payMethod,
-      payAccountId,
-      payRef,
-      payNotes
-    );
+    setIsSubmittingPayment(true);
+    try {
+      const res = await recordSupplierPayment(
+        paySupplierId,
+        payAmount,
+        payMethod,
+        payAccountId,
+        payRef,
+        payNotes
+      );
 
-    if (res.success) {
-      setShowPayModal(false);
-      setPayRef('');
-      setPayNotes('');
-    } else {
-      alert(`Payment failed: ${res.error}`);
+      if (res.success) {
+        setShowPayModal(false);
+        setPayRef('');
+        setPayNotes('');
+      } else {
+        alert(`Payment failed: ${res.error}`);
+      }
+    } finally {
+      setIsSubmittingPayment(false);
     }
   };
 
   const handleCreatePurchaseSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmittingPurchase) return;
     if (items.length === 0) {
       alert('Please add at least one product item.');
       return;
@@ -86,8 +95,6 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
       formattedItems = items.map(item => {
         const prod = products.find(p => p.id === item.productId);
         const serialArr = item.serials ? item.serials.split(',').map(s => s.trim()).filter(Boolean) : [];
-        // Serial numbers are optional:
-        // If provided, they will be registered; otherwise stock is still received normally.
         return {
           productId: item.productId,
           productName: prod?.name || '',
@@ -102,6 +109,7 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
       return;
     }
 
+    setIsSubmittingPurchase(true);
     try {
       const supplier = suppliers.find(s => s.id === supplierId);
       const totalCost = calculateTotalCost();
@@ -126,6 +134,8 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
       }
     } catch (err: any) {
       alert(err.message);
+    } finally {
+      setIsSubmittingPurchase(false);
     }
   };
 
@@ -437,11 +447,26 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
               </div>
 
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowCreateModal(false)}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary btn-sm" 
+                  onClick={() => setShowCreateModal(false)}
+                  disabled={isSubmittingPurchase}
+                >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary btn-sm">
-                  Record Stock Inflow & Update Ledger
+                <button 
+                  type="submit" 
+                  className="btn btn-primary btn-sm"
+                  disabled={isSubmittingPurchase}
+                >
+                  {isSubmittingPurchase ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" /> Recording Intake...
+                    </>
+                  ) : (
+                    'Record Stock Inflow & Update Ledger'
+                  )}
                 </button>
               </div>
             </form>
@@ -549,11 +574,26 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
               </div>
 
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowPayModal(false)}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary btn-sm" 
+                  onClick={() => setShowPayModal(false)}
+                  disabled={isSubmittingPayment}
+                >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary btn-sm">
-                  Confirm Payment & Update Supplier Ledger
+                <button 
+                  type="submit" 
+                  className="btn btn-primary btn-sm"
+                  disabled={isSubmittingPayment}
+                >
+                  {isSubmittingPayment ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" /> Confirming Payment...
+                    </>
+                  ) : (
+                    'Confirm Payment & Update Supplier Ledger'
+                  )}
                 </button>
               </div>
             </form>

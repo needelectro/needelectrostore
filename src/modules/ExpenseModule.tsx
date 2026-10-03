@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useERP } from '../services/erpStore';
 import { ExpenseCategory, PaymentMethod, Expense } from '../types';
-import { Wallet, Plus, Search, Calendar, Tag, DollarSign, X, Edit2, Trash2, Save, ShieldCheck } from 'lucide-react';
+import { Wallet, Plus, Search, Calendar, Tag, DollarSign, X, Edit2, Trash2, Save, ShieldCheck, Loader2 } from 'lucide-react';
 
 interface ExpenseModuleProps {
   onNavigate: (module: string, targetId?: string) => void;
@@ -13,6 +13,7 @@ export const ExpenseModule: React.FC<ExpenseModuleProps> = ({ onNavigate }) => {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [editForm, setEditForm] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [isSubmittingExpense, setIsSubmittingExpense] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
 
@@ -68,25 +69,31 @@ export const ExpenseModule: React.FC<ExpenseModuleProps> = ({ onNavigate }) => {
 
   const totalExpenseAmount = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
 
-  const handleCreateExpense = (e: React.FormEvent) => {
+  const handleCreateExpense = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmittingExpense) return;
     if (amount <= 0 || !description.trim()) {
       alert('Please enter amount and description.');
       return;
     }
 
-    createExpense({
-      category,
-      amount,
-      date,
-      paymentMethod,
-      branchId: selectedBranch.id,
-      description: description.trim()
-    });
+    setIsSubmittingExpense(true);
+    try {
+      await createExpense({
+        category,
+        amount,
+        date,
+        paymentMethod,
+        branchId: selectedBranch.id,
+        description: description.trim()
+      });
 
-    setShowAddModal(false);
-    setDescription('');
-    setAmount(1000);
+      setShowAddModal(false);
+      setDescription('');
+      setAmount(1000);
+    } finally {
+      setIsSubmittingExpense(false);
+    }
   };
 
   const handleSaveEdit = async (e: React.FormEvent) => {
@@ -309,11 +316,26 @@ export const ExpenseModule: React.FC<ExpenseModuleProps> = ({ onNavigate }) => {
               </div>
 
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowAddModal(false)}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary btn-sm" 
+                  onClick={() => setShowAddModal(false)}
+                  disabled={isSubmittingExpense}
+                >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-danger btn-sm">
-                  Record Expense
+                <button 
+                  type="submit" 
+                  className="btn btn-danger btn-sm"
+                  disabled={isSubmittingExpense}
+                >
+                  {isSubmittingExpense ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" /> Recording...
+                    </>
+                  ) : (
+                    'Record Expense'
+                  )}
                 </button>
               </div>
             </form>

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth, hasPermission } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
-import { recordAccountMovement, parseInvestmentMetadata, syncStoredBalancesWithLedger } from '@/lib/accounting';
+import { recordAccountMovement, parseInvestmentMetadata, syncStoredBalancesWithLedger, reverseTransaction } from '@/lib/accounting';
 
 export async function POST(req: NextRequest) {
   const user = await requireAuth(req);
@@ -413,26 +413,20 @@ export async function DELETE(req: NextRequest) {
       const existing = await tx.investment.findUnique({ where: { id } });
       if (!existing) throw new Error('Investment not found');
 
-      // Deduct balance from deposit account if it was active
+      // If active, reverse financial effect via central reverseTransaction
       if (existing.status === 'ACTIVE') {
-        await tx.financialAccount.update({
-          where: { id: existing.depositAccountId },
-          data: { balance: { decrement: existing.amount } },
+        await reverseTransaction(tx, {
+          referenceNumber: existing.referenceNumber,
+          reason: `Investment ${existing.referenceNumber} cancelled/reversed by ${user.name}`,
+          performedBy: user.name,
         });
       }
 
-      // Mark or delete ledger entries
-      await tx.ledgerEntry.deleteMany({
-        where: {
-          OR: [
-            { relatedTransactionId: existing.id },
-            { referenceNumber: existing.referenceNumber },
-          ],
-        },
+      // Mark investment as REVERSED to preserve audit trail
+      await tx.investment.update({
+        where: { id },
+        data: { status: 'REVERSED' },
       });
-
-      // Delete investment
-      await tx.investment.delete({ where: { id } });
 
       await syncStoredBalancesWithLedger(tx);
 
@@ -442,15 +436,15 @@ export async function DELETE(req: NextRequest) {
           id: 'audit-' + Date.now(),
           userId: user.id,
           userName: user.name,
-          action: 'INVESTMENT_DELETED',
+          action: 'INVESTMENT_REVERSED',
           module: 'ACCOUNTING',
           recordId: id,
-          details: `Deleted investment [${existing.referenceNumber}] (${existing.investorName}, ৳${Number(existing.amount).toLocaleString()})`,
+          details: `Reversed capital investment [${existing.referenceNumber}] (${existing.investorName}, ৳${Number(existing.amount).toLocaleString()}) and preserved audit history.`,
         },
       });
     });
 
-    return NextResponse.json({ success: true, message: 'Investment deleted successfully' });
+    return NextResponse.json({ success: true, message: 'Investment reversed successfully and audit trail preserved.' });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

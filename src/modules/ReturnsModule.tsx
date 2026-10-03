@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useERP } from '../services/erpStore';
 import { ProductReturn, ReturnType, PaymentMethod } from '../types';
-import { RotateCcw, Plus, Search, Check, AlertCircle, RefreshCw, X, ShieldAlert, FileText, CheckCircle2 } from 'lucide-react';
+import { RotateCcw, Plus, Search, Check, AlertCircle, RefreshCw, X, ShieldAlert, FileText, CheckCircle2, Loader2 } from 'lucide-react';
 
 interface ReturnsModuleProps {
   onNavigate: (module: string, targetId?: string) => void;
@@ -12,6 +12,7 @@ export const ReturnsModule: React.FC<ReturnsModuleProps> = ({ onNavigate }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'ALL' | ReturnType>('ALL');
   const [showModal, setShowModal] = useState(false);
+  const [isSubmittingReturn, setIsSubmittingReturn] = useState(false);
 
   // Form State
   const [selectedInvoiceNumber, setSelectedInvoiceNumber] = useState('');
@@ -59,6 +60,7 @@ export const ReturnsModule: React.FC<ReturnsModuleProps> = ({ onNavigate }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmittingReturn) return;
     setError(null);
 
     if (!matchedSale) {
@@ -82,7 +84,9 @@ export const ReturnsModule: React.FC<ReturnsModuleProps> = ({ onNavigate }) => {
 
     const serialArr = selectedSerials ? selectedSerials.split(',').map(s => s.trim()).filter(Boolean) : undefined;
 
-    const res = await recordReturn({
+    setIsSubmittingReturn(true);
+    try {
+      const res = await recordReturn({
       date: new Date().toISOString().split('T')[0],
       saleInvoiceId: matchedSale.invoiceNumber,
       customerId: matchedSale.customerId,
@@ -109,13 +113,16 @@ export const ReturnsModule: React.FC<ReturnsModuleProps> = ({ onNavigate }) => {
       notes
     });
 
-    if (res.success) {
-      setShowModal(false);
-      setSelectedInvoiceNumber('');
-      setNotes('');
-      setRefundAmount(0);
-    } else {
-      setError(res.error || 'Failed to process return.');
+      if (res.success) {
+        setShowModal(false);
+        setSelectedInvoiceNumber('');
+        setNotes('');
+        setRefundAmount(0);
+      } else {
+        setError(res.error || 'Failed to process return.');
+      }
+    } finally {
+      setIsSubmittingReturn(false);
     }
   };
 
@@ -475,11 +482,28 @@ export const ReturnsModule: React.FC<ReturnsModuleProps> = ({ onNavigate }) => {
               </div>
 
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowModal(false)}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary btn-sm" 
+                  onClick={() => setShowModal(false)}
+                  disabled={isSubmittingReturn}
+                >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary btn-sm" disabled={!matchedSale}>
-                  <Check size={16} /> Finalize Return & Reconcile
+                <button 
+                  type="submit" 
+                  className="btn btn-primary btn-sm" 
+                  disabled={!matchedSale || isSubmittingReturn}
+                >
+                  {isSubmittingReturn ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" /> Processing Return...
+                    </>
+                  ) : (
+                    <>
+                      <Check size={16} /> Finalize Return & Reconcile
+                    </>
+                  )}
                 </button>
               </div>
             </form>

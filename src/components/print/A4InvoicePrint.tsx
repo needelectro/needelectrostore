@@ -142,7 +142,7 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
       }
 
       const safeInvoiceNumber = (sale.invoiceNumber || 'INV-DRAFT').replace(/[^a-zA-Z0-9-_]/g, '_');
-      pdf.save(`Invoice-${safeInvoiceNumber}.pdf`);
+      pdf.save(`NEED-ELECTRO-Invoice-${safeInvoiceNumber}.pdf`);
     } catch (error) {
       console.error('Failed to generate PDF:', error);
       alert('Failed to generate PDF directly. Please use the Print / Save PDF option.');

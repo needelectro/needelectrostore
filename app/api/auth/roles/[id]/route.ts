@@ -38,3 +38,45 @@ export async function PUT(
 
   return NextResponse.json({ success: true, message: 'Role updated successfully' });
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const user = await requireAuth(req);
+  if (user instanceof NextResponse) return user;
+
+  if (user.role !== 'SUPER_ADMIN') {
+    return NextResponse.json({ success: false, error: 'Access denied. Only Super Admin can delete roles.' }, { status: 403 });
+  }
+
+  const role = await prisma.role.findUnique({ where: { id: params.id } });
+  if (!role) {
+    return NextResponse.json({ success: false, error: 'Role not found' }, { status: 404 });
+  }
+
+  if (role.isSystem) {
+    return NextResponse.json({ success: false, error: 'System core roles cannot be deleted' }, { status: 400 });
+  }
+
+  // Check if any users have this role
+  const userWithRole = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { role: role.code },
+        { roleId: role.id }
+      ]
+    }
+  });
+
+  if (userWithRole) {
+    return NextResponse.json({
+      success: false,
+      error: `Cannot delete role "${role.name}" because active staff account "${userWithRole.name}" is assigned to it.`
+    }, { status: 400 });
+  }
+
+  await prisma.role.delete({ where: { id: params.id } });
+  return NextResponse.json({ success: true, message: `Role "${role.name}" permanently deleted.` });
+}
+

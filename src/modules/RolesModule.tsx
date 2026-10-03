@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useERP } from '../services/erpStore';
 import { 
   Lock, ShieldCheck, Check, X, UserPlus, Users, KeyRound, 
   Building, Edit, Trash2, Power, AlertCircle, Copy, ShieldAlert, 
-  Settings, CheckCircle2, History, AlertTriangle 
+  Settings, CheckCircle2, History, AlertTriangle, Database, Search, Sparkles
 } from 'lucide-react';
 import { User, Role, AccountStatus, UserRole, Permission } from '../types';
 import { SetupWizardModal } from '../components/setup/SetupWizardModal';
 import { OpeningBalancesModal } from '../components/setup/OpeningBalancesModal';
+import { DatabaseConfigManager } from '../components/admin/DatabaseConfigManager';
+import { INITIAL_PERMISSIONS } from '../services/mockData';
 
 interface RolesModuleProps {
   onNavigate: (module: string, targetId?: string) => void;
@@ -22,7 +24,7 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
 
   const isSuperAdmin = currentUser.role === 'SUPER_ADMIN';
 
-  const [activeTab, setActiveTab] = useState<'USERS' | 'ROLES' | 'MATRIX' | 'SETUP'>('USERS');
+  const [activeTab, setActiveTab] = useState<'USERS' | 'ROLES' | 'MATRIX' | 'DATABASE' | 'SETUP'>('USERS');
 
   // Modals state
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
@@ -47,10 +49,67 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
   const [resetPassValue, setResetPassValue] = useState('');
 
   // New Role Form State
+  const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [newRoleName, setNewRoleName] = useState('');
   const [newRoleCode, setNewRoleCode] = useState('');
   const [newRoleDesc, setNewRoleDesc] = useState('');
   const [newRolePermissions, setNewRolePermissions] = useState<string[]>([]);
+  const [rolePermSearch, setRolePermSearch] = useState('');
+
+  // Available permissions with robust fallback
+  const availablePermissions = useMemo<Permission[]>(() => {
+    if (Array.isArray(permissionsList) && permissionsList.length > 0) {
+      return permissionsList;
+    }
+    return INITIAL_PERMISSIONS;
+  }, [permissionsList]);
+
+  // Grouped permissions by module
+  const permissionsByModule = useMemo(() => {
+    const map: Record<string, Permission[]> = {};
+    availablePermissions.forEach(p => {
+      const q = rolePermSearch.toLowerCase().trim();
+      const matchesSearch = !q || 
+        p.label.toLowerCase().includes(q) || 
+        p.module.toLowerCase().includes(q) || 
+        p.action.toLowerCase().includes(q) ||
+        (p.description && p.description.toLowerCase().includes(q));
+
+      if (matchesSearch) {
+        if (!map[p.module]) map[p.module] = [];
+        map[p.module].push(p);
+      }
+    });
+    return map;
+  }, [availablePermissions, rolePermSearch]);
+
+  const filteredModuleKeys = Object.keys(permissionsByModule);
+
+  const MODULE_GROUPS: Record<string, { label: string; icon: string }> = {
+    dashboard: { label: 'Dashboard & Executive Analytics', icon: '📊' },
+    sales: { label: 'Point of Sale (POS) & Billing', icon: '🛒' },
+    emi: { label: 'Laptop EMI & Financing', icon: '📅' },
+    inventory: { label: 'Inventory & Serial Numbers', icon: '📦' },
+    purchases: { label: 'Supplier Purchases & Inflow', icon: '🚚' },
+    products: { label: 'Product Catalog & Pricing', icon: '🏷️' },
+    customers: { label: 'Customers CRM & Receivables', icon: '👥' },
+    suppliers: { label: 'Suppliers Directory & Dues', icon: '🏢' },
+    service: { label: 'Service & Device Repairs', icon: '🔧' },
+    warranty: { label: 'Warranty & Claims', icon: '🛡️' },
+    accounting: { label: 'Central Accounting & P&L', icon: '📈' },
+    cash: { label: 'Cash Vault & Reconciliation', icon: '🏦' },
+    expenses: { label: 'Showroom Operational Expenses', icon: '👛' },
+    reports: { label: 'Reports & Data Exports', icon: '📑' },
+    employees: { label: 'Staff & Attendance HR', icon: '👔' },
+    roles: { label: 'Roles & Access Control', icon: '🔐' },
+    users: { label: 'Staff Accounts Provisioning', icon: '👤' },
+    audit: { label: 'Audit Logs & Security Trails', icon: '📜' },
+    settings: { label: 'System Settings & Branding', icon: '⚙️' },
+    backup: { label: 'Database Backup & Restore', icon: '🗄️' },
+    branches: { label: 'Multi-Branch & Warehouses', icon: '🏬' },
+    control_center: { label: 'System Control Center', icon: '🎛️' },
+    seo: { label: 'Website SEO & Geo-Targeting', icon: '🌐' }
+  };
 
   // Filter & Search
   const [userSearch, setUserSearch] = useState('');
@@ -115,16 +174,50 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
     }
   };
 
-  // Handle Create Role Submit
-  const handleCreateRoleSubmit = (e: React.FormEvent) => {
+  // Handle Open Create Role Modal
+  const handleOpenCreateRole = () => {
+    setEditingRole(null);
+    setNewRoleName('');
+    setNewRoleCode('');
+    setNewRoleDesc('');
+    setNewRolePermissions([]);
+    setRolePermSearch('');
+    setIsCreateRoleOpen(true);
+  };
+
+  // Handle Open Edit Role Modal
+  const handleOpenEditRole = (role: Role) => {
+    setEditingRole(role);
+    setNewRoleName(role.name);
+    setNewRoleCode(role.code);
+    setNewRoleDesc(role.description || '');
+    setNewRolePermissions(role.permissions || []);
+    setRolePermSearch('');
+    setIsCreateRoleOpen(true);
+  };
+
+  // Handle Role Submit (Create or Update)
+  const handleRoleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newRoleName.trim() || !newRoleCode.trim()) {
       addToast('error', 'Validation Error', 'Role name and unique code are required.');
       return;
     }
 
+    if (editingRole) {
+      updateRole({
+        ...editingRole,
+        name: newRoleName.trim(),
+        description: newRoleDesc.trim(),
+        permissions: newRolePermissions,
+      });
+      setIsCreateRoleOpen(false);
+      setEditingRole(null);
+      return;
+    }
+
     const res = createRole({
-      name: newRoleName,
+      name: newRoleName.trim(),
       code: newRoleCode.toUpperCase().replace(/\s+/g, '_'),
       description: newRoleDesc || 'Configurable operational role',
       isSystem: false,
@@ -138,7 +231,30 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
       setNewRoleCode('');
       setNewRoleDesc('');
       setNewRolePermissions([]);
+      setEditingRole(null);
     }
+  };
+
+  const handleTogglePerm = (key: string, id: string, checked: boolean) => {
+    if (checked) {
+      setNewRolePermissions(prev => Array.from(new Set([...prev, key])));
+    } else {
+      setNewRolePermissions(prev => prev.filter(k => k !== key && k !== id));
+    }
+  };
+
+  const handleToggleModuleAll = (perms: Permission[], select: boolean) => {
+    const keys = perms.map(p => `${p.module}.${p.action}`);
+    if (select) {
+      setNewRolePermissions(prev => Array.from(new Set([...prev, ...keys])));
+    } else {
+      setNewRolePermissions(prev => prev.filter(k => !keys.includes(k)));
+    }
+  };
+
+  const handleSelectAllPerms = () => {
+    const allKeys = availablePermissions.map(p => `${p.module}.${p.action}`);
+    setNewRolePermissions(allKeys);
   };
 
   // Toggle permission for a role in the permission matrix
@@ -235,6 +351,7 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
           { key: 'USERS', label: `Staff Accounts (${users.length})`, icon: Users },
           { key: 'ROLES', label: `Database Roles (${roles.length})`, icon: ShieldCheck },
           { key: 'MATRIX', label: 'Granular Permission Matrix', icon: Lock },
+          { key: 'DATABASE', label: 'Database & Cloud Config', icon: Database },
           { key: 'SETUP', label: 'Super Admin Overview & Setup', icon: Settings }
         ].map(tab => {
           const Icon = tab.icon;
@@ -425,7 +542,7 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
             {isSuperAdmin && (
               <button 
                 className="btn btn-primary btn-sm"
-                onClick={() => setIsCreateRoleOpen(true)}
+                onClick={handleOpenCreateRole}
                 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 <ShieldCheck size={15} />
@@ -461,15 +578,27 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
                     </span>
                   </div>
 
-                  {isSuperAdmin && !role.isSystem && (
-                    <button
-                      className="btn btn-ghost btn-sm"
-                      onClick={() => deleteRole(role.id)}
-                      title="Delete Custom Role"
-                      style={{ color: '#ef4444' }}
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                  {isSuperAdmin && (
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => handleOpenEditRole(role)}
+                        title="Configure Role Permissions"
+                        style={{ color: '#38bdf8' }}
+                      >
+                        <Edit size={16} />
+                      </button>
+                      {!role.isSystem && (
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => deleteRole(role.id)}
+                          title="Delete Custom Role"
+                          style={{ color: '#ef4444' }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
 
@@ -692,6 +821,11 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* TAB 4: DATABASE & CLOUD CONFIGURATION ENGINE */}
+      {activeTab === 'DATABASE' && (
+        <DatabaseConfigManager />
       )}
 
       {/* CREATE USER MODAL */}
@@ -917,22 +1051,22 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* CREATE ROLE MODAL */}
+      {/* CREATE / EDIT ROLE MODAL */}
       {isCreateRoleOpen && (
         <div className="modal-overlay" style={{ zIndex: 10000 }}>
-          <div className="modal-content" style={{ maxWidth: '580px' }}>
+          <div className="modal-content" style={{ maxWidth: '780px', width: '92%', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
             <div className="modal-header">
               <div className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ShieldCheck size={18} color="var(--brand-primary)" />
-                <span>Create Custom Database Role</span>
+                <ShieldCheck size={20} color="var(--brand-primary)" />
+                <span>{editingRole ? `Configure Role Permissions — ${editingRole.name}` : 'Create Custom Database Role'}</span>
               </div>
-              <button className="btn btn-ghost btn-sm" onClick={() => setIsCreateRoleOpen(false)}>
+              <button className="btn btn-ghost btn-sm" onClick={() => { setIsCreateRoleOpen(false); setEditingRole(null); }}>
                 <X size={16} />
               </button>
             </div>
 
-            <form onSubmit={handleCreateRoleSubmit}>
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleRoleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto', flex: 1, padding: '1.25rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.85rem' }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label">Role Name *</label>
@@ -954,6 +1088,7 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
                       value={newRoleCode}
                       onChange={e => setNewRoleCode(e.target.value)}
                       placeholder="e.g. CCTV_SUPERVISOR"
+                      disabled={Boolean(editingRole && editingRole.isSystem)}
                       required
                     />
                   </div>
@@ -970,40 +1105,163 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
                   />
                 </div>
 
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">Initial Permissions Matrix</label>
-                  <div style={{ maxHeight: '180px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {permissionsList.map(p => {
-                      const isSelected = newRolePermissions.includes(`${p.module}.${p.action}`);
-                      return (
-                        <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#cbd5e1', cursor: 'pointer' }}>
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={e => {
-                              const key = `${p.module}.${p.action}`;
-                              if (e.target.checked) {
-                                setNewRolePermissions(prev => [...prev, key]);
-                              } else {
-                                setNewRolePermissions(prev => prev.filter(k => k !== key));
-                              }
-                            }}
-                            style={{ accentColor: '#0284c7' }}
-                          />
-                          <span>{p.label} <code style={{ color: '#38bdf8' }}>({p.module}.{p.action})</code></span>
-                        </label>
-                      );
-                    })}
+                {/* Permissions Selector Header */}
+                <div style={{
+                  background: 'rgba(15, 23, 42, 0.6)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '10px',
+                  padding: '0.85rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#ffffff' }}>
+                        Permissions Matrix
+                      </span>
+                      <span className="badge badge-primary" style={{ fontSize: '0.72rem' }}>
+                        {newRolePermissions.length} of {availablePermissions.length} selected
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-xs"
+                        onClick={handleSelectAllPerms}
+                        style={{ fontSize: '0.72rem', color: '#38bdf8' }}
+                      >
+                        ✓ Select All ({availablePermissions.length})
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-xs"
+                        onClick={() => setNewRolePermissions([])}
+                        style={{ fontSize: '0.72rem', color: '#ef4444' }}
+                      >
+                        ✕ Clear All
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Permission Search Input */}
+                  <div style={{ position: 'relative' }}>
+                    <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="Search permissions by name, module, or keyword..."
+                      value={rolePermSearch}
+                      onChange={e => setRolePermSearch(e.target.value)}
+                      style={{ paddingLeft: '2rem', height: '34px', fontSize: '0.8rem' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Grouped Permissions Accordion / Cards */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {filteredModuleKeys.map(modKey => {
+                    const groupMeta = MODULE_GROUPS[modKey] || { label: modKey.toUpperCase(), icon: '📁' };
+                    const modPerms = permissionsByModule[modKey] || [];
+                    const selectedInMod = modPerms.filter(p => newRolePermissions.includes(`${p.module}.${p.action}`) || newRolePermissions.includes(p.id));
+                    const isAllSelected = modPerms.length > 0 && selectedInMod.length === modPerms.length;
+
+                    return (
+                      <div
+                        key={modKey}
+                        style={{
+                          background: 'rgba(30, 41, 59, 0.4)',
+                          border: '1px solid rgba(255, 255, 255, 0.06)',
+                          borderRadius: '8px',
+                          padding: '0.75rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.6rem'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8125rem', fontWeight: 700, color: '#ffffff' }}>
+                            <span>{groupMeta.icon}</span>
+                            <span>{groupMeta.label}</span>
+                            <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                              ({selectedInMod.length}/{modPerms.length})
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-xs"
+                            onClick={() => handleToggleModuleAll(modPerms, !isAllSelected)}
+                            style={{ fontSize: '0.7rem', color: isAllSelected ? '#f59e0b' : '#38bdf8' }}
+                          >
+                            {isAllSelected ? 'Deselect Section' : 'Select All Section'}
+                          </button>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '0.4rem' }}>
+                          {modPerms.map(p => {
+                            const key = `${p.module}.${p.action}`;
+                            const isChecked = newRolePermissions.includes(key) || newRolePermissions.includes(p.id);
+
+                            return (
+                              <label
+                                key={p.id}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'flex-start',
+                                  gap: '8px',
+                                  padding: '6px 8px',
+                                  borderRadius: '6px',
+                                  background: isChecked ? 'rgba(2, 132, 199, 0.12)' : 'rgba(255, 255, 255, 0.02)',
+                                  border: `1px solid ${isChecked ? 'rgba(2, 132, 199, 0.35)' : 'transparent'}`,
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={e => handleTogglePerm(key, p.id, e.target.checked)}
+                                  style={{ marginTop: '2px', accentColor: '#0284c7' }}
+                                />
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.78rem', fontWeight: 600, color: '#ffffff' }}>
+                                    <span>{p.label}</span>
+                                    {p.isSensitive && (
+                                      <span title="Sensitive Action" style={{ display: 'inline-flex' }}>
+                                        <ShieldAlert size={12} color="#f59e0b" />
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div style={{ fontSize: '0.6875rem', color: '#94a3b8', lineHeight: '1.2' }}>
+                                    {p.description}
+                                  </div>
+                                  <code style={{ fontSize: '0.65rem', color: '#38bdf8' }}>
+                                    {p.module}.{p.action}
+                                  </code>
+                                </div>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setIsCreateRoleOpen(false)}>
+              <div className="modal-footer" style={{ borderTop: '1px solid var(--border-color)', padding: '1rem 1.25rem' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => { setIsCreateRoleOpen(false); setEditingRole(null); }}
+                >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  Save Custom Role
+                <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <ShieldCheck size={16} />
+                  <span>{editingRole ? 'Update Role Permissions' : 'Save Custom Role'}</span>
                 </button>
               </div>
             </form>

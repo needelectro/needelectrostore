@@ -5,7 +5,7 @@ import { isProductInCategory, SHOWROOM_CATEGORIES } from '../services/categoryMa
 import { 
   ShoppingCart, Search, Plus, Trash2, CreditCard, 
   Printer, UserPlus, Hash, Percent, Tag, Check, X, 
-  Laptop, ShieldCheck, ArrowRight, Zap, RefreshCw 
+  Laptop, ShieldCheck, ArrowRight, Zap, RefreshCw, Loader2 
 } from 'lucide-react';
 
 interface POSModuleProps {
@@ -47,6 +47,7 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
   const [primaryPaymentMethod, setPrimaryPaymentMethod] = useState<PaymentMethod>('Cash');
   const [paidAmount, setPaidAmount] = useState<number>(0);
   const [isSplitPayment, setIsSplitPayment] = useState(false);
+  const [isProcessingSale, setIsProcessingSale] = useState(false);
   const [splitPayments, setSplitPayments] = useState<{ method: PaymentMethod; amount: number; ref: string }[]>([
     { method: 'Cash', amount: 0, ref: '' },
     { method: 'bKash', amount: 0, ref: '' }
@@ -207,13 +208,16 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
 
   // Complete Sale
   const handleCompleteSale = async () => {
+    if (isProcessingSale) return;
     const cust = customers.find(c => c.id === selectedCustomerId);
     if (!cust) {
       alert('Please select or add a customer!');
       return;
     }
 
-    let payments: PaymentBreakdown[] = [];
+    setIsProcessingSale(true);
+    try {
+      let payments: PaymentBreakdown[] = [];
 
     if (isSplitPayment) {
       const splitTotal = splitPayments.reduce((s, p) => s + p.amount, 0);
@@ -323,7 +327,10 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
     } else {
       alert(`Error creating sale: ${saleResult.error}`);
     }
-  };
+  } finally {
+    setIsProcessingSale(false);
+  }
+};
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, minHeight: 0, overflow: 'hidden' }}>
@@ -1039,11 +1046,27 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
             </div>
 
             <div className="modal-footer">
-              <button className="btn btn-secondary btn-sm" onClick={() => setShowPaymentModal(false)}>
+              <button 
+                className="btn btn-secondary btn-sm" 
+                onClick={() => setShowPaymentModal(false)}
+                disabled={isProcessingSale}
+              >
                 Cancel
               </button>
-              <button className="btn btn-success btn-sm" onClick={handleCompleteSale}>
-                <Check size={16} /> Finalize Sale & Print Invoice
+              <button 
+                className="btn btn-success btn-sm" 
+                onClick={handleCompleteSale}
+                disabled={isProcessingSale}
+              >
+                {isProcessingSale ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" /> Processing Sale...
+                  </>
+                ) : (
+                  <>
+                    <Check size={16} /> Finalize Sale & Print Invoice
+                  </>
+                )}
               </button>
             </div>
           </div>

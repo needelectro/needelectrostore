@@ -1,5 +1,5 @@
 // NEED ELECTRO ERP — Central Accounting & Financial Ledger Synchronization Engine
-import { prisma } from '@/lib/prisma';
+import { prisma } from './prisma';
 import { Prisma } from '@prisma/client';
 
 export type TransactionDirection = 'INFLOW' | 'OUTFLOW';

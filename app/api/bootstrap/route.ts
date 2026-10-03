@@ -443,6 +443,40 @@ export async function GET(req: NextRequest) {
       prisma.ownerWithdrawal.findMany({ orderBy: { date: 'desc' }, take: 200 }),
     ]);
 
+    // Auto-heal empty permissions table
+    let activePermissions = permissionsList;
+    if (activePermissions.length === 0) {
+      try {
+        const { SYSTEM_PERMISSIONS } = await import('@/app/api/admin/database/seed-permissions/route');
+        for (const p of SYSTEM_PERMISSIONS) {
+          await prisma.permission.upsert({ where: { id: p.id }, update: p, create: p });
+        }
+        activePermissions = await prisma.permission.findMany({ orderBy: [{ module: 'asc' }, { action: 'asc' }] });
+      } catch (err: any) {
+        console.warn('Bootstrap permissions auto-seed error:', err.message);
+      }
+    }
+
+    // Auto-heal empty roles table
+    let activeRoles = roles;
+    if (activeRoles.length === 0) {
+      try {
+        const defaultRoles = [
+          { id: 'role-superadmin', name: 'Super Administrator', code: 'SUPER_ADMIN', description: 'Full master authority', isSystem: true, permissions: ['*'], isActive: true },
+          { id: 'role-admin', name: 'Administrator', code: 'ADMIN', description: 'Operations and branch management', isSystem: true, permissions: ['*'], isActive: true },
+          { id: 'role-manager', name: 'Branch Manager', code: 'MANAGER', description: 'Branch management', isSystem: true, permissions: ['dashboard.view', 'sales.view', 'sales.create', 'emi.view', 'inventory.view'], isActive: true },
+          { id: 'role-sales', name: 'Sales Executive', code: 'SALES', description: 'POS and customer checkout', isSystem: true, permissions: ['dashboard.view', 'sales.view', 'sales.create', 'emi.collect'], isActive: true },
+          { id: 'role-investor', name: 'Investor', code: 'INVESTOR', description: 'Investor portal', isSystem: true, permissions: ['investor.portal', 'investor.view'], isActive: true }
+        ];
+        for (const r of defaultRoles) {
+          await prisma.role.upsert({ where: { code: r.code }, update: r, create: r });
+        }
+        activeRoles = await prisma.role.findMany({ orderBy: { createdAt: 'asc' } });
+      } catch (err: any) {
+        console.warn('Bootstrap roles auto-seed error:', err.message);
+      }
+    }
+
     // Shape sales and items to match erpStore expected interfaces
     const formattedSales = sales.map(s => ({
       id: s.id,
@@ -544,8 +578,8 @@ export async function GET(req: NextRequest) {
         notificationTemplatesConfig: serializeRecord(notificationTemplatesConfig),
         financialAccounts: serializeRecord(activeFinancialAccounts),
         emiPlans: serializeRecord(activeEmiPlans),
-        roles: serializeRecord(roles),
-        permissionsList: serializeRecord(permissionsList),
+        roles: serializeRecord(activeRoles),
+        permissionsList: serializeRecord(activePermissions),
         users: serializeRecord(users),
         products: serializeRecord(products),
         serials: serializeRecord(serials),

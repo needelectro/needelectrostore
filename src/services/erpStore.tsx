@@ -423,7 +423,11 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (Array.isArray(d.notificationTemplatesConfig)) setNotificationTemplatesConfig(d.notificationTemplatesConfig);
 
         if (Array.isArray(d.roles)) setRoles(d.roles);
-        if (Array.isArray(d.permissionsList)) setPermissionsList(d.permissionsList);
+        if (Array.isArray(d.permissionsList) && d.permissionsList.length > 0) {
+          setPermissionsList(d.permissionsList);
+        } else {
+          setPermissionsList(INITIAL_PERMISSIONS);
+        }
         if (Array.isArray(d.users)) setUsers(d.users);
 
         if (Array.isArray(d.products)) { setProducts(d.products); setStoredData('products', d.products); }
@@ -936,6 +940,10 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRoles(prev => prev.filter(r => r.id !== roleId));
     logAction('SETTINGS', 'ROLE_DELETED', roleId, `Deleted custom role ${target.name}.`);
     addToast('info', 'Role Removed', `Custom role ${target.name} removed.`);
+
+    // Persist deletion to PostgreSQL database
+    api.auth.deleteRole(roleId).catch(err => console.error('Failed to sync role deletion to database:', err));
+
     return { success: true };
   };
 

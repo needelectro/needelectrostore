@@ -3,7 +3,7 @@ import { useERP } from '../services/erpStore';
 import { 
   Settings, Save, Download, Upload, 
   Building, Phone, Globe, DollarSign, MessageSquare, Sun, Moon, ShieldCheck, Wrench, CheckCircle2,
-  Check, AlertTriangle, Sparkles
+  Check, AlertTriangle, Sparkles, Database
 } from 'lucide-react';
 import { NeedElectroLogo } from '../components/NeedElectroLogo';
 import { SetupWizardModal } from '../components/setup/SetupWizardModal';
@@ -102,7 +102,15 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ onNavigate }) =>
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => onNavigate('control_center', 'database_config')}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <Database size={15} color="var(--brand-primary)" />
+            <span>Database & Cloud Engine</span>
+          </button>
           <button className="btn btn-secondary btn-sm" onClick={handleExportJSON}>
             <Download size={15} /> Export JSON Backup
           </button>

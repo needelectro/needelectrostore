@@ -115,8 +115,29 @@ export const api = {
       method: 'PUT',
       body: JSON.stringify(roleData)
     }),
+    deleteRole: (id: string) => request<{ success: boolean; message: string }>(`/api/auth/roles/${id}`, {
+      method: 'DELETE'
+    }),
     getPermissions: () => request<{ success: boolean; data: any[] }>('/api/auth/permissions'),
     getLoginHistory: () => request<{ success: boolean; data: any[] }>('/api/auth/login-history')
+  },
+
+  // Database Configuration & Health Management
+  database: {
+    getStatus: () => request<{ success: boolean; data: any }>('/api/admin/database/status'),
+    testConnection: (data: { databaseUrl: string }) =>
+      request<{ success: boolean; data?: any; error?: string }>('/api/admin/database/test-connection', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      }),
+    seedPermissions: () =>
+      request<{ success: boolean; message: string; count: number }>('/api/admin/database/seed-permissions', {
+        method: 'POST'
+      }),
+    repairSystem: () =>
+      request<{ success: boolean; message: string; summary: any }>('/api/admin/database/repair-system', {
+        method: 'POST'
+      }),
   },
 
   // 2. High-Speed Bootstrap Sync
