@@ -55,7 +55,7 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
     notificationTemplatesConfig, saveNotificationTemplateConfig, deleteNotificationTemplateConfig,
     priceAuditLog, updateProductPrice, customerMergeAudit, mergeCustomers,
     posSettings, updatePosSettings, inventoryRules, updateInventoryRules,
-    emiPlans, saveEMIPlanWithVersioning, currentUser, addToast,
+    emiPlans, saveEMIPlanWithVersioning, deleteEMIPlan, currentUser, addToast,
     exportDatabase, importDatabase, setupStatus, executeSystemReset
   } = useERP();
 
@@ -353,6 +353,16 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
     setIsPmModalOpen(false);
   };
 
+  const handleDeletePm = async (id: string, name?: string) => {
+    if (window.confirm(`Are you sure you want to delete payment method "${name || id}"?`)) {
+      await deletePaymentMethodConfig(id);
+      if (isPmModalOpen && editingPm?.id === id) {
+        setIsPmModalOpen(false);
+        setEditingPm(null);
+      }
+    }
+  };
+
   // -------------------------------------------------------------
   // TAB 5: EMI PLANS & VERSIONING
   // -------------------------------------------------------------
@@ -408,6 +418,15 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
     setIsEmiModalOpen(false);
   };
 
+  const handleDeleteEmiPlan = async (id: string, name?: string) => {
+    if (window.confirm(`Are you sure you want to deactivate and archive EMI plan "${name || id}"? All existing customer contracts will be safely preserved.`)) {
+      await deleteEMIPlan(id);
+      if (isEmiModalOpen && editingEmiPlan?.plan?.id === id) {
+        setIsEmiModalOpen(false);
+      }
+    }
+  };
+
   // -------------------------------------------------------------
   // TAB 6: INVENTORY & SERIAL RULES
   // -------------------------------------------------------------
@@ -454,6 +473,16 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
     setIsExpModalOpen(false);
   };
 
+  const handleDeleteExp = async (id: string, name?: string) => {
+    if (window.confirm(`Are you sure you want to delete expense category "${name || id}"?`)) {
+      await deleteExpenseCategoryConfig(id);
+      if (isExpModalOpen && editingExp?.id === id) {
+        setIsExpModalOpen(false);
+        setEditingExp(null);
+      }
+    }
+  };
+
   // -------------------------------------------------------------
   // TAB 8: SERVICE & REPAIR CATEGORIES
   // -------------------------------------------------------------
@@ -485,6 +514,16 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
     setIsScModalOpen(false);
   };
 
+  const handleDeleteSc = async (id: string, name?: string) => {
+    if (window.confirm(`Are you sure you want to delete service category "${name || id}"?`)) {
+      await deleteServiceCategoryConfig(id);
+      if (isScModalOpen && editingSc?.id === id) {
+        setIsScModalOpen(false);
+        setEditingSc(null);
+      }
+    }
+  };
+
   // -------------------------------------------------------------
   // TAB 9: WARRANTY POLICIES
   // -------------------------------------------------------------
@@ -514,6 +553,16 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
     if (!editingWr || !editingWr.categoryName) return;
     saveWarrantyRuleConfig(editingWr);
     setIsWrModalOpen(false);
+  };
+
+  const handleDeleteWr = async (id: string, name?: string) => {
+    if (window.confirm(`Are you sure you want to delete warranty policy rule for "${name || 'this category'}"?`)) {
+      await deleteWarrantyRuleConfig(id);
+      if (isWrModalOpen && editingWr?.id === id) {
+        setIsWrModalOpen(false);
+        setEditingWr(null);
+      }
+    }
   };
 
   // -------------------------------------------------------------
@@ -1589,12 +1638,23 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
                           </span>
                         </td>
                         <td style={{ textAlign: 'right' }}>
-                          <button 
-                            className="btn btn-ghost btn-sm"
-                            onClick={() => handleOpenPmModal(pm)}
-                          >
-                            <Edit2 size={14} />
-                          </button>
+                          <div style={{ display: 'inline-flex', gap: '4px' }}>
+                            <button 
+                              className="btn btn-ghost btn-sm"
+                              onClick={() => handleOpenPmModal(pm)}
+                              title="Edit Payment Method"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button 
+                              className="btn btn-ghost btn-sm"
+                              onClick={() => handleDeletePm(pm.id, pm.name)}
+                              title="Delete Payment Method"
+                              style={{ color: '#ef4444' }}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -1677,14 +1737,24 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
                       </span>
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      <button 
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => handleOpenEmiModal(plan)}
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
-                      >
-                        <Edit2 size={13} />
-                        Update Plan
-                      </button>
+                      <div style={{ display: 'inline-flex', gap: '6px' }}>
+                        <button 
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => handleOpenEmiModal(plan)}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+                        >
+                          <Edit2 size={13} />
+                          Update Plan
+                        </button>
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => handleDeleteEmiPlan(plan.id, plan.name)}
+                          title="Deactivate / Delete Plan"
+                          style={{ color: '#ef4444' }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -1897,12 +1967,23 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
                         )}
                       </td>
                       <td style={{ textAlign: 'right' }}>
-                        <button 
-                          className="btn btn-ghost btn-sm"
-                          onClick={() => handleOpenExpModal(cat)}
-                        >
-                          <Edit2 size={14} />
-                        </button>
+                        <div style={{ display: 'inline-flex', gap: '4px' }}>
+                          <button 
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => handleOpenExpModal(cat)}
+                            title="Edit Expense Category"
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                          <button 
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => handleDeleteExp(cat.id, cat.name)}
+                            title="Delete Expense Category"
+                            style={{ color: '#ef4444' }}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -1964,12 +2045,23 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
                       <span className="badge badge-primary">{sc.warrantyDays} Days Guarantee</span>
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      <button 
-                        className="btn btn-ghost btn-sm"
-                        onClick={() => handleOpenScModal(sc)}
-                      >
-                        <Edit2 size={14} />
-                      </button>
+                      <div style={{ display: 'inline-flex', gap: '4px' }}>
+                        <button 
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => handleOpenScModal(sc)}
+                          title="Edit Service Category"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button 
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => handleDeleteSc(sc.id, sc.name)}
+                          title="Delete Service Category"
+                          style={{ color: '#ef4444' }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -2031,12 +2123,23 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
                     </td>
                     <td style={{ fontSize: '0.775rem', color: '#ef4444' }}>{wr.voidConditions}</td>
                     <td style={{ textAlign: 'right' }}>
-                      <button 
-                        className="btn btn-ghost btn-sm"
-                        onClick={() => handleOpenWrModal(wr)}
-                      >
-                        <Edit2 size={14} />
-                      </button>
+                      <div style={{ display: 'inline-flex', gap: '4px' }}>
+                        <button 
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => handleOpenWrModal(wr)}
+                          title="Edit Warranty Rule"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button 
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => handleDeleteWr(wr.id, wr.categoryName)}
+                          title="Delete Warranty Rule"
+                          style={{ color: '#ef4444' }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -2983,9 +3086,24 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
                   placeholder="e.g. 01733-983752"
                 />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsPmModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Save Payment Method</button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
+                <div>
+                  {editingPm && paymentMethodsConfig.some(p => p.id === editingPm.id) && (
+                    <button 
+                      type="button" 
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDeletePm(editingPm.id, editingPm.name)}
+                      style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <Trash2 size={14} />
+                      Delete Method
+                    </button>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => setIsPmModalOpen(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">Save Payment Method</button>
+                </div>
               </div>
             </form>
           </div>
@@ -3096,9 +3214,24 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
                 ℹ️ Saving will create a new version of this plan. All existing customer contracts will preserve their original terms.
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsEmiModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Save Versioned Plan</button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
+                <div>
+                  {editingEmiPlan?.plan?.id && emiPlans.some(p => p.id === editingEmiPlan.plan.id) && (
+                    <button 
+                      type="button" 
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDeleteEmiPlan(editingEmiPlan.plan.id!, editingEmiPlan.plan.name)}
+                      style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <Trash2 size={14} />
+                      Archive / Delete Plan
+                    </button>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => setIsEmiModalOpen(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">Save Versioned Plan</button>
+                </div>
               </div>
             </form>
           </div>
@@ -3139,9 +3272,24 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
                 />
                 <span>Qualifies as Tax-Deductible Business Expense</span>
               </label>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsExpModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Save Expense Category</button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
+                <div>
+                  {editingExp && expenseCategoriesConfig.some(c => c.id === editingExp.id) && (
+                    <button 
+                      type="button" 
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDeleteExp(editingExp.id, editingExp.name)}
+                      style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <Trash2 size={14} />
+                      Delete Category
+                    </button>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => setIsExpModalOpen(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">Save Expense Category</button>
+                </div>
               </div>
             </form>
           </div>
@@ -3195,9 +3343,24 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
                   onChange={e => setEditingSc({ ...editingSc, estimatedDurationHours: Number(e.target.value) })}
                 />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsScModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Save Service Category</button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
+                <div>
+                  {editingSc && serviceCategoriesConfig.some(s => s.id === editingSc.id) && (
+                    <button 
+                      type="button" 
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDeleteSc(editingSc.id, editingSc.name)}
+                      style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <Trash2 size={14} />
+                      Delete Classification
+                    </button>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => setIsScModalOpen(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">Save Service Category</button>
+                </div>
               </div>
             </form>
           </div>
@@ -3269,9 +3432,24 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
                   <span>Free Service Repair</span>
                 </label>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsWrModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Save Warranty Policy</button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
+                <div>
+                  {editingWr && warrantyRulesConfig.some(w => w.id === editingWr.id) && (
+                    <button 
+                      type="button" 
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDeleteWr(editingWr.id, editingWr.categoryName)}
+                      style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <Trash2 size={14} />
+                      Delete Rule
+                    </button>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => setIsWrModalOpen(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">Save Warranty Policy</button>
+                </div>
               </div>
             </form>
           </div>

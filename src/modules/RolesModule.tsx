@@ -56,6 +56,12 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
   const [newRolePermissions, setNewRolePermissions] = useState<string[]>([]);
   const [rolePermSearch, setRolePermSearch] = useState('');
 
+  // Delete Role Confirmation State
+  const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
+  const [isDeleteRoleModalOpen, setIsDeleteRoleModalOpen] = useState(false);
+  const [reassignTargetRoleId, setReassignTargetRoleId] = useState<string>('role-sales');
+  const [isProcessingRoleDelete, setIsProcessingRoleDelete] = useState(false);
+
   // Available permissions with robust fallback
   const availablePermissions = useMemo<Permission[]>(() => {
     if (Array.isArray(permissionsList) && permissionsList.length > 0) {
@@ -208,6 +214,7 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
       updateRole({
         ...editingRole,
         name: newRoleName.trim(),
+        code: editingRole.isSystem ? editingRole.code : (newRoleCode.toUpperCase().replace(/\s+/g, '_') || editingRole.code),
         description: newRoleDesc.trim(),
         permissions: newRolePermissions,
       });
@@ -232,6 +239,49 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
       setNewRoleDesc('');
       setNewRolePermissions([]);
       setEditingRole(null);
+    }
+  };
+
+  // Handle Open Delete Role Modal
+  const handleOpenDeleteRole = (role: Role) => {
+    if (role.isSystem) {
+      addToast('error', 'System Protected', 'Built-in system roles cannot be deleted.');
+      return;
+    }
+    setRoleToDelete(role);
+    const fallback = roles.find(r => r.id !== role.id && r.code !== role.code && (r.code === 'SALES' || r.code === 'STAFF' || r.isSystem));
+    if (fallback) setReassignTargetRoleId(fallback.id);
+    setIsDeleteRoleModalOpen(true);
+  };
+
+  // Handle Confirm Delete Role
+  const handleConfirmDeleteRole = async () => {
+    if (!roleToDelete) return;
+    setIsProcessingRoleDelete(true);
+    try {
+      const assignedUsers = users.filter(u => u.role === roleToDelete.code || u.roleId === roleToDelete.id);
+      if (assignedUsers.length > 0) {
+        const targetRole = roles.find(r => r.id === reassignTargetRoleId) || roles.find(r => r.code === 'SALES') || roles[0];
+        for (const user of assignedUsers) {
+          await updateUser({
+            ...user,
+            role: targetRole.code as UserRole,
+            roleId: targetRole.id
+          });
+        }
+      }
+
+      await deleteRole(roleToDelete.id);
+      setIsDeleteRoleModalOpen(false);
+      setRoleToDelete(null);
+      if (isCreateRoleOpen && editingRole?.id === roleToDelete.id) {
+        setIsCreateRoleOpen(false);
+        setEditingRole(null);
+      }
+    } catch (err: any) {
+      addToast('error', 'Delete Failed', err.message || 'Could not delete role.');
+    } finally {
+      setIsProcessingRoleDelete(false);
     }
   };
 
@@ -591,7 +641,7 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
                       {!role.isSystem && (
                         <button
                           className="btn btn-ghost btn-sm"
-                          onClick={() => deleteRole(role.id)}
+                          onClick={() => handleOpenDeleteRole(role)}
                           title="Delete Custom Role"
                           style={{ color: '#ef4444' }}
                         >
@@ -1251,20 +1301,147 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
                 </div>
               </div>
 
-              <div className="modal-footer" style={{ borderTop: '1px solid var(--border-color)', padding: '1rem 1.25rem' }}>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => { setIsCreateRoleOpen(false); setEditingRole(null); }}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <ShieldCheck size={16} />
-                  <span>{editingRole ? 'Update Role Permissions' : 'Save Custom Role'}</span>
-                </button>
+              <div className="modal-footer" style={{ borderTop: '1px solid var(--border-color)', padding: '1rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  {editingRole && !editingRole.isSystem && (
+                    <button
+                      type="button"
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleOpenDeleteRole(editingRole)}
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <Trash2 size={15} />
+                      <span>Delete Role</span>
+                    </button>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => { setIsCreateRoleOpen(false); setEditingRole(null); }}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ShieldCheck size={16} />
+                    <span>{editingRole ? 'Update Role Permissions' : 'Save Custom Role'}</span>
+                  </button>
+                </div>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* CONFIRM DELETE ROLE MODAL */}
+      {isDeleteRoleModalOpen && roleToDelete && (
+        <div className="modal-overlay" style={{ zIndex: 10001 }}>
+          <div className="modal-content" style={{ maxWidth: '480px', width: '92%', border: '1px solid rgba(239, 68, 68, 0.4)' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid rgba(239, 68, 68, 0.2)' }}>
+              <div className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f87171' }}>
+                <AlertTriangle size={20} color="#ef4444" />
+                <span>Delete Custom Role: {roleToDelete.name}</span>
+              </div>
+              <button 
+                className="btn btn-ghost btn-sm" 
+                onClick={() => { setIsDeleteRoleModalOpen(false); setRoleToDelete(null); }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="modal-body" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <p style={{ margin: 0, fontSize: '0.9rem', color: '#e2e8f0', lineHeight: 1.5 }}>
+                  Are you sure you want to permanently delete custom role <strong>"{roleToDelete.name}"</strong> (<code>{roleToDelete.code}</code>)?
+                </p>
+                <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: '#94a3b8' }}>
+                  This will remove the role definition and its assigned capabilities from the database.
+                </p>
+              </div>
+
+              {(() => {
+                const assignedUsers = users.filter(u => u.role === roleToDelete.code || u.roleId === roleToDelete.id);
+                if (assignedUsers.length > 0) {
+                  return (
+                    <div style={{
+                      background: 'rgba(239, 68, 68, 0.1)',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      borderRadius: '8px',
+                      padding: '0.85rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.6rem'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.825rem', fontWeight: 700, color: '#f87171' }}>
+                        <Users size={16} />
+                        <span>Role in Use: {assignedUsers.length} Staff Member(s) Assigned</span>
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>
+                        Active accounts: <strong>{assignedUsers.map(u => u.name).join(', ')}</strong>
+                      </div>
+                      <div>
+                        <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.3rem', color: '#e2e8f0' }}>
+                          Reassign these users to:
+                        </label>
+                        <select
+                          className="form-input"
+                          style={{ height: '36px', fontSize: '0.8rem' }}
+                          value={reassignTargetRoleId}
+                          onChange={e => setReassignTargetRoleId(e.target.value)}
+                        >
+                          {roles
+                            .filter(r => r.id !== roleToDelete.id && r.code !== roleToDelete.code)
+                            .map(r => (
+                              <option key={r.id} value={r.id}>
+                                {r.name} ({r.code}) {r.isSystem ? '— System' : '— Custom'}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                    </div>
+                  );
+                }
+                return (
+                  <div style={{
+                    background: 'rgba(16, 185, 129, 0.08)',
+                    border: '1px solid rgba(16, 185, 129, 0.25)',
+                    borderRadius: '8px',
+                    padding: '0.75rem',
+                    fontSize: '0.8rem',
+                    color: '#34d399',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}>
+                    <CheckCircle2 size={16} />
+                    <span>No active staff members are currently assigned to this role. Safe to delete.</span>
+                  </div>
+                );
+              })()}
+            </div>
+
+            <div className="modal-footer" style={{ borderTop: '1px solid var(--border-color)', padding: '1rem 1.25rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => { setIsDeleteRoleModalOpen(false); setRoleToDelete(null); }}
+                disabled={isProcessingRoleDelete}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger btn-sm"
+                onClick={handleConfirmDeleteRole}
+                disabled={isProcessingRoleDelete}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Trash2 size={15} />
+                <span>{isProcessingRoleDelete ? 'Deleting Role...' : 'Confirm Delete Role'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
