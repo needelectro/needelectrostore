@@ -3,7 +3,7 @@ import { useERP } from '../services/erpStore';
 import { 
   Lock, ShieldCheck, Check, X, UserPlus, Users, KeyRound, 
   Building, Edit, Trash2, Power, AlertCircle, Copy, ShieldAlert, 
-  Settings, CheckCircle2, History, AlertTriangle, Database, Search, Sparkles
+  Settings, CheckCircle2, History, AlertTriangle, Database, Search, Sparkles, Eye, EyeOff
 } from 'lucide-react';
 import { User, Role, AccountStatus, UserRole, Permission } from '../types';
 import { SetupWizardModal } from '../components/setup/SetupWizardModal';
@@ -17,8 +17,8 @@ interface RolesModuleProps {
 
 export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
   const { 
-    currentUser, users, roles, permissionsList, branches, employees, 
-    createUser, updateUser, setUserStatus, resetUserPassword, revokeUserSessions, 
+    currentUser, users, roles, permissionsList, branches, employees, sales, investments,
+    createUser, updateUser, deleteUser, setUserStatus, resetUserPassword, revokeUserSessions, 
     createRole, updateRole, deleteRole, setupStatus, auditLogs, addToast 
   } = useERP();
 
@@ -33,6 +33,27 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
   const [isSetupWizardOpen, setIsSetupWizardOpen] = useState(false);
   const [isOpeningBalancesOpen, setIsOpeningBalancesOpen] = useState(false);
   const [selectedUserForAction, setSelectedUserForAction] = useState<User | null>(null);
+
+  // Edit User Form State
+  const [isEditUserOpen, setIsEditUserOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editUserName, setEditUserName] = useState('');
+  const [editUserEmail, setEditUserEmail] = useState('');
+  const [editUserPhone, setEditUserPhone] = useState('');
+  const [editUserRole, setEditUserRole] = useState<UserRole>('SALES');
+  const [editUserBranch, setEditUserBranch] = useState('');
+  const [editUserAllowedBranches, setEditUserAllowedBranches] = useState<string[]>([]);
+  const [editUserEmpId, setEditUserEmpId] = useState('');
+  const [editUserStatus, setEditUserStatus] = useState<AccountStatus>('ACTIVE');
+  const [editUserPassword, setEditUserPassword] = useState('');
+  const [showEditPassword, setShowEditPassword] = useState(false);
+  const [isSavingUser, setIsSavingUser] = useState(false);
+
+  // Delete User Confirmation State
+  const [isDeleteUserModalOpen, setIsDeleteUserModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [deleteMode, setDeleteMode] = useState<'PERMANENT' | 'DEACTIVATE'>('PERMANENT');
+  const [isProcessingUserDelete, setIsProcessingUserDelete] = useState(false);
 
   // New User Form State
   const [newUserName, setNewUserName] = useState('');
@@ -177,6 +198,124 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
       setIsResetPassOpen(false);
       setResetPassValue('');
       setSelectedUserForAction(null);
+    }
+  };
+
+  // Handle Open Edit User Modal
+  const handleOpenEditUser = (user: User) => {
+    setEditingUser(user);
+    setEditUserName(user.name || '');
+    setEditUserEmail(user.email || '');
+    setEditUserPhone(user.phone || '');
+    setEditUserRole(user.role as UserRole);
+    setEditUserBranch(user.branchId || branches[0]?.id || 'branch-1');
+    setEditUserAllowedBranches(
+      user.allowedBranchIds && user.allowedBranchIds.length > 0 
+        ? user.allowedBranchIds 
+        : [user.branchId || branches[0]?.id || 'branch-1']
+    );
+    setEditUserEmpId(user.employeeId || '');
+    setEditUserStatus((user.status as AccountStatus) || (user.active ? 'ACTIVE' : 'INACTIVE'));
+    setEditUserPassword('');
+    setShowEditPassword(false);
+    setIsEditUserOpen(true);
+  };
+
+  // Handle Edit User Submit
+  const handleEditUserSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+
+    if (!editUserName.trim() || !editUserEmail.trim()) {
+      addToast('error', 'Validation Error', 'Full Name and Corporate Email are required.');
+      return;
+    }
+
+    if (editUserPassword.trim() && editUserPassword.trim().length < 6) {
+      addToast('error', 'Password Too Short', 'Password override must be at least 6 characters.');
+      return;
+    }
+
+    setIsSavingUser(true);
+    try {
+      const roleObj = roles.find(r => r.code === editUserRole || r.name === editUserRole);
+      const updatedUserPayload: User = {
+        ...editingUser,
+        name: editUserName.trim(),
+        email: editUserEmail.trim().toLowerCase(),
+        phone: editUserPhone.trim(),
+        role: editUserRole,
+        roleId: roleObj?.id || editingUser.roleId,
+        branchId: editUserBranch,
+        allowedBranchIds: editUserAllowedBranches.length > 0 ? editUserAllowedBranches : [editUserBranch],
+        employeeId: editUserEmpId.trim() || undefined,
+        status: editUserStatus,
+        active: editUserStatus === 'ACTIVE',
+        password: editUserPassword.trim() ? editUserPassword.trim() : editingUser.password
+      };
+
+      const res = await updateUser(updatedUserPayload);
+      if (!res.success) {
+        addToast('error', 'Update Failed', res.error || 'Could not update user.');
+        setIsSavingUser(false);
+        return;
+      }
+
+      // If a new password override was specified, reset it explicitly
+      if (editUserPassword.trim()) {
+        await resetUserPassword(editingUser.id, editUserPassword.trim());
+      }
+
+      setIsEditUserOpen(false);
+      setEditingUser(null);
+      setEditUserPassword('');
+    } catch (err: any) {
+      addToast('error', 'Save Error', err.message || 'Error saving user.');
+    } finally {
+      setIsSavingUser(false);
+    }
+  };
+
+  // Handle Open Delete User Confirmation Modal
+  const handleOpenDeleteUser = (user: User) => {
+    if (user.id === currentUser.id) {
+      addToast('error', 'Action Restricted', 'You cannot delete your own active Super Admin account.');
+      return;
+    }
+    if (user.role === 'SUPER_ADMIN' && currentUser.role !== 'SUPER_ADMIN') {
+      addToast('error', 'Unauthorized', 'Only Super Admin can delete another Super Admin account.');
+      return;
+    }
+
+    setUserToDelete(user);
+    // Check if user has associated transactions to recommend safe deactivation
+    const hasSales = sales?.some(s => s.salespersonId === user.id);
+    const isInvestor = user.role === 'INVESTOR' || investments?.some(i => i.investorName?.toLowerCase() === user.name?.toLowerCase());
+
+    if (hasSales || isInvestor) {
+      setDeleteMode('DEACTIVATE');
+    } else {
+      setDeleteMode('PERMANENT');
+    }
+
+    setIsDeleteUserModalOpen(true);
+  };
+
+  // Handle Confirm Delete User
+  const handleConfirmDeleteUser = async () => {
+    if (!userToDelete) return;
+    setIsProcessingUserDelete(true);
+    try {
+      const isPermanent = deleteMode === 'PERMANENT';
+      const res = await deleteUser(userToDelete.id, isPermanent);
+      if (res.success) {
+        setIsDeleteUserModalOpen(false);
+        setUserToDelete(null);
+      }
+    } catch (err: any) {
+      addToast('error', 'Delete Failed', err.message || 'Could not delete user.');
+    } finally {
+      setIsProcessingUserDelete(false);
     }
   };
 
@@ -528,7 +667,19 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
                         </span>
                       </td>
                       <td>
-                        <div style={{ display: 'flex', gap: '0.4rem' }}>
+                        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                          {/* Edit User Button */}
+                          {isSuperAdmin && (
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              title="Edit User Details, Branch & Role"
+                              onClick={() => handleOpenEditUser(user)}
+                              style={{ padding: '5px 8px', color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.3)' }}
+                            >
+                              <Edit size={14} />
+                            </button>
+                          )}
+
                           {/* Reset Password */}
                           <button
                             className="btn btn-secondary btn-sm"
@@ -537,7 +688,7 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
                               setSelectedUserForAction(user);
                               setIsResetPassOpen(true);
                             }}
-                            style={{ padding: '4px 8px' }}
+                            style={{ padding: '5px 8px' }}
                           >
                             <KeyRound size={14} />
                           </button>
@@ -548,7 +699,7 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
                               className="btn btn-secondary btn-sm"
                               title="Revoke Active Sessions"
                               onClick={() => revokeUserSessions(user.id)}
-                              style={{ padding: '4px 8px' }}
+                              style={{ padding: '5px 8px' }}
                             >
                               <Power size={14} />
                             </button>
@@ -563,9 +714,26 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
                                 const nextStatus: AccountStatus = user.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
                                 setUserStatus(user.id, nextStatus);
                               }}
-                              style={{ padding: '4px 8px' }}
+                              style={{ padding: '5px 8px' }}
                             >
                               {user.status === 'ACTIVE' ? <AlertTriangle size={14} /> : <CheckCircle2 size={14} />}
+                            </button>
+                          )}
+
+                          {/* Delete User Button */}
+                          {isSuperAdmin && (
+                            <button
+                              className="btn btn-danger btn-sm"
+                              title={isCurrent ? "Cannot delete your own active account" : "Delete User Account"}
+                              disabled={isCurrent}
+                              onClick={() => !isCurrent && handleOpenDeleteUser(user)}
+                              style={{ 
+                                padding: '5px 8px',
+                                opacity: isCurrent ? 0.3 : 1,
+                                cursor: isCurrent ? 'not-allowed' : 'pointer'
+                              }}
+                            >
+                              <Trash2 size={14} />
                             </button>
                           )}
                         </div>
@@ -1097,6 +1265,398 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT USER MODAL */}
+      {isEditUserOpen && editingUser && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content" style={{ maxWidth: '680px', width: '92%', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div className="modal-header">
+              <div className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Edit size={18} color="var(--brand-primary)" />
+                <span>Edit Staff User Account — {editingUser.name}</span>
+              </div>
+              <button className="btn btn-ghost btn-sm" onClick={() => { setIsEditUserOpen(false); setEditingUser(null); }}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditUserSubmit}>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.25rem' }}>
+                {editingUser.id === currentUser.id && (
+                  <div style={{
+                    background: 'rgba(56, 189, 248, 0.1)',
+                    border: '1px solid rgba(56, 189, 248, 0.3)',
+                    borderRadius: '8px',
+                    padding: '0.75rem',
+                    fontSize: '0.8rem',
+                    color: '#38bdf8',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <AlertCircle size={16} />
+                    <span>You are editing your own active account. Profile and session updates will take effect immediately.</span>
+                  </div>
+                )}
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Full Name *</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={editUserName}
+                      onChange={e => setEditUserName(e.target.value)}
+                      placeholder="e.g. Shakil Mahmud"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Corporate Email *</label>
+                    <input
+                      type="email"
+                      className="form-input"
+                      value={editUserEmail}
+                      onChange={e => setEditUserEmail(e.target.value)}
+                      placeholder="shakil@needelectro.com"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Phone Number</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={editUserPhone}
+                      onChange={e => setEditUserPhone(e.target.value)}
+                      placeholder="01711-000000"
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Assigned Role *</label>
+                    <select
+                      className="form-select"
+                      value={editUserRole}
+                      onChange={e => setEditUserRole(e.target.value as any)}
+                      required
+                    >
+                      {roles.map(r => (
+                        <option key={r.id} value={r.code}>
+                          {r.name} ({r.code}) {r.isSystem ? '• System' : '• Custom'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Primary Branch *</label>
+                    <select
+                      className="form-select"
+                      value={editUserBranch}
+                      onChange={e => {
+                        const newBranch = e.target.value;
+                        setEditUserBranch(newBranch);
+                        if (!editUserAllowedBranches.includes(newBranch)) {
+                          setEditUserAllowedBranches(prev => [...prev, newBranch]);
+                        }
+                      }}
+                      required
+                    >
+                      {branches.map(b => (
+                        <option key={b.id} value={b.id}>{b.name} ({b.code})</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Link to Employee Record</label>
+                    <select
+                      className="form-select"
+                      value={editUserEmpId}
+                      onChange={e => setEditUserEmpId(e.target.value)}
+                    >
+                      <option value="">-- Optional: Link Employee --</option>
+                      {employees.map(emp => (
+                        <option key={emp.id} value={emp.id}>{emp.name} ({emp.designation || 'Staff'})</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Additional Allowed Branches */}
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Multi-Branch Permissions (Allowed Branches)</label>
+                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', background: 'rgba(15, 23, 42, 0.4)', padding: '0.75rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+                    {branches.map(b => {
+                      const isChecked = editUserAllowedBranches.includes(b.id);
+                      return (
+                        <label key={b.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8125rem', color: '#cbd5e1', cursor: 'pointer' }}>
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={e => {
+                              if (e.target.checked) {
+                                setEditUserAllowedBranches(prev => [...prev, b.id]);
+                              } else {
+                                setEditUserAllowedBranches(prev => prev.filter(id => id !== b.id));
+                              }
+                            }}
+                            style={{ accentColor: '#0284c7' }}
+                          />
+                          <span>{b.code} ({b.name.split(' ')[0]})</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Account Status</label>
+                    <select
+                      className="form-select"
+                      value={editUserStatus}
+                      onChange={e => setEditUserStatus(e.target.value as any)}
+                    >
+                      <option value="ACTIVE">ACTIVE (Normal Access)</option>
+                      <option value="SUSPENDED">SUSPENDED (Access Denied)</option>
+                      <option value="INACTIVE">INACTIVE</option>
+                      <option value="PENDING">PENDING</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Password Override (Optional)</label>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type={showEditPassword ? 'text' : 'password'}
+                        className="form-input"
+                        value={editUserPassword}
+                        onChange={e => setEditUserPassword(e.target.value)}
+                        placeholder="Leave blank to keep unchanged"
+                        style={{ paddingRight: '2.5rem' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowEditPassword(!showEditPassword)}
+                        style={{
+                          position: 'absolute',
+                          right: '8px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          background: 'none',
+                          border: 'none',
+                          color: '#94a3b8',
+                          cursor: 'pointer',
+                          padding: '4px'
+                        }}
+                      >
+                        {showEditPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                    <span style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '3px', display: 'block' }}>
+                      Only type here if you wish to reset or change their password.
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer" style={{ borderTop: '1px solid var(--border-color)', padding: '1rem 1.25rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => { setIsEditUserOpen(false); setEditingUser(null); }}
+                  disabled={isSavingUser}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={isSavingUser}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Check size={16} />
+                  <span>{isSavingUser ? 'Saving Changes...' : 'Save User Changes'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE USER CONFIRMATION MODAL */}
+      {isDeleteUserModalOpen && userToDelete && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content" style={{ maxWidth: '540px', width: '92%' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid rgba(239, 68, 68, 0.25)' }}>
+              <div className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f87171' }}>
+                <Trash2 size={20} color="#ef4444" />
+                <span>Delete Staff User Account</span>
+              </div>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => { setIsDeleteUserModalOpen(false); setUserToDelete(null); }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="modal-body" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <p style={{ margin: 0, fontSize: '0.925rem', color: '#e2e8f0', lineHeight: 1.5 }}>
+                  Are you sure you want to remove user account <strong>"{userToDelete.name}"</strong>?
+                </p>
+                <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                  {userToDelete.email} • Role: <span className="badge badge-primary" style={{ fontSize: '0.7rem' }}>{userToDelete.role}</span>
+                </div>
+              </div>
+
+              {/* Inspection of associated transactions */}
+              {(() => {
+                const salesCount = sales?.filter(s => s.salespersonId === userToDelete.id).length || 0;
+                const isInvestor = userToDelete.role === 'INVESTOR' || investments?.some(i => i.investorName?.toLowerCase() === userToDelete.name?.toLowerCase());
+
+                if (salesCount > 0 || isInvestor) {
+                  return (
+                    <div style={{
+                      background: 'rgba(245, 158, 11, 0.1)',
+                      border: '1px solid rgba(245, 158, 11, 0.3)',
+                      borderRadius: '8px',
+                      padding: '0.85rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.825rem', fontWeight: 700, color: '#fbbf24' }}>
+                        <AlertTriangle size={16} />
+                        <span>Historical Activity Detected</span>
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: '#e2e8f0', lineHeight: 1.4 }}>
+                        {salesCount > 0 && <div>• Linked to <strong>{salesCount} sales invoices</strong> as salesperson.</div>}
+                        {isInvestor && <div>• Linked to <strong>Investor profit sharing and capital accounts</strong>.</div>}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>
+                        Safe Deactivation is recommended to preserve transaction history and financial reporting audits.
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div style={{
+                    background: 'rgba(16, 185, 129, 0.08)',
+                    border: '1px solid rgba(16, 185, 129, 0.25)',
+                    borderRadius: '8px',
+                    padding: '0.75rem',
+                    fontSize: '0.8rem',
+                    color: '#34d399',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}>
+                    <CheckCircle2 size={16} />
+                    <span>No historical sales transactions linked to this user. Safe for permanent deletion.</span>
+                  </div>
+                );
+              })()}
+
+              {/* Deletion Mode Selection */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                <label className="form-label" style={{ marginBottom: 0 }}>Choose Action Mode:</label>
+
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '8px',
+                  background: deleteMode === 'PERMANENT' ? 'rgba(239, 68, 68, 0.12)' : 'rgba(15, 23, 42, 0.3)',
+                  border: deleteMode === 'PERMANENT' ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid var(--border-color)',
+                  padding: '0.75rem',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}>
+                  <input
+                    type="radio"
+                    name="deleteMode"
+                    value="PERMANENT"
+                    checked={deleteMode === 'PERMANENT'}
+                    onChange={() => setDeleteMode('PERMANENT')}
+                    style={{ marginTop: '3px', accentColor: '#ef4444' }}
+                  />
+                  <div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f87171' }}>
+                      Permanent Delete (Purge Account)
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                      Completely removes the user profile, credentials, and active session tokens from the central database.
+                    </div>
+                  </div>
+                </label>
+
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '8px',
+                  background: deleteMode === 'DEACTIVATE' ? 'rgba(56, 189, 248, 0.12)' : 'rgba(15, 23, 42, 0.3)',
+                  border: deleteMode === 'DEACTIVATE' ? '1px solid rgba(56, 189, 248, 0.4)' : '1px solid var(--border-color)',
+                  padding: '0.75rem',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}>
+                  <input
+                    type="radio"
+                    name="deleteMode"
+                    value="DEACTIVATE"
+                    checked={deleteMode === 'DEACTIVATE'}
+                    onChange={() => setDeleteMode('DEACTIVATE')}
+                    style={{ marginTop: '3px', accentColor: '#38bdf8' }}
+                  />
+                  <div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#38bdf8' }}>
+                      Safely Deactivate & Archive (Preserve Audit Trails)
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                      Revokes all active sessions and sets status to DEACTIVATED without removing historical records.
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div className="modal-footer" style={{ borderTop: '1px solid var(--border-color)', padding: '1rem 1.25rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => { setIsDeleteUserModalOpen(false); setUserToDelete(null); }}
+                disabled={isProcessingUserDelete}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={`btn ${deleteMode === 'PERMANENT' ? 'btn-danger' : 'btn-primary'} btn-sm`}
+                onClick={handleConfirmDeleteUser}
+                disabled={isProcessingUserDelete}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Trash2 size={15} />
+                <span>
+                  {isProcessingUserDelete 
+                    ? (deleteMode === 'PERMANENT' ? 'Deleting User...' : 'Deactivating...') 
+                    : (deleteMode === 'PERMANENT' ? 'Confirm Permanent Delete' : 'Confirm Safe Deactivation')}
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       )}

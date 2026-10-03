@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { requireAuth } from '@/lib/auth';
-import { SYSTEM_PERMISSIONS } from '../seed-permissions/route';
+import { SYSTEM_PERMISSIONS } from '@/lib/permissions';
 
 export const dynamic = 'force-dynamic';
 

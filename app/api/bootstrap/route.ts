@@ -447,7 +447,7 @@ export async function GET(req: NextRequest) {
     let activePermissions = permissionsList;
     if (activePermissions.length === 0) {
       try {
-        const { SYSTEM_PERMISSIONS } = await import('@/app/api/admin/database/seed-permissions/route');
+        const { SYSTEM_PERMISSIONS } = await import('@/lib/permissions');
         for (const p of SYSTEM_PERMISSIONS) {
           await prisma.permission.upsert({ where: { id: p.id }, update: p, create: p });
         }

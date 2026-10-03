@@ -103,7 +103,7 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ newPassword })
       }),
-    deleteUser: (id: string) => request<{ success: boolean; message: string }>(`/api/auth/users/${id}`, {
+    deleteUser: (id: string, permanent: boolean = true) => request<{ success: boolean; message: string }>(`/api/auth/users/${id}${permanent ? '?permanent=true&force=true' : ''}`, {
       method: 'DELETE'
     }),
     getRoles: () => request<{ success: boolean; data: any[] }>('/api/auth/roles'),

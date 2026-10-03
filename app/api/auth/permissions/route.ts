@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth';
-import { SYSTEM_PERMISSIONS } from '@/app/api/admin/database/seed-permissions/route';
+import { SYSTEM_PERMISSIONS } from '@/lib/permissions';
 
 export async function GET(req: NextRequest) {
   const user = await requireAuth(req);

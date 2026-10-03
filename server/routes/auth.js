@@ -467,7 +467,7 @@ authRouter.post('/users', requireAuth, requirePermission('users.manage'), (req, 
 authRouter.put('/users/:id', requireAuth, requirePermission('users.manage'), (req, res) => {
   try {
     const { id } = req.params;
-    const { name, phone, role, branchId, allowedBranchIds, status, employeeId } = req.body;
+    const { name, email, phone, role, branchId, allowedBranchIds, status, employeeId, password } = req.body;
 
     const targetUser = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
     if (!targetUser) {
@@ -479,34 +479,105 @@ authRouter.put('/users/:id', requireAuth, requirePermission('users.manage'), (re
       return res.status(403).json({ success: false, error: 'Cannot modify Super Admin accounts.' });
     }
 
+    const cleanEmail = email ? email.trim().toLowerCase() : targetUser.email;
+    if (cleanEmail !== targetUser.email) {
+      const emailConflict = db.prepare('SELECT id FROM users WHERE email = ? AND id != ?').get(cleanEmail, id);
+      if (emailConflict) {
+        return res.status(400).json({ success: false, error: 'An account with this email address already exists.' });
+      }
+    }
+
     const roleRow = role ? db.prepare('SELECT id FROM roles WHERE code = ? OR name = ?').get(role, role) : null;
     const branchesJson = allowedBranchIds ? JSON.stringify(allowedBranchIds) : targetUser.allowed_branch_ids;
+    const newPasswordHash = password && password.length >= 6 ? hashPassword(password.trim()) : targetUser.password_hash;
 
     transaction(() => {
       db.prepare(`
         UPDATE users
         SET name = COALESCE(?, name),
+            email = ?,
             phone = COALESCE(?, phone),
             role = COALESCE(?, role),
             role_id = COALESCE(?, role_id),
             branch_id = COALESCE(?, branch_id),
+            primary_branch_id = COALESCE(?, primary_branch_id),
             allowed_branch_ids = ?,
             status = COALESCE(?, status),
-            employee_id = COALESCE(?, employee_id)
+            employee_id = COALESCE(?, employee_id),
+            password_hash = ?
         WHERE id = ?
-      `).run(name, phone, role, roleRow?.id, branchId, branchesJson, status, employeeId, id);
+      `).run(name, cleanEmail, phone, role, roleRow?.id, branchId, branchId, branchesJson, status, employeeId, newPasswordHash, id);
 
       db.prepare(`
         INSERT INTO audit_logs (id, timestamp, user_id, user_name, action, module, record_id, details, ip_address)
         VALUES (?, datetime('now'), ?, ?, 'USER_UPDATED', 'SETTINGS', ?, ?, ?)
       `).run(
         'audit-' + Date.now(), req.user.id, req.user.name, id,
-        `Updated account profile for ${targetUser.name} (${targetUser.email}).`,
+        `Updated account profile for ${targetUser.name} (${cleanEmail}).`,
         req.ip || '127.0.0.1'
       );
     });
 
     res.json({ success: true, message: 'User updated successfully.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * User Management: Delete User Account (Super Admin / Admin)
+ */
+authRouter.delete('/users/:id', requireAuth, (req, res) => {
+  try {
+    const { id } = req.params;
+    if (req.user.role !== 'SUPER_ADMIN' && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ success: false, error: 'Only Super Admin or Admin can delete users.' });
+    }
+    if (req.user.id === id) {
+      return res.status(400).json({ success: false, error: 'Cannot delete your own active account.' });
+    }
+
+    const targetUser = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+    if (!targetUser) {
+      return res.status(404).json({ success: false, error: 'User not found.' });
+    }
+    if (targetUser.role === 'SUPER_ADMIN' && req.user.role !== 'SUPER_ADMIN') {
+      return res.status(403).json({ success: false, error: 'Cannot delete Super Admin account.' });
+    }
+
+    const isPermanent = req.query.permanent === 'true' || req.query.force === 'true';
+
+    transaction(() => {
+      // Invalidate sessions
+      db.prepare('DELETE FROM sessions WHERE user_id = ?').run(id);
+
+      if (isPermanent) {
+        db.prepare('DELETE FROM users WHERE id = ?').run(id);
+        db.prepare(`
+          INSERT INTO audit_logs (id, timestamp, user_id, user_name, action, module, record_id, details, ip_address)
+          VALUES (?, datetime('now'), ?, ?, 'USER_DELETED', 'SETTINGS', ?, ?, ?)
+        `).run(
+          'audit-' + Date.now(), req.user.id, req.user.name, id,
+          `Permanently deleted staff user ${targetUser.name} (${targetUser.email}).`,
+          req.ip || '127.0.0.1'
+        );
+      } else {
+        db.prepare('UPDATE users SET status = "DEACTIVATED", active = 0 WHERE id = ?').run(id);
+        db.prepare(`
+          INSERT INTO audit_logs (id, timestamp, user_id, user_name, action, module, record_id, details, ip_address)
+          VALUES (?, datetime('now'), ?, ?, 'USER_DEACTIVATED', 'SETTINGS', ?, ?, ?)
+        `).run(
+          'audit-' + Date.now(), req.user.id, req.user.name, id,
+          `Safely deactivated staff user ${targetUser.name} (${targetUser.email}).`,
+          req.ip || '127.0.0.1'
+        );
+      }
+    });
+
+    res.json({
+      success: true,
+      message: isPermanent ? `User ${targetUser.name} deleted successfully.` : `User ${targetUser.name} safely deactivated.`
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

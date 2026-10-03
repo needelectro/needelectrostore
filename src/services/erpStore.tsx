@@ -74,7 +74,8 @@ interface ERPContextType {
 
   // User Management
   createUser: (userData: { name: string; email: string; phone: string; role: UserRole; branchId: string; allowedBranchIds?: string[]; employeeId?: string; password: string; status?: AccountStatus; username?: string }) => Promise<{ success: boolean; error?: string; user?: User }>;
-  updateUser: (userData: User) => { success: boolean; error?: string };
+  updateUser: (userData: User) => Promise<{ success: boolean; error?: string }>;
+  deleteUser: (userId: string, permanent?: boolean) => Promise<{ success: boolean; error?: string }>;
   setUserStatus: (userId: string, status: AccountStatus) => { success: boolean; error?: string };
   resetUserPassword: (userId: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
   revokeUserSessions: (userId: string) => { success: boolean; error?: string };
@@ -795,7 +796,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { success: true, user: newUser };
   };
 
-  const updateUser = (userData: User): { success: boolean; error?: string } => {
+  const updateUser = async (userData: User): Promise<{ success: boolean; error?: string }> => {
     if (currentUser.role !== 'SUPER_ADMIN' && currentUser.role !== 'ADMIN') {
       return { success: false, error: 'Unauthorized to update users.' };
     }
@@ -806,14 +807,75 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, error: 'Cannot modify Super Admin privileges.' };
     }
 
-    setUsers(prev => prev.map(u => u.id === userData.id ? { ...u, ...userData } : u));
+    // Email uniqueness check if email was updated
+    const cleanEmail = userData.email?.trim().toLowerCase();
+    if (cleanEmail && cleanEmail !== existing?.email.toLowerCase()) {
+      if (users.some(u => u.id !== userData.id && u.email.toLowerCase() === cleanEmail)) {
+        addToast('error', 'Duplicate Email', 'Another staff account is already using this email address.');
+        return { success: false, error: 'Another staff account is already using this email address.' };
+      }
+    }
+
+    const updatedUser = {
+      ...userData,
+      email: cleanEmail || userData.email,
+      active: userData.status ? userData.status === 'ACTIVE' : userData.active
+    };
+
+    setUsers(prev => prev.map(u => u.id === userData.id ? { ...u, ...updatedUser } : u));
+
     logAction('SETTINGS', 'USER_UPDATED', userData.id, `Updated account profile for ${userData.name}.`);
     addToast('success', 'User Updated', `Account details for ${userData.name} saved.`);
 
-    // Persist to central SQLite database
-    api.auth.updateUser(userData.id, userData).catch(err => console.error('Failed to sync user to database:', err));
+    try {
+      await api.auth.updateUser(userData.id, updatedUser);
+    } catch (err: any) {
+      console.error('Failed to sync user to database:', err);
+    }
 
     return { success: true };
+  };
+
+  const deleteUser = async (userId: string, permanent: boolean = true): Promise<{ success: boolean; error?: string }> => {
+    if (currentUser.role !== 'SUPER_ADMIN' && currentUser.role !== 'ADMIN') {
+      addToast('error', 'Unauthorized', 'Only Super Admin can delete user accounts.');
+      return { success: false, error: 'Unauthorized. Only Super Admin can delete user accounts.' };
+    }
+
+    if (userId === currentUser.id) {
+      addToast('error', 'Cannot Delete Self', 'Cannot delete your own active Super Admin account.');
+      return { success: false, error: 'Cannot delete your own active Super Admin account.' };
+    }
+
+    const targetUser = users.find(u => u.id === userId);
+    if (!targetUser) {
+      return { success: false, error: 'User not found.' };
+    }
+
+    if (targetUser.role === 'SUPER_ADMIN' && currentUser.role !== 'SUPER_ADMIN') {
+      addToast('error', 'Protected Account', 'Only Super Admin can delete another Super Admin.');
+      return { success: false, error: 'Only Super Admin can delete another Super Admin.' };
+    }
+
+    try {
+      const res = await api.auth.deleteUser(userId, permanent);
+      if (!res || !res.success) {
+        throw new Error((res as any)?.error || res?.message || 'Failed to delete user.');
+      }
+
+      if (permanent) {
+        setUsers(prev => prev.filter(u => u.id !== userId));
+      } else {
+        setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: 'DEACTIVATED' as AccountStatus, active: false } : u));
+      }
+
+      logAction('SETTINGS', 'SUPER_ADMIN_USER_DELETE', userId, `Super Admin ${currentUser.name} removed staff account ${targetUser.name} (${targetUser.email}).`);
+      addToast('info', 'User Removed', res.message || `Account for ${targetUser.name} was removed.`);
+      return { success: true };
+    } catch (err: any) {
+      addToast('error', 'Delete Failed', err.message || 'Could not delete user.');
+      return { success: false, error: err.message };
+    }
   };
 
   const setUserStatus = (userId: string, status: AccountStatus): { success: boolean; error?: string } => {
@@ -2555,12 +2617,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const u = users.find(x => x.id === employeeId || x.employeeId === employeeId);
       const targetId = u ? u.id : employeeId;
-      const res = await api.auth.deleteUser(targetId);
-      if (!res || !res.success) throw new Error((res as any)?.error || 'Failed to delete user.');
-      await refreshFromDatabase();
-      logAction('SETTINGS', 'SUPER_ADMIN_DELETE_USER', targetId, `Deleted user ${u?.name || targetId}`);
-      addToast('info', 'User Deleted', `User ${u?.name || targetId} removed.`);
-      return { success: true };
+      return await deleteUser(targetId, true);
     } catch (err: any) {
       addToast('error', 'Delete Failed', err.message);
       return { success: false, error: err.message };
@@ -2645,6 +2702,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteRole,
         createUser,
         updateUser,
+        deleteUser,
         setUserStatus,
         resetUserPassword,
         revokeUserSessions,
