@@ -199,14 +199,14 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
             Supplier Inflow Orders & Stock Receipts ({filteredPurchases.length})
           </h3>
 
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <div style={{ position: 'relative' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', maxWidth: '100%' }}>
+            <div style={{ position: 'relative', width: 'min(220px, 100%)' }}>
               <Search size={15} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input 
                 type="text" 
                 className="form-control" 
                 placeholder="Search PO or supplier..." 
-                style={{ paddingLeft: '32px', width: '220px', height: '34px', fontSize: '0.8rem' }}
+                style={{ paddingLeft: '32px', width: '100%', height: '34px', fontSize: '0.8rem' }}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
               />
@@ -214,7 +214,7 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
 
             <select 
               className="form-control" 
-              style={{ height: '34px', fontSize: '0.8rem' }}
+              style={{ height: '34px', fontSize: '0.8rem', width: 'auto', minWidth: '140px' }}
               value={filterSupplier}
               onChange={e => setFilterSupplier(e.target.value)}
             >
@@ -302,7 +302,7 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
 
             <form onSubmit={handleCreatePurchaseSubmit}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '1rem' }}>
                   <div className="form-group">
                     <label className="form-label">Select Supplier *</label>
                     <select 
@@ -343,7 +343,7 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
                     {items.map((row, idx) => {
                       const prod = products.find(p => p.id === row.productId);
                       return (
-                        <div key={idx} style={{ background: 'var(--bg-card-muted)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', display: 'grid', gridTemplateColumns: '2fr 1fr 1.2fr 2.5fr auto', gap: '0.5rem', alignItems: 'center' }}>
+                        <div key={idx} className="purchase-item-row">
                           <select
                             className="form-select"
                             value={row.productId}
@@ -413,7 +413,7 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
                 </div>
 
                 {/* Financial Overview */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 160px), 1fr))', gap: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
                   <div>
                     <label className="form-label">Total Purchase Cost</label>
                     <div style={{ fontWeight: '800', fontSize: '1.25rem', color: 'var(--brand-primary)' }}>
@@ -506,7 +506,7 @@ export const PurchaseModule: React.FC<PurchaseModuleProps> = ({ onNavigate }) =>
                   </select>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '0.75rem' }}>
                   <div>
                     <label className="form-label">Payment Amount (৳) *</label>
                     <input

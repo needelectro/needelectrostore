@@ -72,11 +72,11 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   const totalResults = matchedProducts.length + matchedSerials.length + matchedCustomers.length + matchedSales.length + matchedEmi.length + matchedServices.length;
 
   return (
-    <div className="modal-overlay" style={{ alignItems: 'flex-start', paddingTop: '10vh' }} onClick={onClose}>
+    <div className="modal-overlay" style={{ alignItems: 'flex-start', paddingTop: 'clamp(0.5rem, 5vh, 4rem)', padding: '0.5rem' }} onClick={onClose}>
       <div 
         className="modal-content modal-content-lg" 
         onClick={e => e.stopPropagation()}
-        style={{ borderRadius: 'var(--radius-xl)', overflow: 'hidden' }}
+        style={{ borderRadius: 'var(--radius-xl)', overflow: 'hidden', maxHeight: 'calc(92dvh - env(safe-area-inset-bottom, 0px))', width: '100%', maxWidth: '780px' }}
       >
         {/* Search Input Bar */}
         <div style={{

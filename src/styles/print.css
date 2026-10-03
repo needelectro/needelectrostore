@@ -9,7 +9,17 @@
   display: flex;
   justify-content: center;
   overflow-y: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   max-height: calc(90vh - 65px);
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .a4-preview-body {
+    padding: 0.5rem !important;
+    justify-content: flex-start !important;
+  }
 }
 
 .a4-print-document {

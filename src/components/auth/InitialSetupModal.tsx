@@ -84,18 +84,21 @@ export const InitialSetupModal: React.FC<InitialSetupModalProps> = ({ isOpen, on
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 999999,
-      padding: '1.5rem',
-      fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif"
+      padding: '1rem 0.5rem',
+      fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+      overflowY: 'auto'
     }}>
       <div style={{
         width: '100%',
         maxWidth: '560px',
+        maxHeight: 'calc(96dvh - env(safe-area-inset-bottom, 0px))',
         background: '#0f172a',
         border: '1px solid rgba(2, 132, 199, 0.4)',
-        borderRadius: '24px',
-        padding: '2.5rem',
+        borderRadius: '20px',
+        padding: '1.75rem 1.25rem',
         boxShadow: '0 30px 70px -15px rgba(0, 0, 0, 0.8), 0 0 50px rgba(2, 132, 199, 0.2)',
-        position: 'relative'
+        position: 'relative',
+        overflowY: 'auto'
       }}>
         {/* Branding header */}
         <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>

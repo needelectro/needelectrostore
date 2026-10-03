@@ -500,7 +500,7 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
       </div>
 
       {/* KPI Stats Bar */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '1rem' }}>
         <div className="erp-card" style={{ padding: '1rem' }}>
           <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Total Accounts</div>
           <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff', marginTop: '0.25rem' }}>{users.length}</div>
@@ -934,7 +934,7 @@ export const RolesModule: React.FC<RolesModuleProps> = ({ onNavigate }) => {
 
       {/* TAB 4: SUPER ADMIN OVERVIEW & SETUP STATUS */}
       {activeTab === 'SETUP' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.25rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))', gap: '1.25rem' }}>
           {/* Setup Checklist */}
           <div className="erp-card" style={{ padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>

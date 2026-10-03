@@ -8,9 +8,19 @@
   padding: 0;
 }
 
-html, body, #root {
+html {
   height: 100%;
   width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body, #root {
+  min-height: 100%;
+  width: 100%;
+  max-width: 100%;
   font-family: var(--font-family);
   background-color: var(--bg-app);
   color: var(--text-primary);
@@ -18,6 +28,7 @@ html, body, #root {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  position: relative;
 }
 
 /* Custom Scrollbar */
@@ -41,17 +52,22 @@ html, body, #root {
 .app-container {
   display: flex;
   height: 100vh;
-  width: 100vw;
+  height: 100dvh;
+  width: 100%;
+  max-width: 100%;
   overflow: hidden;
   position: relative;
 }
 
 .main-viewport {
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   min-width: 0;
+  width: 100%;
+  max-width: 100%;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background-color: var(--bg-app);
   transition: all var(--transition-normal);
@@ -421,6 +437,7 @@ select:-webkit-autofill:focus {
 .table-container {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
   background: var(--bg-card);
@@ -710,20 +727,31 @@ select:-webkit-autofill:focus {
 html, body {
   overflow-x: hidden;
   width: 100%;
-  max-width: 100vw;
+  max-width: 100%;
+}
+
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.sidebar-close-btn {
+  display: none;
 }
 
 /* Tablet & Mobile Breakpoint (<= 1024px) */
 @media (max-width: 1024px) {
   .app-container {
     flex-direction: column;
-    width: 100vw;
+    width: 100%;
+    max-width: 100%;
     overflow-x: hidden;
   }
 
   .main-viewport {
-    width: 100vw;
-    min-width: 100vw;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
 
   /* Slide-over Mobile Drawer Sidebar */
@@ -733,16 +761,23 @@ html, body {
     left: 0 !important;
     bottom: 0 !important;
     height: 100vh !important;
-    width: min(300px, 85vw) !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    width: min(320px, 86vw) !important;
+    max-width: 340px !important;
     z-index: 9999 !important;
     transform: translateX(-100%) !important;
     transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.7) !important;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.75) !important;
     background: var(--bg-sidebar) !important;
   }
 
   .sidebar.sidebar-open {
     transform: translateX(0) !important;
+  }
+
+  .sidebar-close-btn {
+    display: flex !important;
   }
 
   /* Header Top Navigation */
@@ -759,7 +794,7 @@ html, body {
 /* Header Auto-Alignment & Responsive System */
 .header {
   width: 100% !important;
-  max-width: 100vw !important;
+  max-width: 100% !important;
   box-sizing: border-box !important;
   overflow: visible !important;
   padding: 0 1rem !important;
@@ -822,14 +857,14 @@ html, body {
 
 /* Smartphone Breakpoint (<= 768px) */
 @media (max-width: 768px) {
-  /* Prevent iOS zoom on input focus */
-  input, select, textarea {
+  /* Prevent iOS auto-zoom on input focus */
+  input, select, textarea, .form-input, .form-select, .form-control {
     font-size: 16px !important;
   }
 
   .header {
     padding: 0 0.5rem !important;
-    height: 56px !important;
+    height: var(--header-height-mobile, 56px) !important;
     gap: 0.35rem !important;
   }
 
@@ -850,8 +885,9 @@ html, body {
   }
 
   .content-scrollable {
-    padding: 0.85rem !important;
-    padding-bottom: 5.5rem !important; /* extra padding for mobile bottom bar */
+    padding: 0.75rem !important;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; /* safe spacing for mobile bottom bar */
+    -webkit-overflow-scrolling: touch !important;
   }
 
   /* Page Header */
@@ -860,10 +896,19 @@ html, body {
     align-items: flex-start !important;
     gap: 0.75rem !important;
     margin-bottom: 1rem !important;
+    width: 100% !important;
+  }
+
+  .page-header > div:last-child {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
   }
 
   .page-title-group h1 {
-    font-size: 1.35rem !important;
+    font-size: 1.25rem !important;
+    flex-wrap: wrap !important;
   }
 
   /* Grids & Cards */
@@ -873,7 +918,7 @@ html, body {
   }
 
   .erp-card {
-    padding: 1rem !important;
+    padding: 0.85rem !important;
   }
 
   /* Full responsive tables with smooth horizontal scroll */
@@ -884,31 +929,54 @@ html, body {
     max-width: 100% !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
     border-radius: var(--radius-md);
+  }
+
+  .table-container .erp-table,
+  .table-responsive .erp-table,
+  .table-wrapper .erp-table {
+    min-width: 640px; /* Keeps all columns properly readable without text squishing */
   }
 
   /* Modal responsive sizing */
   .modal-overlay {
     padding: 0.5rem !important;
+    align-items: center !important;
   }
 
   .modal-content,
-  .modal-dialog {
+  .modal-dialog,
+  .modal-content-lg,
+  .modal-content-xl {
     width: 100% !important;
-    max-width: 95vw !important;
-    max-height: 92vh !important;
-    margin: auto !important;
-    padding: 1rem !important;
+    max-width: 100% !important;
+    max-height: calc(94dvh - env(safe-area-inset-bottom, 0px)) !important;
+    margin: 0 !important;
+    border-radius: 18px !important;
+  }
+
+  .modal-header {
+    padding: 0.85rem 1rem !important;
   }
 
   .modal-body {
     padding: 1rem !important;
+    max-height: 72vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   .modal-footer {
     padding: 0.75rem 1rem !important;
-    flex-wrap: wrap !important;
+    flex-direction: column-reverse !important;
+    gap: 0.5rem !important;
+  }
+
+  .modal-footer button,
+  .modal-footer .btn {
+    width: 100% !important;
+    justify-content: center !important;
   }
 
   /* Buttons on small screens */
@@ -918,6 +986,51 @@ html, body {
     width: 100% !important;
   }
 }
+
+/* Screen width <= 640px: tighten form grids and popovers */
+@media (max-width: 640px) {
+  /* Collapse multi-column form grids inside modal dialogs to single column */
+  .modal-body [style*="grid-template-columns"],
+  .modal-body [style*="gridTemplateColumns"],
+  .modal-content [style*="grid-template-columns"],
+  .modal-content [style*="gridTemplateColumns"],
+  .modal-container [style*="grid-template-columns"],
+  .modal-container [style*="gridTemplateColumns"],
+  .modal-body.grid,
+  .form-grid-2,
+  .form-grid-3,
+  .form-grid-4 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Anchor dropdown popovers cleanly within screen bounds */
+  .header .erp-card[style*="position: fixed"] {
+    right: 8px !important;
+    left: 8px !important;
+    width: auto !important;
+    max-width: calc(100vw - 16px) !important;
+  }
+}
+
+/* Purchase item intake row responsive layout */
+.purchase-item-row {
+  background: var(--bg-card-muted);
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.2fr 2.5fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .purchase-item-row {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+}
+
 
 /* Mobile Bottom Navigation Dock for ERP */
 .mobile-bottom-nav {
@@ -931,15 +1044,24 @@ html, body {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 60px;
-    background: rgba(11, 17, 33, 0.95);
+    height: calc(58px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: rgba(11, 17, 33, 0.96);
     backdrop-filter: blur(16px);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border-color);
     z-index: 80;
     align-items: center;
     justify-content: space-around;
-    padding: 0 0.5rem;
+    padding-left: max(0.5rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.5rem, env(safe-area-inset-right, 0px));
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  [data-theme='light'] .mobile-bottom-nav {
+    background: rgba(255, 255, 255, 0.96);
+    border-top-color: #e2e8f0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
   }
 
   .mobile-bottom-nav-item {
@@ -958,6 +1080,8 @@ html, body {
     cursor: pointer;
     text-decoration: none;
     transition: all 0.15s ease;
+    min-height: 44px;
+    min-width: 44px;
   }
 
   .mobile-bottom-nav-item.active,
@@ -976,25 +1100,108 @@ html, body {
 }
 
 /* =========================================================================
+   AUTHENTICATION & LOGIN RESPONSIVE SYSTEM
+   ========================================================================= */
+.login-screen-wrapper {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 100%;
+  background: radial-gradient(circle at 15% 50%, rgba(0, 140, 255, 0.15), transparent 45%), radial-gradient(circle at 85% 30%, rgba(0, 43, 91, 0.8), #070d1e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  font-family: var(--font-family);
+  position: relative;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.login-card-container {
+  width: 100%;
+  max-width: 1040px;
+  background: rgba(15, 23, 42, 0.90);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  border: 1px solid rgba(0, 140, 255, 0.3);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 40px rgba(0, 140, 255, 0.15);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.login-brand-panel {
+  padding: 3rem;
+  background: linear-gradient(135deg, rgba(0, 43, 91, 0.95) 0%, rgba(9, 13, 22, 0.98) 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.login-form-panel {
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-form-panel .form-input {
+  min-height: 44px;
+}
+
+@media (max-width: 1024px) {
+  .login-card-container {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+    border-radius: 20px;
+  }
+
+  .login-brand-panel {
+    display: none; /* Hide secondary marketing column on mobile, prioritizing the form */
+  }
+
+  .login-form-panel {
+    padding: 2rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-screen-wrapper {
+    padding: 1rem 0.5rem;
+    align-items: flex-start;
+  }
+
+  .login-card-container {
+    border-radius: 16px;
+    margin-top: 2.5rem;
+  }
+
+  .login-form-panel {
+    padding: 1.5rem 1rem;
+  }
+}
+
+/* =========================================================================
    POS MODULE — RESPONSIVE LAYOUT FOR SMALL LAPTOPS & SCREENS
-   Ensures the billing cart + checkout button is always fully visible
    ========================================================================= */
 
-/* On laptops 1280px and below: tighten grid ratio */
 @media (max-width: 1280px) {
   .pos-main-grid {
     grid-template-columns: 1.2fr 1fr !important;
   }
 }
 
-/* On small laptops (≤ 1100px width) — tighter grid */
 @media (max-width: 1100px) {
   .pos-main-grid {
     grid-template-columns: 1fr 1fr !important;
   }
 }
 
-/* On tablet/small screens — stack vertically */
 @media (max-width: 900px) {
   .pos-main-grid {
     grid-template-columns: 1fr !important;
@@ -1007,14 +1214,12 @@ html, body {
   }
 }
 
-/* Short-screen laptops: use max-height viewport approach for billing panel */
 @media (max-height: 800px) and (min-width: 900px) {
   .pos-billing-panel {
     overflow-y: auto !important;
   }
 }
 
-/* Very short screens */
 @media (max-height: 650px) {
   .pos-main-grid {
     overflow-y: auto !important;

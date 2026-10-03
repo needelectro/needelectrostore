@@ -592,7 +592,7 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
           </div>
 
           {/* Overdue & Today Due Highlights */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '1.25rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.25rem' }}>
             {/* Overdue */}
             <div className="erp-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -820,7 +820,7 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
       {/* TAB 3: DEDICATED EMI COLLECTION SCREEN */}
       {/* ------------------------------------------------------------- */}
       {activeTab === 'collect' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.25rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.25rem' }}>
           {/* Left: Find & View Account Schedule */}
           <div className="erp-card" style={{ padding: '1.25rem' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -1082,7 +1082,7 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
       {/* TAB 4: NEW EMI SALE WIZARD */}
       {/* ------------------------------------------------------------- */}
       {activeTab === 'new_emi' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '1.25rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.25rem' }}>
           {/* Left: Input Form */}
           <div className="erp-card" style={{ padding: '1.25rem' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1394,7 +1394,7 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: '1rem' }}>
             {[...overdueAccounts, ...dueTodayAccounts].map(acc => {
               const isOverdue = acc.installments.some(i => i.status === 'OVERDUE');
               const msg = getNotificationText(acc, reminderLanguage);
@@ -1574,7 +1574,7 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
             </div>
           ) : (
             /* Plans Grid */
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.25rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: '1.25rem' }}>
               {emiPlans.map(plan => {
                 const samplePrice = 50000;
                 const sampleDown = Math.round((samplePrice * plan.minDownPaymentPercent) / 100);
@@ -2015,7 +2015,7 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
 
                 <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                   {/* Summary Bar */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', background: 'var(--bg-card-muted)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '0.75rem', background: 'var(--bg-card-muted)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
                     <div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Laptop Model</div>
                       <div style={{ fontWeight: '700', fontSize: '0.85rem' }}>{acc.productName}</div>

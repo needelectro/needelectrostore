@@ -77,6 +77,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
             display: 'none', 
             alignItems: 'center', 
             justifyContent: 'center', 
+            minWidth: '40px',
+            minHeight: '40px',
             padding: '0.45rem', 
             borderRadius: '8px' 
           }}
@@ -297,9 +299,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
               style={{
                 position: 'fixed',
                 top: 'calc(var(--header-height, 60px) + 4px)',
-                right: '16px',
+                right: 'max(8px, calc((100vw - 340px) / 2))',
                 width: '340px',
-                maxWidth: 'calc(100vw - 32px)',
+                maxWidth: 'calc(100vw - 16px)',
                 zIndex: 9999,
                 padding: '0',
                 boxShadow: '0 12px 32px rgba(0, 0, 0, 0.28)',
@@ -402,9 +404,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
               style={{
                 position: 'fixed',
                 top: 'calc(var(--header-height, 60px) + 4px)',
-                right: '16px',
-                width: '260px',
-                maxWidth: 'calc(100vw - 32px)',
+                right: 'max(8px, calc((100vw - 280px) / 2))',
+                width: '280px',
+                maxWidth: 'calc(100vw - 16px)',
                 zIndex: 9999,
                 padding: '0.75rem',
                 boxShadow: '0 12px 32px rgba(0, 0, 0, 0.28)'

@@ -245,7 +245,7 @@ export const ServiceModule: React.FC<ServiceModuleProps> = ({ onNavigate }) => {
 
       {/* TAB 2: TECHNICIANS */}
       {activeTab === 'technicians' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '1.25rem' }}>
           {technicians.map(tech => (
             <div key={tech.id} className="erp-card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
@@ -274,7 +274,7 @@ export const ServiceModule: React.FC<ServiceModuleProps> = ({ onNavigate }) => {
                 </div>
               </div>
 
-              <div style={{ background: 'var(--bg-card-muted)', padding: '0.75rem', borderRadius: 'var(--radius-md)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.8125rem' }}>
+              <div style={{ background: 'var(--bg-card-muted)', padding: '0.75rem', borderRadius: 'var(--radius-md)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '0.5rem', fontSize: '0.8125rem' }}>
                 <div>
                   <span style={{ color: 'var(--text-muted)' }}>Active Tasks:</span>
                   <div style={{ fontWeight: 'bold', color: tech.activeJobsCount > 0 ? '#f59e0b' : 'inherit' }}>
@@ -317,7 +317,7 @@ export const ServiceModule: React.FC<ServiceModuleProps> = ({ onNavigate }) => {
               </select>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '1rem' }}>
               <div className="form-group">
                 <label className="form-label">Service Category *</label>
                 <select 
@@ -360,7 +360,7 @@ export const ServiceModule: React.FC<ServiceModuleProps> = ({ onNavigate }) => {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '1rem' }}>
               <div className="form-group">
                 <label className="form-label">Device or Site Description *</label>
                 <input
@@ -397,7 +397,7 @@ export const ServiceModule: React.FC<ServiceModuleProps> = ({ onNavigate }) => {
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '1rem' }}>
               <div className="form-group">
                 <label className="form-label">Estimated Labor Cost (৳)</label>
                 <input
@@ -471,7 +471,7 @@ export const ServiceModule: React.FC<ServiceModuleProps> = ({ onNavigate }) => {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '0.75rem' }}>
                 <div className="form-group">
                   <label className="form-label">Payment Status</label>
                   <select 

@@ -1183,7 +1183,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
           ------------------------------------------------------------- */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))',
         gap: '1.25rem',
         marginBottom: '1.5rem'
       }}>
@@ -1205,7 +1205,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
             </span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '0.75rem' }}>
             {[
               { id: 'Cash', label: 'Physical Cash', color: '#10b981', icon: <Wallet size={15} /> },
               { id: 'bKash', label: 'bKash Merchant/Personal', color: '#e11d48', icon: <CreditCard size={15} /> },
@@ -1416,7 +1416,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
           ------------------------------------------------------------- */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))',
         gap: '1.25rem',
         marginBottom: '1.5rem'
       }}>
@@ -2583,7 +2583,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                 <strong>Internal Liquidity Movement:</strong> Moving money between Cash Drawers, Bank Accounts, or Digital Wallets updates ledger accounts without affecting business revenue or profit.
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '0.85rem', marginBottom: '1rem' }}>
                 <div className="form-group">
                   <label className="form-label">Source Account (From) *</label>
                   <select 
@@ -2625,7 +2625,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.85rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '0.85rem', marginBottom: '1rem' }}>
                 <div className="form-group">
                   <label className="form-label">Transfer Amount (৳ BDT) *</label>
                   <input 
@@ -2846,7 +2846,7 @@ export const CashManagementModule: React.FC<CashManagementModuleProps> = ({ onNa
                   padding: '1rem',
                   marginBottom: '1.25rem'
                 }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '0.75rem' }}>
                     {[
                       { note: 1000, value: note1000, setter: setNote1000 },
                       { note: 500, value: note500, setter: setNote500 },

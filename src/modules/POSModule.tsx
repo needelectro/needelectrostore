@@ -337,7 +337,7 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
       {/* Top POS Control Bar */}
       <div className="erp-card" style={{ padding: '0.85rem 1.25rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
         {/* Customer Select */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: '280px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 'min(100%, 260px)' }}>
           <label style={{ fontWeight: '700', fontSize: '0.8125rem', whiteSpace: 'nowrap' }}>Customer:</label>
           <select 
             className="form-select"

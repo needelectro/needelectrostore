@@ -27,21 +27,24 @@ export const LockScreenModal: React.FC = () => {
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 99999,
-      padding: '1.5rem',
-      fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif"
+      padding: '1rem 0.75rem',
+      fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+      overflowY: 'auto'
     }}>
       <div style={{
         width: '100%',
         maxWidth: '420px',
+        maxHeight: 'calc(94dvh - env(safe-area-inset-bottom, 0px))',
         background: '#0f172a',
         border: '1px solid rgba(2, 132, 199, 0.3)',
         borderRadius: '20px',
-        padding: '2.5rem 2rem',
+        padding: '2rem 1.5rem',
         boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px rgba(2, 132, 199, 0.15)',
         textAlign: 'center',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center'
+        alignItems: 'center',
+        overflowY: 'auto'
       }}>
         {/* Logo Icon */}
         <div style={{ marginBottom: '1.25rem' }}>

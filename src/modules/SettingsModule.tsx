@@ -184,7 +184,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ onNavigate }) =>
             1. Corporate Identity & Tax Credentials
           </h3>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 2fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '1rem' }}>
             <div className="form-group">
               <label className="form-label">Company Legal Name *</label>
               <input
@@ -207,7 +207,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ onNavigate }) =>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '1rem' }}>
             <div className="form-group">
               <label className="form-label">Hotline Phone Numbers</label>
               <input
@@ -237,7 +237,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ onNavigate }) =>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginTop: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '1rem', marginTop: '1rem' }}>
             <div className="form-group">
               <label className="form-label">Parent Concern / Affiliation (From Card)</label>
               <input
@@ -260,7 +260,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ onNavigate }) =>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '1rem', marginTop: '1rem' }}>
             <div className="form-group">
               <label className="form-label">Head Showroom Address (Shop#5, MR Plaza, Kusumbag)</label>
               <input
@@ -310,7 +310,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ onNavigate }) =>
             margin: '0 auto'
           }}>
             {/* Main Card Body */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1.3fr', minHeight: '340px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', minHeight: '340px' }}>
               {/* Left Column */}
               <div style={{
                 background: '#ffffff',
@@ -462,7 +462,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ onNavigate }) =>
             2. Invoicing, Currency & Numbering Sequences
           </h3>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '1rem' }}>
             <div className="form-group">
               <label className="form-label">Invoice Prefix</label>
               <input
@@ -500,7 +500,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ onNavigate }) =>
             3. Automated Bilingual EMI Notification Templates
           </h3>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '1.25rem' }}>
             <div className="form-group">
               <label className="form-label">Due Soon / Upcoming Notice (English)</label>
               <textarea

@@ -131,7 +131,7 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({ onNavigate }) => {
 
       {/* Report Container */}
       <div className="erp-card" style={{ padding: '1.5rem' }}>
-        <div style={{ borderBottom: '2px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ borderBottom: '2px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
           <div>
             <h2 style={{ fontSize: '1.2rem', fontWeight: '800', textTransform: 'uppercase' }}>
               NEED ELECTRO — {reportType.toUpperCase()} REPORT
@@ -251,7 +251,7 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({ onNavigate }) => {
 
         {reportType === 'financial' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '1.25rem' }}>
               <div className="erp-card" style={{ background: 'var(--bg-card-muted)' }}>
                 <h4 style={{ fontWeight: '700', marginBottom: '0.5rem', color: '#10b981' }}>Total Invoiced Inflows</h4>
                 <div style={{ fontSize: '1.5rem', fontWeight: '800' }}>

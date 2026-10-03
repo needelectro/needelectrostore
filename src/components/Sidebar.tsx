@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useERP } from '../services/erpStore';
 import {
   LayoutDashboard, ShoppingCart, ReceiptText, CalendarClock, Boxes,
   Truck, Users, PackageSearch, ShieldCheck, Wrench, Wallet,
   PieChart, BookOpen, UserCheck, GitFork, BarChart3,
   Lock, ScrollText, Settings, ChevronRight, Zap, RotateCcw, Sliders, Landmark,
-  User, Globe
+  User, Globe, X
 } from 'lucide-react';
 import { NeedElectroLogo } from './NeedElectroLogo';
 import { UserProfileModal } from './UserProfileModal';
@@ -50,6 +50,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+
+  // Close drawer on Escape key press
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   // Badges
   const overdueCount = emiAccounts.filter(e => e.installments.some(i => i.status === 'OVERDUE')).length;
@@ -137,6 +149,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           padding: '1rem 1.15rem',
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'space-between',
           borderBottom: '1px solid var(--border-color)'
         }}>
           <NeedElectroLogo 
@@ -145,6 +158,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
             showDots={false}
             showSisterConcern={false}
           />
+          {/* Accessible Close Button for Mobile Drawer */}
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close navigation menu"
+            className="sidebar-close-btn"
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'var(--bg-card-muted)',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-secondary)',
+              borderRadius: '8px',
+              width: '36px',
+              height: '36px',
+              cursor: 'pointer',
+              padding: 0,
+              flexShrink: 0
+            }}
+          >
+            <X size={18} />
+          </button>
         </div>
 
 
@@ -246,6 +281,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Sidebar Footer with Official Business Card Affiliation */}
         <div style={{
           padding: '0.75rem 1rem',
+          paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0px))',
           borderTop: '1px solid var(--border-color)',
           background: 'var(--bg-card-muted)',
           display: 'flex',

@@ -447,7 +447,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
 
             <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '1rem' }}>
                   <div className="form-group">
                     <label className="form-label">Product Name *</label>
                     <input
@@ -539,7 +539,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
                   <div style={{ fontWeight: '700', fontSize: '0.85rem', marginBottom: '0.75rem', color: 'var(--brand-primary)' }}>
                     Multi-Tier Commercial Pricing Strategy (৳ BDT)
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.75rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '0.75rem' }}>
                     <div className="form-group">
                       <label className="form-label">Purchase Price</label>
                       <input
@@ -631,7 +631,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
                 </div>
 
                 {/* Inventory & Tracking Settings */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 160px), 1fr))', gap: '1rem' }}>
                   <div className="form-group">
                     <label className="form-label">Opening Stock Quantity</label>
                     <input
@@ -694,7 +694,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
                       <Laptop size={16} color="var(--brand-primary)" />
                       Dedicated Laptop Hardware Specifications
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))', gap: '0.75rem' }}>
                       <div className="form-group">
                         <label className="form-label">Processor (CPU)</label>
                         <input

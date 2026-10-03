@@ -21,7 +21,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ onClose }) =
       <div className="modal-overlay" style={{ zIndex: 10000 }} onClick={onClose}>
         <div 
           className="modal-content" 
-          style={{ maxWidth: '480px', width: '92vw', padding: 0, overflow: 'hidden' }}
+          style={{ maxWidth: '480px', width: '92vw', maxHeight: 'calc(94dvh - env(safe-area-inset-bottom, 0px))', padding: 0, overflowY: 'auto' }}
           onClick={e => e.stopPropagation()}
         >
           {/* Header Banner */}

@@ -126,8 +126,8 @@ export const SupplierModule: React.FC<SupplierModuleProps> = ({ onNavigate }) =>
       </div>
 
       <div className="erp-card" style={{ padding: '1.25rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-          <div style={{ position: 'relative', width: '320px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div style={{ position: 'relative', width: '320px', maxWidth: '100%' }}>
             <Search size={16} style={{ position: 'absolute', left: '10px', top: '11px', color: 'var(--text-muted)' }} />
             <input
               type="text"
@@ -243,7 +243,7 @@ export const SupplierModule: React.FC<SupplierModuleProps> = ({ onNavigate }) =>
 
             <form onSubmit={handleSaveSupplier}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '0.75rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '0.75rem' }}>
                   <div className="form-group">
                     <label className="form-label">Company Name *</label>
                     <input
@@ -267,7 +267,7 @@ export const SupplierModule: React.FC<SupplierModuleProps> = ({ onNavigate }) =>
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.75rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '0.75rem' }}>
                   <div className="form-group">
                     <label className="form-label">Contact Representative</label>
                     <input
@@ -289,7 +289,7 @@ export const SupplierModule: React.FC<SupplierModuleProps> = ({ onNavigate }) =>
                     />
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '0.75rem' }}>
                   <div className="form-group">
                     <label className="form-label">Phone *</label>
                     <input
@@ -366,7 +366,7 @@ export const SupplierModule: React.FC<SupplierModuleProps> = ({ onNavigate }) =>
 
             <form onSubmit={handleSaveEdit}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '0.75rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '0.75rem' }}>
                   <div className="form-group">
                     <label className="form-label">Company Name *</label>
                     <input
@@ -388,7 +388,7 @@ export const SupplierModule: React.FC<SupplierModuleProps> = ({ onNavigate }) =>
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.75rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '0.75rem' }}>
                   <div className="form-group">
                     <label className="form-label">Contact Representative</label>
                     <input
@@ -408,7 +408,7 @@ export const SupplierModule: React.FC<SupplierModuleProps> = ({ onNavigate }) =>
                     />
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '0.75rem' }}>
                   <div className="form-group">
                     <label className="form-label">Phone *</label>
                     <input

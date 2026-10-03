@@ -167,7 +167,7 @@ export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate, init
       </div>
 
       {/* Main Split Layout: Customer List (Left) + 360° Profile (Right) */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.25rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '1.25rem' }}>
         {/* Left Column: Customer Directory */}
         <div className="erp-card" style={{ padding: '1.25rem', height: 'fit-content' }}>
           <div style={{ position: 'relative', marginBottom: '1rem' }}>
@@ -241,7 +241,7 @@ export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate, init
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {/* Top Bio Card */}
             <div className="erp-card" style={{ padding: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                   <div style={{
                     width: '54px',
@@ -265,7 +265,7 @@ export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate, init
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
                   {Number(selectedCustomer.currentBalance) > 0 && (
                     <button 
                       className="btn btn-primary btn-sm"
@@ -307,7 +307,7 @@ export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate, init
               </div>
 
               {/* Bio Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', fontSize: '0.8125rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 160px), 1fr))', gap: '1rem', marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', fontSize: '0.8125rem' }}>
                 <div>
                   <span style={{ color: 'var(--text-muted)' }}>Phone:</span>
                   <div style={{ fontWeight: '600' }}>{selectedCustomer.phone}</div>
@@ -444,7 +444,7 @@ export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate, init
               </button>
             </div>
             <form onSubmit={handleCreateCustomer}>
-              <div className="modal-body" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="modal-body" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '1rem' }}>
                 <div className="form-group">
                   <label className="form-label">Full Name *</label>
                   <input
@@ -571,7 +571,7 @@ export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate, init
             </div>
 
             <form onSubmit={handleSaveEdit}>
-              <div className="modal-body" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="modal-body" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '1rem' }}>
                 <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                   <label className="form-label">Full Name *</label>
                   <input
@@ -661,7 +661,7 @@ export const CustomerModule: React.FC<CustomerModuleProps> = ({ onNavigate, init
       {/* Quick Due Collection Modal */}
       {showDueModal && selectedCustomer && (
         <div className="modal-overlay" onClick={() => setShowDueModal(false)}>
-          <div className="modal-container" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+          <div className="modal-container" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px', width: '100%' }}>
             <div className="modal-header">
               <h3 className="modal-title">Collect Customer Due</h3>
               <button className="btn-close" onClick={() => setShowDueModal(false)}>

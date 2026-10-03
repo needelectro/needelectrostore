@@ -362,7 +362,7 @@ export const ReturnsModule: React.FC<ReturnsModuleProps> = ({ onNavigate }) => {
 
                 {matchedSale && (
                   <>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '1rem' }}>
                       <div className="form-group">
                         <label className="form-label">Item to Return *</label>
                         <select
@@ -398,7 +398,7 @@ export const ReturnsModule: React.FC<ReturnsModuleProps> = ({ onNavigate }) => {
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '1rem' }}>
                       <div className="form-group">
                         <label className="form-label">Return Type *</label>
                         <select
@@ -438,7 +438,7 @@ export const ReturnsModule: React.FC<ReturnsModuleProps> = ({ onNavigate }) => {
                       />
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '1rem' }}>
                       <div className="form-group">
                         <label className="form-label">Total Refund Amount (৳) *</label>
                         <input

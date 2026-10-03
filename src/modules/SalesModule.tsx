@@ -427,7 +427,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
         {/* Top Filter Bar */}
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.25rem', alignItems: 'center' }}>
           {/* Search Box */}
-          <div style={{ position: 'relative', width: '340px' }}>
+          <div style={{ position: 'relative', width: '340px', maxWidth: '100%' }}>
             <Search size={16} style={{ position: 'absolute', left: '10px', top: '11px', color: 'var(--text-muted)' }} />
             <input
               type="text"
@@ -857,7 +857,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
             {/* Modal Body */}
             <div style={{ padding: '1.5rem', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               {/* Customer & Meta Box */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', background: 'var(--bg-surface, rgba(0,0,0,0.1))', padding: '1rem', borderRadius: '8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '1rem', background: 'var(--bg-surface, rgba(0,0,0,0.1))', padding: '1rem', borderRadius: '8px' }}>
                 <div>
                   <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#008CFF', textTransform: 'uppercase' }}>Customer Information</div>
                   <div style={{ fontSize: '1rem', fontWeight: 800, marginTop: '2px' }}>{viewingSale.customerName}</div>
@@ -1134,7 +1134,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '0.75rem' }}>
                 <div>
                   <label className="form-label" style={{ fontWeight: 700 }}>Payment Method *</label>
                   <select
@@ -1259,7 +1259,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
                 setEditingSale(null);
               }
             }} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-              <div style={{ padding: '1.25rem 1.5rem', overflowY: 'auto', flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ padding: '1.25rem 1.5rem', overflowY: 'auto', flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '1rem' }}>
                 <div>
                   <label className="form-label" style={{ fontWeight: 700, fontSize: '0.75rem' }}>Invoice Number</label>
                   <input

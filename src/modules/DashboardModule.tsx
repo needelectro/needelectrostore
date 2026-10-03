@@ -238,7 +238,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) 
         borderRadius: '24px',
         background: 'linear-gradient(135deg, #002B5B 0%, #0052A3 50%, #008CFF 100%)',
         color: '#ffffff',
-        padding: '3rem 2.5rem',
+        padding: 'clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 2.5rem)',
         overflow: 'hidden',
         boxShadow: '0 20px 40px -15px rgba(0, 140, 255, 0.35)',
         border: '1px solid rgba(255, 255, 255, 0.15)'
@@ -285,17 +285,17 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) 
           {/* Hero Main Headline */}
           <div style={{ maxWidth: '820px' }}>
             <h1 style={{
-              fontSize: 'clamp(2rem, 3.8vw, 3.1rem)',
+              fontSize: 'clamp(1.5rem, 5vw, 3rem)',
               fontWeight: 900,
-              lineHeight: 1.15,
+              lineHeight: 1.18,
               letterSpacing: '-0.025em',
-              margin: '0 0 1rem 0',
+              margin: '0 0 0.85rem 0',
               color: '#ffffff'
             }}>
               Welcome to <span style={{ color: '#67e8f9' }}>NEED ELECTRO</span> ERP
             </h1>
             <p style={{
-              fontSize: '1.1rem',
+              fontSize: 'clamp(0.95rem, 2.5vw, 1.1rem)',
               lineHeight: 1.6,
               color: 'rgba(255, 255, 255, 0.9)',
               margin: 0,
@@ -308,13 +308,13 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) 
           {/* Today's Business Dynamic Strip */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
             gap: '1.25rem',
             background: 'rgba(7, 18, 38, 0.45)',
             backdropFilter: 'blur(16px)',
             border: '1px solid rgba(255, 255, 255, 0.15)',
             borderRadius: '18px',
-            padding: '1.25rem 1.75rem'
+            padding: '1.25rem clamp(0.85rem, 2.5vw, 1.75rem)'
           }}>
             <div>
               <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -1656,7 +1656,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) 
           ========================================================================= */}
       <section style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))',
         gap: '1.5rem'
       }}>
         {/* EMI Section */}
@@ -1806,7 +1806,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) 
           ========================================================================= */}
       <section style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))',
         gap: '1.5rem'
       }}>
         {/* Customer Directory Glance */}

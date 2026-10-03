@@ -54,43 +54,33 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome, onSucces
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'radial-gradient(circle at 15% 50%, rgba(0, 140, 255, 0.15), transparent 45%), radial-gradient(circle at 85% 30%, rgba(0, 43, 91, 0.8), #070d1e)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1.5rem',
-      fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
+    <div className="login-screen-wrapper">
       {onBackToHome && (
         <button
           onClick={onBackToHome}
           type="button"
           style={{
             position: 'absolute',
-            top: '1.25rem',
-            left: '1.5rem',
+            top: '1rem',
+            left: '1rem',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.4rem',
-            background: 'rgba(15, 23, 42, 0.75)',
+            background: 'rgba(15, 23, 42, 0.85)',
             border: '1px solid rgba(255, 255, 255, 0.15)',
             borderRadius: '9999px',
             padding: '0.45rem 1rem',
             color: '#f8fafc',
-            fontSize: '0.85rem',
+            fontSize: '0.825rem',
             fontWeight: 600,
             cursor: 'pointer',
-            zIndex: 20,
+            zIndex: 30,
             backdropFilter: 'blur(12px)',
             transition: 'all 0.2s ease',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
           }}
           onMouseOver={e => e.currentTarget.style.backgroundColor = 'rgba(0, 140, 255, 0.25)'}
-          onMouseOut={e => e.currentTarget.style.backgroundColor = 'rgba(15, 23, 42, 0.75)'}
+          onMouseOut={e => e.currentTarget.style.backgroundColor = 'rgba(15, 23, 42, 0.85)'}
         >
           ← Back to Homepage
         </button>
@@ -120,29 +110,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome, onSucces
       }} />
 
       {/* Main Container */}
-      <div style={{
-        width: '100%',
-        maxWidth: '1080px',
-        background: 'rgba(15, 23, 42, 0.85)',
-        backdropFilter: 'blur(20px)',
-        borderRadius: '24px',
-        border: '1px solid rgba(0, 140, 255, 0.3)',
-        boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 40px rgba(0, 140, 255, 0.15)',
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        overflow: 'hidden',
-        position: 'relative',
-        zIndex: 1
-      }}>
-        {/* Left: Brand Presentation Banner */}
-        <div style={{
-          padding: '3rem',
-          background: 'linear-gradient(135deg, rgba(0, 43, 91, 0.95) 0%, rgba(9, 13, 22, 0.98) 100%)',
-          borderRight: '1px solid rgba(255, 255, 255, 0.08)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between'
-        }}>
+      <div className="login-card-container">
+        {/* Left: Brand Presentation Banner (Shown on desktop/tablet >= 1024px) */}
+        <div className="login-brand-panel">
           <div>
             <div style={{ marginBottom: '2.5rem' }}>
               <NeedElectroLogo size="lg" showTagline={true} />
@@ -233,14 +203,16 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome, onSucces
           </div>
         </div>
 
-        {/* Right: Real Security Authentication Form */}
-        <div style={{
-          padding: '3rem',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center'
-        }}>
+        {/* Right: Security Authentication Form (Prioritized on Mobile) */}
+        <div className="login-form-panel">
           <div>
+            {/* Mobile Brand Logo Header (Visible on screens < 1024px) */}
+            <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
+              <div style={{ display: 'inline-flex', marginBottom: '0.5rem' }}>
+                <NeedElectroLogo size="md" showTagline={true} />
+              </div>
+            </div>
+
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
               <ShieldCheck size={20} color="#008CFF" />
               <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#008CFF', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
@@ -251,7 +223,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome, onSucces
             <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ffffff', marginBottom: '0.25rem' }}>
               Sign in to ERP
             </h2>
-            <p style={{ fontSize: '0.825rem', color: '#94a3b8', marginBottom: '1.75rem' }}>
+            <p style={{ fontSize: '0.825rem', color: '#94a3b8', marginBottom: '1.5rem' }}>
               Enter your verified credentials to access your designated workspace.
             </p>
 
@@ -265,17 +237,18 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome, onSucces
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: '10px',
-                marginBottom: '1.5rem',
+                marginBottom: '1.25rem',
                 color: '#fca5a5',
                 fontSize: '0.825rem',
-                lineHeight: 1.4
+                lineHeight: 1.4,
+                wordBreak: 'break-word'
               }}>
                 <AlertCircle size={18} color="#ef4444" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <div>{errorMessage}</div>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
               {/* Branch Selection */}
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label" style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>
@@ -291,8 +264,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome, onSucces
                       background: 'rgba(30, 41, 59, 0.7)',
                       borderColor: 'rgba(0, 140, 255, 0.3)',
                       color: '#ffffff',
-                      height: '42px',
-                      fontSize: '0.875rem'
+                      height: '44px',
+                      fontSize: '16px',
+                      width: '100%'
                     }}
                   >
                     {branches && branches.length > 0 ? (
@@ -307,7 +281,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome, onSucces
                       </option>
                     )}
                   </select>
-                  <Building size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '13px' }} />
+                  <Building size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '14px', pointerEvents: 'none' }} />
                 </div>
               </div>
 
@@ -318,7 +292,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome, onSucces
                 </label>
                 <div style={{ position: 'relative' }}>
                   <input
-                    type="text"
+                    type="email"
+                    inputMode="email"
+                    autoComplete="username"
+                    autoCapitalize="none"
+                    autoCorrect="off"
                     className="form-input"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
@@ -329,11 +307,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome, onSucces
                       background: 'rgba(30, 41, 59, 0.7)',
                       borderColor: 'rgba(0, 140, 255, 0.3)',
                       color: '#ffffff',
-                      height: '42px',
-                      fontSize: '0.875rem'
+                      height: '44px',
+                      fontSize: '16px',
+                      width: '100%'
                     }}
                   />
-                  <Mail size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '13px' }} />
+                  <Mail size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '14px', pointerEvents: 'none' }} />
                 </div>
               </div>
 
@@ -345,6 +324,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome, onSucces
                 <div style={{ position: 'relative' }}>
                   <input
                     type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
                     className="form-input"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
@@ -352,42 +332,49 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome, onSucces
                     required
                     style={{
                       paddingLeft: '2.5rem',
-                      paddingRight: '2.5rem',
+                      paddingRight: '2.75rem',
                       background: 'rgba(30, 41, 59, 0.7)',
                       borderColor: 'rgba(0, 140, 255, 0.3)',
                       color: '#ffffff',
-                      height: '42px',
-                      fontSize: '0.875rem'
+                      height: '44px',
+                      fontSize: '16px',
+                      width: '100%'
                     }}
                   />
-                  <Lock size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '13px' }} />
+                  <Lock size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '14px', pointerEvents: 'none' }} />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                     style={{
                       position: 'absolute',
-                      right: '12px',
-                      top: '12px',
+                      right: '4px',
+                      top: '2px',
+                      width: '40px',
+                      height: '40px',
                       background: 'none',
                       border: 'none',
-                      color: '#64748b',
+                      color: '#94a3b8',
                       cursor: 'pointer',
-                      padding: 0
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '8px'
                     }}
                   >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </div>
 
               {/* Remember Me */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.825rem', minHeight: '36px' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#cbd5e1' }}>
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={e => setRememberMe(e.target.checked)}
-                    style={{ accentColor: '#008CFF' }}
+                    style={{ accentColor: '#008CFF', width: '18px', height: '18px' }}
                   />
                   <span>Remember session on this computer</span>
                 </label>
@@ -399,7 +386,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome, onSucces
                 className="btn btn-primary"
                 disabled={isLoading}
                 style={{
-                  height: '46px',
+                  height: '48px',
                   fontSize: '0.95rem',
                   fontWeight: 700,
                   background: 'linear-gradient(135deg, #008CFF 0%, #002B5B 100%)',
@@ -408,7 +395,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome, onSucces
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  marginTop: '0.5rem'
+                  marginTop: '0.25rem',
+                  width: '100%'
                 }}
               >
                 {isLoading ? (
@@ -424,23 +412,23 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome, onSucces
           </div>
 
           {/* Production Database Security Banner */}
-          <div style={{ marginTop: '2rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+          <div style={{ marginTop: '1.75rem', paddingTop: '1rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
             <div style={{
               background: 'rgba(0, 140, 255, 0.08)',
               border: '1px solid rgba(0, 140, 255, 0.25)',
               borderRadius: '10px',
-              padding: '0.85rem 1rem',
+              padding: '0.75rem 1rem',
               display: 'flex',
               alignItems: 'center',
               gap: '10px'
             }}>
               <ShieldCheck size={22} color="#008CFF" style={{ flexShrink: 0 }} />
               <div>
-                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#ffffff', letterSpacing: '0.02em' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#ffffff', letterSpacing: '0.02em' }}>
                   REAL DATABASE AUTHENTICATION ACTIVE
                 </div>
-                <div style={{ fontSize: '0.72rem', color: '#94a3b8', lineHeight: 1.4 }}>
-                  Connected to central SQLite database (WAL mode). Passwords hashed using PBKDF2-HMAC-SHA256 (100k rounds). Super Admin: <strong style={{ color: '#008CFF' }}>Amdadur Rahman</strong>.
+                <div style={{ fontSize: '0.7rem', color: '#94a3b8', lineHeight: 1.4 }}>
+                  Central SQLite database (WAL mode). Passwords hashed using PBKDF2-HMAC-SHA256 (100k rounds). Super Admin: <strong style={{ color: '#008CFF' }}>Amdadur Rahman</strong>.
                 </div>
               </div>
             </div>
