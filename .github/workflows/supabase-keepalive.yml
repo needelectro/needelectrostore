@@ -48,7 +48,7 @@ jobs:
             AUTH_HEADER="Authorization: Bearer $CRON_SECRET"
           fi
 
-          RESPONSE_FILE=$(mktemp)
+          RESPONSE_FILE="/tmp/keepalive_response.txt"
           HTTP_STATUS=$(curl -sSL -X GET "$TARGET_URL" \
             ${AUTH_HEADER:+-H "$AUTH_HEADER"} \
             -H "User-Agent: NeedElectro-KeepAlive-Worker/1.0" \
@@ -58,30 +58,33 @@ jobs:
             -w "%{http_code}" \
             -o "$RESPONSE_FILE")
 
-          BODY=$(cat "$RESPONSE_FILE")
+          BODY=$(head -c 2000 "$RESPONSE_FILE")
           echo "HTTP Status Code: $HTTP_STATUS"
-          echo "Response Body: $BODY"
+          echo "Response Preview: $BODY"
 
           if [ "$HTTP_STATUS" -eq 200 ]; then
             echo "Status: SUCCESS - Supabase Database is reachable."
             echo "status=success" >> $GITHUB_OUTPUT
-            echo "body=$BODY" >> $GITHUB_OUTPUT
           else
             echo "Status: FAILURE - Endpoint returned $HTTP_STATUS."
             echo "status=failed" >> $GITHUB_OUTPUT
-            echo "body=$BODY" >> $GITHUB_OUTPUT
             exit 1
           fi
 
       - name: Publish Health Summary to GitHub Step Summary
         if: always()
         run: |
-          echo "### 🏥 Supabase Keep-Alive & Health Check" >> $GITHUB_STEP_SUMMARY
-          echo "- **Target URL:** \`${{ steps.config.outputs.target_url }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status:** ${{ steps.ping.outputs.status == 'success' && '✅ Healthy (Database Reachable)' || '❌ Degraded / Failed' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Timestamp:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "#### Response Payload:" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
-          echo "${{ steps.ping.outputs.body }}" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "### 🏥 Supabase Keep-Alive & Health Check"
+            echo "- **Target URL:** \`${{ steps.config.outputs.target_url }}\`"
+            echo "- **Status:** ${{ steps.ping.outputs.status == 'success' && '✅ Healthy (Database Reachable)' || '❌ Degraded / Failed' }}"
+            echo "- **Timestamp:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+            echo ""
+            echo "#### Response Payload:"
+            echo '```json'
+            if [ -f /tmp/keepalive_response.txt ]; then
+              cat /tmp/keepalive_response.txt | head -c 2000
+            fi
+            echo ""
+            echo '```'
+          } >> $GITHUB_STEP_SUMMARY
