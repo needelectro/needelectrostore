@@ -72,7 +72,7 @@ export const createSaleSchema = z.object({
     payments: z.array(
       z.object({
         method: z.string(),
-        amount: z.number().positive(),
+        amount: z.number().nonnegative('Payment amount cannot be negative'),
         accountId: z.string().optional(),
         ref: z.string().optional(),
       })

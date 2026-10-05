@@ -219,21 +219,26 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
     try {
       let payments: PaymentBreakdown[] = [];
 
+    if (paidAmount < 0) {
+      alert('Paid amount cannot be negative.');
+      return;
+    }
+
     if (isSplitPayment) {
       const splitTotal = splitPayments.reduce((s, p) => s + p.amount, 0);
-      if (splitTotal <= 0) {
+      if (splitTotal < 0) {
         alert('Please enter valid split payment amounts.');
         return;
       }
       payments = splitPayments.map(p => ({
         method: p.method,
-        amount: p.amount,
+        amount: Math.max(0, p.amount),
         transactionRef: p.ref || undefined
       }));
     } else {
       payments = [{
         method: primaryPaymentMethod,
-        amount: paidAmount,
+        amount: Math.max(0, paidAmount),
         transactionRef: transactionRef || undefined
       }];
     }
@@ -276,7 +281,7 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
       dueAmount,
       payments,
       saleType: 'REGULAR',
-      status: dueAmount === 0 ? 'COMPLETED' : 'PARTIALLY_PAID',
+      status: dueAmount === 0 ? 'COMPLETED' : (actualPaid === 0 ? 'DUE' : 'PARTIALLY_PAID'),
       salespersonId: currentUser.id,
       salespersonName: currentUser.name,
       notes: saleNotes
@@ -960,9 +965,10 @@ export const POSModule: React.FC<POSModuleProps> = ({ onNavigate }) => {
                       <label className="form-label">Paid Amount (৳)</label>
                       <input
                         type="number"
+                        min="0"
                         className="form-input"
                         value={paidAmount}
-                        onChange={e => setPaidAmount(Number(e.target.value) || 0)}
+                        onChange={e => setPaidAmount(Math.max(0, Number(e.target.value) || 0))}
                       />
                     </div>
                     <div className="form-group">

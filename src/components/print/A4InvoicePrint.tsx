@@ -68,8 +68,10 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
   const dueAmount = Number(sale.dueAmount !== undefined ? sale.dueAmount : Math.max(0, grandTotal - paidAmount));
 
   // Ensure payment breakdown amounts accurately reflect the actual paidAmount
-  let paymentMethodsText = 'Direct Cash';
-  if (payments.length === 1) {
+  let paymentMethodsText = paidAmount > 0 ? 'Direct Cash' : 'Unpaid (Due)';
+  if (paidAmount <= 0) {
+    paymentMethodsText = 'Unpaid (Due)';
+  } else if (payments.length === 1) {
     const singleMethod = payments[0].method || 'Cash';
     const effectiveAmount = paidAmount > 0 ? paidAmount : Number(payments[0].amount || 0);
     paymentMethodsText = `${singleMethod} (৳${effectiveAmount.toLocaleString()})`;

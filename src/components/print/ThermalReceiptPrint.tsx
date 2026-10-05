@@ -58,9 +58,11 @@ export const ThermalReceiptPrint: React.FC<ThermalReceiptPrintProps> = ({ sale, 
   const paidAmount = Number(sale.paidAmount || 0);
   const dueAmount = Number(sale.dueAmount !== undefined ? sale.dueAmount : Math.max(0, grandTotal - paidAmount));
 
-  const paidMethodsText = payments.length > 0 
-    ? payments.map((p: any) => p.method || 'CASH').join('/') 
-    : 'CASH';
+  const paidMethodsText = paidAmount <= 0
+    ? 'UNPAID (DUE)'
+    : (payments.length > 0 
+        ? payments.filter((p: any) => Number(p.amount) > 0).map((p: any) => p.method || 'CASH').join('/') || (payments[0]?.method || 'CASH')
+        : 'CASH');
 
   return (
     <div className="modal-overlay print-active-modal" style={{ zIndex: 9999 }}>
