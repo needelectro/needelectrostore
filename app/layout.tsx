@@ -45,6 +45,7 @@ export const metadata: Metadata = {
 };
 
 import { CartProvider } from '@/src/services/cartContext';
+import { MobileBottomNav } from '@/src/components/customer/MobileBottomNav';
 
 export default function RootLayout({
   children,
@@ -81,6 +82,7 @@ export default function RootLayout({
       <body>
         <CartProvider>
           {children}
+          <MobileBottomNav />
         </CartProvider>
         <script
           dangerouslySetInnerHTML={{

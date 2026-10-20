@@ -262,6 +262,16 @@ export const CustomerHeader: React.FC = () => {
               ERP
             </Link>
 
+            {/* Mobile Quick Call Button */}
+            <a
+              href={`tel:${BUSINESS_INFO.phoneClean}`}
+              className="md:hidden p-1.5 rounded-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center"
+              aria-label="Call Sales Hotline"
+              title="Call Sales Hotline"
+            >
+              <Phone size={15} />
+            </a>
+
             {/* Dark / Light Toggle */}
             <button
               type="button"
@@ -275,7 +285,7 @@ export const CustomerHeader: React.FC = () => {
             {/* Mobile Menu Hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-1.5 rounded-lg bg-slate-800 text-white"
+              className="md:hidden p-1.5 rounded-lg bg-slate-800 text-white hover:bg-slate-700 transition-colors"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -284,22 +294,84 @@ export const CustomerHeader: React.FC = () => {
         </div>
 
         {/* Mobile Search Bar inside header */}
-        <div className="md:hidden px-4 pb-2.5">
-          <div className="relative">
+        <div ref={searchRef} className="md:hidden px-3 sm:px-4 pb-2.5 relative">
+          <div className="relative flex items-center">
             <input
               type="text"
-              placeholder="Search products, brands, laptops..."
+              placeholder="Search CCTV, PC, Laptop, Electricals..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white text-slate-900 placeholder-slate-400 rounded-full pl-4 pr-10 py-1.5 text-xs font-medium focus:outline-none"
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setSearchOpen(true);
+              }}
+              onFocus={() => setSearchOpen(true)}
+              className="w-full bg-white text-slate-900 placeholder-slate-400 rounded-full pl-4 pr-10 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#0084d6] shadow-inner"
             />
-            <Search size={14} className="absolute right-3 top-2.5 text-slate-400" />
+            <button
+              type="button"
+              aria-label="Submit Search"
+              className="absolute right-1 top-1 bottom-1 w-7 h-7 rounded-full bg-[#0084d6] text-white flex items-center justify-center"
+            >
+              {isSearching ? (
+                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Search size={13} />
+              )}
+            </button>
           </div>
+
+          {/* Mobile Search Suggestions Dropdown */}
+          {searchOpen && searchQuery.trim().length >= 2 && (
+            <div className="absolute top-full left-3 right-3 mt-1.5 rounded-2xl shadow-2xl overflow-hidden z-50 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 max-h-72 overflow-y-auto">
+              <div className="p-2 border-b text-[10px] font-bold uppercase tracking-wider flex justify-between bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500">
+                <span>Suggestions ({searchResults.length})</span>
+                <button
+                  type="button"
+                  onClick={() => setSearchOpen(false)}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  ✕ Close
+                </button>
+              </div>
+              {searchResults.length > 0 ? (
+                <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {searchResults.map((p) => (
+                    <Link
+                      key={p.id}
+                      href={`/product/${p.slug}`}
+                      onClick={() => {
+                        setSearchOpen(false);
+                        setSearchQuery('');
+                      }}
+                      className="p-2.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      <div className="pr-2">
+                        <p className="text-xs font-semibold line-clamp-1">{p.name}</p>
+                        <p className="text-[10px] text-slate-400">{p.brand} • {p.category}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="text-xs font-bold text-[#0084d6] font-mono block">
+                          ৳{p.retailPrice.toLocaleString()}
+                        </span>
+                        <span className={`text-[9px] font-bold ${p.currentStock > 0 ? 'text-emerald-500' : 'text-rose-400'}`}>
+                          {p.currentStock > 0 ? 'In Stock' : 'Pre-Order'}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-4 text-center text-xs text-slate-500">
+                  {isSearching ? 'Searching...' : `No products found for "${searchQuery}"`}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       {/* 2. Horizontal Scrolling Sub-bar Category Navigation (Trust Computer MB Style) */}
-      <nav className="bg-[#f8fafc] dark:bg-[#0b1320] border-b border-slate-200/90 dark:border-slate-800/90 py-2 px-4 overflow-x-auto scrollbar-none">
+      <nav className="bg-[#f8fafc] dark:bg-[#0b1320] border-b border-slate-200/90 dark:border-slate-800/90 py-2 px-3 sm:px-4 overflow-x-auto scrollbar-none">
         <div className="max-w-7xl mx-auto flex items-center gap-1.5 sm:gap-2 text-xs font-medium whitespace-nowrap min-w-max">
           {CATEGORY_NAV_ITEMS.map((item) => {
             const Icon = item.icon;
@@ -307,12 +379,12 @@ export const CustomerHeader: React.FC = () => {
               <Link
                 key={item.name}
                 href={item.href}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-full text-slate-700 dark:text-slate-300 hover:text-[#0084d6] dark:hover:text-cyan-400 hover:bg-white dark:hover:bg-slate-800/90 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all text-[11px] sm:text-xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-800 dark:text-slate-200 hover:text-[#0084d6] dark:hover:text-cyan-400 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-[#0084d6] dark:hover:border-slate-700 shadow-2xs transition-all text-[11px] sm:text-xs font-semibold"
               >
                 <Icon size={13} className="text-slate-500 dark:text-slate-400 shrink-0" />
                 <span>{item.name}</span>
                 {item.badge && (
-                  <span className="bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-1.5 py-0.2 rounded-full text-[9px] font-bold">
+                  <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-1.5 py-0.2 rounded-full text-[9px] font-bold">
                     {item.badge}
                   </span>
                 )}
@@ -322,83 +394,143 @@ export const CustomerHeader: React.FC = () => {
         </div>
       </nav>
 
-      {/* Mobile Menu Drawer */}
+      {/* Mobile Menu Drawer Overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 px-4 py-4 space-y-3 shadow-xl">
-          <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
-            <Link
-              href="/"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white"
-            >
-              🏠 Home
+        <div className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex flex-col justify-start">
+          <div className="bg-[#081621] text-white border-b border-slate-800 px-4 py-3 flex items-center justify-between shadow-lg">
+            <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2">
+              <NeedElectroLogo size="sm" theme="dark" showSisterConcern={false} />
             </Link>
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
+              aria-label="Close menu"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className="bg-white dark:bg-slate-950 flex-1 overflow-y-auto px-4 py-4 space-y-4 text-slate-900 dark:text-slate-100">
+            {/* Quick Track Order Banner */}
             <Link
               href="/track-order"
               onClick={() => setMobileMenuOpen(false)}
-              className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold"
+              className="flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold shadow-md shadow-emerald-500/20"
             >
-              📦 Track Order
+              <div className="flex items-center gap-2.5">
+                <PackageSearch size={18} />
+                <div>
+                  <p className="text-xs leading-none">Track Order Live</p>
+                  <p className="text-[10px] text-emerald-100 font-normal mt-0.5">Check parcel delivery status</p>
+                </div>
+              </div>
+              <ArrowRight size={14} />
             </Link>
-            <Link
-              href="/laptops"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200"
-            >
-              💻 Laptops
-            </Link>
-            <Link
-              href="/computers"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200"
-            >
-              🖥️ Desktops &amp; PCs
-            </Link>
-            <Link
-              href="/cctv"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200"
-            >
-              📹 CCTV &amp; Security
-            </Link>
-            <Link
-              href="/electrical-products"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200"
-            >
-              ⚡ Electrical Equipment
-            </Link>
-            <Link
-              href="/laptop-emi"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#0084d6] dark:text-cyan-400 font-bold"
-            >
-              💳 Laptop EMI
-            </Link>
-            <Link
-              href="/services/electrician"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold"
-            >
-              🔧 Book Electrician
-            </Link>
-          </div>
 
-          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-            <a
-              href={`tel:${BUSINESS_INFO.phoneClean}`}
-              className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-200"
-            >
-              <Phone size={13} className="text-[#0084d6]" />
-              <span>{BUSINESS_INFO.phone}</span>
-            </a>
-            <Link
-              href="/admin"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-            >
-              Staff ERP Login →
-            </Link>
+            {/* Categories Grid */}
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Shop Categories</p>
+              <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
+                <Link
+                  href="/laptops"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors"
+                >
+                  <Laptop size={14} className="text-[#0084d6]" />
+                  <span>Laptops</span>
+                </Link>
+                <Link
+                  href="/computers"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors"
+                >
+                  <Monitor size={14} className="text-indigo-500" />
+                  <span>Desktops &amp; PCs</span>
+                </Link>
+                <Link
+                  href="/cctv"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors"
+                >
+                  <Camera size={14} className="text-emerald-500" />
+                  <span>CCTV &amp; Security</span>
+                </Link>
+                <Link
+                  href="/electrical-products"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors"
+                >
+                  <Zap size={14} className="text-amber-500" />
+                  <span>Electrical Equipment</span>
+                </Link>
+                <Link
+                  href="/networking"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors"
+                >
+                  <Wifi size={14} className="text-teal-500" />
+                  <span>Networking &amp; Routers</span>
+                </Link>
+                <Link
+                  href="/computer-accessories"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors"
+                >
+                  <Smartphone size={14} className="text-sky-500" />
+                  <span>Accessories</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Special Services */}
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Customer Services</p>
+              <div className="space-y-2">
+                <Link
+                  href="/laptop-emi"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#0084d6] dark:text-cyan-400 font-bold flex items-center justify-between text-xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <CreditCard size={15} />
+                    <span>Laptop EMI (0% Interest)</span>
+                  </div>
+                  <span className="text-[10px] bg-[#0084d6] text-white px-2 py-0.5 rounded-full">Apply</span>
+                </Link>
+                <Link
+                  href="/services/electrician"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-bold flex items-center justify-between text-xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <Zap size={15} />
+                    <span>Book Certified Electrician</span>
+                  </div>
+                  <span className="text-[10px] bg-amber-600 text-white px-2 py-0.5 rounded-full">Moulvibazar</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Contact & Hotline */}
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2 text-xs">
+              <a
+                href={`tel:${BUSINESS_INFO.phoneClean}`}
+                className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-[#081621] text-white font-bold shadow-xs"
+              >
+                <Phone size={14} className="text-[#0084d6]" />
+                <span>Call Hotline: {BUSINESS_INFO.phone}</span>
+              </a>
+              <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+                <span>📍 Kusumbag, Moulvibazar</span>
+                <Link
+                  href="/admin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-[#0084d6] hover:underline font-semibold"
+                >
+                  Staff ERP Login →
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       )}

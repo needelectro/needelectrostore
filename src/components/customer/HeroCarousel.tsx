@@ -77,7 +77,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
 
   return (
     <div
-      className="relative rounded-2xl overflow-hidden shadow-md border border-slate-200 dark:border-slate-800 bg-[#081621] text-white h-[320px] sm:h-[380px] lg:h-[430px] flex flex-col justify-center"
+      className="relative rounded-2xl overflow-hidden shadow-md border border-slate-200 dark:border-slate-800 bg-[#081621] text-white h-[270px] xs:h-[310px] sm:h-[380px] lg:h-[430px] flex flex-col justify-center"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -86,34 +86,34 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
       <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-sky-400/15 blur-3xl pointer-events-none" />
 
       {/* Slide Content */}
-      <div className="relative px-6 sm:px-10 py-6 flex items-center h-full">
+      <div className="relative px-4 sm:px-10 py-4 sm:py-6 flex items-center h-full">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center w-full">
           {/* Text Left Column */}
-          <div className="md:col-span-8 space-y-3 sm:space-y-4">
+          <div className="md:col-span-8 space-y-2.5 sm:space-y-4">
             {active.badge && (
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#0084d6]/20 border border-[#0084d6]/40 text-sky-300">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-[#0084d6]/20 border border-[#0084d6]/40 text-sky-300">
                 <Sparkles size={12} className="text-sky-400" />
                 <span>{active.badge}</span>
               </div>
             )}
 
-            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white drop-shadow-sm">
+            <h2 className="text-lg xs:text-xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white drop-shadow-sm">
               {active.title}
             </h2>
 
             {active.subtitle && (
-              <p className="text-xs sm:text-sm text-slate-300 max-w-lg leading-relaxed line-clamp-3">
+              <p className="text-[11px] sm:text-sm text-slate-300 max-w-lg leading-relaxed line-clamp-2 sm:line-clamp-3">
                 {active.subtitle}
               </p>
             )}
 
-            <div className="flex flex-wrap items-center gap-3 pt-2">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-1 sm:pt-2">
               <Link
                 href={active.targetUrl || '/laptops'}
-                className="px-5 py-2.5 rounded-xl bg-[#0084d6] hover:bg-[#0073bc] text-white font-bold text-xs shadow-md shadow-blue-500/30 transition-all flex items-center gap-2 group"
+                className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#0084d6] hover:bg-[#0073bc] text-white font-bold text-xs shadow-md shadow-blue-500/30 transition-all flex items-center gap-1.5 sm:gap-2 group"
               >
                 <span>{active.buttonText || 'Discover Now'}</span>
-                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
                 href="/delivery"
