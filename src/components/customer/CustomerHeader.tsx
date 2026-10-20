@@ -288,14 +288,6 @@ export const CustomerHeader: React.FC = () => {
               </span>
             </button>
 
-            {/* Staff Portal Link */}
-            <Link
-              href="/admin"
-              className="hidden md:inline-flex items-center px-2.5 py-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-[11px] text-slate-300 transition-colors"
-            >
-              {t('nav.admin', 'ERP')}
-            </Link>
-
             {/* Mobile Quick Call Button */}
             <a
               href={`tel:${BUSINESS_INFO.phoneClean}`}
