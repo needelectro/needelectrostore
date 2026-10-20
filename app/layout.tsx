@@ -63,6 +63,7 @@ import { CartProvider } from '@/src/services/cartContext';
 import { LanguageProvider } from '@/src/services/languageContext';
 import { MobileBottomNav } from '@/src/components/customer/MobileBottomNav';
 import { PwaInstallPrompt } from '@/src/components/pwa/PwaInstallPrompt';
+import { VoiceWelcome } from '@/src/components/common/VoiceWelcome';
 
 export default function RootLayout({
   children,
@@ -107,6 +108,7 @@ export default function RootLayout({
             {children}
             <MobileBottomNav />
             <PwaInstallPrompt />
+            <VoiceWelcome />
           </CartProvider>
         </LanguageProvider>
         <script
