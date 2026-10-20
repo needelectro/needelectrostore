@@ -258,14 +258,18 @@ export const CustomerFooter: React.FC = () => {
           </div>
         </div>
 
-        {/* Payment Methods & Bangla Notice */}
+        {/* Payment Methods & Trust Notice */}
         <div className="border-t border-slate-800/80 pt-6 pb-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-400">
           <div>
             <span className="font-semibold text-slate-200 block mb-1">
-              মৌলভীবাজার ও সারা বাংলাদেশে বিশ্বস্ত প্রযুক্তি ও ইলেকট্রিক্যাল সমাধান
+              {isBangla
+                ? 'মৌলভীবাজার ও সারা বাংলাদেশে বিশ্বস্ত প্রযুক্তি ও ইলেকট্রিক্যাল সমাধান'
+                : 'Trusted Technology & Electrical Solutions in Moulvibazar and All Over Bangladesh'}
             </span>
             <span>
-              Payment Methods: Cash on Delivery, bKash, Nagad, Rocket, Bank Transfer, Visa / Mastercard, and In-House Laptop EMI.
+              {isBangla
+                ? 'পেমেন্ট মেথডঃ ক্যাশ অন ডেলিভারি, বিকাশ, নগদ, রকেট, ব্যাংক ট্রান্সফার, ভিসা/মাস্টারকার্ড এবং ইন-হাউস ল্যাপটপ ইএমআই।'
+                : 'Payment Methods: Cash on Delivery, bKash, Nagad, Rocket, Bank Transfer, Visa / Mastercard, and In-House Laptop EMI.'}
             </span>
           </div>
           <div className="flex items-center gap-2.5 text-slate-400">
