@@ -25,10 +25,11 @@ interface SearchResult {
 }
 
 const CATEGORY_NAV_ITEMS = [
-  { name: 'All Products', href: '/laptops', icon: Layers, badge: '50+' },
+  { name: 'All Products', href: '/shop', icon: Layers, badge: '50+' },
   { name: 'Laptop & Computer', href: '/laptops', icon: Laptop, badge: 'HP, Dell' },
   { name: 'Monitor & Display', href: '/computers', icon: Monitor },
   { name: 'CCTV & Security', href: '/cctv', icon: Camera, badge: 'Hikvision' },
+  { name: 'Guides & Advice', href: '/guides', icon: Sparkles, badge: 'Hub' },
   { name: 'Electrical & Switchgear', href: '/electrical-products', icon: Zap },
   { name: 'Computer Accessories', href: '/computer-accessories', icon: Smartphone },
   { name: 'Networking & Router', href: '/networking', icon: Wifi },
@@ -486,6 +487,17 @@ export const CustomerHeader: React.FC = () => {
             <div>
               <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Customer Services</p>
               <div className="space-y-2">
+                <Link
+                  href="/guides"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2.5 rounded-xl bg-cyan-50 dark:bg-cyan-950/60 text-[#008CFF] dark:text-cyan-300 font-bold flex items-center justify-between text-xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={15} />
+                    <span>Guides &amp; Advice Hub</span>
+                  </div>
+                  <span className="text-[10px] bg-[#008CFF] text-white px-2 py-0.5 rounded-full">Explore</span>
+                </Link>
                 <Link
                   href="/laptop-emi"
                   onClick={() => setMobileMenuOpen(false)}

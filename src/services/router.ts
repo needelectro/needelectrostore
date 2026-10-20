@@ -63,6 +63,8 @@ export function getModuleUrl(module: string, param?: string): string {
       return param ? `/control-center/${encodeURIComponent(param)}` : '/control-center';
     case 'seo_management':
       return '/seo-management';
+    case 'guides_cms':
+      return '/admin/guides';
     default:
       return `/${module}`;
   }
@@ -101,9 +103,10 @@ export function parseRoute(pathname: string = '', search: string = ''): ParsedRo
   }
 
   // 2. Admin Root
-  if (cleanPath === '/admin') {
+  if (cleanPath === '/admin' || cleanPath === '/admin/') {
+    const requestedModule = searchParams['module'] || 'dashboard';
     return {
-      module: 'dashboard',
+      module: requestedModule,
       isLogin: false,
       isLanding: false,
       isProtected: true,
@@ -586,6 +589,19 @@ export function parseRoute(pathname: string = '', search: string = ''): ParsedRo
   if (cleanPath === '/seo-management' || cleanPath === '/seo_management') {
     return {
       module: 'seo_management',
+      isLogin: false,
+      isLanding: false,
+      isProtected: true,
+      fullPath,
+      pathname: cleanPath,
+      searchParams,
+    };
+  }
+
+  // 25.1 Guides & Content CMS
+  if (cleanPath === '/admin/guides' || cleanPath === '/admin/guides-cms' || cleanPath === '/guides-cms') {
+    return {
+      module: 'guides_cms',
       isLogin: false,
       isLanding: false,
       isProtected: true,

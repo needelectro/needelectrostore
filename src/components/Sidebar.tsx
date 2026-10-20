@@ -107,6 +107,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'control_center', label: 'System Control Center', icon: Sliders, badge: 'SUPER', badgeColor: '#2563eb' },
         { id: 'banners', label: 'Store Banners & Hero', icon: Sparkles, badge: 'HERO', badgeColor: '#0084d6' },
+        { id: 'guides_cms', label: 'Guides & Content CMS', icon: BookOpen, badge: 'CMS', badgeColor: '#10b981' },
         { id: 'seo_management', label: 'SEO Management', icon: Globe, badge: 'SEO', badgeColor: '#06b6d4' },
         { id: 'employees', label: 'Employees & Techs', icon: UserCheck },
         { id: 'branches', label: 'Branches & Transfers', icon: GitFork },

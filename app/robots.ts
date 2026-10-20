@@ -41,6 +41,8 @@ export default function robots(): MetadataRoute.Robots {
           '/about/',
           '/contact/',
           '/faq/',
+          '/guides/',
+          '/guides/*',
           '/api/feed/google-merchant',
         ],
         disallow: [

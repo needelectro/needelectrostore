@@ -635,7 +635,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (target === 'warranty' && perm.startsWith('warranty.')) return true;
       if (target === 'ledgers' && (perm.startsWith('accounting.') || perm.startsWith('customers.') || perm.startsWith('suppliers.'))) return true;
       if (target === 'cash_management' && (perm.startsWith('cash.') || perm.startsWith('accounting.') || perm.startsWith('financial.') || perm === 'cash_management')) return true;
-      if ((target === 'control_center' || target === 'seo_management') && (perm.startsWith('settings.') || perm === 'control_center' || perm === 'settings')) return true;
+      if ((target === 'control_center' || target === 'seo_management' || target === 'guides_cms') && (perm.startsWith('settings.') || perm === 'control_center' || perm === 'settings' || perm === 'guides_cms')) return true;
       return false;
     });
   };

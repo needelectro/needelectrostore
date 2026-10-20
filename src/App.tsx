@@ -40,6 +40,7 @@ import { ReturnsModule } from './modules/ReturnsModule';
 import { ControlCenterModule } from './modules/ControlCenterModule';
 import { WebsiteOrdersManager } from './components/admin/WebsiteOrdersManager';
 import { BannersManager } from './components/admin/BannersManager';
+import { GuidesCmsManager } from './components/admin/GuidesCmsManager';
 
 import { InitialSetupModal } from './components/auth/InitialSetupModal';
 import { LandingPage } from './components/landing/LandingPage';
@@ -493,6 +494,8 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
         return <WebsiteOrdersManager />;
       case 'banners':
         return <BannersManager />;
+      case 'guides_cms':
+        return <GuidesCmsManager />;
       case 'control_center':
         return <ControlCenterModule onNavigate={handleNavigate} initialTab={moduleInitialParam as any} />;
       case 'seo_management':

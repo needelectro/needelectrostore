@@ -1295,3 +1295,43 @@ model WebsiteOrder {
   @@map("website_orders")
 }
 
+// ---------------------------------------------------------
+// 27. CONTENT SEO HUB & KNOWLEDGE GUIDES
+// ---------------------------------------------------------
+
+model GuideArticle {
+  id                 String    @id @default(cuid())
+  slug               String    @unique
+  category           String    // 'prices' | 'comparisons' | 'buying-guides' | 'faqs'
+  title              String
+  titleBn            String?   @map("title_bn")
+  seoTitle           String?   @map("seo_title")
+  metaDescription    String    @map("meta_description")
+  metaDescriptionBn  String?   @map("meta_description_bn")
+  summary            String
+  summaryBn          String?   @map("summary_bn")
+  content            String    @db.Text
+  contentBn          String?   @map("content_bn") @db.Text
+  featuredImage      String?   @map("featured_image")
+  readingTime        String?   @default("6 min read") @map("reading_time")
+  author             String    @default("Amdadur Rahman")
+  authorRole         String?   @default("Founder & Managing Director") @map("author_role")
+  tableOfContents    Json?     @map("table_of_contents")
+  priceTable         Json?     @map("price_table")
+  comparisonTable    Json?     @map("comparison_table")
+  faqs               Json?
+  relatedSkus        Json?     @map("related_skus")
+  relatedServices    Json?     @map("related_services")
+  relatedGuideSlugs  Json?     @map("related_guide_slugs")
+  isFeatured         Boolean   @default(false) @map("is_featured")
+  isPublished        Boolean   @default(true) @map("is_published")
+  views              Int       @default(0)
+  publishedAt        DateTime  @default(now()) @map("published_at")
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@index([isPublished])
+  @@index([isFeatured])
+  @@map("guide_articles")
+}
+

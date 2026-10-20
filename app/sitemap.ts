@@ -44,6 +44,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${domain}/contact`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${domain}/faq`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${domain}/blog`, lastModified: now, changeFrequency: 'daily', priority: 0.85 },
+    // Content SEO Hub Master Categories
+    { url: `${domain}/guides`, lastModified: now, changeFrequency: 'daily', priority: 0.95 },
+    { url: `${domain}/guides/prices`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${domain}/guides/comparisons`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${domain}/guides/buying-guides`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${domain}/guides/faqs`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
   ];
 
   // 2. Knowledge Center Blog Articles
@@ -53,6 +59,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: 'monthly',
     priority: 0.8,
   }));
+
+  // 2.1 Content SEO Hub Guide Articles
+  let guideRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const guides = await prisma.guideArticle.findMany({
+      where: { isPublished: true },
+      select: { slug: true, category: true, updatedAt: true },
+    });
+    guideRoutes = guides.map(g => ({
+      url: `${domain}/guides/${g.category}/${g.slug}`,
+      lastModified: g.updatedAt || now,
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    }));
+  } catch (err) {
+    console.error('Sitemap guide articles query error:', err);
+  }
 
   // 3. Dynamic Products from Database
   let productRoutes: MetadataRoute.Sitemap = [];

@@ -136,6 +136,12 @@ export const CustomerFooter: React.FC = () => {
             </h3>
             <ul className="space-y-2 text-xs">
               <li>
+                <Link href="/guides" className="text-cyan-400 font-bold hover:underline flex items-center gap-1.5">
+                  <ChevronRight size={12} className="text-cyan-400" />
+                  <span>💡 Guides &amp; Advice (Prices &amp; Specs)</span>
+                </Link>
+              </li>
+              <li>
                 <Link href="/track-order" className="text-emerald-400 font-bold hover:underline flex items-center gap-1.5">
                   <PackageSearch size={13} className="text-emerald-400" />
                   <span>Track Your Order Online</span>
@@ -259,6 +265,10 @@ export const CustomerFooter: React.FC = () => {
           </p>
           <div className="flex items-center flex-wrap gap-3">
             <Link href="/about" className="hover:text-slate-300">About Us</Link>
+            <span>•</span>
+            <Link href="/guides" className="text-cyan-400 hover:text-cyan-300 font-semibold">Guides &amp; Advice</Link>
+            <span>•</span>
+            <Link href="/guides/faqs" className="hover:text-slate-300">FAQs</Link>
             <span>•</span>
             <Link href="/shipping-policy" className="hover:text-slate-300">Shipping Policy</Link>
             <span>•</span>
