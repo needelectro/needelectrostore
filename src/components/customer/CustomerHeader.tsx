@@ -130,7 +130,7 @@ export const CustomerHeader: React.FC = () => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full shadow-sm">
+    <>
       {/* 0. Live Synchronized Storefront Announcement Bar */}
       {announcement && announcement.active && (
         <div className="bg-gradient-to-r from-[#002B5B] via-[#008CFF] to-[#002B5B] text-white text-[11px] sm:text-xs font-bold py-1.5 px-4 text-center tracking-wide flex items-center justify-center gap-2 shadow-inner">
@@ -142,6 +142,12 @@ export const CustomerHeader: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* Sticky Header: Topbar + Category Navigation stay pinned during scroll */}
+      <header
+        className="sticky top-0 z-40 w-full shadow-md backdrop-blur-xs"
+        style={{ position: 'sticky', top: 0, zIndex: 40 }}
+      >
 
       {/* 1. Main Dark Top Navbar (Trust Computer MB Style: #081621) */}
       <div className="bg-[#081621] text-white border-b border-slate-800">
@@ -421,6 +427,7 @@ export const CustomerHeader: React.FC = () => {
           })}
         </div>
       </nav>
+    </header>
 
       {/* Mobile Menu Drawer Overlay */}
       {mobileMenuOpen && (
@@ -588,6 +595,6 @@ export const CustomerHeader: React.FC = () => {
 
       {/* Cart Drawer */}
       <CartDrawer />
-    </header>
+    </>
   );
 };
