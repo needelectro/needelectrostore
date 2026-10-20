@@ -2,17 +2,16 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { Volume2, VolumeX, Sparkles, X } from 'lucide-react';
+import { Volume2, VolumeX, X } from 'lucide-react';
 
 const STORAGE_KEY = 'needElectroVoiceWelcomePlayed';
 const WELCOME_TEXT = 'Welcome to Need Electro, your trusted electrical and technological solutions.';
 
 export const VoiceWelcome: React.FC = () => {
   const pathname = usePathname();
-  const [showPrompt, setShowPrompt] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const hasAttemptedRef = useRef(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const playedRef = useRef(false);
+  const speechAttemptedRef = useRef(false);
 
   // Helper to pick the most natural, clear English voice
   const getPreferredVoice = (): SpeechSynthesisVoice | null => {
@@ -42,19 +41,27 @@ export const VoiceWelcome: React.FC = () => {
     return anyEnglish || voices[0] || null;
   };
 
-  const playWelcomeSpeech = (isUserInitiated = false) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      setShowPrompt(false);
-      return;
-    }
+  const playWelcomeSpeech = () => {
+    if (playedRef.current) return;
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
     try {
-      // Clear any stuck utterances
+      // Check localStorage once more
+      const alreadyPlayed = localStorage.getItem(STORAGE_KEY);
+      if (alreadyPlayed === 'true' || alreadyPlayed === 'dismissed') {
+        playedRef.current = true;
+        return;
+      }
+
+      // Resume speech synthesis in case the browser suspended the audio context
       window.speechSynthesis.cancel();
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
 
       const utterance = new SpeechSynthesisUtterance(WELCOME_TEXT);
       utterance.lang = 'en-US';
-      utterance.rate = 0.95; // Natural, clear speaking speed
+      utterance.rate = 0.93; // Natural, clear speaking speed
       utterance.pitch = 1.0;
       utterance.volume = 1.0;
 
@@ -65,49 +72,27 @@ export const VoiceWelcome: React.FC = () => {
 
       utterance.onstart = () => {
         setIsSpeaking(true);
-        setShowPrompt(false);
+        playedRef.current = true;
+        try {
+          localStorage.setItem(STORAGE_KEY, 'true');
+        } catch {}
       };
 
       utterance.onend = () => {
         setIsSpeaking(false);
-        setShowPrompt(false);
-        try {
-          localStorage.setItem(STORAGE_KEY, 'true');
-        } catch {
-          // ignore localStorage restrictions
-        }
       };
 
       utterance.onerror = (e) => {
         setIsSpeaking(false);
-        // If not user-initiated and blocked by browser policy, offer subtle tap button
-        if (!isUserInitiated) {
-          setShowPrompt(true);
-        } else {
-          setShowPrompt(false);
-          try {
-            localStorage.setItem(STORAGE_KEY, 'true');
-          } catch {}
-        }
+        // If synthesis error occurs (e.g. cancelled), mark as played so it doesn't loop
+        try {
+          localStorage.setItem(STORAGE_KEY, 'true');
+        } catch {}
       };
 
       window.speechSynthesis.speak(utterance);
-
-      // Autoplay watchdog: if automatic attempt doesn't trigger onstart within 1200ms,
-      // browser autoplay restriction likely intercepted it. Show the friendly prompt.
-      if (!isUserInitiated) {
-        if (timerRef.current) clearTimeout(timerRef.current);
-        timerRef.current = setTimeout(() => {
-          if (!window.speechSynthesis.speaking) {
-            setShowPrompt(true);
-          }
-        }, 1200);
-      }
     } catch {
-      // Fail silently without breaking the application
-      if (!isUserInitiated) {
-        setShowPrompt(true);
-      }
+      // Fail silently without errors
     }
   };
 
@@ -117,125 +102,111 @@ export const VoiceWelcome: React.FC = () => {
       return;
     }
 
-    // 2. Check if already played or dismissed
+    // 2. Check if already played
     try {
       const alreadyPlayed = localStorage.getItem(STORAGE_KEY);
       if (alreadyPlayed === 'true' || alreadyPlayed === 'dismissed') {
+        playedRef.current = true;
         return;
       }
     } catch {
-      // Storage unavailable
       return;
     }
 
-    // 3. Prevent duplicate attempts in React Strict Mode or fast re-renders
-    if (hasAttemptedRef.current) return;
-    hasAttemptedRef.current = true;
+    // 3. Prevent duplicate setup
+    if (speechAttemptedRef.current) return;
+    speechAttemptedRef.current = true;
 
-    // 4. Ensure speech synthesis is available
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
       return;
     }
 
-    // Load voices if not populated yet
-    const initVoicesAndSpeak = () => {
-      // Small pause after page mount so initial paint finishes smoothly
-      const startTimer = setTimeout(() => {
-        playWelcomeSpeech(false);
-      }, 800);
-      return () => clearTimeout(startTimer);
+    // 4. Try immediate autoplay on page load
+    const attemptImmediate = () => {
+      // Small pause after initial render so paint completes
+      setTimeout(() => {
+        playWelcomeSpeech();
+      }, 600);
     };
 
     if (window.speechSynthesis.getVoices().length === 0) {
       window.speechSynthesis.onvoiceschanged = () => {
-        initVoicesAndSpeak();
+        attemptImmediate();
       };
     } else {
-      initVoicesAndSpeak();
+      attemptImmediate();
     }
 
+    // 5. Global first-interaction listener:
+    // If the browser's autoplay policy blocked the unprompted call, the very first
+    // touch, scroll, swipe, click, or tap anywhere on the screen immediately triggers the welcome speech
+    // without requiring the visitor to click any specific speaker button!
+    const interactionEvents = ['pointerdown', 'touchstart', 'scroll', 'click', 'keydown', 'wheel'];
+
+    const handleFirstInteraction = () => {
+      if (!playedRef.current) {
+        playWelcomeSpeech();
+      }
+      cleanupListeners();
+    };
+
+    const cleanupListeners = () => {
+      interactionEvents.forEach((evt) => {
+        window.removeEventListener(evt, handleFirstInteraction);
+        document.removeEventListener(evt, handleFirstInteraction);
+      });
+    };
+
+    interactionEvents.forEach((evt) => {
+      window.addEventListener(evt, handleFirstInteraction, { once: true, passive: true });
+      document.addEventListener(evt, handleFirstInteraction, { once: true, passive: true });
+    });
+
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      cleanupListeners();
     };
   }, [pathname]);
 
-  const handleManualPlay = () => {
-    playWelcomeSpeech(true);
-  };
-
-  const handleDismiss = (e: React.MouseEvent) => {
+  const handleStop = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setShowPrompt(false);
+    setIsSpeaking(false);
+    playedRef.current = true;
     try {
-      localStorage.setItem(STORAGE_KEY, 'dismissed');
+      localStorage.setItem(STORAGE_KEY, 'true');
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
     } catch {}
   };
 
-  // If already played or not needed, render nothing
-  if (!showPrompt && !isSpeaking) {
+  // Only render the soundwave indicator while speaking; never render a speaker prompt button
+  if (!isSpeaking) {
     return null;
   }
 
-  // Active Speaking Pill Indicator
-  if (isSpeaking) {
-    return (
-      <aside
-        aria-label="Voice Welcome Playing"
-        className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-40 animate-fade-in pointer-events-auto"
-      >
-        <div className="glass-panel px-3.5 py-2 rounded-full border border-[var(--glass-border)] shadow-xl flex items-center gap-2.5 bg-[var(--glass-surface-solid)] text-[var(--text-primary)] backdrop-blur-xl">
-          <div className="w-6 h-6 rounded-full bg-[#008CFF] text-white flex items-center justify-center shrink-0 shadow-sm shadow-[#008CFF]/50 animate-pulse">
-            <Volume2 size={13} />
-          </div>
-          <span className="text-xs font-semibold tracking-wide pr-1">
-            Welcome to NEED ELECTRO
-          </span>
-          <div className="flex items-center gap-0.5 ml-1">
-            <span className="w-1 h-3 bg-[#008CFF] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="w-1 h-4 bg-[#008CFF] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="w-1 h-2 bg-[#008CFF] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-          </div>
-        </div>
-      </aside>
-    );
-  }
-
-  // Fallback Interactive Prompt when Autoplay is Restricted
   return (
     <aside
-      aria-label="Voice Welcome Prompt"
-      className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-40 animate-slide-up pointer-events-auto"
+      aria-label="Welcome Voice Playing"
+      className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-40 animate-fade-in pointer-events-auto select-none"
     >
-      <div
-        onClick={handleManualPlay}
-        className="glass-panel group pl-3 pr-2 py-1.5 rounded-full border border-[#008CFF]/30 hover:border-[#008CFF] shadow-xl flex items-center gap-2.5 bg-[var(--glass-surface-solid)] text-[var(--text-primary)] backdrop-blur-xl cursor-pointer hover:shadow-[#008CFF]/20 transition-all active:scale-95"
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleManualPlay();
-          }
-        }}
-      >
-        <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#002B5B] to-[#008CFF] text-white flex items-center justify-center shrink-0 shadow-sm shadow-[#008CFF]/40 group-hover:scale-105 transition-transform">
-          <Volume2 size={14} className="group-hover:rotate-6 transition-transform" />
+      <div className="glass-panel pl-3 pr-2.5 py-1.5 rounded-full border border-[#008CFF]/40 shadow-xl flex items-center gap-2.5 bg-[#081621]/95 text-white backdrop-blur-xl">
+        <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#008CFF] to-sky-400 text-white flex items-center justify-center shrink-0 shadow-sm shadow-[#008CFF]/50 animate-pulse">
+          <Volume2 size={13} />
         </div>
-
-        <div className="flex items-center gap-1.5 text-xs font-bold text-[#008CFF] group-hover:text-[#0070cc]">
-          <span>Tap to hear welcome</span>
-          <Sparkles size={13} className="text-amber-400 shrink-0" />
+        <span className="text-xs font-semibold tracking-wide pr-1">
+          Welcome to NEED ELECTRO
+        </span>
+        <div className="flex items-center gap-0.5">
+          <span className="w-1 h-3 bg-[#008CFF] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+          <span className="w-1 h-4 bg-sky-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+          <span className="w-1 h-2 bg-[#008CFF] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
         </div>
-
         <button
           type="button"
-          onClick={handleDismiss}
-          className="ml-1 p-1 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-          aria-label="Dismiss voice welcome"
-          title="Dismiss"
+          onClick={handleStop}
+          className="ml-1 p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+          aria-label="Mute welcome message"
+          title="Mute"
         >
           <X size={13} />
         </button>
