@@ -7,7 +7,7 @@ import {
   Download, Upload, Search, Filter, Eye, Users, 
   ArrowRight, Check, X, Smartphone, Globe, Mail, Phone, Calendar, 
   Hash, Tag, FileText, ChevronRight, Laptop, Monitor, Wifi, Zap,
-  Key, Database, UserCheck, Moon, Sun, ArrowLeftRight, RotateCcw, RefreshCw
+  Key, Database, UserCheck, Moon, Sun, ArrowLeftRight, RotateCcw, RefreshCw, Sparkles
 } from 'lucide-react';
 import { 
   ProductCategoryConfig, BrandConfig, ConfigurablePaymentMethod, 
@@ -19,6 +19,7 @@ import {
 import { MasterEntityHub } from '../components/admin/MasterEntityHub';
 import { SeoControlCenter } from '../components/admin/SeoControlCenter';
 import { DatabaseConfigManager } from '../components/admin/DatabaseConfigManager';
+import { BannerManager } from '../components/admin/BannerManager';
 
 type ControlCenterTab = 
   | 'master_crud'
@@ -35,7 +36,8 @@ type ControlCenterTab =
   | 'security'
   | 'database_config'
   | 'maintenance'
-  | 'seo';
+  | 'seo'
+  | 'storefront_banners';
 
 interface ControlCenterModuleProps {
   onNavigate: (module: string, targetId?: string) => void;
@@ -780,7 +782,8 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
           { id: 'security', label: 'Users & Security', icon: Lock },
           { id: 'database_config', label: '🗄️ Database & Cloud Engine', icon: Database },
           { id: 'maintenance', label: 'Maintenance & Merging', icon: Database },
-          { id: 'seo', label: '🌐 SEO Management', icon: Globe }
+          { id: 'seo', label: '🌐 SEO Management', icon: Globe },
+          { id: 'storefront_banners', label: '🎨 Storefront Banners & Campaigns', icon: Sparkles }
         ].map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -813,6 +816,13 @@ export const ControlCenterModule: React.FC<ControlCenterModuleProps> = ({ onNavi
       </div>
 
       {/* TAB CONTENT AREAS */}
+
+      {/* ========================================================================= */}
+      {/* 0. STOREFRONT BANNERS & PROMOTIONAL HERO CAROUSEL */}
+      {/* ========================================================================= */}
+      {activeTab === 'storefront_banners' && (
+        <BannerManager />
+      )}
 
       {/* ========================================================================= */}
       {/* 0. SUPER ADMIN UNIVERSAL MASTER ENTITY HUB */}

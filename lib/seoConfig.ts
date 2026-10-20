@@ -39,6 +39,7 @@ export const BUSINESS_INFO = {
     linkedin: 'https://linkedin.com/company/needelectro',
     whatsapp: 'https://wa.me/8801733983752',
   },
+  googleMapsUrl: 'https://maps.google.com/?q=NEED+ELECTRO+MR+Plaza+Kusumbag+Moulvibazar',
   serviceAreas: [
     'Moulvibazar Town',
     'Kusumbag, Moulvibazar',

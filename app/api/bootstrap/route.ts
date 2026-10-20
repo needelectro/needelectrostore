@@ -328,8 +328,37 @@ export async function GET(req: NextRequest) {
       defaultSerialPrefix: 'NEC-SN-',
     };
 
-    // If unauthenticated, return public branding, branch list and setup status
+    // If unauthenticated, return public branding, branch list, setup status, and published products
     if (!user) {
+      const publicProducts = await prisma.product.findMany({
+        where: {
+          status: { in: ['ACTIVE', 'OUT_OF_STOCK'] },
+        },
+        select: {
+          id: true,
+          name: true,
+          sku: true,
+          category: true,
+          brand: true,
+          model: true,
+          description: true,
+          imageUrl: true,
+          images: true,
+          retailPrice: true,
+          wholesalePrice: true,
+          emiPrice: true,
+          currentStock: true,
+          minStock: true,
+          warrantyPeriodMonths: true,
+          isSerialized: true,
+          status: true,
+          specs: true,
+          createdAt: true,
+        },
+        orderBy: [{ currentStock: 'desc' }, { createdAt: 'desc' }],
+        take: 200,
+      });
+
       return NextResponse.json({
         success: true,
         authenticated: false,
@@ -348,6 +377,7 @@ export async function GET(req: NextRequest) {
             isWarehouse: b.isWarehouse,
             active: b.active,
           })),
+          products: serializeRecord(publicProducts),
         },
       });
     }

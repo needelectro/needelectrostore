@@ -75,6 +75,7 @@ export async function POST(req: NextRequest) {
           model: productData.model,
           description: productData.description,
           imageUrl: productData.imageUrl,
+          images: productData.images || (productData.imageUrl ? [productData.imageUrl] : []),
           purchasePrice: new Prisma.Decimal(productData.purchasePrice || 0),
           costPrice: new Prisma.Decimal(productData.costPrice || 0),
           retailPrice: new Prisma.Decimal(productData.retailPrice || 0),
@@ -86,6 +87,8 @@ export async function POST(req: NextRequest) {
           warrantyPeriodMonths: productData.warrantyPeriodMonths || 0,
           isSerialized: Boolean(productData.isSerialized),
           status: productData.status || 'ACTIVE',
+          isPublished: productData.isPublished !== undefined ? productData.isPublished : true,
+          isFeatured: productData.isFeatured !== undefined ? productData.isFeatured : false,
           specs: productData.specs || {},
         },
       });

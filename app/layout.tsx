@@ -44,6 +44,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { CartProvider } from '@/src/services/cartContext';
+
 export default function RootLayout({
   children,
 }: {
@@ -77,7 +79,9 @@ export default function RootLayout({
         />
       </head>
       <body>
-        {children}
+        <CartProvider>
+          {children}
+        </CartProvider>
         <script
           dangerouslySetInnerHTML={{
             __html: `

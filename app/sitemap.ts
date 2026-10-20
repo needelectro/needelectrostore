@@ -30,7 +30,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${domain}/sreemangal`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 },
     { url: `${domain}/kulaura`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 },
     { url: `${domain}/rajnagar`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 },
-    { url: `${domain}/delivery`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${domain}/delivery`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 },
+    { url: `${domain}/cart`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${domain}/about`, lastModified: now, changeFrequency: 'monthly', priority: 0.75 },
     { url: `${domain}/contact`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${domain}/faq`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
@@ -51,6 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const products = await prisma.product.findMany({
       where: {
         status: { in: ['ACTIVE', 'OUT_OF_STOCK'] },
+        isPublished: true,
       },
       select: {
         name: true,

@@ -124,6 +124,7 @@ export const createProductSchema = z.object({
     model: z.string().optional(),
     description: z.string().optional(),
     imageUrl: z.string().optional(),
+    images: z.array(z.string()).optional(),
     purchasePrice: z.number().nonnegative().optional().default(0),
     costPrice: z.number().nonnegative().optional().default(0),
     retailPrice: z.number().nonnegative().optional().default(0),
@@ -135,9 +136,43 @@ export const createProductSchema = z.object({
     warrantyPeriodMonths: z.number().int().nonnegative().optional().default(0),
     isSerialized: z.boolean().optional().default(false),
     status: z.enum(['ACTIVE', 'DISCONTINUED', 'OUT_OF_STOCK']).optional().default('ACTIVE'),
+    isPublished: z.boolean().optional().default(true),
+    isFeatured: z.boolean().optional().default(false),
     specs: z.record(z.any()).optional(),
   }),
   initialSerials: z.array(z.string()).optional(),
+});
+
+export const bannerSchema = z.object({
+  title: z.string().min(2, 'Banner title is required'),
+  subtitle: z.string().optional(),
+  badge: z.string().optional(),
+  imageUrl: z.string().min(1, 'Banner image is required'),
+  mobileImageUrl: z.string().optional(),
+  targetUrl: z.string().optional(),
+  buttonText: z.string().optional().default('Shop Now'),
+  sortOrder: z.number().int().default(0),
+  isActive: z.boolean().optional().default(true),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  placement: z.string().optional().default('HERO'),
+});
+
+export const createWebsiteOrderSchema = z.object({
+  customerName: z.string().min(2, 'Customer name is required'),
+  customerPhone: z.string().regex(/^(\+?880|0)?1[3-9]\d{8}$/, 'Valid Bangladeshi mobile number (11 digits e.g. 017XXXXXXXX) is required'),
+  customerEmail: z.string().email('Invalid email address').optional().or(z.literal('')),
+  deliveryAddress: z.string().min(5, 'Full delivery address with house/road/area is required'),
+  district: z.string().min(2, 'District is required'),
+  deliveryArea: z.string().optional(),
+  deliveryNotes: z.string().optional(),
+  paymentMethod: z.enum(['COD', 'BKASH', 'NAGAD', 'BANK']).default('COD'),
+  items: z.array(
+    z.object({
+      productId: z.string().min(1, 'Product ID is required'),
+      quantity: z.number().int().positive('Quantity must be at least 1'),
+    })
+  ).min(1, 'Order must contain at least one item'),
 });
 
 export const stockAdjustSchema = z.object({

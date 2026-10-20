@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useERP } from '../services/erpStore';
 import { Product, ProductCategory, LaptopSpecifications } from '../types';
 import { isProductInCategory, SHOWROOM_CATEGORIES } from '../services/categoryMatcher';
+import { api } from '../services/api';
 import { 
   PackageSearch, Plus, Search, Edit2, Laptop, 
-  Tag, Layers, Hash, Check, X, ShieldAlert, Trash2 
+  Tag, Layers, Hash, Check, X, ShieldAlert, Trash2,
+  UploadCloud, Image as ImageIcon, Link as LinkIcon, Star,
+  Eye, EyeOff, Loader2, Sparkles, CheckCircle2
 } from 'lucide-react';
 
 interface ProductsModuleProps {
@@ -63,6 +66,99 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
   const [batteryCondition, setBatteryCondition] = useState('');
   const [physicalCondition, setPhysicalCondition] = useState('');
 
+  // Product Media & Storefront Visibility
+  const [imageUrl, setImageUrl] = useState('');
+  const [images, setImages] = useState<string[]>([]);
+  const [isPublished, setIsPublished] = useState<boolean>(true);
+  const [isFeatured, setIsFeatured] = useState<boolean>(false);
+  const [imageInputMode, setImageInputMode] = useState<'upload' | 'url'>('upload');
+  const [externalUrlInput, setExternalUrlInput] = useState('');
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState('');
+  const [urlTestStatus, setUrlTestStatus] = useState<'idle' | 'testing' | 'valid' | 'invalid'>('idle');
+
+  // Handle Device File Upload (Method A)
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImageUploadError('');
+
+    // Client-side validations
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+    if (!allowedTypes.includes(file.type)) {
+      setImageUploadError('Invalid file type. Please upload a JPEG, PNG, or WebP image.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setImageUploadError('File is too large. Maximum image size is 5MB.');
+      return;
+    }
+
+    try {
+      setIsUploadingImage(true);
+      const res = await api.storage.uploadFile(file, 'products');
+      if (res && res.success && res.publicUrl) {
+        const uploadedUrl = res.publicUrl;
+        setImageUrl(prev => prev || uploadedUrl);
+        setImages(prev => prev.includes(uploadedUrl) ? prev : [...prev, uploadedUrl]);
+        setImageUploadError('');
+      } else {
+        setImageUploadError(res?.error || 'Failed to upload image. Please try again.');
+      }
+    } catch (err: any) {
+      setImageUploadError(err.message || 'Error uploading file to storage.');
+    } finally {
+      setIsUploadingImage(false);
+      // Reset input value so same file can be re-selected if desired
+      e.target.value = '';
+    }
+  };
+
+  // Handle External Image URL (Method B)
+  const handleApplyExternalUrl = () => {
+    const url = externalUrlInput.trim();
+    if (!url) return;
+
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      setImageUploadError('Please provide a valid URL starting with http:// or https://');
+      return;
+    }
+
+    setUrlTestStatus('testing');
+    setImageUploadError('');
+
+    // Pre-test image loading in browser
+    const testImg = new window.Image();
+    testImg.onload = () => {
+      setUrlTestStatus('valid');
+      setImageUrl(prev => prev || url);
+      setImages(prev => prev.includes(url) ? prev : [...prev, url]);
+      setExternalUrlInput('');
+      setTimeout(() => setUrlTestStatus('idle'), 2000);
+    };
+    testImg.onerror = () => {
+      setUrlTestStatus('invalid');
+      setImageUploadError('The remote URL could not be loaded as an image. Please verify the URL.');
+    };
+    testImg.src = url;
+  };
+
+  const handleRemoveImage = (urlToRemove: string) => {
+    const nextImages = images.filter(u => u !== urlToRemove);
+    setImages(nextImages);
+    if (imageUrl === urlToRemove) {
+      setImageUrl(nextImages[0] || '');
+    }
+  };
+
+  const handleSetPrimaryImage = (targetUrl: string) => {
+    setImageUrl(targetUrl);
+    if (!images.includes(targetUrl)) {
+      setImages(prev => [targetUrl, ...prev]);
+    }
+  };
+
   const categories: ProductCategory[] = [
     'Laptop', 'Desktop', 'Monitor', 'Smartphone', 'Tablet', 'Printer',
     'CCTV', 'Router', 'Networking', 'Computer Accessories', 'Laptop Accessories',
@@ -105,6 +201,12 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
     setDisplay('');
     setBatteryCondition('');
     setPhysicalCondition('');
+    setImageUrl('');
+    setImages([]);
+    setIsPublished(true);
+    setIsFeatured(false);
+    setImageUploadError('');
+    setExternalUrlInput('');
     setEditingProduct(null);
     setShowAddModal(true);
   };
@@ -166,6 +268,10 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
         supplierId,
         warrantyPeriodMonths: numWarranty,
         isSerialized,
+        imageUrl: imageUrl.trim() || undefined,
+        images: images.length > 0 ? images : (imageUrl.trim() ? [imageUrl.trim()] : []),
+        isPublished,
+        isFeatured,
         specs
       });
     } else {
@@ -186,7 +292,11 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
         supplierId,
         warrantyPeriodMonths: numWarranty,
         isSerialized,
+        imageUrl: imageUrl.trim() || undefined,
+        images: images.length > 0 ? images : (imageUrl.trim() ? [imageUrl.trim()] : []),
         status: 'ACTIVE',
+        isPublished,
+        isFeatured,
         specs
       }, initialSerialsText ? initialSerialsText.split(',').map(s => s.trim()).filter(Boolean) : undefined);
     }
@@ -310,15 +420,58 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
                 return (
                   <tr key={p.id}>
                     <td>
-                      <div style={{ fontWeight: '700', fontSize: '0.9rem' }}>{p.name}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                        SKU: {p.sku} • Brand: {p.brand}
-                      </div>
-                      {p.specs && 'processor' in p.specs && (
-                        <div style={{ fontSize: '0.7rem', color: '#2563eb', marginTop: '2px' }}>
-                          {(p.specs as LaptopSpecifications).processor} | {(p.specs as LaptopSpecifications).ram} | {(p.specs as LaptopSpecifications).storage}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        {/* Thumbnail Preview */}
+                        <div style={{
+                          width: '42px',
+                          height: '42px',
+                          borderRadius: '8px',
+                          background: 'var(--bg-card-muted)',
+                          border: '1px solid var(--border-color)',
+                          overflow: 'hidden',
+                          flexShrink: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}>
+                          {p.imageUrl ? (
+                            <img
+                              src={p.imageUrl}
+                              alt={p.name}
+                              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                              onError={(e) => {
+                                (e.target as HTMLElement).style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <ImageIcon size={18} style={{ color: 'var(--text-muted)' }} />
+                          )}
                         </div>
-                      )}
+
+                        <div>
+                          <div style={{ fontWeight: '700', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                            <span>{p.name}</span>
+                            {p.isFeatured && (
+                              <span title="Featured in Spotlight" style={{ color: '#f59e0b', display: 'inline-flex' }}>
+                                <Star size={13} fill="#f59e0b" />
+                              </span>
+                            )}
+                            {p.isPublished === false && (
+                              <span className="badge badge-warning" style={{ fontSize: '0.65rem', padding: '1px 5px' }}>
+                                Hidden
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                            SKU: {p.sku} • Brand: {p.brand}
+                          </div>
+                          {p.specs && 'processor' in p.specs && (
+                            <div style={{ fontSize: '0.7rem', color: '#2563eb', marginTop: '2px' }}>
+                              {(p.specs as LaptopSpecifications).processor} | {(p.specs as LaptopSpecifications).ram} | {(p.specs as LaptopSpecifications).storage}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </td>
                     <td><span className="badge badge-neutral">{p.category}</span></td>
                     <td>
@@ -399,6 +552,12 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
                             setBatteryCondition('');
                             setPhysicalCondition('');
                           }
+                          setImageUrl(p.imageUrl || '');
+                          setImages(p.images && Array.isArray(p.images) ? p.images : (p.imageUrl ? [p.imageUrl] : []));
+                          setIsPublished(p.isPublished !== undefined ? p.isPublished : true);
+                          setIsFeatured(p.isFeatured || false);
+                          setImageUploadError('');
+                          setExternalUrlInput('');
                           setShowAddModal(true);
                         }}
                       >
@@ -686,6 +845,304 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
                     </div>
                   </div>
                 )}
+
+                {/* PRODUCT MEDIA & STOREFRONT IMAGE MANAGEMENT */}
+                <div style={{
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-card-muted)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <ImageIcon size={18} color="var(--brand-primary)" />
+                      <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>
+                        Product Photography & Storefront Media
+                      </span>
+                    </div>
+
+                    {/* Method Switcher Tabs: Device Upload vs External URL */}
+                    <div style={{ display: 'inline-flex', background: 'var(--bg-card)', padding: '2px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                      <button
+                        type="button"
+                        onClick={() => { setImageInputMode('upload'); setImageUploadError(''); }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                          padding: '4px 10px',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          borderRadius: '6px',
+                          border: 'none',
+                          cursor: 'pointer',
+                          background: imageInputMode === 'upload' ? 'var(--brand-primary)' : 'transparent',
+                          color: imageInputMode === 'upload' ? '#ffffff' : 'var(--text-secondary)',
+                        }}
+                      >
+                        <UploadCloud size={13} />
+                        Method A: Device Upload
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setImageInputMode('url'); setImageUploadError(''); }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                          padding: '4px 10px',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          borderRadius: '6px',
+                          border: 'none',
+                          cursor: 'pointer',
+                          background: imageInputMode === 'url' ? 'var(--brand-primary)' : 'transparent',
+                          color: imageInputMode === 'url' ? '#ffffff' : 'var(--text-secondary)',
+                        }}
+                      >
+                        <LinkIcon size={13} />
+                        Method B: External Image URL
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Method A: Device File Upload */}
+                  {imageInputMode === 'upload' && (
+                    <div style={{
+                      border: '2px dashed var(--border-color)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '1.25rem',
+                      textAlign: 'center',
+                      background: 'var(--bg-card)',
+                      transition: 'border-color 0.2s',
+                    }}>
+                      <input
+                        type="file"
+                        id="product-image-file-input"
+                        accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+                        style={{ display: 'none' }}
+                        onChange={handleFileUpload}
+                        disabled={isUploadingImage}
+                      />
+                      <label
+                        htmlFor="product-image-file-input"
+                        style={{ cursor: isUploadingImage ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}
+                      >
+                        <div style={{
+                          width: '44px',
+                          height: '44px',
+                          borderRadius: '50%',
+                          background: 'rgba(0, 140, 255, 0.1)',
+                          color: 'var(--brand-primary)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}>
+                          {isUploadingImage ? <Loader2 size={22} className="spin" /> : <UploadCloud size={22} />}
+                        </div>
+                        <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>
+                          {isUploadingImage ? 'Uploading & Optimizing image...' : 'Click to Browse from Computer or Phone'}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                          Supports JPEG, PNG, WebP up to 5MB. Multiple uploads will be added to the product gallery.
+                        </div>
+                      </label>
+                    </div>
+                  )}
+
+                  {/* Method B: External Image URL */}
+                  {imageInputMode === 'url' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <input
+                          type="url"
+                          className="form-input"
+                          placeholder="Paste verified image URL (e.g. https://example.com/images/hp-laptop.jpg)"
+                          value={externalUrlInput}
+                          onChange={e => setExternalUrlInput(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleApplyExternalUrl();
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={handleApplyExternalUrl}
+                          disabled={urlTestStatus === 'testing' || !externalUrlInput.trim()}
+                        >
+                          {urlTestStatus === 'testing' ? (
+                            <>
+                              <Loader2 size={13} className="spin" /> Verifying...
+                            </>
+                          ) : (
+                            <>
+                              <Check size={13} /> Test & Add
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                        Secure HTTPS image sources only. Image will be pre-tested for validity before saving.
+                      </div>
+                    </div>
+                  )}
+
+                  {imageUploadError && (
+                    <div style={{
+                      padding: '0.5rem 0.75rem',
+                      background: 'rgba(239, 68, 68, 0.1)',
+                      border: '1px solid rgba(239, 68, 68, 0.25)',
+                      borderRadius: 'var(--radius-sm)',
+                      color: '#ef4444',
+                      fontSize: '0.78rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                    }}>
+                      <ShieldAlert size={14} />
+                      <span>{imageUploadError}</span>
+                    </div>
+                  )}
+
+                  {/* Image Gallery & Primary Selector */}
+                  {images.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                        Uploaded Images ({images.length}) — Click 'Set Primary' to choose storefront thumbnail:
+                      </div>
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
+                        gap: '0.75rem',
+                      }}>
+                        {images.map((img, idx) => {
+                          const isPrimary = img === imageUrl;
+                          return (
+                            <div
+                              key={idx}
+                              style={{
+                                position: 'relative',
+                                borderRadius: 'var(--radius-md)',
+                                border: isPrimary ? '2px solid var(--brand-primary)' : '1px solid var(--border-color)',
+                                background: 'var(--bg-card)',
+                                padding: '4px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                boxShadow: isPrimary ? '0 0 0 2px rgba(0, 140, 255, 0.2)' : 'none',
+                              }}
+                            >
+                              {isPrimary && (
+                                <span style={{
+                                  position: 'absolute',
+                                  top: '6px',
+                                  left: '6px',
+                                  background: 'var(--brand-primary)',
+                                  color: '#ffffff',
+                                  fontSize: '0.62rem',
+                                  fontWeight: 800,
+                                  padding: '1px 5px',
+                                  borderRadius: '4px',
+                                  zIndex: 2,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '2px',
+                                }}>
+                                  <Star size={9} fill="#fff" /> PRIMARY
+                                </span>
+                              )}
+
+                              <div style={{ width: '100%', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                                <img
+                                  src={img}
+                                  alt={`Product preview ${idx + 1}`}
+                                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                  onError={(e) => {
+                                    (e.target as HTMLElement).setAttribute('src', '/logo-icon.png');
+                                  }}
+                                />
+                              </div>
+
+                              <div style={{ width: '100%', display: 'flex', gap: '3px', marginTop: '4px' }}>
+                                {!isPrimary && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSetPrimaryImage(img)}
+                                    style={{
+                                      flex: 1,
+                                      padding: '2px 4px',
+                                      fontSize: '0.65rem',
+                                      fontWeight: 600,
+                                      background: 'var(--bg-card-muted)',
+                                      border: '1px solid var(--border-color)',
+                                      borderRadius: '4px',
+                                      cursor: 'pointer',
+                                      color: 'var(--text-secondary)',
+                                    }}
+                                  >
+                                    Set Primary
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveImage(img)}
+                                  title="Remove image"
+                                  style={{
+                                    padding: '2px 5px',
+                                    background: 'rgba(239, 68, 68, 0.1)',
+                                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    color: '#ef4444',
+                                  }}
+                                >
+                                  <X size={11} />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Storefront Publication & Spotlight Settings */}
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '1.25rem',
+                    paddingTop: '0.75rem',
+                    borderTop: '1px solid var(--border-color)',
+                  }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                      <input
+                        type="checkbox"
+                        checked={isPublished}
+                        onChange={e => setIsPublished(e.target.checked)}
+                      />
+                      <span style={{ fontWeight: 600 }}>Publish on Customer Website</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>(Allows customers to view and buy online)</span>
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                      <input
+                        type="checkbox"
+                        checked={isFeatured}
+                        onChange={e => setIsFeatured(e.target.checked)}
+                      />
+                      <span style={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <Star size={13} color="#f59e0b" fill="#f59e0b" />
+                        Homepage Spotlight Collection
+                      </span>
+                    </label>
+                  </div>
+                </div>
 
                 {/* Tech Specs if Laptop */}
                 {category === 'Laptop' && (

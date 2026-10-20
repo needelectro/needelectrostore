@@ -8,6 +8,7 @@ import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
 import { ProductCard } from '@/src/components/customer/ProductCard';
+import { ProductDetailView } from '@/src/components/customer/ProductDetailView';
 import {
   ShieldCheck, CheckCircle2, Phone, MessageCircle, Truck,
   CreditCard, Clock, MapPin, Laptop, Cpu, Check, ArrowRight
@@ -143,143 +144,24 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
 
       {/* Main Product Hero */}
       <section className="py-10 px-4 max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Left Column: Product Photo & Media */}
-          <div className="lg:col-span-5 space-y-4">
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 aspect-[4/3] flex items-center justify-center relative overflow-hidden shadow-sm">
-              <img
-                src={product.imageUrl || (isLaptop ? '/logo-dark-transparent.png' : '/logo-icon.png')}
-                alt={`${product.name} available at ${BUSINESS_INFO.name} Moulvibazar`}
-                className="max-h-full max-w-full object-contain"
-              />
-              <span className="absolute top-4 left-4 bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-cyan-300 font-bold px-2.5 py-1 rounded-lg text-xs">
-                {product.brand}
-              </span>
-              <span className={`absolute top-4 right-4 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
-                isAvailable ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:border-emerald-500/30' : 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950 dark:text-rose-400 dark:border-rose-500/30'
-              }`}>
-                {isAvailable ? 'In Stock (Moulvibazar)' : 'Pre-Order'}
-              </span>
-            </div>
-
-            {/* Warranty & Guarantee Highlights */}
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center gap-2.5 shadow-xs">
-                <ShieldCheck size={18} className="text-blue-600 dark:text-cyan-400 shrink-0" />
-                <span className="text-slate-700 dark:text-slate-300 font-medium">7-Day Replacement</span>
-              </div>
-              <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center gap-2.5 shadow-xs">
-                <Clock size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
-                <span className="text-slate-700 dark:text-slate-300 font-medium">2-Year Free Service</span>
-              </div>
-              <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center gap-2.5 shadow-xs">
-                <Truck size={18} className="text-amber-500 dark:text-amber-400 shrink-0" />
-                <span className="text-slate-700 dark:text-slate-300 font-medium">Open-Box Verification</span>
-              </div>
-              <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center gap-2.5 shadow-xs">
-                <CreditCard size={18} className="text-blue-600 dark:text-blue-400 shrink-0" />
-                <span className="text-slate-700 dark:text-slate-300 font-medium">Laptop EMI Available</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Title, Pricing, Actions */}
-          <div className="lg:col-span-7 space-y-6">
-            <div>
-              <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mb-2">
-                <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded font-mono text-blue-700 dark:text-cyan-300 font-semibold border border-slate-200 dark:border-transparent">
-                  SKU: {product.sku}
-                </span>
-                <span>Category: {product.category}</span>
-                {product.model && <span>Model: {product.model}</span>}
-              </div>
-
-              {/* Single Semantic H1 for the Product Page */}
-              <h1 className="text-2xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-snug">
-                {product.name}
-              </h1>
-
-              {product.description && (
-                <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {product.description}
-                </p>
-              )}
-            </div>
-
-            {/* Pricing Box */}
-            <div className="p-6 rounded-2xl bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-950 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
-              <div className="flex items-baseline justify-between">
-                <div>
-                  <span className="text-xs text-slate-500 dark:text-slate-400 block mb-1">Cash / bKash / Showroom Price</span>
-                  <span className="text-3xl md:text-4xl font-extrabold text-blue-600 dark:text-cyan-400 font-mono">
-                    ৳{retailPriceNum.toLocaleString()}
-                  </span>
-                  <span className="text-xs text-slate-400 dark:text-slate-500 ml-2">BDT (VAT Incl.)</span>
-                </div>
-
-                {isLaptop && emiMonthly && (
-                  <div className="text-right">
-                    <span className="text-xs text-slate-500 dark:text-slate-400 block mb-1">Monthly Installment</span>
-                    <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-500/30 px-3 py-1.5 rounded-xl inline-block">
-                      From ৳{emiMonthly.toLocaleString()}/mo
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {isLaptop && (
-                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300 flex items-center justify-between">
-                  <span>Available on 3, 6, 9 & 12 Month EMI plans</span>
-                  <Link href="/laptop-emi" className="text-blue-600 dark:text-cyan-400 hover:underline font-bold">
-                    View EMI Terms →
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {/* Direct Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <a
-                href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=${whatsappMessage}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-600/25 transition-all"
-              >
-                <MessageCircle size={17} />
-                <span>Order on WhatsApp</span>
-              </a>
-
-              {isLaptop && (
-                <Link
-                  href="/laptop-emi"
-                  className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-blue-600/25 transition-all"
-                >
-                  <CreditCard size={17} />
-                  <span>Apply for EMI</span>
-                </Link>
-              )}
-
-              <a
-                href={`tel:${BUSINESS_INFO.phoneClean}`}
-                className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold py-3 px-6 rounded-xl text-xs flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 transition-colors shadow-xs"
-              >
-                <Phone size={15} className="text-blue-600 dark:text-cyan-400" />
-                <span>Call Showroom</span>
-              </a>
-            </div>
-
-            {/* Pickup & Verification Notice */}
-            <div className="p-4 rounded-xl bg-blue-50/60 dark:bg-slate-900/60 border border-blue-100 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 space-y-1">
-              <div className="flex items-center gap-2 text-blue-700 dark:text-cyan-400 font-bold">
-                <MapPin size={14} />
-                <span>Moulvibazar Showroom Pickup Available</span>
-              </div>
-              <p className="text-slate-600 dark:text-slate-400 text-[11px]">
-                MR Plaza, Kusumbag, Moulvibazar. Test the laptop personally before buying. Same-day hand delivery available in Moulvibazar town, Sreemangal, and Kulaura.
-              </p>
-            </div>
-          </div>
-        </div>
+        <ProductDetailView
+          product={{
+            id: product.id,
+            name: product.name,
+            sku: product.sku,
+            category: product.category,
+            brand: product.brand,
+            model: product.model,
+            description: product.description,
+            imageUrl: product.imageUrl,
+            images: Array.isArray(product.images) ? (product.images as string[]) : null,
+            retailPrice: retailPriceNum,
+            currentStock: product.currentStock,
+            warrantyPeriodMonths: product.warrantyPeriodMonths || undefined,
+          }}
+          isLaptop={isLaptop}
+          emiMonthly={emiMonthly}
+        />
 
         {/* Detailed Technical Specifications Table */}
         {product.specs && typeof product.specs === 'object' && Object.keys(product.specs).length > 0 && (

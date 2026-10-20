@@ -6,10 +6,12 @@ import {
   Search, Phone, MessageCircle, Menu, X, ChevronDown,
   Laptop, Monitor, Camera, Zap, Cpu, Wifi, Smartphone,
   MapPin, ShieldCheck, CreditCard, BookOpen, Clock, ArrowRight,
-  Sun, Moon
+  Sun, Moon, ShoppingBag
 } from 'lucide-react';
 import { BUSINESS_INFO, slugify } from '@/lib/seoConfig';
 import { NeedElectroLogo } from '@/src/components/NeedElectroLogo';
+import { useCart } from '@/src/services/cartContext';
+import { CartDrawer } from '@/src/components/customer/CartDrawer';
 
 interface SearchResult {
   id: string;
@@ -23,6 +25,7 @@ interface SearchResult {
 }
 
 export const CustomerHeader: React.FC = () => {
+  const { openCart, totalItems } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
@@ -251,6 +254,25 @@ export const CustomerHeader: React.FC = () => {
             }`}
           >
             {isLight ? <Sun size={17} /> : <Moon size={17} />}
+          </button>
+
+          {/* Shopping Cart Button */}
+          <button
+            type="button"
+            onClick={openCart}
+            aria-label="View shopping cart"
+            className={`relative p-2 rounded-xl border transition-all flex items-center justify-center group ${
+              isLight
+                ? 'bg-blue-50/80 hover:bg-blue-100 text-blue-600 border-blue-200 shadow-2xs'
+                : 'bg-slate-900 hover:bg-slate-800 text-cyan-400 border-slate-700'
+            }`}
+          >
+            <ShoppingBag size={18} className="group-hover:scale-110 transition-transform" />
+            {totalItems > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-xs animate-in zoom-in">
+                {totalItems > 99 ? '99+' : totalItems}
+              </span>
+            )}
           </button>
 
           <Link
@@ -517,6 +539,21 @@ export const CustomerHeader: React.FC = () => {
             >
               ⚡ Electrical
             </Link>
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                openCart();
+              }}
+              className="p-2.5 rounded-xl font-bold bg-blue-600 text-white flex items-center justify-between"
+            >
+              <span className="flex items-center gap-2">
+                <ShoppingBag size={16} />
+                <span>My Shopping Cart</span>
+              </span>
+              <span className="bg-white text-blue-600 text-xs px-2.5 py-0.5 rounded-full font-black">
+                {totalItems}
+              </span>
+            </button>
             <Link
               href="/services/electrician"
               onClick={() => setMobileMenuOpen(false)}
@@ -555,6 +592,7 @@ export const CustomerHeader: React.FC = () => {
           </div>
         </div>
       )}
+      <CartDrawer />
     </header>
   );
 };

@@ -61,6 +61,33 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   return data;
 }
 
+async function uploadRequest<T>(endpoint: string, formData: FormData): Promise<T> {
+  const token = getSessionToken();
+  const headers: Record<string, string> = {};
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers,
+    body: formData
+  });
+
+  const data = await response.json().catch(() => ({ success: false, error: 'Failed to parse JSON response' }));
+
+  if (!response.ok || data.success === false) {
+    const errorMsg = data.error || `HTTP error ${response.status}: ${response.statusText}`;
+    const err: any = new Error(errorMsg);
+    err.status = response.status;
+    err.data = data;
+    throw err;
+  }
+
+  return data;
+}
+
 export const api = {
   // 1. Auth & RBAC
   auth: {
@@ -632,5 +659,57 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ mode, confirmationKeyword })
       })
+  },
+
+  // 19. Storage & Image Upload
+  storage: {
+    uploadFile: (file: File, folder: string = 'products') => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', folder);
+      return uploadRequest<{ success: boolean; publicUrl: string; fileName: string; error?: string }>('/api/storage/upload', formData);
+    }
+  },
+
+  // 20. Banners & Homepage Content
+  banners: {
+    getBanners: (params?: { activeOnly?: boolean; placement?: string }) => {
+      const q = params ? '?' + new URLSearchParams(params as any).toString() : '';
+      return request<{ success: boolean; data: any[] }>(`/api/banners${q}`);
+    },
+    createBanner: (bannerData: any) =>
+      request<{ success: boolean; message: string; banner: any }>('/api/banners', {
+        method: 'POST',
+        body: JSON.stringify(bannerData)
+      }),
+    updateBanner: (id: string, updates: any) =>
+      request<{ success: boolean; message: string; banner: any }>(`/api/banners/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates)
+      }),
+    deleteBanner: (id: string) =>
+      request<{ success: boolean; message: string }>(`/api/banners/${id}`, {
+        method: 'DELETE'
+      })
+  },
+
+  // 21. Website Orders & Online Checkout
+  websiteOrders: {
+    getOrders: (params?: Record<string, string>) => {
+      const q = params ? '?' + new URLSearchParams(params).toString() : '';
+      return request<{ success: boolean; data: any[]; count?: number }>(`/api/orders${q}`);
+    },
+    getOrder: (id: string) => request<{ success: boolean; data: any }>(`/api/orders/${id}`),
+    createOrder: (orderData: any) =>
+      request<{ success: boolean; message: string; order: any; sale?: any }>('/api/orders', {
+        method: 'POST',
+        body: JSON.stringify(orderData)
+      }),
+    updateOrderStatus: (id: string, updates: { orderStatus?: string; paymentStatus?: string; fulfillmentStatus?: string; notes?: string }) =>
+      request<{ success: boolean; message: string; order: any }>(`/api/orders/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates)
+      })
   }
 };
+

@@ -6,10 +6,11 @@ import {
   RotateCcw, Calendar, Check, X, ArrowUpRight,
   Edit2, Trash2, Save, ShieldCheck, RefreshCw, Database, AlertCircle,
   CreditCard, Copy, Share2, Filter, ChevronDown, CheckCircle2,
-  Clock, DollarSign, User, Phone, MapPin, Tag, ShoppingCart
+  Clock, DollarSign, User, Phone, MapPin, Tag, ShoppingCart, Truck
 } from 'lucide-react';
 
 import { getInvoiceItemSpecs, formatWarrantyInfo } from '../services/invoiceSpecsHelper';
+import { WebsiteOrdersManager } from '../components/admin/WebsiteOrdersManager';
 
 interface SalesModuleProps {
   onNavigate: (module: string, targetId?: string) => void;
@@ -46,6 +47,7 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
   const [selectedBranchId, setSelectedBranchId] = useState<string>('ALL');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('ALL');
   const [isSyncing, setIsSyncing] = useState(false);
+  const [viewMode, setViewMode] = useState<'INVOICES' | 'WEBSITE_ORDERS'>('INVOICES');
 
   // Keep URL search params in sync without replacing other query parameters (e.g. page)
   useEffect(() => {
@@ -367,8 +369,57 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* KPI Summary Dashboard Strip */}
-      <div className="kpi-grid">
+      {/* Mode Switcher: Invoices vs Website Orders */}
+      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+        <button
+          onClick={() => setViewMode('INVOICES')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            padding: '0.55rem 1rem',
+            borderRadius: 'var(--radius-md)',
+            fontSize: '0.85rem',
+            fontWeight: viewMode === 'INVOICES' ? 700 : 500,
+            color: viewMode === 'INVOICES' ? '#fff' : 'var(--text-secondary)',
+            background: viewMode === 'INVOICES' ? 'var(--brand-primary)' : 'var(--bg-card)',
+            border: '1px solid',
+            borderColor: viewMode === 'INVOICES' ? 'var(--brand-primary)' : 'var(--border-color)',
+            cursor: 'pointer'
+          }}
+        >
+          <ReceiptText size={15} />
+          Invoices &amp; Showroom Sales
+        </button>
+
+        <button
+          onClick={() => setViewMode('WEBSITE_ORDERS')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            padding: '0.55rem 1rem',
+            borderRadius: 'var(--radius-md)',
+            fontSize: '0.85rem',
+            fontWeight: viewMode === 'WEBSITE_ORDERS' ? 700 : 500,
+            color: viewMode === 'WEBSITE_ORDERS' ? '#fff' : 'var(--text-secondary)',
+            background: viewMode === 'WEBSITE_ORDERS' ? 'var(--brand-primary)' : 'var(--bg-card)',
+            border: '1px solid',
+            borderColor: viewMode === 'WEBSITE_ORDERS' ? 'var(--brand-primary)' : 'var(--border-color)',
+            cursor: 'pointer'
+          }}
+        >
+          <Truck size={15} />
+          Website Online &amp; COD Orders
+        </button>
+      </div>
+
+      {viewMode === 'WEBSITE_ORDERS' ? (
+        <WebsiteOrdersManager />
+      ) : (
+        <>
+          {/* KPI Summary Dashboard Strip */}
+          <div className="kpi-grid">
         <div className="kpi-card">
           <div className="kpi-top">
             <span className="kpi-title">Total Invoiced Amount</span>
@@ -1376,6 +1427,8 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
             </form>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

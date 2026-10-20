@@ -16,11 +16,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'No file provided' }, { status: 400 });
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const ext = file.name.split('.').pop() || 'jpg';
-    const cleanFileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
+    // Maximum 5MB
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      return NextResponse.json({ success: false, error: 'Image size exceeds maximum 5MB limit' }, { status: 400 });
+    }
 
-    const result = await uploadToStorage(cleanFileName, buffer, file.type || 'application/octet-stream');
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+    if (file.type && !allowedTypes.includes(file.type)) {
+      return NextResponse.json({
+        success: false,
+        error: `Unsupported file type: ${file.type}. Allowed formats: JPEG, PNG, WebP, GIF, SVG.`,
+      }, { status: 400 });
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const rawExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const safeExt = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(rawExt) ? rawExt : 'jpg';
+    const cleanFileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${safeExt}`;
+
+    const result = await uploadToStorage(cleanFileName, buffer, file.type || 'image/jpeg');
 
     if (!result.success) {
       return NextResponse.json({ success: false, error: result.error }, { status: 500 });

@@ -31,6 +31,20 @@ export async function uploadToStorage(
   try {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
       // Fallback for local development if Supabase credentials are not yet supplied
+      try {
+        const fs = await import('fs');
+        const path = await import('path');
+        const fullLocalPath = path.join(process.cwd(), 'public', 'uploads', filePath);
+        const dir = path.dirname(fullLocalPath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        if (Buffer.isBuffer(fileBuffer)) {
+          fs.writeFileSync(fullLocalPath, fileBuffer);
+        }
+      } catch (localErr) {
+        console.warn('Local file write fallback notice:', localErr);
+      }
       return {
         success: true,
         publicUrl: `/uploads/${filePath}`,

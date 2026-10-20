@@ -167,6 +167,7 @@ export interface Product {
   model: string;
   description: string;
   imageUrl?: string;
+  images?: string[];
   purchasePrice: number;
   costPrice: number;
   retailPrice: number;
@@ -178,6 +179,8 @@ export interface Product {
   warrantyPeriodMonths: number;
   isSerialized: boolean;
   status?: 'ACTIVE' | 'DISCONTINUED' | 'OUT_OF_STOCK';
+  isPublished?: boolean;
+  isFeatured?: boolean;
   specs?: LaptopSpecifications | ElectricalSpecifications | CCTVSpecifications | Record<string, string>;
   createdAt?: string;
 }
@@ -1115,6 +1118,57 @@ export interface CashSummary {
     seedFunding: number;
   };
   movements: CashMovementRecord[];
+}
+
+export interface Banner {
+  id: string;
+  title: string;
+  subtitle?: string;
+  badge?: string;
+  imageUrl: string;
+  mobileImageUrl?: string;
+  targetUrl?: string;
+  buttonText?: string;
+  sortOrder: number;
+  isActive: boolean;
+  startDate?: string;
+  endDate?: string;
+  placement?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface WebsiteOrderItem {
+  productId: string;
+  name: string;
+  sku: string;
+  price: number;
+  quantity: number;
+  imageUrl?: string;
+}
+
+export interface WebsiteOrder {
+  id: string;
+  orderNumber: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
+  deliveryAddress: string;
+  district: string;
+  deliveryArea?: string;
+  deliveryNotes?: string;
+  paymentMethod: string;
+  subtotal: number;
+  deliveryCharge: number;
+  discount: number;
+  total: number;
+  orderStatus: 'PENDING' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+  paymentStatus: 'UNPAID' | 'PAID' | 'REFUNDED';
+  fulfillmentStatus: 'UNFULFILLED' | 'PACKED' | 'SHIPPED' | 'DELIVERED';
+  items: WebsiteOrderItem[];
+  saleInvoiceId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 

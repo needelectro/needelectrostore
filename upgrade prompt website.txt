@@ -1,0 +1,753 @@
+# NEED ELECTRO — ULTIMATE MASTER IMPLEMENTATION PROMPT
+## Complete ERP Upgrade + Premium E-Commerce Redesign + Product Image Management + Direct Checkout + National SEO + Production Optimization
+
+### 1. YOUR ROLE
+
+Act as a senior full-stack software architect, ERP specialist, e-commerce engineer, database architect, UI/UX designer, cybersecurity engineer, SEO specialist, performance engineer, and QA automation engineer.
+
+Your mission is to audit, upgrade, redesign, test, and production-harden the existing NEED ELECTRO application directly inside the current GitHub repository:
+
+**Repository:** https://github.com/needelectro/needelectroerp
+
+NEED ELECTRO is a Bangladesh-focused electrical products, electronics, gadget, and technical services business.
+
+The existing application contains both:
+- The customer-facing public website.
+- The authenticated ERP and administrative panel.
+
+Both must continue working within the same existing application and repository.
+
+**Do not assume that a new website, separate repository, or replacement ERP is required. Inspect the actual architecture first.**
+
+This is an upgrade of an existing production-oriented system, not a greenfield rebuild.
+
+---
+
+### 2. PRIMARY OBJECTIVE
+
+Transform the existing NEED ELECTRO platform into a premium, mobile-first, nationwide e-commerce marketplace comparable in user experience, product discoverability, and shopping convenience to leading Bangladeshi electronics retailers such as Star Tech and Ryans.
+
+Preserve and improve the existing ERP at the same time.
+
+The final system must allow:
+
+1. Customers to browse the public website without logging in.
+2. Customers to discover all eligible published products and their available information.
+3. Administrators to manage products through the existing ERP.
+4. Product images to be uploaded from a device or added using an external image URL.
+5. Product information and images to appear correctly on the customer website.
+6. Customers to place orders directly through the website.
+7. Customers to choose Cash on Delivery (COD), subject to configured delivery and order policies.
+8. Website orders, inventory, payments, and fulfillment status to be managed reliably through the ERP.
+9. Administrators to manage homepage banners, offers, featured products, and promotional sections.
+10. Google and other search engines to discover and index eligible product and category pages.
+
+The public storefront and ERP must remain integrated without duplicating or breaking existing business logic.
+
+---
+
+### 3. NON-NEGOTIABLE PRESERVATION RULES
+
+Before making any changes, inspect the complete existing project.
+
+Preserve all existing working ERP functionality, including applicable modules for:
+
+- Product and category management.
+- Inventory and stock control.
+- Product SKU and barcode management.
+- Laptop and electronics serial-number tracking.
+- Purchase and sales records.
+- POS and billing.
+- Invoices and receipts.
+- Customer and supplier management.
+- Accounting, ledgers, income, expenses, and financial reports.
+- EMI and installment management.
+- Branches, warehouses, and stock transfers.
+- Service jobs and technical service records.
+- User management, staff roles, and permissions.
+- Existing reports, settings, integrations, and business workflows.
+
+The list above describes preservation requirements; verify which modules exist before changing them.
+
+**Strict rules:**
+
+- Do not replace the ERP with a simplified dashboard.
+- Do not remove working features to make implementation easier.
+- Do not delete or reset the production database.
+- Do not drop tables, truncate records, or regenerate production data.
+- Do not overwrite existing product IDs, SKU values, serial numbers, invoice numbers, customer records, or transaction histories.
+- Do not introduce dummy products or fake business transactions into production.
+- Do not expose administrative features to unauthenticated visitors.
+- Do not introduce a second product catalogue or conflicting stock system.
+- Do not hardcode business data that should come from the database.
+- Do not claim that a feature is complete unless it has been implemented and tested.
+
+Every database migration must be backward-compatible where practical, reviewed before execution, and accompanied by a rollback strategy.
+
+---
+
+### 4. PHASE ZERO — COMPLETE CODEBASE AUDIT
+
+Before implementing the redesign, inspect:
+
+- Repository structure and application entry points.
+- Framework, runtime, dependencies, and build configuration.
+- Routing and public versus authenticated layouts.
+- Database provider, schema, ORM, migrations, and relationships.
+- Authentication and authorization.
+- Existing product creation and editing flows.
+- Product image upload and storage implementation.
+- Public product queries and rendering.
+- API endpoints, server actions, and data-fetching logic.
+- Existing cart, checkout, order, and payment functionality.
+- ERP inventory and sales transaction logic.
+- Existing banners, promotional settings, and content management.
+- Environment variables and deployment configuration.
+- Automated tests, logs, and existing performance issues.
+
+Determine whether the public storefront and ERP already use the same database and product records. Confirm this from the code and schema rather than assumptions.
+
+Create a feature inventory containing:
+
+| Area | Existing state | Problem | Required change | Regression test |
+|---|---|---|---|---|
+| ERP | Verified from code | Evidence-based finding | Minimal safe change | Required |
+| Product management | Verified from code | Evidence-based finding | Minimal safe change | Required |
+| Images | Verified from code | Evidence-based finding | Minimal safe change | Required |
+| Storefront | Verified from code | Evidence-based finding | Minimal safe change | Required |
+| Checkout and orders | Verified from code | Evidence-based finding | Minimal safe change | Required |
+| Performance and SEO | Measured or verified | Evidence-based finding | Minimal safe change | Required |
+
+Distinguish confirmed defects from hypotheses. Record existing functionality before modifying it.
+
+Then produce a short audit report and implementation checklist. Continue implementing after the audit rather than stopping at recommendations, provided repository permissions and available tools allow the work.
+
+---
+
+### 5. PREMIUM CUSTOMER WEBSITE REDESIGN
+
+Completely redesign the public storefront while preserving its connection to the existing ERP.
+
+#### Brand identity
+
+Use the NEED ELECTRO brand system:
+
+- Electric Blue: `#008CFF`
+- Dark Navy: `#002B5B`
+- White: `#FFFFFF`
+- Light Grey: `#F4F6F8`
+
+Use a clean, premium, trustworthy electronics-commerce design.
+
+The interface should feel modern and polished, with clear typography, consistent spacing, product-focused layouts, responsive navigation, subtle animations, and accessible interactions.
+
+Avoid excessive animations, clutter, and unnecessary loading effects.
+
+#### Homepage requirements
+
+Build the homepage from real database-backed content.
+
+Include, where supported by the existing system:
+
+1. Responsive header with NEED ELECTRO logo.
+2. Prominent product search.
+3. Product category navigation.
+4. Account, cart, and order-related navigation.
+5. Main promotional hero banner or carousel.
+6. Special offers and campaign banners.
+7. Featured products.
+8. Best-selling products based on actual sales data.
+9. Latest arrivals based on actual product records.
+10. Category-specific product sections.
+11. Laptops and computers.
+12. CCTV and surveillance equipment.
+13. Smartphones, gadgets, and accessories.
+14. Electrical products and smart electrical solutions.
+15. Relevant service categories and service booking entry points.
+16. Delivery, customer support, and payment information.
+17. Trust-building information based on real business policies.
+18. Footer with accurate company details, contact links, and policy pages.
+
+Only display sections for which real data or functioning features exist. Do not fabricate reviews, sales counts, discounts, stock availability, or customer statistics.
+
+#### Navigation and mobile experience
+
+- Make mobile devices a first-class target.
+- Use a responsive search experience.
+- Make category browsing intuitive.
+- Ensure product cards are readable on small screens.
+- Provide accessible cart controls and navigation.
+- Avoid horizontal overflow and layout shifts.
+- Keep touch targets appropriately sized.
+- Support keyboard navigation and visible focus states.
+
+Do not merely reskin the current homepage. Improve the information architecture and shopping journey.
+
+---
+
+### 6. PRODUCT IMAGE MANAGEMENT — CRITICAL REQUIREMENT
+
+Upgrade the existing ERP product creation and editing forms.
+
+The administrator must be able to add product images in two ways:
+
+**Method A — Device upload**
+- Upload images from a computer or mobile device.
+- Support appropriate formats such as JPEG, PNG, and WebP.
+- Validate file type and size on the server.
+- Generate optimized image variants where appropriate.
+- Show upload progress, preview, and meaningful error messages.
+- Allow the administrator to replace or remove images according to permissions.
+- Support multiple product images if the current schema can accommodate them safely.
+
+**Method B — External image URL**
+- Provide a field for an image URL.
+- Validate the URL and allow only approved HTTP/HTTPS image sources.
+- Preview the image before saving.
+- Handle unavailable or invalid images gracefully.
+- Avoid server-side request forgery when validating remote resources.
+- Never render untrusted URLs as executable content.
+
+#### Image storage and delivery
+
+Inspect the current storage implementation before selecting a solution.
+
+Prefer the existing compatible storage provider if it is suitable. If the project uses Supabase Storage, inspect its current buckets, access policies, and upload configuration before modifying them.
+
+Do not store large image files directly in database records.
+
+Store image metadata and stable image references in the existing product schema or an appropriately reviewed migration.
+
+Ensure that:
+
+- Image records remain associated with the correct product.
+- Product image ordering is predictable.
+- Primary images are clearly defined.
+- Storage access permissions are correct.
+- Public product images can be delivered to customers.
+- Private administrative assets remain protected.
+- Deleted or replaced images do not break existing product records.
+- Existing product images are preserved and migrated safely if needed.
+
+#### Customer-side image display
+
+Every eligible published product should display its primary image on:
+
+- Homepage product cards.
+- Category listings.
+- Search results.
+- Product detail pages.
+- Cart and checkout summaries.
+- Relevant order views.
+
+Use responsive image sizing, appropriate compression, lazy loading below the fold, and prioritized loading for the main above-the-fold image.
+
+Provide a consistent fallback image for genuinely unavailable images.
+
+Do not silently hide product images when an image URL is temporarily unavailable.
+
+---
+
+### 7. COMPLETE PRODUCT INFORMATION ON THE STOREFRONT
+
+Audit the existing ERP product schema and determine which fields are available.
+
+Map all relevant product information to the public product page without inventing missing values.
+
+Display applicable fields such as:
+
+- Product name.
+- Brand and model.
+- SKU or product code, where appropriate.
+- Primary image and image gallery.
+- Current selling price in BDT.
+- Previous price and discount, only when supported by genuine pricing records.
+- Availability and stock status.
+- Key specifications.
+- Full description.
+- Category and subcategory.
+- Warranty details, where recorded.
+- Product condition, where relevant.
+- Delivery information.
+- Available variants.
+- Genuine product attributes.
+- Related products.
+- Customer reviews, only if a real review system exists.
+
+Create clear product detail layouts with readable specifications and a prominent Add to Cart button.
+
+If important information is missing, display an appropriate unavailable label rather than inventing data.
+
+#### Product publication rules
+
+Introduce or reuse a clear publication status if the current system supports it.
+
+The public website should display products that are explicitly eligible for publication and available for public sale.
+
+Respect:
+
+- Product publication status.
+- Visibility rules.
+- Active/inactive state.
+- Stock rules.
+- Product category visibility.
+- Valid pricing.
+- Applicable branch or warehouse constraints.
+
+Do not expose draft products, private cost prices, supplier-only information, internal notes, or confidential business data.
+
+Out-of-stock products may remain visible when appropriate, but they must not be incorrectly presented as available for immediate purchase.
+
+---
+
+### 8. ERP-CONTROLLED BANNERS AND PROMOTIONS
+
+Add homepage content management to the existing admin panel.
+
+Reuse an existing CMS or promotional module if one exists. Otherwise, add a compatible module with minimal schema changes.
+
+Administrators should be able to:
+
+- Create, edit, reorder, activate, and deactivate banners.
+- Upload banner images or provide validated image URLs.
+- Set banner titles and supporting text.
+- Configure button labels and destination URLs.
+- Schedule campaign start and end times.
+- Select desktop and mobile image variants when supported.
+- Manage promotional sections and featured product collections.
+- Preview the customer-facing presentation.
+- Publish or unpublish content.
+
+Use explicit permissions for these operations.
+
+Validate all destinations and prevent unsafe redirects.
+
+Expired, inactive, or unpublished campaigns must not be displayed.
+
+Use responsive image delivery and accessible carousel controls. Avoid automatically rotating banners too quickly or creating intrusive animations.
+
+The homepage should update from saved ERP-managed content without requiring a source-code deployment for every banner change.
+
+---
+
+### 9. DIRECT CUSTOMER ORDERING AND CASH ON DELIVERY
+
+Implement or upgrade the public shopping workflow.
+
+#### Shopping cart
+
+Customers must be able to:
+
+- Add products to their cart.
+- Change quantities.
+- Remove products.
+- View item prices and totals.
+- See stock and availability changes.
+- Review applicable delivery charges.
+- Continue to checkout.
+
+Do not trust client-submitted prices, discounts, shipping charges, or stock quantities.
+
+Recalculate all order totals on the server using authoritative records.
+
+#### Checkout
+
+Collect only the information required to fulfill an order, such as:
+
+- Customer name.
+- Phone number.
+- Delivery address.
+- District and relevant delivery area.
+- Optional email address.
+- Delivery instructions, where appropriate.
+
+Allow guest checkout if compatible with the existing security and order architecture.
+
+Provide clear order review before submission.
+
+#### Cash on Delivery
+
+Add COD as a supported payment method.
+
+The checkout should explain that payment is collected upon delivery.
+
+Create a properly recorded order with an appropriate initial order and payment status, consistent with the existing ERP accounting model.
+
+COD order creation must not incorrectly record cash as already received.
+
+Use distinct states for order fulfillment and payment collection. For example:
+
+- Order: Pending confirmation.
+- Payment: Unpaid / COD.
+- Fulfillment: Unfulfilled.
+
+Adapt these labels to the existing status model instead of introducing conflicting duplicate status fields.
+
+Provide an order confirmation page and a unique order reference.
+
+If appropriate, provide notifications using existing configured services.
+
+Never fabricate a successful order when the server transaction fails.
+
+---
+
+### 10. CONNECT WEBSITE ORDERS TO THE EXISTING ERP
+
+The existing ERP must remain the operational source of truth for inventory, serial tracking, and accounting wherever its architecture supports those responsibilities.
+
+#### Order integration
+
+A website order must create or synchronize a proper sales/order record in the ERP without creating duplicate transactions.
+
+Use a transaction-safe integration strategy appropriate to the existing architecture.
+
+Requirements include:
+
+- Unique external order references.
+- Idempotent order processing.
+- Server-side input validation.
+- Reliable retry handling.
+- Error logging and reconciliation.
+- Consistent customer and order references.
+- Correct payment and fulfillment statuses.
+- Controlled access to administrative APIs.
+- Protection against duplicate submissions.
+- Auditable stock changes.
+
+Do not allow a public customer request to directly manipulate ERP stock or financial ledgers.
+
+#### Inventory consistency
+
+Inspect how the current ERP tracks inventory, including branch and warehouse stock.
+
+Implement reservation, deduction, or adjustment behavior consistent with the current business rules.
+
+Prevent overselling when multiple customers attempt to order the same available stock.
+
+Do not deduct inventory twice when an order is retried, synchronized, canceled, or returned.
+
+Define when stock is reserved, when it is committed to a sale, and when it is released after cancellation.
+
+#### Serial-number-controlled products
+
+For laptops and other serialized electronics, preserve the existing serial-number controls.
+
+Do not assign the same physical serial number to two completed sales.
+
+Use the existing ERP sales and serial allocation logic instead of bypassing it.
+
+#### Financial integrity
+
+COD orders must not appear as received cash until collection is recorded.
+
+Preserve existing invoice numbering, ledger rules, sales reporting, EMI records, and accounting integrity.
+
+If the current architecture requires an intermediate order state before generating a finalized sales invoice, follow that design.
+
+---
+
+### 11. ERP ADMIN PANEL — KEEP ALL EXISTING CAPABILITIES
+
+Improve the ERP interface without reducing its capabilities.
+
+Use consistent layouts, clear navigation, accessible forms, readable tables, responsive dialogs, and appropriate loading and error states.
+
+Preserve existing modules and workflows.
+
+Improve where necessary:
+
+- Product creation and editing.
+- Product image management.
+- Inventory visibility.
+- Sales and website order management.
+- Order confirmation and fulfillment.
+- COD payment collection records.
+- Banner and promotion management.
+- Customer details and order history.
+- Search, filtering, pagination, and sorting.
+- Reports and audit trails.
+- Role-based access control.
+
+Use a dedicated website-order view only if it integrates properly with the existing order system. Avoid maintaining separate conflicting copies of orders.
+
+Every administrative action must be authorized on the server, not merely hidden in the interface.
+
+---
+
+### 12. NATIONAL E-COMMERCE SEO FOR BANGLADESH
+
+The target is nationwide product discovery, not just local visibility in Moulvibazar.
+
+Implement technical SEO using the existing framework's recommended capabilities.
+
+#### Technical SEO
+
+- Unique page titles and meta descriptions.
+- Canonical URLs.
+- XML sitemap generation.
+- Correct robots directives.
+- Clean, stable product URLs.
+- Appropriate redirects for changed URLs.
+- Crawlable internal links.
+- Correct HTTP status codes.
+- Open Graph and social sharing metadata.
+- Structured data validation.
+- Useful 404 and error pages.
+- Appropriate pagination and filtering behavior.
+- No accidental indexing of private admin routes, carts, or internal search states.
+
+#### Product SEO
+
+Each eligible product should have its own indexable detail page with:
+
+- A descriptive product title.
+- Brand and model information.
+- Accurate current price in BDT.
+- Availability based on actual inventory.
+- Unique descriptions and specifications where available.
+- Optimized product images.
+- Breadcrumb navigation.
+- Valid Product structured data.
+- Offer markup only when the corresponding price and offer are genuine.
+
+Use relevant search intent such as:
+
+- Laptop price in Bangladesh.
+- [Brand/model] price in Bangladesh.
+- Laptop shop in Bangladesh.
+- Computer price in Bangladesh.
+- CCTV camera price in Bangladesh.
+- Electronics and electrical products in Bangladesh.
+
+These are keyword examples, not instructions to stuff keywords into page titles or descriptions.
+
+Create useful category pages and indexable product pages. Avoid generating thousands of low-quality, near-duplicate pages.
+
+#### Google Merchant Center and Search Console readiness
+
+Prepare accurate product feeds and verification workflows where appropriate.
+
+Support legitimate Google product discovery features, including merchant listings when eligibility requirements are met.
+
+Do not claim that the website is verified, indexed, or approved without checking the relevant services.
+
+Do not guarantee a first-page or number-one ranking. Measure progress using Search Console, index coverage, impressions, clicks, and relevant conversions.
+
+---
+
+### 13. PERFORMANCE AND MOBILE-FIRST OPTIMIZATION
+
+The current site has been reported to load slowly and sometimes display content late during scrolling. Diagnose these issues instead of merely adding a loading animation.
+
+Inspect:
+
+- Initial server response.
+- Client-side JavaScript execution.
+- Rendering and hydration.
+- API and database query duration.
+- Unnecessary network requests.
+- Image dimensions and compression.
+- Font loading.
+- Large component trees.
+- Product-list rendering.
+- Dashboard table performance.
+- Repeated state updates and rerenders.
+- Cache configuration.
+- Third-party scripts.
+- Memory usage and console errors.
+
+Use the existing framework's compatible performance features.
+
+Where appropriate:
+
+- Prefer server rendering for indexable content.
+- Use static generation or caching for suitable public pages.
+- Revalidate public product data when ERP changes occur.
+- Keep inventory and checkout validation authoritative and fresh.
+- Paginate large datasets.
+- Use virtualization for genuinely large administrative tables.
+- Lazy-load below-the-fold content.
+- Prioritize the main product image.
+- Avoid blocking the initial page render on noncritical content.
+
+Measure Core Web Vitals and set these proposed targets:
+
+- LCP: 2.5 seconds or less.
+- INP: 200 milliseconds or less.
+- CLS: 0.1 or less.
+
+These are target thresholds, not assumed current results. Validate with laboratory tests and real-user data when available.
+
+Do not introduce stale prices or stock information simply to improve caching scores.
+
+---
+
+### 14. SECURITY AND PRIVACY
+
+Review the entire application for:
+
+- Authentication and authorization weaknesses.
+- Insecure direct object references.
+- Missing server-side validation.
+- Unsafe file uploads.
+- Malicious image URLs.
+- SQL injection and unsafe query construction.
+- Cross-site scripting.
+- Cross-site request forgery where applicable.
+- Rate-limiting gaps.
+- Exposure of customer information.
+- Unprotected administrative APIs.
+- Leaked secrets.
+- Incorrect storage policies.
+- Insecure webhook processing.
+
+Keep secrets in environment variables or an approved secrets manager.
+
+Never place private service-role keys, payment secrets, or database credentials in browser code.
+
+Use least-privilege access, appropriate database policies, and secure session handling.
+
+Protect personal information and avoid collecting unnecessary customer data.
+
+---
+
+### 15. TESTING AND ACCEPTANCE CRITERIA
+
+Implement tests appropriate to the existing stack.
+
+At minimum, verify the following end-to-end scenarios.
+
+**Test A — Product publishing**
+1. Administrator logs into the ERP.
+2. Creates a product with complete information.
+3. Uploads a local image.
+4. Saves and publishes the product.
+5. Customer opens the product page.
+6. Correct product information, image, price, and availability appear.
+
+**Test B — External image URL**
+1. Administrator adds a valid external image URL.
+2. The application validates and previews the image.
+3. The product is saved.
+4. The customer website displays the image correctly.
+5. An invalid or unavailable URL produces a safe fallback.
+
+**Test C — Product editing**
+1. Administrator changes the price, description, or image.
+2. The public product page reflects the updated data within the documented revalidation interval.
+3. No duplicate product is created.
+4. Existing identifiers and historical sales records remain unchanged.
+
+**Test D — Cash on Delivery**
+1. Customer adds a product to the cart.
+2. Proceeds to checkout.
+3. Enters delivery details.
+4. Selects COD.
+5. Submits the order.
+6. Receives a genuine order confirmation.
+7. The order appears in the ERP.
+8. Payment remains unpaid until actual collection is recorded.
+
+**Test E — Inventory and serial tracking**
+1. Two concurrent orders attempt to purchase the final available unit.
+2. The system prevents overselling.
+3. Retries do not create duplicate orders or stock deductions.
+4. Existing serialized-product rules remain enforced.
+
+**Test F — Existing ERP regression**
+1. Create and edit products.
+2. Process an existing POS sale.
+3. Generate an invoice.
+4. Verify stock and serial tracking.
+5. Check customer and supplier records.
+6. Review relevant accounting reports.
+7. Verify existing permissions and branch rules.
+
+**Test G — Security**
+1. Unauthenticated visitors cannot access protected ERP actions.
+2. Customers cannot alter authoritative prices or payment statuses.
+3. Users cannot access another customer's private order data.
+4. Unauthorized staff cannot perform restricted actions.
+
+**Test H — SEO and performance**
+1. Product pages return appropriate HTTP status codes.
+2. Metadata and canonical URLs are correct.
+3. Structured data validates against applicable requirements.
+4. The sitemap includes eligible indexable pages.
+5. Mobile layouts work without horizontal overflow.
+6. Representative Lighthouse and browser performance tests are recorded.
+
+Use a staging environment or isolated test records wherever possible. Do not create test transactions in production without authorization.
+
+---
+
+### 16. DEPLOYMENT AND ROLLBACK
+
+Before deployment:
+
+- Back up the database and verify restoration procedures.
+- Review schema migrations.
+- Check production environment variables.
+- Run linting, type checking, and relevant automated tests.
+- Run a production build.
+- Verify storage permissions.
+- Test critical workflows in staging.
+- Prepare a deployment and rollback plan.
+
+Deploy in controlled stages where feasible.
+
+After deployment, monitor errors, failed orders, inventory inconsistencies, image delivery, page performance, and synchronization failures.
+
+Never mark the work complete merely because the application builds successfully.
+
+---
+
+### 17. REQUIRED DELIVERABLES
+
+Complete the work in the existing repository and provide:
+
+1. Initial codebase audit report.
+2. Verified list of existing ERP modules and preserved functionality.
+3. Prioritized implementation plan.
+4. Database and API change summary.
+5. Product field and image mapping.
+6. Completed premium storefront redesign.
+7. Completed image upload and image URL workflows.
+8. Completed product detail and category experiences.
+9. ERP-managed banner and promotion management.
+10. Functional cart and COD checkout, if implemented and tested.
+11. Reliable website-to-ERP order integration, if implemented and tested.
+12. Technical SEO implementation.
+13. Performance optimizations with before-and-after measurements.
+14. Automated and manual test results.
+15. Security review findings.
+16. Deployment instructions and rollback procedure.
+17. List of remaining issues, blockers, and unimplemented requirements.
+
+For each major change, explain which files were modified, why the change was necessary, and how it was verified.
+
+Clearly distinguish implemented features from recommendations and blocked tasks.
+
+---
+
+### 18. FINAL EXECUTION INSTRUCTIONS
+
+Start by inspecting the actual repository, current database schema, product workflows, and application architecture.
+
+Do not begin with a complete rewrite.
+
+Do not remove working functionality to achieve a visually attractive design.
+
+Do not modify production data without authorization.
+
+Use the existing framework, database, authentication, and storage systems whenever suitable.
+
+Implement the smallest safe architectural changes that achieve the required behavior.
+
+Preserve the existing ERP as the operational business system while turning the customer-facing experience into a polished, fast, trustworthy nationwide marketplace.
+
+Prioritize data integrity, security, real functionality, mobile usability, product discoverability, and measurable results over superficial appearance.
+
+**The definition of success is not simply a beautiful website. Success means the existing NEED ELECTRO ERP continues working correctly while customers can discover products, view complete information and images, place genuine orders, and receive reliable service through a modern nationwide e-commerce experience.**
+
+Begin with the repository audit, document the baseline, and then execute the implementation in verified stages.

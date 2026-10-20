@@ -1,7 +1,10 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { ShieldCheck, MessageCircle, ArrowRight, Laptop, Cpu, CheckCircle } from 'lucide-react';
+import { MessageCircle, ArrowRight, ShoppingBag, Check } from 'lucide-react';
 import { BUSINESS_INFO, slugify } from '@/lib/seoConfig';
+import { useCart } from '@/src/services/cartContext';
 
 export interface ProductCardData {
   id: string;
@@ -24,6 +27,9 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const { addItem, openCart } = useCart();
+  const [added, setAdded] = useState(false);
+
   const slug = `${slugify(product.name)}-${product.sku.toLowerCase()}`;
   const isLaptop = product.category.toLowerCase().includes('laptop') || product.name.toLowerCase().includes('laptop');
   const fallbackImage = isLaptop ? '/logo-dark-transparent.png' : '/logo-icon.png';
@@ -33,13 +39,29 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   // Calculate approximate 6-month EMI starting payment
   const emiMonthly = product.retailPrice > 0 ? Math.round((product.retailPrice * 0.75) / 6) : null;
 
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem({
+      id: product.id,
+      name: product.name,
+      sku: product.sku,
+      price: product.retailPrice,
+      imageUrl: product.imageUrl || null,
+      maxStock: product.currentStock,
+    });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1800);
+    openCart();
+  };
+
   return (
     <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-cyan-500/50 rounded-2xl overflow-hidden shadow-xs hover:shadow-xl transition-all duration-200 flex flex-col group">
       {/* Product Image */}
       <Link href={`/product/${slug}`} className="relative block bg-slate-50 dark:bg-slate-950/70 p-6 aspect-[4/3] overflow-hidden border-b border-slate-100 dark:border-slate-800/80">
         <img
           src={imgUrl}
-          alt={`${product.name} available at ${BUSINESS_INFO.name} Moulvibazar`}
+          alt={`${product.name} available at ${BUSINESS_INFO.name} Bangladesh`}
           loading="lazy"
           className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
         />
@@ -104,32 +126,64 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
 
         {/* Pricing & CTA */}
-        <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
-          <div>
-            <span className="text-[11px] text-slate-400 block font-medium">Showroom Price</span>
-            <span className="text-lg font-extrabold text-blue-600 dark:text-cyan-400 font-mono">
-              ৳{product.retailPrice.toLocaleString()}
-            </span>
+        <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[11px] text-slate-400 block font-medium">Price</span>
+              <span className="text-lg font-extrabold text-blue-600 dark:text-cyan-400 font-mono">
+                ৳{product.retailPrice.toLocaleString()}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <a
+                href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=Hello%20NEED%20ELECTRO%2C%20I%20am%20interested%20in%20buying%20${encodeURIComponent(product.name)}%20(SKU:%20${product.sku}).%20Is%20it%20available%20for%20delivery%3F`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Inquire about ${product.name} on WhatsApp`}
+                className="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 dark:text-emerald-400 dark:border-emerald-500/30 transition-colors"
+                title="WhatsApp Inquiry"
+              >
+                <MessageCircle size={15} />
+              </a>
+              <Link
+                href={`/product/${slug}`}
+                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 transition-colors"
+                aria-label={`View details of ${product.name}`}
+                title="View Details"
+              >
+                <ArrowRight size={15} />
+              </Link>
+            </div>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <a
-              href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=Hello%20NEED%20ELECTRO%2C%20I%20am%20interested%20in%20buying%20${encodeURIComponent(product.name)}%20(SKU:%20${product.sku}).%20Is%20it%20available%20at%20Moulvibazar%20showroom%3F`}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`Inquire about ${product.name} on WhatsApp`}
-              className="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 dark:text-emerald-400 dark:border-emerald-500/30 transition-colors"
-            >
-              <MessageCircle size={15} />
-            </a>
-            <Link
-              href={`/product/${slug}`}
-              className="p-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 dark:bg-cyan-950/60 dark:hover:bg-cyan-900/60 dark:text-cyan-400 dark:border-cyan-500/30 transition-colors"
-              aria-label={`View details of ${product.name}`}
-            >
-              <ArrowRight size={15} />
-            </Link>
-          </div>
+          {/* Direct Add to Cart Button */}
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={!isAvailable}
+            className={`w-full py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs ${
+              !isAvailable
+                ? 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed'
+                : added
+                ? 'bg-emerald-600 text-white shadow-emerald-500/20'
+                : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20 active:scale-98'
+            }`}
+          >
+            {added ? (
+              <>
+                <Check size={14} className="stroke-3" />
+                <span>Added to Cart!</span>
+              </>
+            ) : isAvailable ? (
+              <>
+                <ShoppingBag size={14} />
+                <span>Add to Cart</span>
+              </>
+            ) : (
+              <span>Out of Stock</span>
+            )}
+          </button>
         </div>
       </div>
     </div>
