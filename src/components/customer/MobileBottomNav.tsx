@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Package, Heart, ShoppingBag, PackageSearch, User } from 'lucide-react';
+import { Home, LayoutGrid, ShoppingBag, PackageSearch, User } from 'lucide-react';
 import { useCart } from '@/src/services/cartContext';
 import { useLanguage } from '@/src/services/languageContext';
 import { useCustomerAuth } from '@/src/services/customerAuthContext';
@@ -12,24 +12,7 @@ export const MobileBottomNav: React.FC = () => {
   const pathname = usePathname();
   const { openCart, totalItems } = useCart();
   const { customer } = useCustomerAuth();
-  const { t, formatNumber } = useLanguage();
-  const [wishlistCount, setWishlistCount] = useState<number>(0);
-
-  // Sync wishlist count from localStorage
-  useEffect(() => {
-    const syncWishlist = () => {
-      try {
-        const saved = JSON.parse(localStorage.getItem('customer_wishlist') || '[]');
-        setWishlistCount(Array.isArray(saved) ? saved.length : 0);
-      } catch {
-        setWishlistCount(0);
-      }
-    };
-
-    syncWishlist();
-    window.addEventListener('storage', syncWishlist);
-    return () => window.removeEventListener('storage', syncWishlist);
-  }, []);
+  const { t, formatNumber, isBangla } = useLanguage();
 
   // Do not render on staff ERP routes
   if (pathname?.startsWith('/admin')) {
@@ -37,74 +20,91 @@ export const MobileBottomNav: React.FC = () => {
   }
 
   const isHome = pathname === '/';
-  const isCategories =
+  const isProducts =
+    pathname === '/shop' ||
+    pathname?.startsWith('/shop') ||
+    pathname?.startsWith('/product') ||
     pathname?.startsWith('/laptops') ||
     pathname?.startsWith('/computers') ||
     pathname?.startsWith('/cctv') ||
     pathname?.startsWith('/electrical-products') ||
     pathname?.startsWith('/computer-accessories') ||
     pathname?.startsWith('/networking') ||
-    pathname?.startsWith('/smart-devices') ||
-    pathname?.startsWith('/shop');
-  const isWishlist = pathname === '/wishlist';
+    pathname?.startsWith('/smart-devices');
   const isTrack = pathname?.startsWith('/track-order');
   const isAccount = pathname?.startsWith('/customer');
 
   return (
     <nav
       aria-label="Mobile Navigation"
-      className="fixed bottom-0 left-0 right-0 z-40 md:hidden glass-panel border-t border-[var(--glass-border)] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] pb-[max(0.5rem,env(safe-area-inset-bottom))] transition-transform duration-300 backdrop-blur-xl"
-      style={{
-        backgroundColor: 'var(--glass-surface-subtle)',
-      }}
+      className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/90 dark:bg-[#071324]/92 backdrop-blur-2xl border-t border-slate-200/80 dark:border-cyan-500/20 shadow-[0_-10px_35px_rgba(0,0,0,0.12),0_-1px_0_rgba(0,140,255,0.1)] pb-[max(0.6rem,env(safe-area-inset-bottom))] pt-1.5 transition-all duration-300"
     >
-      <div className="grid grid-cols-5 h-14 items-center max-w-lg mx-auto">
-        {/* 1. Home */}
+      {/* Top Futuristic Neon Beam Edge */}
+      <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#008CFF]/50 to-transparent pointer-events-none" />
+
+      <div className="grid grid-cols-5 h-14 items-center max-w-lg mx-auto px-1.5">
+        {/* 1. Home Button */}
         <Link
           href="/"
           aria-label={t('nav.home', 'Home')}
           className="flex items-center justify-center h-full w-full focus:outline-none"
         >
-          <div
-            className={`relative flex flex-col items-center justify-center h-full w-full py-1 transition-all duration-200 active:scale-95 ${
-              isHome
-                ? 'text-[#008CFF] font-bold'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            <div className="relative">
-              <Home className={`w-5 h-5 transition-transform duration-200 ${isHome ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8]'}`} />
+          <div className="relative flex flex-col items-center justify-center h-full w-full py-1 transition-all duration-200 active:scale-90 group select-none">
+            <div
+              className={`relative w-11 h-7 rounded-full flex items-center justify-center transition-all duration-300 ${
+                isHome
+                  ? 'bg-gradient-to-b from-[#008CFF]/20 to-[#008CFF]/5 text-[#008CFF] dark:text-sky-400 border border-[#008CFF]/30 shadow-[0_0_14px_rgba(0,140,255,0.25)]'
+                  : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200'
+              }`}
+            >
+              <Home
+                className={`w-[19px] h-[19px] transition-transform duration-300 ${
+                  isHome ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8] group-hover:scale-105'
+                }`}
+              />
             </div>
-            <span className="text-[10px] mt-0.5 tracking-tight leading-tight truncate max-w-full px-0.5 text-center">
-              {t('nav.home', 'Home')}
+            <span
+              className={`text-[10px] mt-1 tracking-tight leading-none truncate max-w-full px-0.5 text-center transition-colors duration-200 ${
+                isHome ? 'font-bold text-[#008CFF] dark:text-sky-400' : 'font-medium text-slate-500 dark:text-slate-400'
+              }`}
+            >
+              {isBangla ? 'হোম' : 'Home'}
             </span>
             {isHome && (
-              <span className="absolute bottom-0 w-6 h-0.5 bg-[#008CFF] rounded-full shadow-sm shadow-[#008CFF]" />
+              <span className="absolute -bottom-1 w-5 h-0.5 rounded-full bg-gradient-to-r from-sky-400 to-[#008CFF] shadow-[0_0_8px_#008CFF]" />
             )}
           </div>
         </Link>
 
-        {/* 2. Categories / Products */}
+        {/* 2. Products Button (Replaced from Categories) */}
         <Link
-          href="/laptops"
-          aria-label={t('nav.categories', 'Categories')}
+          href="/shop"
+          aria-label={isBangla ? 'পণ্য' : 'Products'}
           className="flex items-center justify-center h-full w-full focus:outline-none"
         >
-          <div
-            className={`relative flex flex-col items-center justify-center h-full w-full py-1 transition-all duration-200 active:scale-95 ${
-              isCategories
-                ? 'text-[#008CFF] font-bold'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            <div className="relative">
-              <Package className={`w-5 h-5 transition-transform duration-200 ${isCategories ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8]'}`} />
+          <div className="relative flex flex-col items-center justify-center h-full w-full py-1 transition-all duration-200 active:scale-90 group select-none">
+            <div
+              className={`relative w-11 h-7 rounded-full flex items-center justify-center transition-all duration-300 ${
+                isProducts
+                  ? 'bg-gradient-to-b from-[#008CFF]/20 to-[#008CFF]/5 text-[#008CFF] dark:text-sky-400 border border-[#008CFF]/30 shadow-[0_0_14px_rgba(0,140,255,0.25)]'
+                  : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200'
+              }`}
+            >
+              <LayoutGrid
+                className={`w-[19px] h-[19px] transition-transform duration-300 ${
+                  isProducts ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8] group-hover:scale-105'
+                }`}
+              />
             </div>
-            <span className="text-[10px] mt-0.5 tracking-tight leading-tight truncate max-w-full px-0.5 text-center">
-              {t('nav.categories', 'Categories')}
+            <span
+              className={`text-[10px] mt-1 tracking-tight leading-none truncate max-w-full px-0.5 text-center transition-colors duration-200 ${
+                isProducts ? 'font-bold text-[#008CFF] dark:text-sky-400' : 'font-medium text-slate-500 dark:text-slate-400'
+              }`}
+            >
+              {isBangla ? 'পণ্য' : 'Products'}
             </span>
-            {isCategories && (
-              <span className="absolute bottom-0 w-6 h-0.5 bg-[#008CFF] rounded-full shadow-sm shadow-[#008CFF]" />
+            {isProducts && (
+              <span className="absolute -bottom-1 w-5 h-0.5 rounded-full bg-gradient-to-r from-sky-400 to-[#008CFF] shadow-[0_0_8px_#008CFF]" />
             )}
           </div>
         </Link>
@@ -116,17 +116,17 @@ export const MobileBottomNav: React.FC = () => {
           aria-label={t('nav.cart', 'Cart')}
           className="flex items-center justify-center h-full w-full focus:outline-none"
         >
-          <div className="relative flex flex-col items-center justify-center h-full w-full py-1 transition-all duration-200 active:scale-95 text-[var(--text-secondary)] hover:text-[#008CFF]">
-            <div className="relative">
-              <ShoppingBag className="w-5 h-5 stroke-[1.8]" />
+          <div className="relative flex flex-col items-center justify-center h-full w-full py-1 transition-all duration-200 active:scale-90 group select-none">
+            <div className="relative w-11 h-7 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:text-[#008CFF] transition-all duration-300">
+              <ShoppingBag className="w-[19px] h-[19px] stroke-[1.8] group-hover:scale-105 transition-transform" />
               {totalItems > 0 && (
-                <span className="absolute -top-1.5 -right-2 bg-[#008CFF] text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-md shadow-[#008CFF]/40 animate-pulse">
+                <span className="absolute -top-1 -right-0.5 bg-gradient-to-r from-[#008CFF] to-cyan-400 text-white text-[9px] font-black min-w-[17px] h-[17px] px-1 rounded-full flex items-center justify-center shadow-[0_2px_8px_rgba(0,140,255,0.6)] border border-white/60 dark:border-slate-900 animate-pulse">
                   {formatNumber(totalItems)}
                 </span>
               )}
             </div>
-            <span className="text-[10px] mt-0.5 tracking-tight leading-tight truncate max-w-full px-0.5 text-center">
-              {t('nav.cart', 'Cart')}
+            <span className="text-[10px] mt-1 tracking-tight leading-none truncate max-w-full px-0.5 text-center font-medium text-slate-500 dark:text-slate-400 group-hover:text-[#008CFF] transition-colors duration-200">
+              {isBangla ? 'কার্ট' : 'Cart'}
             </span>
           </div>
         </button>
@@ -134,55 +134,71 @@ export const MobileBottomNav: React.FC = () => {
         {/* 4. Track Order */}
         <Link
           href="/track-order"
-          aria-label={t('nav.trackOrder', 'Track')}
+          aria-label={isBangla ? 'ট্র্যাক' : 'Track Order'}
           className="flex items-center justify-center h-full w-full focus:outline-none"
         >
-          <div
-            className={`relative flex flex-col items-center justify-center h-full w-full py-1 transition-all duration-200 active:scale-95 ${
-              isTrack
-                ? 'text-emerald-500 font-bold'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            <div className="relative">
-              <PackageSearch className={`w-5 h-5 transition-transform duration-200 ${isTrack ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8]'}`} />
+          <div className="relative flex flex-col items-center justify-center h-full w-full py-1 transition-all duration-200 active:scale-90 group select-none">
+            <div
+              className={`relative w-11 h-7 rounded-full flex items-center justify-center transition-all duration-300 ${
+                isTrack
+                  ? 'bg-gradient-to-b from-emerald-500/20 to-emerald-500/5 text-emerald-500 border border-emerald-500/30 shadow-[0_0_14px_rgba(16,185,129,0.25)]'
+                  : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200'
+              }`}
+            >
+              <PackageSearch
+                className={`w-[19px] h-[19px] transition-transform duration-300 ${
+                  isTrack ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8] group-hover:scale-105'
+                }`}
+              />
             </div>
-            <span className="text-[10px] mt-0.5 tracking-tight leading-tight truncate max-w-full px-0.5 text-center">
-              {t('orders.trackOrder', 'Track')}
+            <span
+              className={`text-[10px] mt-1 tracking-tight leading-none truncate max-w-full px-0.5 text-center transition-colors duration-200 ${
+                isTrack ? 'font-bold text-emerald-500' : 'font-medium text-slate-500 dark:text-slate-400'
+              }`}
+            >
+              {isBangla ? 'ট্র্যাক' : 'Track Order'}
             </span>
             {isTrack && (
-              <span className="absolute bottom-0 w-6 h-0.5 bg-emerald-500 rounded-full shadow-sm shadow-emerald-500" />
+              <span className="absolute -bottom-1 w-5 h-0.5 rounded-full bg-gradient-to-r from-emerald-400 to-teal-500 shadow-[0_0_8px_#10b981]" />
             )}
           </div>
         </Link>
 
-        {/* 5. Customer Account */}
+        {/* 5. Customer Account / Login */}
         <Link
           href={customer ? '/customer/dashboard' : '/customer/login'}
-          aria-label={customer ? 'Account' : 'Sign In'}
+          aria-label={customer ? 'Account' : 'Login'}
           className="flex items-center justify-center h-full w-full focus:outline-none"
         >
-          <div
-            className={`relative flex flex-col items-center justify-center h-full w-full py-1 transition-all duration-200 active:scale-95 ${
-              isAccount
-                ? 'text-[#008CFF] font-bold'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            <div className="relative">
+          <div className="relative flex flex-col items-center justify-center h-full w-full py-1 transition-all duration-200 active:scale-90 group select-none">
+            <div
+              className={`relative w-11 h-7 rounded-full flex items-center justify-center transition-all duration-300 ${
+                isAccount
+                  ? 'bg-gradient-to-b from-[#008CFF]/20 to-[#008CFF]/5 text-[#008CFF] dark:text-sky-400 border border-[#008CFF]/30 shadow-[0_0_14px_rgba(0,140,255,0.25)]'
+                  : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200'
+              }`}
+            >
               {customer ? (
-                <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-[#008CFF] to-sky-400 flex items-center justify-center text-[10px] text-white font-black shadow-xs">
+                <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-[#008CFF] to-sky-400 flex items-center justify-center text-[10px] text-white font-black shadow-xs ring-1 ring-white/30">
                   {customer.name.charAt(0).toUpperCase()}
                 </div>
               ) : (
-                <User className={`w-5 h-5 transition-transform duration-200 ${isAccount ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8]'}`} />
+                <User
+                  className={`w-[19px] h-[19px] transition-transform duration-300 ${
+                    isAccount ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8] group-hover:scale-105'
+                  }`}
+                />
               )}
             </div>
-            <span className="text-[10px] mt-0.5 tracking-tight leading-tight truncate max-w-full px-0.5 text-center">
-              {customer ? (customer.name.split(' ')[0] || 'Account') : t('nav.login', 'Sign In')}
+            <span
+              className={`text-[10px] mt-1 tracking-tight leading-none truncate max-w-full px-0.5 text-center transition-colors duration-200 ${
+                isAccount ? 'font-bold text-[#008CFF] dark:text-sky-400' : 'font-medium text-slate-500 dark:text-slate-400'
+              }`}
+            >
+              {customer ? (customer.name.split(' ')[0] || (isBangla ? 'অ্যাকাউন্ট' : 'Account')) : (isBangla ? 'লগইন' : 'Login')}
             </span>
             {isAccount && (
-              <span className="absolute bottom-0 w-6 h-0.5 bg-[#008CFF] rounded-full shadow-sm shadow-[#008CFF]" />
+              <span className="absolute -bottom-1 w-5 h-0.5 rounded-full bg-gradient-to-r from-sky-400 to-[#008CFF] shadow-[0_0_8px_#008CFF]" />
             )}
           </div>
         </Link>
@@ -192,3 +208,4 @@ export const MobileBottomNav: React.FC = () => {
 };
 
 export default MobileBottomNav;
+
