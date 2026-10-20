@@ -71,14 +71,14 @@ const CATEGORY_TILES = [
 ];
 
 const BRANDS = [
-  { name: 'HP', desc: 'EliteBook & ProBook' },
-  { name: 'Dell', desc: 'Latitude & Inspiron' },
-  { name: 'Lenovo', desc: 'ThinkPad & IdeaPad' },
-  { name: 'Hikvision', desc: 'IP Camera & NVR' },
-  { name: 'Dahua', desc: 'Smart Surveillance' },
-  { name: 'Schneider', desc: 'Circuit Breakers' },
-  { name: 'Super Star', desc: 'Electrical Fixtures' },
-  { name: 'TP-Link', desc: 'Wi-Fi 6 Routers' },
+  { name: 'HP', desc: 'EliteBook & ProBook', slug: '/laptops/hp', badge: 'Laptops', color: 'from-blue-600 to-sky-500' },
+  { name: 'Dell', desc: 'Latitude & XPS', slug: '/laptops/dell', badge: 'Laptops', color: 'from-sky-600 to-cyan-500' },
+  { name: 'Lenovo', desc: 'ThinkPad & Legion', slug: '/laptops/lenovo', badge: 'Laptops', color: 'from-rose-600 to-red-500' },
+  { name: 'Hikvision', desc: '4K IP & ColorVu', slug: '/cctv', badge: 'CCTV Security', color: 'from-emerald-600 to-teal-500' },
+  { name: 'Dahua', desc: 'Smart AI Cameras', slug: '/cctv', badge: 'Surveillance', color: 'from-teal-600 to-cyan-500' },
+  { name: 'TP-Link', desc: 'Wi-Fi 6 Routers', slug: '/networking', badge: 'Networking', color: 'from-indigo-600 to-blue-500' },
+  { name: 'Schneider', desc: 'Circuit Breakers', slug: '/electrical-products', badge: 'Electrical', color: 'from-emerald-700 to-green-600' },
+  { name: 'Super Star', desc: 'Switches & Lighting', slug: '/electrical-products', badge: 'Electrical', color: 'from-amber-600 to-orange-500' },
 ];
 
 export default async function HomePage() {
@@ -170,17 +170,24 @@ export default async function HomePage() {
             <HeroCarousel banners={banners} />
           </div>
 
-          {/* Right 4 Cols: 2 Stacked Feature Cards */}
+          {/* Right 4 Cols: 2 Stacked Feature Cards with Brand Banners */}
           <div className="lg:col-span-4 flex flex-col justify-between gap-4">
             {/* Card 1: Customer Care & Warranty */}
-            <div className="flex-1 rounded-2xl bg-gradient-to-br from-[#0a1c2e] to-[#040e19] text-white p-5 sm:p-6 border border-slate-800 shadow-md flex flex-col justify-between relative overflow-hidden group">
-              <div className="absolute -top-12 -right-12 w-36 h-36 bg-blue-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform" />
-              <div>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider mb-2.5">
+            <div className="flex-1 rounded-2xl bg-gradient-to-br from-[#0a1c2e] to-[#040e19] text-white p-5 sm:p-6 border border-slate-700/80 shadow-md flex flex-col justify-between relative overflow-hidden group">
+              {/* High-res Warranty Care Banner Background */}
+              <div
+                className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-40 group-hover:scale-105 transition-all duration-700 pointer-events-none"
+                style={{ backgroundImage: "url('/banners/warranty-care-banner.jpg')" }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#040e19] via-[#040e19]/80 to-[#040e19]/40 pointer-events-none" />
+              <div className="absolute -top-12 -right-12 w-36 h-36 bg-blue-500/15 rounded-full blur-2xl group-hover:scale-125 transition-transform pointer-events-none" />
+
+              <div className="relative z-10">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider mb-2.5 backdrop-blur-xs">
                   <ShieldCheck size={12} />
                   <span>Showroom Care &amp; Warranty</span>
                 </span>
-                <h3 className="text-base sm:text-lg font-black tracking-tight leading-snug">
+                <h3 className="text-base sm:text-lg font-black tracking-tight leading-snug drop-shadow-sm">
                   Customer Support &amp; Official Warranty
                 </h3>
                 <p className="text-xs text-slate-300 mt-1.5 leading-relaxed line-clamp-2">
@@ -188,10 +195,10 @@ export default async function HomePage() {
                 </p>
               </div>
 
-              <div className="pt-3 flex items-center justify-between">
+              <div className="relative z-10 pt-3 flex items-center justify-between">
                 <a
                   href={`tel:${BUSINESS_INFO.phoneClean}`}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0084d6] hover:underline"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-400 hover:text-sky-300 hover:underline"
                 >
                   <Phone size={13} />
                   <span>{BUSINESS_INFO.phone}</span>
@@ -200,7 +207,7 @@ export default async function HomePage() {
                   href={`https://wa.me/${BUSINESS_INFO.whatsappClean}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition-colors"
+                  className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-emerald-600/30 transition-all active:scale-95"
                 >
                   <MessageCircle size={13} />
                   <span>WhatsApp</span>
@@ -209,14 +216,21 @@ export default async function HomePage() {
             </div>
 
             {/* Card 2: Custom PC & Electrical Servicing */}
-            <div className="flex-1 rounded-2xl bg-gradient-to-br from-[#0e1e38] to-[#061021] text-white p-5 sm:p-6 border border-slate-800 shadow-md flex flex-col justify-between relative overflow-hidden group">
-              <div className="absolute -bottom-12 -right-12 w-36 h-36 bg-amber-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform" />
-              <div>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wider mb-2.5">
+            <div className="flex-1 rounded-2xl bg-gradient-to-br from-[#0e1e38] to-[#061021] text-white p-5 sm:p-6 border border-slate-700/80 shadow-md flex flex-col justify-between relative overflow-hidden group">
+              {/* High-res Custom Gaming PC & Engineering Banner Background */}
+              <div
+                className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-40 group-hover:scale-105 transition-all duration-700 pointer-events-none"
+                style={{ backgroundImage: "url('/banners/custom-pc-banner.jpg')" }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#061021] via-[#061021]/80 to-[#061021]/40 pointer-events-none" />
+              <div className="absolute -bottom-12 -right-12 w-36 h-36 bg-amber-500/15 rounded-full blur-2xl group-hover:scale-125 transition-transform pointer-events-none" />
+
+              <div className="relative z-10">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wider mb-2.5 backdrop-blur-xs">
                   <Zap size={12} />
                   <span>Engineering Services</span>
                 </span>
-                <h3 className="text-base sm:text-lg font-black tracking-tight leading-snug">
+                <h3 className="text-base sm:text-lg font-black tracking-tight leading-snug drop-shadow-sm">
                   Custom PC &amp; Electrical Installation
                 </h3>
                 <p className="text-xs text-slate-300 mt-1.5 leading-relaxed line-clamp-2">
@@ -224,17 +238,17 @@ export default async function HomePage() {
                 </p>
               </div>
 
-              <div className="pt-3 flex items-center justify-between">
+              <div className="relative z-10 pt-3 flex items-center justify-between">
                 <Link
                   href="/services/electrician"
-                  className="px-4 py-1.5 rounded-xl bg-[#0084d6] hover:bg-[#0073bc] text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all"
+                  className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#0070cc] hover:to-[#005bb5] text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-blue-500/25 transition-all active:scale-95"
                 >
                   <span>Book Technician</span>
                   <ArrowRight size={13} />
                 </Link>
                 <Link
                   href="/laptop-emi"
-                  className="text-xs font-bold text-amber-400 hover:underline"
+                  className="text-xs font-bold text-amber-400 hover:text-amber-300 hover:underline"
                 >
                   Laptop EMI →
                 </Link>
@@ -393,7 +407,51 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* 5. Products Showcase with Interactive Tabs (Trust Computer Style) */}
+        {/* 5. Official Brand Partners & Series Showcase */}
+        <section aria-label="Official Brand Partners">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                Official Brand Lineup
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Authorized showroom warranty, genuine serialized products &amp; official distributor supply
+              </p>
+            </div>
+            <Link
+              href="/laptops"
+              className="text-xs font-bold text-[#008CFF] hover:underline flex items-center gap-1"
+            >
+              <span>Explore All Brands</span>
+              <ChevronRight size={14} />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+            {BRANDS.map((brand) => (
+              <Link
+                key={brand.name}
+                href={brand.slug}
+                className="group bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-[#008CFF] dark:hover:border-sky-400 rounded-2xl p-3.5 text-center flex flex-col items-center justify-between transition-all hover:shadow-md hover:-translate-y-1"
+              >
+                <div className={`w-11 h-11 rounded-2xl bg-gradient-to-tr ${brand.color} text-white font-black text-xs flex items-center justify-center shadow-xs group-hover:scale-110 transition-transform mb-2`}>
+                  {brand.name.substring(0, 3).toUpperCase()}
+                </div>
+                <h3 className="font-extrabold text-xs text-slate-900 dark:text-white group-hover:text-[#008CFF] transition-colors leading-tight">
+                  {brand.name}
+                </h3>
+                <span className="text-[10px] text-slate-400 font-medium truncate max-w-full block mt-0.5">
+                  {brand.desc}
+                </span>
+                <span className="mt-2 text-[9px] font-bold text-[#008CFF] bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-full border border-blue-200/60 dark:border-blue-900">
+                  {brand.badge}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* 6. Products Showcase with Interactive Tabs (Trust Computer Style) */}
         <section aria-label="Featured Products">
           <ProductTabsShowcase products={mappedProducts} />
         </section>

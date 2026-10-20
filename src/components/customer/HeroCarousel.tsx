@@ -21,30 +21,39 @@ interface HeroCarouselProps {
 const DEFAULT_SLIDES: BannerSlide[] = [
   {
     id: 'default-1',
-    badge: 'Official Showroom & Nationwide Delivery',
-    title: 'Authentic Laptops & Tech in Bangladesh',
-    subtitle: 'Explore HP, Dell & Lenovo laptops with official warranty, open-box inspection, and doorstep Cash on Delivery across all 64 districts.',
-    targetUrl: '/laptops',
-    buttonText: 'Browse Laptops',
-    imageUrl: '/logo-dark-transparent.png',
+    badge: 'HP AUTHORIZED BUSINESS RANGE',
+    title: 'HP EliteBook & ProBook Laptops',
+    subtitle: 'Intel Core i5 & i7 processors, all-day battery, military-grade aluminum chassis. Certified showroom warranty & express delivery across Bangladesh.',
+    targetUrl: '/laptops/hp',
+    buttonText: 'Shop HP Series',
+    imageUrl: '/banners/hp-elitebook-banner.jpg',
   },
   {
     id: 'default-2',
-    badge: 'Zero-Interest Showroom Financing',
-    title: 'Flexible Laptop EMI Plans',
-    subtitle: 'Get your dream laptop today with easy 3 to 12-month installment plans. Available with debit card or showroom document verification.',
-    targetUrl: '/laptop-emi',
-    buttonText: 'Apply For EMI',
-    imageUrl: '/logo-icon.png',
+    badge: 'DELL OFFICIAL SERIES',
+    title: 'Dell Latitude & XPS Laptops',
+    subtitle: 'Ultra-portable performance, FHD InfinityEdge display & 16GB/32GB RAM for executives, developers, and professionals.',
+    targetUrl: '/laptops/dell',
+    buttonText: 'Shop Dell Series',
+    imageUrl: '/banners/dell-latitude-banner.jpg',
   },
   {
     id: 'default-3',
-    badge: 'Security & Surveillance Solutions',
-    title: 'High-Definition CCTV Systems',
-    subtitle: 'Hikvision, Dahua & Imou smart cameras for homes, offices, and factories. Professional installation and mobile live-view setup.',
+    badge: 'LENOVO LEGENDARY DURABILITY',
+    title: 'Lenovo ThinkPad X1 & T-Series',
+    subtitle: 'Legendary typing ergonomics, spill-resistant keyboard, carbon fiber durability. 100% genuine with showroom inspection.',
+    targetUrl: '/laptops/lenovo',
+    buttonText: 'Shop ThinkPad',
+    imageUrl: '/banners/lenovo-thinkpad-banner.jpg',
+  },
+  {
+    id: 'default-4',
+    badge: 'HIKVISION SMART SECURITY',
+    title: 'Hikvision 4K & ColorVu CCTV',
+    subtitle: 'Full-color night vision, AI human & vehicle detection, and smartphone live streaming with certified technician installation.',
     targetUrl: '/cctv',
     buttonText: 'Explore CCTV Packages',
-    imageUrl: '/logo-icon.png',
+    imageUrl: '/banners/cctv-hikvision-banner.jpg',
   },
 ];
 
@@ -58,7 +67,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
     if (isHovered || slides.length <= 1) return;
     timerRef.current = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
-    }, 5500);
+    }, 6000);
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -77,47 +86,54 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
 
   return (
     <div
-      className="relative rounded-2xl overflow-hidden shadow-md border border-slate-200 dark:border-slate-800 bg-[#081621] text-white h-[270px] xs:h-[310px] sm:h-[380px] lg:h-[430px] flex flex-col justify-center"
+      className="relative rounded-2xl overflow-hidden shadow-xl border border-slate-700/80 bg-[#081621] text-white h-[300px] xs:h-[340px] sm:h-[390px] lg:h-[430px] flex flex-col justify-center group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Background ambient lighting accents */}
+      {/* Dynamic Ambient Background Blur derived from active banner */}
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-30 filter blur-3xl scale-125 pointer-events-none transition-all duration-1000 ease-out"
+        style={{ backgroundImage: `url(${active.imageUrl || '/banners/hp-elitebook-banner.jpg'})` }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#081621] via-[#081621]/90 to-[#081621]/60 pointer-events-none" />
+
+      {/* Decorative neon ambient glows */}
       <div className="absolute -top-24 -left-24 w-80 h-80 rounded-full bg-blue-500/20 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-sky-400/15 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-sky-400/20 blur-3xl pointer-events-none" />
 
       {/* Slide Content */}
-      <div className="relative px-4 sm:px-10 py-4 sm:py-6 flex items-center h-full">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center w-full">
+      <div className="relative z-10 px-4 sm:px-8 lg:px-10 py-4 sm:py-6 flex items-center h-full">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 lg:gap-8 items-center w-full">
           {/* Text Left Column */}
-          <div className="md:col-span-8 space-y-2.5 sm:space-y-4">
+          <div className="md:col-span-7 space-y-2.5 sm:space-y-4">
             {active.badge && (
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-[#0084d6]/20 border border-[#0084d6]/40 text-sky-300">
-                <Sparkles size={12} className="text-sky-400" />
-                <span>{active.badge}</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-[#008CFF]/20 border border-[#008CFF]/40 text-sky-300 shadow-sm backdrop-blur-md">
+                <Sparkles size={12} className="text-sky-400 animate-pulse" />
+                <span className="tracking-wide">{active.badge}</span>
               </div>
             )}
 
-            <h2 className="text-lg xs:text-xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white drop-shadow-sm">
+            <h2 className="text-xl xs:text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white drop-shadow-md">
               {active.title}
             </h2>
 
             {active.subtitle && (
-              <p className="text-[11px] sm:text-sm text-slate-300 max-w-lg leading-relaxed line-clamp-2 sm:line-clamp-3">
+              <p className="text-xs sm:text-sm text-slate-300 max-w-lg leading-relaxed line-clamp-2 sm:line-clamp-3">
                 {active.subtitle}
               </p>
             )}
 
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-1 sm:pt-2">
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 pt-1.5 sm:pt-2">
               <Link
                 href={active.targetUrl || '/laptops'}
-                className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#0084d6] hover:bg-[#0073bc] text-white font-bold text-xs shadow-md shadow-blue-500/30 transition-all flex items-center gap-1.5 sm:gap-2 group"
+                className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#0070cc] hover:to-[#005bb5] text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/30 transition-all flex items-center gap-1.5 sm:gap-2 group/btn active:scale-95"
               >
                 <span>{active.buttonText || 'Discover Now'}</span>
-                <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
+                <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
               </Link>
               <Link
                 href="/delivery"
-                className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold text-xs backdrop-blur-xs transition-colors flex items-center gap-2"
+                className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold text-xs sm:text-sm backdrop-blur-md transition-colors flex items-center gap-2 active:scale-95"
               >
                 <ShieldCheck size={14} className="text-emerald-400" />
                 <span>Cash on Delivery</span>
@@ -125,16 +141,26 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
             </div>
           </div>
 
-          {/* Graphic / Image Right Column */}
-          <div className="hidden md:flex md:col-span-4 justify-center items-center">
-            <div className="relative w-48 h-48 lg:w-56 lg:h-56 rounded-2xl bg-white/5 border border-white/10 p-5 flex items-center justify-center backdrop-blur-sm group shadow-xl">
+          {/* Graphic / Image Right Column: 16:10 Widescreen Glass Showcase */}
+          <div className="hidden md:flex md:col-span-5 justify-center items-center">
+            <div className="relative w-full max-w-[340px] lg:max-w-[400px] aspect-[16/10] rounded-2xl overflow-hidden border border-white/20 shadow-2xl shadow-blue-500/20 group/img backdrop-blur-md bg-slate-900/50">
               <img
-                src={active.imageUrl || '/logo-dark-transparent.png'}
+                src={active.imageUrl || '/banners/hp-elitebook-banner.jpg'}
                 alt={active.title}
-                className="max-h-full max-w-full object-contain filter drop-shadow-[0_10px_20px_rgba(0,140,255,0.35)] transition-transform duration-500 group-hover:scale-105"
+                className="w-full h-full object-cover object-center group-hover/img:scale-105 transition-transform duration-700 ease-out"
               />
-              <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md text-[9px] font-mono text-cyan-300 border border-cyan-500/30">
-                100% Genuine
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10 pointer-events-none" />
+              
+              {/* Floating Brand Badge */}
+              <div className="absolute top-2.5 left-2.5 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold text-sky-300 border border-sky-400/30 flex items-center gap-1.5 shadow-md">
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+                <span>{active.badge ? active.badge.split(' ')[0] : 'Brand'} Official</span>
+              </div>
+
+              {/* Floating Guarantee Badge */}
+              <div className="absolute bottom-2.5 right-2.5 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold text-emerald-400 border border-emerald-500/30 flex items-center gap-1 shadow-md">
+                <ShieldCheck size={12} className="text-emerald-400" />
+                <span>100% Genuine</span>
               </div>
             </div>
           </div>
