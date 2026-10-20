@@ -580,6 +580,16 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
                           <Trash2 size={12} />
                         </button>
                       )}
+                      <a
+                        href={`/product/${p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')}-${p.sku.toLowerCase()}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-ghost btn-sm"
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', color: 'var(--brand-primary)' }}
+                        title="View Live Product on Customer Storefront"
+                      >
+                        <Eye size={12} />
+                      </a>
                     </div>
                   </td>
                 </tr>

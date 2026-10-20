@@ -1,11 +1,11 @@
 /* NEED ELECTRO ERP - Design Tokens & Theme Variables */
 :root {
-  /* Brand Colors */
-  --brand-primary: #008CFF; /* Electric Blue */
-  --brand-primary-hover: #0075d6;
-  --brand-navy: #002B5B; /* Dark Navy */
+  /* Brand Colors aligned with Customer Storefront */
+  --brand-primary: #0084d6; /* Trust Computer MB & Need Electro Signature Blue */
+  --brand-primary-hover: #0073bc;
+  --brand-navy: #081621; /* Rich Midnight Navy from Customer Header & Footer */
   --brand-accent: #f59e0b;
-  --brand-electric: #008CFF;
+  --brand-electric: #0084d6;
   --brand-success: #10b981;
   --brand-warning: #f59e0b;
   --brand-danger: #ef4444;
@@ -42,59 +42,59 @@
   --safe-area-right: env(safe-area-inset-right, 0px);
 }
 
-/* Dark Theme (Default) */
+/* Dark Theme (Default - Aligned with #081621 Customer Storefront) */
 [data-theme='dark'], :root:not([data-theme='light']) {
   color-scheme: dark;
-  --bg-app: #090d16;
-  --bg-card: #0f172a;
-  --bg-card-hover: #162038;
-  --bg-card-muted: #131d33;
-  --bg-sidebar: #0b1120;
-  --bg-header: rgba(15, 23, 42, 0.88);
-  --bg-modal: #0f172a;
-  --bg-input: #151e34;
-  --bg-input-focus: #1c2846;
-  --bg-active: rgba(37, 99, 235, 0.18);
+  --bg-app: #081621;
+  --bg-card: #0d1e2e;
+  --bg-card-hover: #122438;
+  --bg-card-muted: #0a1724;
+  --bg-sidebar: #081621;
+  --bg-header: rgba(8, 22, 33, 0.95);
+  --bg-modal: #0d1e2e;
+  --bg-input: #0f2234;
+  --bg-input-focus: #142a40;
+  --bg-active: rgba(0, 132, 214, 0.18);
   --bg-hover: rgba(255, 255, 255, 0.05);
 
-  --border-color: rgba(255, 255, 255, 0.12);
-  --border-focus: #008CFF;
+  --border-color: rgba(255, 255, 255, 0.10);
+  --border-focus: #0084d6;
   --border-subtle: rgba(255, 255, 255, 0.06);
 
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
-  --text-inverse: #0f172a;
+  --text-inverse: #081621;
 
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
   --shadow-md: 0 4px 12px -1px rgba(0, 0, 0, 0.6), 0 2px 6px -2px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 12px 30px -4px rgba(0, 0, 0, 0.7), 0 4px 10px -3px rgba(0, 0, 0, 0.6);
-  --shadow-glow: 0 0 20px rgba(56, 189, 248, 0.15);
+  --shadow-glow: 0 0 20px rgba(0, 132, 214, 0.2);
 
-  --glass-bg: rgba(15, 23, 42, 0.75);
+  --glass-bg: rgba(13, 30, 46, 0.85);
   --glass-border: rgba(255, 255, 255, 0.09);
 }
 
-/* Light Theme */
+/* Light Theme (Aligned with #f2f4f8 Customer Storefront) */
 [data-theme='light'] {
   color-scheme: light;
-  --bg-app: #F4F6F8;
+  --bg-app: #f2f4f8;
   --bg-card: #ffffff;
   --bg-card-hover: #f8fafc;
   --bg-card-muted: #eef2f6;
   --bg-sidebar: #ffffff;
-  --bg-header: rgba(255, 255, 255, 0.92);
+  --bg-header: rgba(255, 255, 255, 0.95);
   --bg-modal: #ffffff;
   --bg-input: #f8fafc;
   --bg-input-focus: #ffffff;
-  --bg-active: rgba(37, 99, 235, 0.1);
+  --bg-active: rgba(0, 132, 214, 0.1);
   --bg-hover: rgba(0, 0, 0, 0.04);
 
   --border-color: #e2e8f0;
-  --border-focus: #2563eb;
+  --border-focus: #0084d6;
   --border-subtle: #edf2f7;
 
-  --text-primary: #0f172a;
+  --text-primary: #081621;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
   --text-inverse: #ffffff;
@@ -102,8 +102,8 @@
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 12px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.12), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.12);
+  --shadow-glow: 0 0 20px rgba(0, 132, 214, 0.15);
 
-  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-bg: rgba(255, 255, 255, 0.9);
   --glass-border: rgba(0, 0, 0, 0.08);
 }

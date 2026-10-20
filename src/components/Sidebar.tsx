@@ -5,7 +5,7 @@ import {
   Truck, Users, PackageSearch, ShieldCheck, Wrench, Wallet,
   PieChart, BookOpen, UserCheck, GitFork, BarChart3,
   Lock, ScrollText, Settings, ChevronRight, Zap, RotateCcw, Sliders, Landmark,
-  User, Globe, X
+  User, Globe, X, ShoppingBag, Sparkles
 } from 'lucide-react';
 import { NeedElectroLogo } from './NeedElectroLogo';
 import { UserProfileModal } from './UserProfileModal';
@@ -73,6 +73,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       group: 'Core Operations',
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'website_orders', label: 'Online Store Orders', icon: ShoppingBag, badge: 'STORE', badgeColor: '#10b981' },
         { id: 'pos', label: 'POS / Billing', icon: ShoppingCart, highlight: true },
         { id: 'sales', label: 'Sales & Invoices', icon: ReceiptText },
         { id: 'returns', label: 'Returns & RMA', icon: RotateCcw },
@@ -105,6 +106,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       group: 'Enterprise Control',
       items: [
         { id: 'control_center', label: 'System Control Center', icon: Sliders, badge: 'SUPER', badgeColor: '#2563eb' },
+        { id: 'banners', label: 'Store Banners & Hero', icon: Sparkles, badge: 'HERO', badgeColor: '#0084d6' },
         { id: 'seo_management', label: 'SEO Management', icon: Globe, badge: 'SEO', badgeColor: '#06b6d4' },
         { id: 'employees', label: 'Employees & Techs', icon: UserCheck },
         { id: 'branches', label: 'Branches & Transfers', icon: GitFork },
@@ -300,6 +302,59 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10b981' }} />
               <span style={{ color: '#10b981', fontWeight: 'bold' }}>Active</span>
             </div>
+          </div>
+
+          {/* Quick Storefront Links */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '0.35rem',
+            marginTop: '0.2rem'
+          }}>
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.3rem',
+                padding: '0.35rem 0.4rem',
+                borderRadius: '6px',
+                background: 'rgba(0, 132, 214, 0.12)',
+                border: '1px solid rgba(0, 132, 214, 0.25)',
+                color: 'var(--brand-primary)',
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                textDecoration: 'none'
+              }}
+            >
+              <span>Storefront</span>
+              <span style={{ fontSize: '0.7rem' }}>↗</span>
+            </a>
+            <a
+              href="/track-order"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.3rem',
+                padding: '0.35rem 0.4rem',
+                borderRadius: '6px',
+                background: 'rgba(16, 185, 129, 0.12)',
+                border: '1px solid rgba(16, 185, 129, 0.25)',
+                color: '#10b981',
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                textDecoration: 'none'
+              }}
+            >
+              <span>Tracking</span>
+              <span style={{ fontSize: '0.7rem' }}>↗</span>
+            </a>
           </div>
 
           <div style={{

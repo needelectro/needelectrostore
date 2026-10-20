@@ -12,7 +12,7 @@ const App = dynamic(() => import('@/src/App'), {
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: '100vh',
-        backgroundColor: '#090d16',
+        backgroundColor: '#081621',
         color: '#f8fafc',
         fontFamily: 'system-ui, sans-serif',
       }}
@@ -21,8 +21,8 @@ const App = dynamic(() => import('@/src/App'), {
         style={{
           width: '48px',
           height: '48px',
-          border: '4px solid rgba(0, 140, 255, 0.2)',
-          borderTopColor: '#008CFF',
+          border: '4px solid rgba(0, 132, 214, 0.2)',
+          borderTopColor: '#0084d6',
           borderRadius: '50%',
           animation: 'spin 1s linear infinite',
           marginBottom: '20px',

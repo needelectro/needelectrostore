@@ -38,6 +38,8 @@ import { AuditModule } from './modules/AuditModule';
 import { SettingsModule } from './modules/SettingsModule';
 import { ReturnsModule } from './modules/ReturnsModule';
 import { ControlCenterModule } from './modules/ControlCenterModule';
+import { WebsiteOrdersManager } from './components/admin/WebsiteOrdersManager';
+import { BannersManager } from './components/admin/BannersManager';
 
 import { InitialSetupModal } from './components/auth/InitialSetupModal';
 import { LandingPage } from './components/landing/LandingPage';
@@ -487,6 +489,10 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
         return <AuditModule onNavigate={handleNavigate} />;
       case 'settings':
         return <SettingsModule onNavigate={handleNavigate} />;
+      case 'website_orders':
+        return <WebsiteOrdersManager />;
+      case 'banners':
+        return <BannersManager />;
       case 'control_center':
         return <ControlCenterModule onNavigate={handleNavigate} initialTab={moduleInitialParam as any} />;
       case 'seo_management':

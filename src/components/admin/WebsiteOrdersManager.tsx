@@ -298,12 +298,22 @@ export const WebsiteOrdersManager: React.FC = () => {
                   {selectedOrder.orderNumber}
                 </h3>
               </div>
-              <button
-                onClick={() => setSelectedOrder(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
-              >
-                ✕
-              </button>
+              <div className="flex items-center gap-3">
+                <a
+                  href={`/order-confirmation/${selectedOrder.orderNumber}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#0084d6] border border-blue-200 dark:border-blue-800 text-xs font-bold hover:underline"
+                >
+                  Customer Invoice ↗
+                </a>
+                <button
+                  onClick={() => setSelectedOrder(null)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-xs">
