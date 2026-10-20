@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import { NeedElectroLogo } from './NeedElectroLogo';
 import { ChangePasswordModal } from './auth/ChangePasswordModal';
-import { LanguageSwitcher } from './common/LanguageSwitcher';
 
 interface HeaderProps {
   onOpenSearch: () => void;
@@ -277,9 +276,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
         flexShrink: 0,
         marginLeft: 'auto'
       }}>
-        {/* Language Switcher */}
-        <LanguageSwitcher variant="pill" />
-
         {/* Theme Toggle */}
         <button 
           className="btn btn-ghost btn-sm"
