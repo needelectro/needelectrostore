@@ -956,7 +956,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
         }}>
           {/* Logo */}
           <a href="#home" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-            <NeedElectroLogo size="sm" showSisterConcern={false} theme={theme === 'light' ? 'light' : 'dark'} />
+            <NeedElectroLogo size="sm" showTagline={false} showSisterConcern={false} theme={theme === 'light' ? 'light' : 'dark'} />
           </a>
 
           {/* Navigation Links (Desktop) — all pill style */}

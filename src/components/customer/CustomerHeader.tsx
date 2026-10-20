@@ -149,7 +149,7 @@ export const CustomerHeader: React.FC = () => {
           {/* Logo */}
           <div className="flex items-center shrink-0">
             <Link href="/" className="flex items-center gap-2 group">
-              <NeedElectroLogo size="sm" theme="dark" showSisterConcern={false} />
+              <NeedElectroLogo size="sm" theme="dark" showTagline={false} showSisterConcern={false} />
             </Link>
           </div>
 
@@ -245,11 +245,6 @@ export const CustomerHeader: React.FC = () => {
               <Phone size={12} className="text-[#008CFF]" />
               <span>{isBangla ? formatNumber(BUSINESS_INFO.phone) : BUSINESS_INFO.phone}</span>
             </a>
-
-            {/* Language Switcher Pill */}
-            <div className="hidden sm:block">
-              <LanguageSwitcher variant="pill" />
-            </div>
 
             {/* Track Order Button */}
             <Link
@@ -432,7 +427,7 @@ export const CustomerHeader: React.FC = () => {
         <div className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex flex-col justify-start">
           <div className="bg-[#081621] text-white border-b border-slate-800 px-4 py-3 flex items-center justify-between shadow-lg">
             <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2">
-              <NeedElectroLogo size="sm" theme="dark" showSisterConcern={false} />
+              <NeedElectroLogo size="sm" theme="dark" showTagline={false} showSisterConcern={false} />
             </Link>
             <button
               onClick={() => setMobileMenuOpen(false)}

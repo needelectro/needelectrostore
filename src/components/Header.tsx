@@ -89,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
         </button>
 
         <div className="header-brand-logo" style={{ display: 'flex', alignItems: 'center' }}>
-          <NeedElectroLogo size="sm" showSisterConcern={false} />
+          <NeedElectroLogo size="sm" showTagline={false} showSisterConcern={false} />
         </div>
       </div>
 
