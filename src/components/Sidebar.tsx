@@ -105,6 +105,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       group: 'Enterprise Control',
       items: [
+        { id: 'website_management', label: 'Website Management Hub', icon: Globe, badge: 'SYNC', badgeColor: '#008CFF', highlight: true },
         { id: 'control_center', label: 'System Control Center', icon: Sliders, badge: 'SUPER', badgeColor: '#2563eb' },
         { id: 'banners', label: 'Store Banners & Hero', icon: Sparkles, badge: 'HERO', badgeColor: '#0084d6' },
         { id: 'guides_cms', label: 'Guides & Content CMS', icon: BookOpen, badge: 'CMS', badgeColor: '#10b981' },

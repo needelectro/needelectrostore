@@ -167,6 +167,7 @@ export const createWebsiteOrderSchema = z.object({
   deliveryArea: z.string().optional(),
   deliveryNotes: z.string().optional(),
   paymentMethod: z.enum(['COD', 'BKASH', 'NAGAD', 'BANK']).default('COD'),
+  couponCode: z.string().optional(),
   items: z.array(
     z.object({
       productId: z.string().min(1, 'Product ID is required'),

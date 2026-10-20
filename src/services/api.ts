@@ -710,6 +710,58 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify(updates)
       })
+  },
+
+  // 22. Website Dashboard & Analytics
+  websiteDashboard: {
+    getStats: () => request<{ success: boolean; data: any }>('/api/website-dashboard')
+  },
+
+  // 23. Website Pages & Dynamic CMS
+  pages: {
+    getPages: () => request<{ success: boolean; data: any[] }>('/api/pages'),
+    getPageBySlug: (slug: string) => request<{ success: boolean; data: any }>(`/api/pages?slug=${encodeURIComponent(slug)}`),
+    savePage: (pageData: any) => request<{ success: boolean; data: any }>('/api/pages', {
+      method: 'POST',
+      body: JSON.stringify(pageData)
+    }),
+    updatePage: (id: string, updates: any) => request<{ success: boolean; data: any }>(`/api/pages/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates)
+    }),
+    deletePage: (id: string) => request<{ success: boolean; message: string }>(`/api/pages/${id}`, {
+      method: 'DELETE'
+    })
+  },
+
+  // 24. Coupons & Discounts
+  coupons: {
+    getCoupons: () => request<{ success: boolean; data: any[] }>('/api/coupons'),
+    createCoupon: (data: any) => request<{ success: boolean; data: any }>('/api/coupons', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+    updateCoupon: (id: string, updates: any) => request<{ success: boolean; data: any }>(`/api/coupons/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates)
+    }),
+    deleteCoupon: (id: string) => request<{ success: boolean; message: string }>(`/api/coupons/${id}`, {
+      method: 'DELETE'
+    }),
+    validate: (code: string, subtotal: number) => request<{ success: boolean; message?: string; data?: any }>('/api/coupons/validate', {
+      method: 'POST',
+      body: JSON.stringify({ code, subtotal })
+    })
+  },
+
+  // 25. Website Settings & Announcement Bar
+  websiteSettings: {
+    getSettings: () => request<{ success: boolean; data: any }>('/api/website-settings'),
+    updateSettings: (settingsData: any) => request<{ success: boolean; data: any }>('/api/website-settings', {
+      method: 'POST',
+      body: JSON.stringify(settingsData)
+    })
   }
 };
+
 

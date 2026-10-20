@@ -45,10 +45,43 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Coupon state
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountAmount: number } | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+
   // Delivery charge calculation
   const isSylhetDivision = ['Moulvibazar', 'Sylhet', 'Habiganj', 'Sunamganj'].includes(district);
   const deliveryCharge = isSylhetDivision ? 60 : 120;
-  const grandTotal = subtotal + deliveryCharge;
+  const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+  const grandTotal = Math.max(0, subtotal - discountAmount + deliveryCharge);
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponError(null);
+    try {
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponCode.trim(), subtotal })
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        setAppliedCoupon({
+          code: json.data.code,
+          discountAmount: json.data.discountAmount
+        });
+      } else {
+        setCouponError(json.error || 'Invalid coupon code');
+      }
+    } catch (err: any) {
+      setCouponError(err.message || 'Failed to apply coupon');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,7 +116,8 @@ export default function CheckoutPage() {
         deliveryAddress: deliveryAddress.trim(),
         district,
         notes: notes.trim() || undefined,
-        paymentMethod: 'CASH_ON_DELIVERY',
+        paymentMethod: 'COD',
+        couponCode: appliedCoupon?.code,
         items: items.map((i) => ({
           productId: i.id,
           quantity: i.quantity,
@@ -372,6 +406,41 @@ export default function CheckoutPage() {
                   <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
                     ৳{deliveryCharge.toLocaleString()}
                   </span>
+                </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-bold">
+                    <span>Discount ({appliedCoupon.code})</span>
+                    <span className="font-mono">
+                      -৳{appliedCoupon.discountAmount.toLocaleString()}
+                    </span>
+                  </div>
+                )}
+
+                {/* Promo Code Input Box */}
+                <div className="pt-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="Promo / Coupon Code"
+                      className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs uppercase font-mono font-bold focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={couponLoading || !couponCode.trim()}
+                      className="px-3 py-1.5 rounded-lg bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 text-white text-xs font-bold shrink-0 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      {couponLoading ? '...' : 'Apply'}
+                    </button>
+                  </div>
+                  {couponError && (
+                    <p className="text-[11px] text-rose-500 mt-1 font-semibold">{couponError}</p>
+                  )}
+                  {appliedCoupon && (
+                    <p className="text-[11px] text-emerald-600 mt-1 font-bold">✓ Coupon applied: ৳{appliedCoupon.discountAmount} saved</p>
+                  )}
                 </div>
                 <div className="border-t border-slate-200 dark:border-slate-800 pt-3 flex justify-between items-baseline">
                   <span className="text-sm font-bold text-slate-900 dark:text-white">Payable on Delivery</span>

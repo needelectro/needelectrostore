@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10), 1), 50);
 
     const where: any = {
+      isPublished: true,
       status: { in: ['ACTIVE', 'OUT_OF_STOCK'] },
     };
 

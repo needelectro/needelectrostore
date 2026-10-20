@@ -50,6 +50,8 @@ export const CustomerHeader: React.FC = () => {
   // Theme state
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
+  const [announcement, setAnnouncement] = useState<{ active: boolean; text: string; link?: string } | null>(null);
+
   useEffect(() => {
     try {
       const saved = (localStorage.getItem('customer_theme') as 'light' | 'dark') || 'light';
@@ -62,6 +64,20 @@ export const CustomerHeader: React.FC = () => {
       const savedWishlist = JSON.parse(localStorage.getItem('customer_wishlist') || '[]');
       setWishlistCount(Array.isArray(savedWishlist) ? savedWishlist.length : 0);
     } catch (e) {}
+
+    // Fetch live synchronized announcement bar from website settings
+    fetch('/api/website-settings')
+      .then(r => r.json())
+      .then(json => {
+        if (json.success && json.data && json.data.announcementActive && json.data.announcementText) {
+          setAnnouncement({
+            active: true,
+            text: json.data.announcementText,
+            link: json.data.announcementLink || '/laptops'
+          });
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const toggleTheme = () => {
@@ -112,6 +128,18 @@ export const CustomerHeader: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full shadow-sm">
+      {/* 0. Live Synchronized Storefront Announcement Bar */}
+      {announcement && announcement.active && (
+        <div className="bg-gradient-to-r from-[#002B5B] via-[#008CFF] to-[#002B5B] text-white text-[11px] sm:text-xs font-bold py-1.5 px-4 text-center tracking-wide flex items-center justify-center gap-2 shadow-inner">
+          <span>{announcement.text}</span>
+          {announcement.link && (
+            <Link href={announcement.link} className="underline underline-offset-2 hover:text-sky-200 ml-1">
+              Explore Now →
+            </Link>
+          )}
+        </div>
+      )}
+
       {/* 1. Main Dark Top Navbar (Trust Computer MB Style: #081621) */}
       <div className="bg-[#081621] text-white border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3 sm:gap-6">

@@ -82,6 +82,7 @@ export async function POST(req: NextRequest) {
       deliveryArea,
       deliveryNotes,
       paymentMethod,
+      couponCode,
       items,
     } = parsed.data;
 
@@ -151,7 +152,38 @@ export async function POST(req: NextRequest) {
       deliveryChargeNum = 0;
     }
 
-    const totalNum = subtotalNum + deliveryChargeNum;
+    // 2.1 Authoritative Coupon Validation & Discount
+    let discountNum = 0;
+    let validatedCouponId: string | null = null;
+    if (couponCode && typeof couponCode === 'string' && couponCode.trim()) {
+      const cleanCoupon = couponCode.trim().toUpperCase();
+      const coupon = await prisma.coupon.findUnique({
+        where: { code: cleanCoupon },
+      });
+
+      if (coupon && coupon.isActive) {
+        const now = new Date();
+        const isStarted = !coupon.startDate || now >= coupon.startDate;
+        const isNotExpired = !coupon.endDate || now <= coupon.endDate;
+        const withinLimit = !coupon.usageLimit || coupon.usageCount < coupon.usageLimit;
+        const meetsMin = subtotalNum >= Number(coupon.minOrderAmount);
+
+        if (isStarted && isNotExpired && withinLimit && meetsMin) {
+          validatedCouponId = coupon.id;
+          const val = Number(coupon.discountValue);
+          if (coupon.discountType === 'PERCENTAGE') {
+            discountNum = Math.round((subtotalNum * val) / 100);
+            if (coupon.maxDiscountAmount) {
+              discountNum = Math.min(discountNum, Number(coupon.maxDiscountAmount));
+            }
+          } else {
+            discountNum = Math.min(val, subtotalNum);
+          }
+        }
+      }
+    }
+
+    const totalNum = Math.max(0, subtotalNum - discountNum + deliveryChargeNum);
 
     // 3. Generate Identifiers
     const orderNumber = `NEC-ORD-${Date.now().toString().slice(-6)}`;
@@ -206,7 +238,7 @@ export async function POST(req: NextRequest) {
           paymentMethod,
           subtotal: new Prisma.Decimal(subtotalNum),
           deliveryCharge: new Prisma.Decimal(deliveryChargeNum),
-          discount: new Prisma.Decimal(0),
+          discount: new Prisma.Decimal(discountNum),
           total: new Prisma.Decimal(totalNum),
           orderStatus: 'PENDING',
           paymentStatus: 'UNPAID', // Cash on Delivery: payment collected at doorstep
@@ -230,6 +262,7 @@ export async function POST(req: NextRequest) {
           branchId,
           subtotal: new Prisma.Decimal(subtotalNum),
           deliveryCharge: new Prisma.Decimal(deliveryChargeNum),
+          overallDiscount: new Prisma.Decimal(discountNum),
           grandTotal: new Prisma.Decimal(totalNum),
           paidAmount: new Prisma.Decimal(0),
           dueAmount: new Prisma.Decimal(totalNum),

@@ -43,6 +43,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${domain}/about`, lastModified: now, changeFrequency: 'monthly', priority: 0.75 },
     { url: `${domain}/contact`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${domain}/faq`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${domain}/privacy-policy`, lastModified: now, changeFrequency: 'monthly', priority: 0.75 },
+    { url: `${domain}/terms-conditions`, lastModified: now, changeFrequency: 'monthly', priority: 0.75 },
     { url: `${domain}/blog`, lastModified: now, changeFrequency: 'daily', priority: 0.85 },
     // Content SEO Hub Master Categories
     { url: `${domain}/guides`, lastModified: now, changeFrequency: 'daily', priority: 0.95 },

@@ -65,6 +65,8 @@ export function getModuleUrl(module: string, param?: string): string {
       return '/seo-management';
     case 'guides_cms':
       return '/admin/guides';
+    case 'website_management':
+      return param ? `/admin/website-management/${encodeURIComponent(param)}` : '/admin/website-management';
     default:
       return `/${module}`;
   }
@@ -602,6 +604,21 @@ export function parseRoute(pathname: string = '', search: string = ''): ParsedRo
   if (cleanPath === '/admin/guides' || cleanPath === '/admin/guides-cms' || cleanPath === '/guides-cms') {
     return {
       module: 'guides_cms',
+      isLogin: false,
+      isLanding: false,
+      isProtected: true,
+      fullPath,
+      pathname: cleanPath,
+      searchParams,
+    };
+  }
+
+  // 25.2 Website Management Hub
+  if (cleanPath === '/admin/website-management' || cleanPath.startsWith('/admin/website-management/')) {
+    const param = cleanPath.startsWith('/admin/website-management/') ? decodeURIComponent(cleanPath.slice('/admin/website-management/'.length)) : undefined;
+    return {
+      module: 'website_management',
+      param,
       isLogin: false,
       isLanding: false,
       isProtected: true,

@@ -270,6 +270,10 @@ export const CustomerFooter: React.FC = () => {
             <span>•</span>
             <Link href="/guides/faqs" className="hover:text-slate-300">FAQs</Link>
             <span>•</span>
+            <Link href="/privacy-policy" className="hover:text-slate-300">Privacy Policy</Link>
+            <span>•</span>
+            <Link href="/terms-conditions" className="hover:text-slate-300">Terms &amp; Conditions</Link>
+            <span>•</span>
             <Link href="/shipping-policy" className="hover:text-slate-300">Shipping Policy</Link>
             <span>•</span>
             <Link href="/return-refund-policy" className="hover:text-slate-300">Return &amp; Refund</Link>
