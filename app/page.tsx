@@ -71,14 +71,14 @@ const CATEGORY_TILES = [
 ];
 
 const BRANDS = [
-  { name: 'HP', desc: 'EliteBook & ProBook' },
-  { name: 'Dell', desc: 'Latitude & Inspiron' },
-  { name: 'Lenovo', desc: 'ThinkPad & IdeaPad' },
-  { name: 'Hikvision', desc: 'IP Camera & NVR' },
-  { name: 'Dahua', desc: 'Smart Surveillance' },
-  { name: 'Schneider', desc: 'Circuit Breakers' },
-  { name: 'Super Star', desc: 'Electrical Fixtures' },
-  { name: 'TP-Link', desc: 'Wi-Fi 6 Routers' },
+  { name: 'HP', desc: 'EliteBook & ProBook', href: '/laptops/hp' },
+  { name: 'Dell', desc: 'Latitude & Inspiron', href: '/laptops/dell' },
+  { name: 'Lenovo', desc: 'ThinkPad & IdeaPad', href: '/laptops/lenovo' },
+  { name: 'Hikvision', desc: 'IP Camera & NVR', href: '/cctv' },
+  { name: 'Dahua', desc: 'Smart Surveillance', href: '/cctv' },
+  { name: 'Schneider', desc: 'Circuit Breakers', href: '/electrical-products' },
+  { name: 'Super Star', desc: 'Electrical Fixtures', href: '/electrical-products' },
+  { name: 'TP-Link', desc: 'Wi-Fi 6 Routers', href: '/networking' },
 ];
 
 export default async function HomePage() {
@@ -407,69 +407,210 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* 5. Products Showcase with Interactive Tabs (Trust Computer Style) */}
+        {/* 5. Dual Promotional Campaign Banners Grid (0% Laptop EMI & Gigabit Wi-Fi 6) */}
+        <section aria-label="Special Offers and Campaigns" className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          {/* Promo Card 1: Laptop EMI */}
+          <div className="relative rounded-3xl overflow-hidden min-h-[220px] sm:min-h-[260px] flex flex-col justify-between p-6 sm:p-7 border border-slate-700/80 shadow-xl group transition-all">
+            {/* Background Image with Hover Scale */}
+            <div
+              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none"
+              style={{ backgroundImage: "url('/banners/laptop-emi-promo-banner.jpg')" }}
+            />
+            {/* Vignette Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/95 via-slate-950/75 to-slate-950/35 pointer-events-none" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/15 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform" />
+
+            {/* Content Top */}
+            <div className="relative z-10 space-y-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-blue-500/25 text-blue-300 border border-blue-400/40 backdrop-blur-md uppercase tracking-wider">
+                <CreditCard size={13} className="text-blue-400" />
+                <span>0% EMI Available</span>
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-tight drop-shadow-md">
+                Up to 12 Months 0% Interest Laptop EMI
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-200/90 leading-relaxed max-w-sm drop-shadow">
+                Own genuine HP, Dell &amp; Lenovo laptops with easy monthly credit card installments. Instant showroom eligibility check.
+              </p>
+            </div>
+
+            {/* Content Bottom CTA */}
+            <div className="relative z-10 pt-4 flex items-center justify-between">
+              <Link
+                href="/laptop-emi"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#005fb8] hover:from-[#007be0] hover:to-[#004e9a] text-white text-xs sm:text-sm font-bold shadow-lg shadow-blue-500/30 transition-all active:scale-95"
+              >
+                <span>Calculate EMI &amp; Apply</span>
+                <ArrowRight size={14} />
+              </Link>
+              <span className="text-[11px] font-semibold text-slate-300 bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-xs hidden sm:inline-block">
+                18+ Partner Banks
+              </span>
+            </div>
+          </div>
+
+          {/* Promo Card 2: Wi-Fi 6 & Enterprise Networking */}
+          <div className="relative rounded-3xl overflow-hidden min-h-[220px] sm:min-h-[260px] flex flex-col justify-between p-6 sm:p-7 border border-slate-700/80 shadow-xl group transition-all">
+            {/* Background Image with Hover Scale */}
+            <div
+              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none"
+              style={{ backgroundImage: "url('/banners/wifi-networking-banner.jpg')" }}
+            />
+            {/* Vignette Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/95 via-slate-950/75 to-slate-950/35 pointer-events-none" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform" />
+
+            {/* Content Top */}
+            <div className="relative z-10 space-y-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-cyan-500/25 text-cyan-300 border border-cyan-400/40 backdrop-blur-md uppercase tracking-wider">
+                <Wifi size={13} className="text-cyan-400" />
+                <span>Gigabit Speeds</span>
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-tight drop-shadow-md">
+                Ultra-Fast Wi-Fi 6 &amp; Structured Mesh
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-200/90 leading-relaxed max-w-sm drop-shadow">
+                Eliminate Wi-Fi dead spots with dual-band gigabit routers, PoE switches, and commercial Cat6 cabling setup.
+              </p>
+            </div>
+
+            {/* Content Bottom CTA */}
+            <div className="relative z-10 pt-4 flex items-center justify-between">
+              <Link
+                href="/networking"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-cyan-500/30 transition-all active:scale-95"
+              >
+                <span>Shop Routers &amp; Switches</span>
+                <ArrowRight size={14} />
+              </Link>
+              <span className="text-[11px] font-semibold text-slate-300 bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-xs hidden sm:inline-block">
+                Up to 3000 Mbps
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* 6. Products Showcase with Interactive Tabs (Trust Computer Style) */}
         <section aria-label="Featured Products">
           <ProductTabsShowcase products={mappedProducts} />
         </section>
 
-        {/* 6. Electrical Engineering & Services Highlight Banner */}
-        <section aria-label="Electrical Solutions & Services">
-          <div className="bg-gradient-to-br from-[#081621] via-[#0b1c2d] to-[#040c14] text-white rounded-3xl p-6 sm:p-10 border border-slate-800 shadow-xl relative overflow-hidden">
-            <div className="absolute right-0 top-0 w-80 h-80 rounded-full bg-[#0084d6]/15 blur-3xl pointer-events-none" />
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative">
+        {/* 7. Full-Width Solar Inverter & Emergency IPS Power Banner */}
+        <section aria-label="Solar and IPS Power Solutions">
+          <div className="relative rounded-3xl overflow-hidden border border-slate-700/80 shadow-2xl p-6 sm:p-10 group">
+            {/* Background Solar IPS Banner Image with Zoom */}
+            <div
+              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none"
+              style={{ backgroundImage: "url('/banners/solar-ips-power-banner.jpg')" }}
+            />
+            {/* High-Contrast Gradient Backdrop for readability */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#030914]/95 via-[#030914]/90 to-[#030914]/65 pointer-events-none" />
+            <div className="absolute -right-10 top-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
               <div className="lg:col-span-8 space-y-3.5">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                  <Zap size={14} className="text-amber-400" />
-                  <span>Certified Electrician &amp; Engineering Services</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 backdrop-blur-md">
+                  <Sun size={14} className="text-amber-400" />
+                  <span>24/7 Load-Shedding Solution — Pure Sine Wave Solar &amp; IPS Systems</span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
-                  Need Professional Electrical Installation or Laptop Servicing?
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight drop-shadow-md">
+                  Uninterrupted Power for Your Home, Office &amp; Lab
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-                  Our certified engineers provide residential wiring, circuit breaker upgrades, solar inverter IPS setup, and chip-level laptop maintenance with guaranteed warranty.
+                <p className="text-xs sm:text-sm text-slate-200 max-w-2xl leading-relaxed drop-shadow">
+                  Heavy-duty pure sine wave inverters, deep-cycle tubular batteries, and hybrid solar installations by certified engineers. Auto-switchover ensures zero reboot downtime for laptops, CCTV, and servers.
                 </p>
+
+                {/* Highlights */}
+                <div className="flex flex-wrap gap-2 pt-1 text-[11px] sm:text-xs text-slate-200">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 border border-white/15 backdrop-blur-xs">
+                    <CheckCircle2 size={13} className="text-emerald-400" /> 100% Pure Sine Wave
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 border border-white/15 backdrop-blur-xs">
+                    <CheckCircle2 size={13} className="text-emerald-400" /> Up to 36 Months Battery Warranty
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 border border-white/15 backdrop-blur-xs">
+                    <CheckCircle2 size={13} className="text-emerald-400" /> On-site Setup Across Bangladesh
+                  </span>
+                </div>
+
                 <div className="flex flex-wrap gap-3 pt-2">
                   <Link
-                    href="/services/electrician"
-                    className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs sm:text-sm transition-all shadow-md shadow-amber-500/20"
+                    href="/electrical-products"
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs sm:text-sm transition-all shadow-lg shadow-amber-500/30 active:scale-95"
                   >
-                    Book Electrician Service
+                    Explore IPS &amp; Solar Packages
+                  </Link>
+                  <Link
+                    href="/services/electrician"
+                    className="px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/20 border border-white/25 text-white font-bold text-xs sm:text-sm backdrop-blur-md transition-colors flex items-center gap-2"
+                  >
+                    <Wrench size={14} className="text-amber-400" />
+                    <span>Book Installation Engineer</span>
                   </Link>
                   <a
                     href={`tel:${BUSINESS_INFO.phoneClean}`}
-                    className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold text-xs sm:text-sm transition-colors flex items-center gap-2"
+                    className="px-4 py-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-900/80 border border-slate-700 text-slate-200 font-semibold text-xs sm:text-sm transition-colors flex items-center gap-2"
                   >
-                    <Phone size={14} />
+                    <Phone size={14} className="text-[#008CFF]" />
                     <span>Call Hotline: {BUSINESS_INFO.phone}</span>
                   </a>
                 </div>
               </div>
 
-              <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xs space-y-2.5">
-                <h3 className="font-bold text-sm text-white flex items-center gap-2">
-                  <Award size={15} className="text-amber-400" />
-                  <span>Service Guarantees</span>
-                </h3>
-                <ul className="text-xs text-slate-300 space-y-2">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
-                    <span>Residential &amp; commercial wiring inspection</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
-                    <span>HD CCTV IP camera mobile live-view setup</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
-                    <span>Same-day Moulvibazar emergency technician callout</span>
-                  </li>
-                </ul>
+              {/* Right Column Quick Packages Box */}
+              <div className="lg:col-span-4 bg-slate-950/80 border border-white/15 rounded-2xl p-5 backdrop-blur-md space-y-3 shadow-2xl">
+                <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+                  <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Zap size={14} /> Power Capacity Guide
+                  </span>
+                  <span className="text-[10px] text-emerald-400 bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
+                    In Stock
+                  </span>
+                </div>
+                <div className="space-y-2.5 text-xs text-slate-300">
+                  <div className="flex items-center justify-between py-1 border-b border-white/5">
+                    <div>
+                      <div className="font-bold text-white">Home 600VA – 800VA</div>
+                      <div className="text-[11px] text-slate-400">4 Fans + 6 LED Lights</div>
+                    </div>
+                    <span className="text-[11px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2 py-0.5 rounded">
+                      Economical
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-1 border-b border-white/5">
+                    <div>
+                      <div className="font-bold text-white">Office 1000VA – 1500VA</div>
+                      <div className="text-[11px] text-slate-400">Laptops, Wi-Fi &amp; CCTV Wall</div>
+                    </div>
+                    <span className="text-[11px] font-bold text-blue-400 bg-blue-950/60 border border-blue-800/40 px-2 py-0.5 rounded">
+                      Standard
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-1">
+                    <div>
+                      <div className="font-bold text-white">Commercial 2.5kVA+ Hybrid</div>
+                      <div className="text-[11px] text-slate-400">Full Solar Integration</div>
+                    </div>
+                    <span className="text-[11px] font-bold text-amber-400 bg-amber-950/60 border border-amber-800/40 px-2 py-0.5 rounded">
+                      Heavy-Duty
+                    </span>
+                  </div>
+                </div>
+                <a
+                  href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=Hello%20NEED%20ELECTRO,%20I%20am%20interested%20in%20an%20IPS%20or%20Solar%20package`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-600/30 transition-all active:scale-95"
+                >
+                  <MessageCircle size={14} />
+                  <span>Get Free WhatsApp Consultation</span>
+                </a>
               </div>
             </div>
           </div>
         </section>
 
-        {/* 7. Authorized Global Brands Showcase */}
+        {/* 8. Authorized Global Brands Showcase */}
         <section aria-label="Featured Brands">
           <div className="text-center max-w-xl mx-auto mb-4">
             <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
@@ -480,17 +621,18 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 sm:gap-3">
             {BRANDS.map((b) => (
-              <div
+              <Link
                 key={b.name}
-                className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-3 text-center shadow-xs hover:border-[#0084d6] transition-colors"
+                href={b.href}
+                className="group bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-[#0084d6] dark:hover:border-cyan-400 rounded-xl p-3 text-center shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all block"
               >
-                <span className="font-black text-xs sm:text-sm text-slate-800 dark:text-slate-100 block">
+                <span className="font-black text-xs sm:text-sm text-slate-800 dark:text-slate-100 group-hover:text-[#0084d6] dark:group-hover:text-cyan-400 block transition-colors">
                   {b.name}
                 </span>
                 <span className="text-[10px] text-slate-400 mt-0.5 block truncate">
                   {b.desc}
                 </span>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
