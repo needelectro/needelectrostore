@@ -5,15 +5,19 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Lock, Phone, Mail, Eye, EyeOff, ArrowRight,
-  AlertCircle, CheckCircle2, KeyRound, ArrowLeft
+  AlertCircle, CheckCircle2, ShieldCheck, Cpu,
+  Sparkles, ArrowLeft, KeyRound, Zap, Laptop,
+  Camera, Wifi, Radio
 } from 'lucide-react';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
+import { NeedElectroLogo } from '@/src/components/NeedElectroLogo';
 import { useCustomerAuth } from '@/src/services/customerAuthContext';
 import { useLanguage } from '@/src/services/languageContext';
+import { BUSINESS_INFO } from '@/lib/seoConfig';
 
-function LoginForm() {
+function FuturisticLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get('redirect') || '/customer/dashboard';
@@ -24,12 +28,13 @@ function LoginForm() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Forgot password mode
+  // Forgot password state machine
   const [isForgotMode, setIsForgotMode] = useState(false);
   const [forgotStep, setForgotStep] = useState<'request' | 'reset'>('request');
   const [forgotIdentifier, setForgotIdentifier] = useState('');
@@ -52,12 +57,20 @@ function LoginForm() {
     setSuccessMessage(null);
 
     if (!identifier.trim()) {
-      setErrorMessage(isBangla ? 'অনুগ্রহ করে মোবাইল নম্বর বা ইমেইল লিখুন।' : 'Please enter your mobile number or email.');
+      setErrorMessage(
+        isBangla
+          ? 'অনুগ্রহ করে মোবাইল নম্বর বা ইমেইল ঠিকানা লিখুন।'
+          : 'Please enter your registered mobile number or email.'
+      );
       return;
     }
 
     if (!password) {
-      setErrorMessage(isBangla ? 'অনুগ্রহ করে পাসওয়ার্ড লিখুন।' : 'Please enter your password.');
+      setErrorMessage(
+        isBangla
+          ? 'অনুগ্রহ করে অ্যাকাউন্টের পাসওয়ার্ড লিখুন।'
+          : 'Please enter your password.'
+      );
       return;
     }
 
@@ -65,15 +78,19 @@ function LoginForm() {
     try {
       const res = await login(identifier.trim(), password);
       if (res.success) {
-        setSuccessMessage(isBangla ? 'সফলভাবে লগইন হয়েছে! রিডাইরেক্ট হচ্ছে...' : 'Signed in successfully! Redirecting...');
+        setSuccessMessage(
+          isBangla
+            ? 'সফলভাবে যাচাই হয়েছে! ড্যাশবোর্ডে প্রবেশ করানো হচ্ছে...'
+            : 'Access granted! Securely redirecting to your account...'
+        );
         setTimeout(() => {
           router.push(redirectUrl);
         }, 800);
       } else {
-        setErrorMessage(res.error || 'Login failed. Please check credentials.');
+        setErrorMessage(res.error || 'Authentication failed. Please verify credentials.');
       }
     } catch (err: any) {
-      setErrorMessage(err.message || 'An unexpected error occurred.');
+      setErrorMessage(err.message || 'An unexpected connection error occurred.');
     } finally {
       setIsSubmitting(false);
     }
@@ -85,7 +102,9 @@ function LoginForm() {
     setForgotMessage(null);
 
     if (!forgotIdentifier.trim()) {
-      setForgotError(isBangla ? 'মোবাইল বা ইমেইল লিখুন।' : 'Please enter your mobile number or email.');
+      setForgotError(
+        isBangla ? 'মোবাইল বা ইমেইল লিখুন।' : 'Please enter your mobile number or email.'
+      );
       return;
     }
 
@@ -101,11 +120,11 @@ function LoginForm() {
         setForgotStep('reset');
         setForgotMessage(
           data.resetCodeHint
-            ? `Recovery code generated: ${data.resetCodeHint} (Check SMS / Email)`
+            ? `Security code generated: ${data.resetCodeHint} (Check SMS / Email)`
             : (data.message || 'Verification code sent.')
         );
       } else {
-        setForgotError(data.error || 'Failed to send recovery code.');
+        setForgotError(data.error || 'Failed to dispatch recovery code.');
       }
     } catch (err: any) {
       setForgotError(err.message || 'Request failed.');
@@ -120,12 +139,16 @@ function LoginForm() {
     setForgotMessage(null);
 
     if (!resetCode.trim() || !newPassword) {
-      setForgotError(isBangla ? 'কোড ও নতুন পাসওয়ার্ড দিন।' : 'Please enter the reset code and new password.');
+      setForgotError(
+        isBangla ? 'কোড ও নতুন পাসওয়ার্ড দিন।' : 'Please enter the reset code and new password.'
+      );
       return;
     }
 
     if (newPassword.length < 6) {
-      setForgotError(isBangla ? 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।' : 'Password must be at least 6 characters.');
+      setForgotError(
+        isBangla ? 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।' : 'Password must be at least 6 characters.'
+      );
       return;
     }
 
@@ -142,11 +165,15 @@ function LoginForm() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        setSuccessMessage(isBangla ? 'পাসওয়ার্ড পরিবর্তিত হয়েছে! সাইন ইন হচ্ছে...' : 'Password reset! Signing you in...');
+        setSuccessMessage(
+          isBangla
+            ? 'পাসওয়ার্ড সফলভাবে আপডেট হয়েছে! সাইন ইন হচ্ছে...'
+            : 'Password updated successfully! Signing you in...'
+        );
         setIsForgotMode(false);
         setTimeout(() => {
           router.push(redirectUrl);
-        }, 1200);
+        }, 1000);
       } else {
         setForgotError(data.error || 'Failed to reset password.');
       }
@@ -158,219 +185,381 @@ function LoginForm() {
   };
 
   return (
-    <div className="max-w-md mx-auto w-full px-4 py-8 sm:py-16">
-      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 shadow-2xl backdrop-blur-xl">
-        {!isForgotMode ? (
-          <>
-            <div className="text-center mb-6 sm:mb-8">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#002B5B] to-[#008CFF] text-white shadow-lg shadow-[#008CFF]/25 mb-3">
-                <Lock size={22} />
-              </div>
-              <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                {isBangla ? 'কাস্টমার সাইন ইন' : 'Customer Sign In'}
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5">
-                {isBangla
-                  ? 'আপনার অর্ডার ও প্রোফাইল অ্যাক্সেস করতে লগইন করুন।'
-                  : 'Access your orders, saved addresses, and live order status.'}
-              </p>
+    <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        
+        {/* ================= LEFT PANEL: Brand Experience & Futuristic Visual ================= */}
+        <div className="hidden lg:flex lg:col-span-6 flex-col justify-between space-y-8 pr-4">
+          <div className="space-y-4">
+            <Link href="/" className="inline-block group">
+              <NeedElectroLogo size="lg" theme="dark" showTagline={false} showSisterConcern={false} />
+            </Link>
+
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-[#008CFF]/15 text-[#008CFF] border border-[#008CFF]/30 backdrop-blur-md">
+              <Radio size={13} className="text-[#008CFF] animate-pulse" />
+              <span className="tracking-wider uppercase">
+                {isBangla ? 'নিরাপদ কাস্টমার গেটওয়ে' : 'Secure Customer Gateway'}
+              </span>
             </div>
 
-            {errorMessage && (
-              <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 flex items-start gap-3 text-xs sm:text-sm">
-                <AlertCircle size={18} className="shrink-0 mt-0.5" />
-                <span>{errorMessage}</span>
-              </div>
-            )}
+            <h1 className="text-3xl xl:text-4xl font-black text-white tracking-tight leading-tight">
+              {isBangla ? (
+                <>
+                  আপনার ডিজিটাল বিশ্বকে <br />
+                  <span className="bg-gradient-to-r from-sky-400 via-[#008CFF] to-blue-500 bg-clip-text text-transparent">
+                    স্মার্টভাবে পরিচালনা করুন
+                  </span>
+                </>
+              ) : (
+                <>
+                  Powering Your <br />
+                  <span className="bg-gradient-to-r from-sky-400 via-[#008CFF] to-blue-500 bg-clip-text text-transparent">
+                    Digital World.
+                  </span>
+                </>
+              )}
+            </h1>
 
-            {successMessage && (
-              <div className="mb-6 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-start gap-3 text-xs sm:text-sm">
-                <CheckCircle2 size={18} className="shrink-0 mt-0.5" />
-                <span>{successMessage}</span>
-              </div>
-            )}
+            <p className="text-sm text-slate-300 leading-relaxed max-w-lg">
+              {isBangla
+                ? 'অ্যাকাউন্টে সাইন ইন করে ল্যাপটপ, সিসিটিভি ও ইলেকট্রিক্যাল অর্ডার ট্র্যাক করুন, অফিসিয়াল ওয়ারেন্টি ক্লেইম করুন এবং এক্সক্লুসিভ অফার উপভোগ করুন।'
+                : 'Access your account to explore technology, shop smarter, and manage your orders with verified confidence.'}
+            </p>
+          </div>
 
-            <form onSubmit={handleLoginSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                  {isBangla ? 'মোবাইল নম্বর বা ইমেইল *' : 'Mobile Number or Email *'}
-                </label>
-                <div className="relative">
-                  <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    required
-                    value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="017XXXXXXXX or user@example.com"
-                    className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#008CFF] transition-all"
-                  />
+          {/* Futuristic Circuit & Infrastructure Holographic Visual */}
+          <div className="relative rounded-3xl p-6 border border-cyan-500/20 bg-gradient-to-b from-slate-900/40 via-slate-900/70 to-slate-950/80 backdrop-blur-xl overflow-hidden shadow-2xl shadow-[#008CFF]/10">
+            {/* Tech grid texture overlay */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#008CFF0a_1px,transparent_1px),linear-gradient(to_bottom,#008CFF0a_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
+            <div className="absolute -top-10 -right-10 w-44 h-44 bg-[#008CFF]/20 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 space-y-4">
+              <div className="flex items-center justify-between border-b border-cyan-500/15 pb-3">
+                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-sky-400 flex items-center gap-2">
+                  <Cpu size={14} className="text-[#008CFF] animate-spin-slow" />
+                  <span>Integrated Tech Matrix</span>
+                </span>
+                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                  Online 24/7
+                </span>
+              </div>
+
+              {/* 4 Connected Satellite Telemetry Nodes */}
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-[#008CFF]/40 transition-colors">
+                  <div className="flex items-center gap-2 text-sky-400 font-bold mb-1">
+                    <Laptop size={14} />
+                    <span>Laptops &amp; PCs</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300">HP, Dell, Lenovo with Serialized Warranty</p>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-[#008CFF]/40 transition-colors">
+                  <div className="flex items-center gap-2 text-cyan-400 font-bold mb-1">
+                    <Camera size={14} />
+                    <span>CCTV Security</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300">Hikvision &amp; Dahua HD Live Remote-View</p>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-[#008CFF]/40 transition-colors">
+                  <div className="flex items-center gap-2 text-amber-400 font-bold mb-1">
+                    <Zap size={14} />
+                    <span>Solar &amp; IPS Power</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300">Pure Sine Wave Backup &amp; Certified Electrician</p>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-[#008CFF]/40 transition-colors">
+                  <div className="flex items-center gap-2 text-emerald-400 font-bold mb-1">
+                    <Wifi size={14} />
+                    <span>Wi-Fi 6 Mesh</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300">Gigabit Structured Commercial Cabling</p>
                 </div>
               </div>
 
+              {/* Telemetry Footer Pill */}
+              <div className="pt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-white/5 font-mono">
+                <span className="flex items-center gap-1.5 text-slate-300">
+                  <ShieldCheck size={13} className="text-emerald-400" />
+                  256-Bit SSL Encrypted
+                </span>
+                <span>Moulvibazar Showroom</span>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-xs text-slate-400 italic">
+            {isBangla
+              ? 'NEED ELECTRO — নির্ভরযোগ্য ইলেকট্রিক্যাল এবং প্রযুক্তি সমাধান।'
+              : 'NEED ELECTRO — Trusted Electrical and Technological Solutions.'}
+          </p>
+        </div>
+
+        {/* ================= RIGHT PANEL: Glass Login Card ================= */}
+        <div className="lg:col-span-6 w-full max-w-md mx-auto lg:max-w-none">
+          <div className="relative rounded-3xl border border-cyan-500/30 bg-slate-900/75 dark:bg-[#071324]/85 backdrop-blur-2xl p-6 sm:p-9 shadow-[0_0_50px_rgba(0,140,255,0.15)] overflow-hidden">
+            {/* Subtle top neon glowing trace */}
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#008CFF] to-transparent pointer-events-none" />
+            <div className="absolute -bottom-20 -right-20 w-52 h-52 bg-[#008CFF]/15 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Mobile Header (Shown on mobile devices) */}
+            <div className="lg:hidden text-center mb-6">
+              <Link href="/" className="inline-block mb-3">
+                <NeedElectroLogo size="sm" theme="dark" showTagline={false} showSisterConcern={false} />
+              </Link>
+            </div>
+
+            {!isForgotMode ? (
+              <>
+                <div className="mb-6">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#008CFF]/20 text-sky-300 border border-[#008CFF]/30 uppercase tracking-widest mb-2 backdrop-blur-xs">
+                    <Sparkles size={11} className="text-sky-400" />
+                    <span>Customer Portal</span>
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                    {isBangla ? 'স্বাগতম' : 'Welcome Back'}
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-300 mt-1">
+                    {isBangla
+                      ? 'NEED ELECTRO-তে সাইন ইন করুন।'
+                      : 'Sign in to continue to NEED ELECTRO.'}
+                  </p>
+                </div>
+
+                {errorMessage && (
+                  <div className="mb-5 p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-rose-300 flex items-start gap-2.5 text-xs sm:text-sm backdrop-blur-md">
+                    <AlertCircle size={17} className="shrink-0 mt-0.5 text-rose-400" />
+                    <span className="leading-snug">{errorMessage}</span>
+                  </div>
+                )}
+
+                {successMessage && (
+                  <div className="mb-5 p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 flex items-start gap-2.5 text-xs sm:text-sm backdrop-blur-md">
+                    <CheckCircle2 size={17} className="shrink-0 mt-0.5 text-emerald-400" />
+                    <span className="leading-snug">{successMessage}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleLoginSubmit} className="space-y-4">
+                  {/* Identifier Input */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                      {isBangla ? 'মোবাইল নম্বর বা ইমেইল *' : 'Mobile Number or Email *'}
+                    </label>
+                    <div className="relative">
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                        <Phone size={15} />
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        autoComplete="username"
+                        value={identifier}
+                        onChange={(e) => setIdentifier(e.target.value)}
+                        placeholder="017XXXXXXXX or name@example.com"
+                        className="w-full bg-slate-950/70 border border-slate-700/80 hover:border-slate-600 focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/25 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Password Input */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                        {isBangla ? 'পাসওয়ার্ড *' : 'Password *'}
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsForgotMode(true);
+                          setForgotIdentifier(identifier);
+                        }}
+                        className="text-xs text-[#008CFF] hover:text-sky-300 hover:underline font-semibold transition-colors"
+                      >
+                        {isBangla ? 'পাসওয়ার্ড ভুলে গেছেন?' : 'Forgot Password?'}
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                        <Lock size={15} />
+                      </div>
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full bg-slate-950/70 border border-slate-700/80 hover:border-slate-600 focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/25 rounded-xl pl-10 pr-10 py-2.5 sm:py-3 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                      >
+                        {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Remember Me Option */}
+                  <div className="flex items-center justify-between pt-1">
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                        className="w-4 h-4 rounded bg-slate-900 border-slate-700 text-[#008CFF] focus:ring-[#008CFF] focus:ring-offset-slate-900 cursor-pointer"
+                      />
+                      <span className="text-xs text-slate-300">
+                        {isBangla ? 'আমাকে মনে রাখুন' : 'Keep me signed in on this device'}
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Primary Futuristic Sign In Button */}
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#005fb8] hover:from-[#007be0] hover:to-[#004e9a] text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-60 cursor-pointer group/btn"
+                  >
+                    {isSubmitting ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <span>{isBangla ? 'সাইন ইন করুন' : 'Sign In'}</span>
+                        <ArrowRight size={15} className="group-hover/btn:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                {/* Divider & Registration Switch */}
+                <div className="mt-6 pt-5 border-t border-slate-800 text-center space-y-3">
+                  <div className="relative flex items-center justify-center">
+                    <span className="bg-[#071324] px-3 text-[11px] font-mono text-slate-400 uppercase tracking-wider">
+                      {isBangla ? 'NEED ELECTRO-তে নতুন?' : 'New to NEED ELECTRO?'}
+                    </span>
+                  </div>
+
+                  <Link
+                    href={`/customer/register?redirect=${encodeURIComponent(redirectUrl)}`}
+                    className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-700 hover:border-[#008CFF] bg-slate-900/60 hover:bg-slate-800 text-slate-200 hover:text-white font-bold text-xs sm:text-sm transition-all"
+                  >
+                    <span>{isBangla ? 'নতুন অ্যাকাউন্ট তৈরি করুন' : 'Create Account'}</span>
+                    <ArrowRight size={14} className="text-[#008CFF]" />
+                  </Link>
+                </div>
+              </>
+            ) : (
+              /* ================= FORGOT PASSWORD FLOW ================= */
               <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                    {isBangla ? 'পাসওয়ার্ড *' : 'Password *'}
-                  </label>
+                <div className="flex items-center gap-2 mb-4">
                   <button
                     type="button"
                     onClick={() => {
-                      setIsForgotMode(true);
-                      setForgotIdentifier(identifier);
+                      setIsForgotMode(false);
+                      setForgotError(null);
+                      setForgotMessage(null);
                     }}
-                    className="text-xs text-[#008CFF] hover:underline font-semibold"
+                    className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
                   >
-                    {isBangla ? 'পাসওয়ার্ড ভুলে গেছেন?' : 'Forgot password?'}
+                    <ArrowLeft size={18} />
                   </button>
+                  <h2 className="text-lg sm:text-xl font-bold text-white">
+                    {isBangla ? 'পাসওয়ার্ড পুনরুদ্ধার' : 'Reset Password'}
+                  </h2>
                 </div>
-                <div className="relative">
-                  <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#008CFF] transition-all"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                  </button>
-                </div>
-              </div>
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0066cc] hover:from-[#0070cc] hover:to-[#0052a3] text-white font-bold text-xs sm:text-sm shadow-lg shadow-[#008CFF]/25 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 disabled:opacity-60 cursor-pointer"
-              >
-                {isSubmitting ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <span>{isBangla ? 'সাইন ইন করুন' : 'Sign In to Account'}</span>
-                    <ArrowRight size={16} />
-                  </>
+                {forgotError && (
+                  <div className="mb-4 p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs">
+                    {forgotError}
+                  </div>
                 )}
-              </button>
-            </form>
 
-            <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800 text-center">
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {isBangla ? 'কোন অ্যাকাউন্ট নেই?' : "Don't have a customer account yet?"}{' '}
-                <Link
-                  href={`/customer/register?redirect=${encodeURIComponent(redirectUrl)}`}
-                  className="text-[#008CFF] font-bold hover:underline ml-1"
-                >
-                  {isBangla ? 'নিবন্ধন করুন →' : 'Register now →'}
-                </Link>
-              </p>
-            </div>
-          </>
-        ) : (
-          /* Forgot Password Recovery Flow */
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsForgotMode(false);
-                  setForgotError(null);
-                  setForgotMessage(null);
-                }}
-                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500"
-              >
-                <ArrowLeft size={18} />
-              </button>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                {isBangla ? 'পাসওয়ার্ড পুনরুদ্ধার' : 'Reset Password'}
-              </h2>
-            </div>
+                {forgotMessage && (
+                  <div className="mb-4 p-3 rounded-xl bg-sky-500/15 border border-sky-500/40 text-sky-300 text-xs font-mono">
+                    {forgotMessage}
+                  </div>
+                )}
 
-            {forgotError && (
-              <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs">
-                {forgotError}
+                {forgotStep === 'request' ? (
+                  <form onSubmit={handleForgotRequest} className="space-y-4">
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      {isBangla
+                        ? 'আপনার নিবন্ধিত মোবাইল নম্বর বা ইমেইল লিখুন। আমরা একটি ৬-ডিজিটের ভেরিফিকেশন কোড প্রদান করব।'
+                        : 'Enter your registered mobile number or email. We will generate a 6-digit verification code.'}
+                    </p>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                        {isBangla ? 'মোবাইল বা ইমেইল' : 'Mobile Number or Email'}
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={forgotIdentifier}
+                        onChange={(e) => setForgotIdentifier(e.target.value)}
+                        placeholder="017XXXXXXXX or name@example.com"
+                        className="w-full bg-slate-950/70 border border-slate-700/80 hover:border-slate-600 focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/25 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition-all"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={forgotLoading}
+                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#005fb8] hover:from-[#007be0] hover:to-[#004e9a] text-white font-bold text-xs sm:text-sm shadow-md transition-all disabled:opacity-60"
+                    >
+                      {forgotLoading
+                        ? 'Processing...'
+                        : (isBangla ? 'রিকভারি কোড পাঠান' : 'Send Recovery Code')}
+                    </button>
+                  </form>
+                ) : (
+                  <form onSubmit={handleResetSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                        {isBangla ? '৬-ডিজিটের কোড' : '6-Digit Reset Code'}
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={resetCode}
+                        onChange={(e) => setResetCode(e.target.value)}
+                        placeholder="123456"
+                        className="w-full bg-slate-950/70 border border-slate-700/80 hover:border-slate-600 focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/25 rounded-xl px-4 py-2.5 text-sm sm:text-base text-white font-mono text-center tracking-widest outline-none transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                        {isBangla ? 'নতুন পাসওয়ার্ড' : 'New Password (min 6 characters)'}
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full bg-slate-950/70 border border-slate-700/80 hover:border-slate-600 focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/25 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition-all"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={forgotLoading}
+                      className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow-md transition-all disabled:opacity-60"
+                    >
+                      {forgotLoading
+                        ? 'Resetting...'
+                        : (isBangla ? 'পাসওয়ার্ড নিশ্চিত করুন' : 'Confirm & Sign In')}
+                    </button>
+                  </form>
+                )}
               </div>
-            )}
-
-            {forgotMessage && (
-              <div className="mb-4 p-3 rounded-xl bg-sky-500/10 border border-sky-500/30 text-[#008CFF] text-xs">
-                {forgotMessage}
-              </div>
-            )}
-
-            {forgotStep === 'request' ? (
-              <form onSubmit={handleForgotRequest} className="space-y-4">
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {isBangla
-                    ? 'আপনার নিবন্ধিত মোবাইল নম্বর বা ইমেইল লিখুন। আমরা একটি ৬-ডিজিটের ভেরিফিকেশন কোড প্রদান করব।'
-                    : 'Enter your registered mobile number or email. We will generate a 6-digit verification code.'}
-                </p>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                    {isBangla ? 'মোবাইল বা ইমেইল' : 'Mobile Number or Email'}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={forgotIdentifier}
-                    onChange={(e) => setForgotIdentifier(e.target.value)}
-                    placeholder="017XXXXXXXX or name@example.com"
-                    className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#008CFF]"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={forgotLoading}
-                  className="w-full py-2.5 rounded-xl bg-[#008CFF] hover:bg-[#0070cc] text-white font-bold text-xs shadow-md transition-all disabled:opacity-60"
-                >
-                  {forgotLoading ? 'Processing...' : (isBangla ? 'রিকভারি কোড পাঠান' : 'Send Recovery Code')}
-                </button>
-              </form>
-            ) : (
-              <form onSubmit={handleResetSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                    {isBangla ? '৬-ডিজিটের কোড' : '6-Digit Reset Code'}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={resetCode}
-                    onChange={(e) => setResetCode(e.target.value)}
-                    placeholder="123456"
-                    className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white font-mono text-center tracking-widest text-lg focus:outline-none focus:ring-2 focus:ring-[#008CFF]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                    {isBangla ? 'নতুন পাসওয়ার্ড' : 'New Password (min 6 characters)'}
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#008CFF]"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={forgotLoading}
-                  className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all disabled:opacity-60"
-                >
-                  {forgotLoading ? 'Resetting...' : (isBangla ? 'পাসওয়ার্ড নিশ্চিত করুন' : 'Confirm & Sign In')}
-                </button>
-              </form>
             )}
           </div>
-        )}
+        </div>
+
       </div>
     </div>
   );
@@ -380,18 +569,26 @@ export default function CustomerLoginPage() {
   const { t } = useLanguage();
   const breadcrumbs = [
     { name: t('nav.home', 'Home'), path: '/' },
-    { name: 'Customer Login', path: '/customer/login' },
+    { name: 'Customer Sign In', path: '/customer/login' },
   ];
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#070d1e] text-slate-800 dark:text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#030914] text-slate-100 flex flex-col relative overflow-hidden font-sans">
+      {/* Background Cyber Grid & Radiant Neon Orbs */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#008CFF0c_1px,transparent_1px),linear-gradient(to_bottom,#008CFF0c_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-600/20 via-cyan-500/10 to-transparent pointer-events-none" />
+      <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-[#008CFF]/15 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-blue-700/15 blur-3xl pointer-events-none" />
+
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
-      <main className="flex-1 flex items-center justify-center">
-        <Suspense fallback={<div className="p-12 text-center text-sm">Loading...</div>}>
-          <LoginForm />
+      
+      <main className="flex-1 flex items-center justify-center relative z-10">
+        <Suspense fallback={<div className="p-12 text-center text-sm font-mono text-sky-400">Loading Secure Portal...</div>}>
+          <FuturisticLoginForm />
         </Suspense>
       </main>
+
       <CustomerFooter />
     </div>
   );
