@@ -1,10 +1,11 @@
 {
-  "name": "NEED ELECTRO ERP — Trusted Solutions",
-  "short_name": "NeedElectro",
-  "description": "Enterprise Retail POS, Laptop EMI Installment Financing, Inventory & Service Management System.",
+  "name": "NEED ELECTRO — Laptops, CCTV & Electrical Solutions",
+  "short_name": "NEED ELECTRO",
+  "description": "Premier destination for laptops, custom computers, CCTV surveillance, electrical goods, and certified electrician services in Moulvibazar, Sylhet, Bangladesh.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#090d16",
+  "background_color": "#002B5B",
   "theme_color": "#008CFF",
   "orientation": "any",
   "icons": [
@@ -26,22 +27,27 @@
       "type": "image/png"
     }
   ],
-  "categories": ["business", "finance", "productivity"],
+  "categories": ["shopping", "business", "utilities", "productivity"],
   "shortcuts": [
     {
-      "name": "New POS Sale",
-      "url": "/?module=pos",
-      "description": "Quick checkout and barcode billing"
+      "name": "Shop Products",
+      "url": "/?ref=pwa_shop",
+      "description": "Browse laptops, CCTV cameras and electrical equipment"
     },
     {
-      "name": "Laptop EMI Collection",
-      "url": "/?module=emi",
-      "description": "Collect monthly installment payments"
+      "name": "Book Electrician / Service",
+      "url": "/services?ref=pwa_services",
+      "description": "Schedule certified electricians and technical repair"
     },
     {
-      "name": "Service Jobs",
-      "url": "/?module=service",
-      "description": "Field repair and technician cards"
+      "name": "Track Order",
+      "url": "/track-order?ref=pwa_track",
+      "description": "Check real-time order delivery status"
+    },
+    {
+      "name": "Shopping Cart",
+      "url": "/cart?ref=pwa_cart",
+      "description": "View items in your cart and checkout"
     }
   ]
 }

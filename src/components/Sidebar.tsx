@@ -10,6 +10,7 @@ import {
 import { NeedElectroLogo } from './NeedElectroLogo';
 import { UserProfileModal } from './UserProfileModal';
 import { ChangePasswordModal } from './auth/ChangePasswordModal';
+import { useLanguage } from '../services/languageContext';
 
 interface SidebarProps {
   activeModule: string;
@@ -68,59 +69,61 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const lowStockCount = products.filter(p => p.currentStock <= p.minStock).length;
   const pendingServicesCount = services.filter(s => s.status === 'Pending').length;
 
+  const { isBangla, formatNumber } = useLanguage();
+
   const navGroups: NavGroup[] = [
     {
-      group: 'Core Operations',
+      group: isBangla ? 'প্রধান কার্যক্রম' : 'Core Operations',
       items: [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { id: 'website_orders', label: 'Online Store Orders', icon: ShoppingBag, badge: 'STORE', badgeColor: '#10b981' },
-        { id: 'pos', label: 'POS / Billing', icon: ShoppingCart, highlight: true },
-        { id: 'sales', label: 'Sales & Invoices', icon: ReceiptText },
-        { id: 'returns', label: 'Returns & RMA', icon: RotateCcw },
-        { id: 'emi', label: 'Laptop EMI System', icon: CalendarClock, badge: overdueCount > 0 ? overdueCount : undefined, badgeColor: '#ef4444' },
-        { id: 'inventory', label: 'Inventory & Serials', icon: Boxes, badge: lowStockCount > 0 ? lowStockCount : undefined, badgeColor: '#f59e0b' },
-        { id: 'purchases', label: 'Purchase Inflow', icon: Truck },
-        { id: 'products', label: 'Product Catalog', icon: PackageSearch }
+        { id: 'dashboard', label: isBangla ? 'ড্যাশবোর্ড' : 'Dashboard', icon: LayoutDashboard },
+        { id: 'website_orders', label: isBangla ? 'অনলাইন অর্ডার' : 'Online Store Orders', icon: ShoppingBag, badge: 'STORE', badgeColor: '#10b981' },
+        { id: 'pos', label: isBangla ? 'পিওএস / সেলস বিলিং' : 'POS / Billing', icon: ShoppingCart, highlight: true },
+        { id: 'sales', label: isBangla ? 'বিক্রয় ও ইনভয়েস' : 'Sales & Invoices', icon: ReceiptText },
+        { id: 'returns', label: isBangla ? 'রিটার্ন ও আরএমএ' : 'Returns & RMA', icon: RotateCcw },
+        { id: 'emi', label: isBangla ? 'ল্যাপটপ ইএমআই সিস্টেম' : 'Laptop EMI System', icon: CalendarClock, badge: overdueCount > 0 ? formatNumber(overdueCount) : undefined, badgeColor: '#ef4444' },
+        { id: 'inventory', label: isBangla ? 'ইনভেন্টরি ও সিরিয়াল' : 'Inventory & Serials', icon: Boxes, badge: lowStockCount > 0 ? formatNumber(lowStockCount) : undefined, badgeColor: '#f59e0b' },
+        { id: 'purchases', label: isBangla ? 'ক্রয় ও স্টক ইন' : 'Purchase Inflow', icon: Truck },
+        { id: 'products', label: isBangla ? 'পণ্য ক্যাটালগ' : 'Product Catalog', icon: PackageSearch }
       ]
     },
     {
-      group: 'People & CRM',
+      group: isBangla ? 'গ্রাহক ও সেবা' : 'People & CRM',
       items: [
-        { id: 'customers', label: 'Customer CRM', icon: Users },
-        { id: 'suppliers', label: 'Suppliers', icon: Truck },
-        { id: 'service', label: 'Service & Repair', icon: Wrench, badge: pendingServicesCount > 0 ? pendingServicesCount : undefined, badgeColor: '#38bdf8' },
-        { id: 'warranty', label: 'Warranty & Claims', icon: ShieldCheck }
+        { id: 'customers', label: isBangla ? 'গ্রাহক সিআরএম' : 'Customer CRM', icon: Users },
+        { id: 'suppliers', label: isBangla ? 'সাপ্লায়ার্স' : 'Suppliers', icon: Truck },
+        { id: 'service', label: isBangla ? 'সার্ভিস ও মেরামত' : 'Service & Repair', icon: Wrench, badge: pendingServicesCount > 0 ? formatNumber(pendingServicesCount) : undefined, badgeColor: '#38bdf8' },
+        { id: 'warranty', label: isBangla ? 'ওয়ারেন্টি ও ক্লেইম' : 'Warranty & Claims', icon: ShieldCheck }
       ]
     },
     {
-      group: 'Finance & Accounts',
+      group: isBangla ? 'অর্থ ও হিসাবরক্ষণ' : 'Finance & Accounts',
       items: [
-        { id: 'cash_management', label: 'Cash & Liquidity', icon: Landmark, highlight: true },
-        { id: 'accounting', label: 'Accounting & P&L', icon: PieChart },
-        { id: 'ledgers', label: 'Customer & Supplier Ledgers', icon: BookOpen },
-        { id: 'expenses', label: 'Expense Manager', icon: Wallet },
-        { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 }
+        { id: 'cash_management', label: isBangla ? 'নগদ ও ক্যাশ ফান্ড' : 'Cash & Liquidity', icon: Landmark, highlight: true },
+        { id: 'accounting', label: isBangla ? 'অ্যাকাউন্টিং ও লাভ-ক্ষতি' : 'Accounting & P&L', icon: PieChart },
+        { id: 'ledgers', label: isBangla ? 'গ্রাহক ও সাপ্লায়ার লেজার' : 'Customer & Supplier Ledgers', icon: BookOpen },
+        { id: 'expenses', label: isBangla ? 'খরচ ব্যবস্থাপনা' : 'Expense Manager', icon: Wallet },
+        { id: 'reports', label: isBangla ? 'রিপোর্ট ও অ্যানালিটিক্স' : 'Reports & Analytics', icon: BarChart3 }
       ]
     },
     {
-      group: 'Enterprise Control',
+      group: isBangla ? 'এন্টারপ্রাইজ কন্ট্রোল' : 'Enterprise Control',
       items: [
-        { id: 'website_management', label: 'Website Management Hub', icon: Globe, badge: 'SYNC', badgeColor: '#008CFF', highlight: true },
-        { id: 'control_center', label: 'System Control Center', icon: Sliders, badge: 'SUPER', badgeColor: '#2563eb' },
-        { id: 'banners', label: 'Store Banners & Hero', icon: Sparkles, badge: 'HERO', badgeColor: '#0084d6' },
-        { id: 'guides_cms', label: 'Guides & Content CMS', icon: BookOpen, badge: 'CMS', badgeColor: '#10b981' },
-        { id: 'seo_management', label: 'SEO Management', icon: Globe, badge: 'SEO', badgeColor: '#06b6d4' },
-        { id: 'employees', label: 'Employees & Techs', icon: UserCheck },
-        { id: 'branches', label: 'Branches & Transfers', icon: GitFork },
-        { id: 'roles', label: 'Roles & RBAC', icon: Lock },
-        { id: 'audit', label: 'Audit Logs', icon: ScrollText },
-        { id: 'settings', label: 'System Settings', icon: Settings }
+        { id: 'website_management', label: isBangla ? 'ওয়েবসাইট ম্যানেজমেন্ট হাব' : 'Website Management Hub', icon: Globe, badge: 'SYNC', badgeColor: '#008CFF', highlight: true },
+        { id: 'control_center', label: isBangla ? 'সিস্টেম কন্ট্রোল সেন্টার' : 'System Control Center', icon: Sliders, badge: 'SUPER', badgeColor: '#2563eb' },
+        { id: 'banners', label: isBangla ? 'স্টোর ব্যানার ও স্লাইডার' : 'Store Banners & Hero', icon: Sparkles, badge: 'HERO', badgeColor: '#0084d6' },
+        { id: 'guides_cms', label: isBangla ? 'বায়িং গাইড সিএমএস' : 'Guides & Content CMS', icon: BookOpen, badge: 'CMS', badgeColor: '#10b981' },
+        { id: 'seo_management', label: isBangla ? 'এসইও ম্যানেজমেন্ট' : 'SEO Management', icon: Globe, badge: 'SEO', badgeColor: '#06b6d4' },
+        { id: 'employees', label: isBangla ? 'কর্মচারী ও টেকনিশিয়ান' : 'Employees & Techs', icon: UserCheck },
+        { id: 'branches', label: isBangla ? 'শাখা ও ট্রান্সফার' : 'Branches & Transfers', icon: GitFork },
+        { id: 'roles', label: isBangla ? 'রোল ও পারমিশন' : 'Roles & RBAC', icon: Lock },
+        { id: 'audit', label: isBangla ? 'অডিট লগ' : 'Audit Logs', icon: ScrollText },
+        { id: 'settings', label: isBangla ? 'সিস্টেম সেটিংস' : 'System Settings', icon: Settings }
       ]
     },
     {
-      group: 'My Account & Access',
+      group: isBangla ? 'অ্যাকাউন্ট ও অ্যাক্সেস' : 'My Account & Access',
       items: [
-        { id: 'user_profile', label: 'My Profile & Account', icon: User, highlight: true }
+        { id: 'user_profile', label: isBangla ? 'আমার প্রোফাইল' : 'My Profile & Account', icon: User, highlight: true }
       ]
     }
   ];

@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import '../src/styles/tokens.css';
+@import '../src/styles/glassmorphism.css';
 @import '../src/styles/main.css';
 @import '../src/styles/print.css';
 

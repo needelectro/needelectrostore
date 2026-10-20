@@ -12,6 +12,8 @@ import { BUSINESS_INFO, slugify } from '@/lib/seoConfig';
 import { NeedElectroLogo } from '@/src/components/NeedElectroLogo';
 import { useCart } from '@/src/services/cartContext';
 import { CartDrawer } from '@/src/components/customer/CartDrawer';
+import { LanguageSwitcher } from '@/src/components/common/LanguageSwitcher';
+import { useLanguage } from '@/src/services/languageContext';
 
 interface SearchResult {
   id: string;
@@ -39,6 +41,7 @@ const CATEGORY_NAV_ITEMS = [
 
 export const CustomerHeader: React.FC = () => {
   const { openCart, totalItems } = useCart();
+  const { t, formatNumber, isBangla } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
@@ -150,7 +153,7 @@ export const CustomerHeader: React.FC = () => {
             </Link>
             <div className="hidden xl:block h-6 w-px bg-slate-700/80 mx-3" />
             <span className="hidden xl:inline text-[11px] text-slate-300 font-medium tracking-wide whitespace-nowrap">
-              - Trusted Electrical &amp; Technological Solutions -
+              {isBangla ? '- বিশ্বস্ত ইলেকট্রিক্যাল ও প্রযুক্তি সমাধান -' : '- Trusted Electrical & Technological Solutions -'}
             </span>
           </div>
 
@@ -159,19 +162,19 @@ export const CustomerHeader: React.FC = () => {
             <div className="relative flex items-center">
               <input
                 type="text"
-                placeholder="Search for products, brands, electricals or laptops..."
+                placeholder={t('header.searchPlaceholder', 'Search for products, brands, electricals or laptops...')}
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setSearchOpen(true);
                 }}
                 onFocus={() => setSearchOpen(true)}
-                className="w-full bg-white text-slate-900 placeholder-slate-400 rounded-full pl-5 pr-11 py-2 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0084d6] shadow-inner transition-all"
+                className="w-full bg-white text-slate-900 placeholder-slate-400 rounded-full pl-5 pr-11 py-2 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#008CFF] shadow-inner transition-all"
               />
               <button
                 type="button"
                 aria-label="Search"
-                className="absolute right-1 top-1 bottom-1 w-8 h-8 rounded-full bg-[#0084d6] hover:bg-[#0073bc] text-white flex items-center justify-center transition-colors shadow-2xs"
+                className="absolute right-1 top-1 bottom-1 w-8 h-8 rounded-full bg-[#008CFF] hover:bg-[#0070cc] text-white flex items-center justify-center transition-colors shadow-2xs"
               >
                 {isSearching ? (
                   <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -185,8 +188,8 @@ export const CustomerHeader: React.FC = () => {
             {searchOpen && searchQuery.trim().length >= 2 && (
               <div className="absolute top-full left-0 right-0 mt-2 rounded-2xl shadow-2xl overflow-hidden z-50 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
                 <div className="p-2.5 border-b text-[11px] font-bold uppercase tracking-wider flex justify-between bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400">
-                  <span>Search Suggestions</span>
-                  <span>{searchResults.length} matches</span>
+                  <span>{isBangla ? 'পণ্য পরামর্শ' : 'Search Suggestions'}</span>
+                  <span>{formatNumber(searchResults.length)} {isBangla ? 'টি ফলাফল' : 'matches'}</span>
                 </div>
                 {searchResults.length > 0 ? (
                   <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
@@ -198,7 +201,7 @@ export const CustomerHeader: React.FC = () => {
                         className="p-3 flex items-center justify-between hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition-colors group"
                       >
                         <div>
-                          <p className="text-xs sm:text-sm font-semibold group-hover:text-[#0084d6] transition-colors line-clamp-1">
+                          <p className="text-xs sm:text-sm font-semibold group-hover:text-[#008CFF] transition-colors line-clamp-1">
                             {p.name}
                           </p>
                           <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
@@ -211,11 +214,11 @@ export const CustomerHeader: React.FC = () => {
                           </div>
                         </div>
                         <div className="text-right shrink-0 ml-3">
-                          <span className="text-xs sm:text-sm font-extrabold text-[#0084d6] block font-mono">
-                            ৳{p.retailPrice.toLocaleString()}
+                          <span className="text-xs sm:text-sm font-extrabold text-[#008CFF] block font-mono">
+                            ৳{formatNumber(p.retailPrice.toLocaleString())}
                           </span>
                           <span className={`text-[10px] font-bold ${p.currentStock > 0 ? 'text-emerald-500' : 'text-rose-400'}`}>
-                            {p.currentStock > 0 ? 'In Stock' : 'Pre-Order'}
+                            {p.currentStock > 0 ? t('common.inStock', 'In Stock') : t('common.outOfStock', 'Pre-Order')}
                           </span>
                         </div>
                       </Link>
@@ -223,7 +226,7 @@ export const CustomerHeader: React.FC = () => {
                   </div>
                 ) : (
                   <div className="p-6 text-center text-xs text-slate-500">
-                    {isSearching ? 'Searching catalog...' : `No matching products found for "${searchQuery}".`}
+                    {isSearching ? t('common.loading', 'Searching catalog...') : `${t('common.noResults', 'No matching products found for')} "${searchQuery}".`}
                   </div>
                 )}
               </div>
@@ -234,8 +237,8 @@ export const CustomerHeader: React.FC = () => {
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             {/* Showroom Pill */}
             <div className="hidden 2xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/80 text-[11px] text-slate-300">
-              <MapPin size={12} className="text-[#0084d6]" />
-              <span className="font-medium">Moulvibazar</span>
+              <MapPin size={12} className="text-[#008CFF]" />
+              <span className="font-medium">{isBangla ? 'মৌলভীবাজার' : 'Moulvibazar'}</span>
             </div>
 
             {/* Hotline Pill */}
@@ -243,17 +246,22 @@ export const CustomerHeader: React.FC = () => {
               href={`tel:${BUSINESS_INFO.phoneClean}`}
               className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-[11px] text-slate-200 font-bold transition-colors"
             >
-              <Phone size={12} className="text-[#0084d6]" />
-              <span>{BUSINESS_INFO.phone}</span>
+              <Phone size={12} className="text-[#008CFF]" />
+              <span>{isBangla ? formatNumber(BUSINESS_INFO.phone) : BUSINESS_INFO.phone}</span>
             </a>
 
-            {/* Track Order Button (Trust Computer MB Green Highlight) */}
+            {/* Language Switcher Pill */}
+            <div className="hidden sm:block">
+              <LanguageSwitcher variant="pill" />
+            </div>
+
+            {/* Track Order Button */}
             <Link
               href="/track-order"
               className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white text-xs font-bold shadow-md shadow-emerald-500/20 transition-all transform hover:-translate-y-0.5"
             >
               <PackageSearch size={14} />
-              <span>Track Order</span>
+              <span>{t('orders.trackOrder', 'Track Order')}</span>
             </Link>
 
             {/* Wishlist Icon */}
@@ -263,9 +271,9 @@ export const CustomerHeader: React.FC = () => {
               className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-xs text-slate-300 hover:text-white transition-colors"
             >
               <Heart size={14} className="text-rose-400" />
-              <span className="font-semibold text-[11px]">Wishlist</span>
+              <span className="font-semibold text-[11px]">{t('nav.wishlist', 'Wishlist')}</span>
               <span className="text-[10px] bg-slate-700 px-1.5 py-0.2 rounded-full font-bold ml-0.5">
-                {wishlistCount}
+                {formatNumber(wishlistCount)}
               </span>
             </Link>
 
@@ -274,12 +282,12 @@ export const CustomerHeader: React.FC = () => {
               type="button"
               onClick={openCart}
               aria-label="View shopping cart"
-              className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0084d6] hover:bg-[#0073bc] text-white text-xs font-bold shadow-md shadow-blue-500/25 transition-all group"
+              className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#008CFF] hover:bg-[#0070cc] text-white text-xs font-bold shadow-md shadow-blue-500/25 transition-all group"
             >
               <ShoppingBag size={15} className="group-hover:scale-110 transition-transform" />
-              <span className="hidden sm:inline font-semibold">Cart</span>
-              <span className="bg-white text-[#0084d6] text-[10px] font-black px-1.5 py-0.2 rounded-full">
-                {totalItems}
+              <span className="hidden sm:inline font-semibold">{t('nav.cart', 'Cart')}</span>
+              <span className="bg-white text-[#008CFF] text-[10px] font-black px-1.5 py-0.2 rounded-full">
+                {formatNumber(totalItems)}
               </span>
             </button>
 
@@ -288,7 +296,7 @@ export const CustomerHeader: React.FC = () => {
               href="/admin"
               className="hidden md:inline-flex items-center px-2.5 py-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-[11px] text-slate-300 transition-colors"
             >
-              ERP
+              {t('nav.admin', 'ERP')}
             </Link>
 
             {/* Mobile Quick Call Button */}
@@ -440,6 +448,14 @@ export const CustomerHeader: React.FC = () => {
           </div>
 
           <div className="bg-white dark:bg-slate-950 flex-1 overflow-y-auto px-4 py-4 space-y-4 text-slate-900 dark:text-slate-100">
+            {/* Language Switcher Card */}
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                {isBangla ? 'ভাষা পরিবর্তন করুন' : 'Select Language'}
+              </span>
+              <LanguageSwitcher variant="segmented" />
+            </div>
+
             {/* Quick Track Order Banner */}
             <Link
               href="/track-order"
@@ -449,8 +465,10 @@ export const CustomerHeader: React.FC = () => {
               <div className="flex items-center gap-2.5">
                 <PackageSearch size={18} />
                 <div>
-                  <p className="text-xs leading-none">Track Order Live</p>
-                  <p className="text-[10px] text-emerald-100 font-normal mt-0.5">Check parcel delivery status</p>
+                  <p className="text-xs leading-none">{t('orders.trackOrder', 'Track Order Live')}</p>
+                  <p className="text-[10px] text-emerald-100 font-normal mt-0.5">
+                    {isBangla ? 'রিয়েল-টাইম ডেলিভারি স্ট্যাটাস দেখুন' : 'Check parcel delivery status'}
+                  </p>
                 </div>
               </div>
               <ArrowRight size={14} />
@@ -458,15 +476,17 @@ export const CustomerHeader: React.FC = () => {
 
             {/* Categories Grid */}
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Shop Categories</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                {t('nav.categories', 'Shop Categories')}
+              </p>
               <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
                 <Link
                   href="/laptops"
                   onClick={() => setMobileMenuOpen(false)}
                   className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors"
                 >
-                  <Laptop size={14} className="text-[#0084d6]" />
-                  <span>Laptops</span>
+                  <Laptop size={14} className="text-[#008CFF]" />
+                  <span>{t('nav.laptops', 'Laptops')}</span>
                 </Link>
                 <Link
                   href="/computers"
@@ -474,7 +494,7 @@ export const CustomerHeader: React.FC = () => {
                   className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors"
                 >
                   <Monitor size={14} className="text-indigo-500" />
-                  <span>Desktops &amp; PCs</span>
+                  <span>{isBangla ? 'ডেস্কটপ ও পিসি' : 'Desktops & PCs'}</span>
                 </Link>
                 <Link
                   href="/cctv"
@@ -482,7 +502,7 @@ export const CustomerHeader: React.FC = () => {
                   className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors"
                 >
                   <Camera size={14} className="text-emerald-500" />
-                  <span>CCTV &amp; Security</span>
+                  <span>{t('nav.cctv', 'CCTV & Security')}</span>
                 </Link>
                 <Link
                   href="/electrical-products"
@@ -490,7 +510,7 @@ export const CustomerHeader: React.FC = () => {
                   className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors"
                 >
                   <Zap size={14} className="text-amber-500" />
-                  <span>Electrical Equipment</span>
+                  <span>{t('nav.electrical', 'Electrical Equipment')}</span>
                 </Link>
                 <Link
                   href="/networking"
@@ -498,7 +518,7 @@ export const CustomerHeader: React.FC = () => {
                   className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors"
                 >
                   <Wifi size={14} className="text-teal-500" />
-                  <span>Networking &amp; Routers</span>
+                  <span>{isBangla ? 'নেটওয়ার্কিং ও রাউটার' : 'Networking & Routers'}</span>
                 </Link>
                 <Link
                   href="/computer-accessories"
@@ -506,7 +526,7 @@ export const CustomerHeader: React.FC = () => {
                   className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors"
                 >
                   <Smartphone size={14} className="text-sky-500" />
-                  <span>Accessories</span>
+                  <span>{isBangla ? 'কম্পিউটার এক্সেসরিজ' : 'Accessories'}</span>
                 </Link>
               </div>
             </div>

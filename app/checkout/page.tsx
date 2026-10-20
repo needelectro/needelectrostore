@@ -11,6 +11,7 @@ import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
 import { useCart } from '@/src/services/cartContext';
+import { useLanguage } from '@/src/services/languageContext';
 
 const BANGLADESH_DISTRICTS = [
   'Moulvibazar', 'Sylhet', 'Habiganj', 'Sunamganj',
@@ -31,9 +32,12 @@ const BANGLADESH_DISTRICTS = [
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, subtotal, totalItems, clearCart } = useCart();
+  const { t, formatCurrency, formatNumber, isBangla } = useLanguage();
+
   const breadcrumbs = [
-    { name: 'Shopping Cart', path: '/cart' },
-    { name: 'Direct Checkout', path: '/checkout' },
+    { name: t('nav.home', 'Home'), path: '/' },
+    { name: t('cart.title', 'Shopping Cart'), path: '/cart' },
+    { name: t('checkout.title', 'Checkout'), path: '/checkout' },
   ];
 
   const [customerName, setCustomerName] = useState('');
@@ -74,7 +78,7 @@ export default function CheckoutPage() {
           discountAmount: json.data.discountAmount
         });
       } else {
-        setCouponError(json.error || 'Invalid coupon code');
+        setCouponError(json.error || t('cart.couponInvalid', 'Invalid coupon code'));
       }
     } catch (err: any) {
       setCouponError(err.message || 'Failed to apply coupon');
@@ -89,20 +93,32 @@ export default function CheckoutPage() {
 
     // Basic client validation
     if (!customerName.trim()) {
-      setErrorMessage('Please enter your full name.');
+      setErrorMessage(isBangla ? 'অনুগ্রহ করে আপনার সম্পূর্ণ নাম লিখুন।' : 'Please enter your full name.');
       return;
     }
     const cleanPhone = customerPhone.replace(/\D/g, '');
     if (cleanPhone.length < 11 || (!cleanPhone.startsWith('01') && !cleanPhone.startsWith('8801'))) {
-      setErrorMessage('Please enter a valid 11-digit Bangladeshi mobile number (e.g., 017XXXXXXXX).');
+      setErrorMessage(
+        isBangla
+          ? 'অনুগ্রহ করে সঠিক ১১-ডিজিটের বাংলাদেশি মোবাইল নম্বর দিন (যেমনঃ 017XXXXXXXX)।'
+          : 'Please enter a valid 11-digit Bangladeshi mobile number (e.g., 017XXXXXXXX).'
+      );
       return;
     }
     if (!deliveryAddress.trim() || deliveryAddress.trim().length < 8) {
-      setErrorMessage('Please enter a detailed delivery address with house/road/area details.');
+      setErrorMessage(
+        isBangla
+          ? 'অনুগ্রহ করে বাসা/সড়ক/এলাকার বিবরণসহ বিস্তারিত ঠিকানা দিন।'
+          : 'Please enter a detailed delivery address with house/road/area details.'
+      );
       return;
     }
     if (items.length === 0) {
-      setErrorMessage('Your cart is empty. Please add products before checking out.');
+      setErrorMessage(
+        isBangla
+          ? 'আপনার কার্ট খালি। অর্ডার করার আগে পণ্য যোগ করুন।'
+          : 'Your cart is empty. Please add products before checking out.'
+      );
       return;
     }
 
@@ -149,24 +165,26 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
+      <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col">
         <CustomerHeader />
         <Breadcrumb items={breadcrumbs} />
         <main className="max-w-md mx-auto w-full px-4 py-16 text-center">
-          <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4 text-slate-400">
-            <ShoppingBag size={28} />
+          <div className="glass-panel p-8 rounded-3xl border border-[var(--glass-border)] shadow-xl backdrop-blur-xl">
+            <div className="w-16 h-16 rounded-2xl bg-[#008CFF]/15 text-[#008CFF] flex items-center justify-center mx-auto mb-4 border border-[#008CFF]/20 shadow-md">
+              <ShoppingBag size={28} />
+            </div>
+            <h1 className="text-xl font-bold">{t('cart.emptyCart', 'Your cart is empty')}</h1>
+            <p className="text-xs text-[var(--text-secondary)] mt-2 mb-6">
+              {t('cart.emptyCartMsg', 'Please add at least one product to your cart to proceed with checkout.')}
+            </p>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#008CFF] hover:bg-[#0070cc] text-white font-semibold text-xs shadow-md shadow-[#008CFF]/25 transition-all active:scale-95"
+            >
+              <ArrowLeft size={14} />
+              <span>{t('cart.continueShopping', 'Return to Storefront')}</span>
+            </Link>
           </div>
-          <h1 className="text-xl font-bold">Your cart is empty</h1>
-          <p className="text-xs text-slate-500 mt-2 mb-6">
-            Please add at least one product to your cart to proceed with checkout.
-          </p>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-xs hover:bg-blue-700 shadow-md transition-all"
-          >
-            <ArrowLeft size={14} />
-            <span>Return to Storefront</span>
-          </Link>
         </main>
         <CustomerFooter />
       </div>
@@ -174,29 +192,33 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col">
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 
       <main className="max-w-7xl mx-auto w-full px-4 py-8 flex-1">
         <div className="mb-6">
-          <div className="inline-flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-cyan-400 bg-blue-50 dark:bg-blue-950/50 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-900 mb-2">
+          <div className="inline-flex items-center gap-2 text-xs font-bold text-[#008CFF] bg-[#008CFF]/10 px-3 py-1 rounded-full border border-[#008CFF]/20 mb-2">
             <Lock size={12} />
-            <span>Secure Cash on Delivery Checkout</span>
+            <span>
+              {isBangla ? 'সুরক্ষিত ক্যাশ অন ডেলিভারি চেকআউট' : 'Secure Cash on Delivery Checkout'}
+            </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-            Complete Your Order
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            {t('checkout.title', 'Complete Your Order')}
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Provide your shipping details. Pay in cash after inspecting your package upon delivery.
+          <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-1">
+            {isBangla
+              ? 'ডেলিভারি ঠিকানা ও ফোন নম্বর প্রদান করুন। পণ্য হাতে পেয়ে দেখে টাকা পরিশোধ করুন।'
+              : 'Provide your shipping details. Pay in cash after inspecting your package upon delivery.'}
           </p>
         </div>
 
         {errorMessage && (
-          <div className="mb-6 p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-300 text-xs sm:text-sm flex items-start gap-3 animate-in fade-in">
+          <div className="mb-6 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-300 text-xs sm:text-sm flex items-start gap-3 animate-in fade-in">
             <AlertCircle size={18} className="shrink-0 mt-0.5 text-rose-600" />
             <div>
-              <p className="font-bold">Please check your details:</p>
+              <p className="font-bold">{isBangla ? 'অনুগ্রহ করে তথ্য যাচাই করুন:' : 'Please check your details:'}</p>
               <p>{errorMessage}</p>
             </div>
           </div>
@@ -205,30 +227,30 @@ export default function CheckoutPage() {
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Shipping Details Column */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-5">
-              <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
-                <User size={18} className="text-blue-600 dark:text-cyan-400" />
-                <span>Customer Information</span>
+            <div className="glass-panel rounded-3xl border border-[var(--glass-border)] p-6 shadow-xl space-y-5 backdrop-blur-xl">
+              <h2 className="text-base font-bold flex items-center gap-2 pb-3 border-b border-[var(--glass-border)]">
+                <User size={18} className="text-[#008CFF]" />
+                <span>{t('checkout.billingDetails', 'Customer Information')}</span>
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                    Full Name <span className="text-rose-500">*</span>
+                  <label className="block text-xs font-bold text-[var(--text-primary)] mb-1.5">
+                    {t('checkout.fullName', 'Full Name')} <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Tanvir Ahmed"
+                    placeholder={isBangla ? 'যেমনঃ তানভীর আহমেদ' : 'e.g. Tanvir Ahmed'}
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--glass-border)] bg-white/60 dark:bg-slate-900/60 text-sm focus:outline-none focus:ring-2 focus:ring-[#008CFF]/30 focus:border-[#008CFF] transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                    Mobile Phone Number <span className="text-rose-500">*</span>
+                  <label className="block text-xs font-bold text-[var(--text-primary)] mb-1.5">
+                    {t('checkout.phone', 'Mobile Phone Number')} <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -237,19 +259,19 @@ export default function CheckoutPage() {
                       placeholder="017XXXXXXXX"
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--glass-border)] bg-white/60 dark:bg-slate-900/60 text-sm focus:outline-none focus:ring-2 focus:ring-[#008CFF]/30 focus:border-[#008CFF] font-mono transition-all"
                     />
-                    <Phone size={15} className="absolute right-3 top-3 text-slate-400" />
+                    <Phone size={15} className="absolute right-3 top-3 text-[var(--text-secondary)]" />
                   </div>
-                  <span className="text-[10px] text-slate-400 mt-1 block">
-                    We will call you on this number to confirm dispatch.
+                  <span className="text-[10px] text-[var(--text-secondary)] mt-1 block">
+                    {isBangla ? 'অর্ডার নিশ্চিত করার জন্য এই নম্বরে কল করা হবে।' : 'We will call you on this number to confirm dispatch.'}
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Email Address <span className="text-slate-400 font-normal">(Optional, for invoice copy)</span>
+                <label className="block text-xs font-bold text-[var(--text-primary)] mb-1.5">
+                  {t('checkout.email', 'Email Address')} <span className="text-[var(--text-secondary)] font-normal">({t('common.optional', 'Optional')})</span>
                 </label>
                 <div className="relative">
                   <input
@@ -257,98 +279,101 @@ export default function CheckoutPage() {
                     placeholder="you@example.com"
                     value={customerEmail}
                     onChange={(e) => setCustomerEmail(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--glass-border)] bg-white/60 dark:bg-slate-900/60 text-sm focus:outline-none focus:ring-2 focus:ring-[#008CFF]/30 focus:border-[#008CFF] transition-all"
                   />
-                  <Mail size={15} className="absolute right-3 top-3 text-slate-400" />
+                  <Mail size={15} className="absolute right-3 top-3 text-[var(--text-secondary)]" />
                 </div>
               </div>
             </div>
 
             {/* Delivery Address Box */}
-            <div className="bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-5">
-              <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
-                <MapPin size={18} className="text-blue-600 dark:text-cyan-400" />
-                <span>Delivery Address in Bangladesh</span>
+            <div className="glass-panel rounded-3xl border border-[var(--glass-border)] p-6 shadow-xl space-y-5 backdrop-blur-xl">
+              <h2 className="text-base font-bold flex items-center gap-2 pb-3 border-b border-[var(--glass-border)]">
+                <MapPin size={18} className="text-[#008CFF]" />
+                <span>{isBangla ? 'ডেলিভারি ঠিকানা (বাংলাদেশ)' : 'Delivery Address in Bangladesh'}</span>
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                    District <span className="text-rose-500">*</span>
+                  <label className="block text-xs font-bold text-[var(--text-primary)] mb-1.5">
+                    {t('checkout.district', 'District')} <span className="text-rose-500">*</span>
                   </label>
                   <select
                     value={district}
                     onChange={(e) => setDistrict(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--glass-border)] bg-white/60 dark:bg-slate-900/60 text-sm focus:outline-none focus:ring-2 focus:ring-[#008CFF]/30 focus:border-[#008CFF] transition-all"
                   >
                     {BANGLADESH_DISTRICTS.map((d) => (
-                      <option key={d} value={d}>
-                        {d} {['Moulvibazar', 'Sylhet', 'Habiganj', 'Sunamganj'].includes(d) ? '(Sylhet Div - ৳60)' : '(৳120)'}
+                      <option key={d} value={d} className="bg-[var(--bg-app)] text-[var(--text-primary)]">
+                        {d} {['Moulvibazar', 'Sylhet', 'Habiganj', 'Sunamganj'].includes(d) ? `(${isBangla ? 'সিলেট বিভাগ - ৳৬০' : 'Sylhet Div - ৳60'})` : `(${isBangla ? '৳১২০' : '৳120'})`}
                       </option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                    Delivery Speed
+                  <label className="block text-xs font-bold text-[var(--text-primary)] mb-1.5">
+                    {isBangla ? 'ডেলিভারি স্পিড' : 'Delivery Speed'}
                   </label>
-                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
-                    <span className="font-bold text-slate-800 dark:text-slate-200 block">
-                      {isSylhetDivision ? '⚡ Same-Day / Next-Day Express' : '🚚 Standard Nationwide Courier (2-3 Days)'}
+                  <div className="p-2.5 rounded-xl bg-white/40 dark:bg-black/20 border border-[var(--glass-border)] text-xs">
+                    <span className="font-bold text-[var(--text-primary)] block">
+                      {isSylhetDivision ? (isBangla ? '⚡ সেইম-ডে / নেক্সট-ডে এক্সপ্রেস' : '⚡ Same-Day / Next-Day Express') : (isBangla ? '🚚 স্ট্যান্ডার্ড কুরিয়ার (২-৩ দিন)' : '🚚 Standard Nationwide Courier (2-3 Days)')}
                     </span>
-                    <span className="text-slate-500 text-[11px]">
-                      {isSylhetDivision ? 'Local dispatch from Moulvibazar showroom' : 'Steadfast / RedX insured courier'}
+                    <span className="text-[var(--text-secondary)] text-[11px]">
+                      {isSylhetDivision ? (isBangla ? 'মৌলভীবাজার শোরুম থেকে সরাসরি প্রেরণ' : 'Local dispatch from Moulvibazar showroom') : (isBangla ? 'স্টেডফাস্ট / রেডএক্স ইন্সুরেন্সড কুরিয়ার' : 'Steadfast / RedX insured courier')}
                     </span>
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Detailed Street Address <span className="text-rose-500">*</span>
+                <label className="block text-xs font-bold text-[var(--text-primary)] mb-1.5">
+                  {t('checkout.address', 'Detailed Street Address')} <span className="text-rose-500">*</span>
                 </label>
                 <textarea
                   required
                   rows={3}
-                  placeholder="House/Holding number, Road name, Village/Area, Thana/Upazila..."
+                  placeholder={isBangla ? 'বাসা/হোল্ডিং নম্বর, রোড, গ্রাম/এলাকা, থানা/উপজেলা...' : 'House/Holding number, Road name, Village/Area, Thana/Upazila...'}
                   value={deliveryAddress}
                   onChange={(e) => setDeliveryAddress(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--glass-border)] bg-white/60 dark:bg-slate-900/60 text-sm focus:outline-none focus:ring-2 focus:ring-[#008CFF]/30 focus:border-[#008CFF] transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Special Delivery Instructions <span className="text-slate-400 font-normal">(Optional)</span>
+                <label className="block text-xs font-bold text-[var(--text-primary)] mb-1.5">
+                  {t('checkout.notes', 'Special Delivery Instructions')} <span className="text-[var(--text-secondary)] font-normal">({t('common.optional', 'Optional')})</span>
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Call before arrival, deliver after 2 PM..."
+                  placeholder={isBangla ? 'যেমনঃ পৌঁছানোর পূর্বে কল দিন, দুপুর ২টার পরে...' : 'e.g. Call before arrival, deliver after 2 PM...'}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--glass-border)] bg-white/60 dark:bg-slate-900/60 text-sm focus:outline-none focus:ring-2 focus:ring-[#008CFF]/30 focus:border-[#008CFF] transition-all"
                 />
               </div>
             </div>
 
             {/* Payment Method Selector */}
-            <div className="bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-4">
-              <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
-                <Truck size={18} className="text-blue-600 dark:text-cyan-400" />
-                <span>Payment Method</span>
+            <div className="glass-panel rounded-3xl border border-[var(--glass-border)] p-6 shadow-xl space-y-4 backdrop-blur-xl">
+              <h2 className="text-base font-bold flex items-center gap-2 pb-3 border-b border-[var(--glass-border)]">
+                <Truck size={18} className="text-[#008CFF]" />
+                <span>{t('checkout.paymentMethod', 'Payment Method')}</span>
               </h2>
 
-              <div className="p-4 rounded-xl border-2 border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full border-2 border-blue-600 bg-blue-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+              <div className="p-4 rounded-2xl border-2 border-[#008CFF] bg-[#008CFF]/10 flex items-start gap-3">
+                <div className="w-5 h-5 rounded-full border-2 border-[#008CFF] bg-[#008CFF] text-white flex items-center justify-center shrink-0 mt-0.5">
                   <CheckCircle2 size={12} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
-                    Cash on Delivery (COD)
+                  <h3 className="font-bold text-sm text-[var(--text-primary)]">
+                    {t('checkout.cod', 'Cash on Delivery (COD)')}
                   </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
-                    Pay in cash directly to the delivery courier when your order arrives at your address. You are allowed to inspect the package seal and device before completing final payment.
+                  <p className="text-xs text-[var(--text-secondary)] mt-0.5 leading-relaxed">
+                    {t(
+                      'checkout.codDesc',
+                      'Pay in cash directly to the delivery courier when your order arrives at your address. You are allowed to inspect the package seal and device before completing final payment.'
+                    )}
                   </p>
                 </div>
               </div>
@@ -357,20 +382,20 @@ export default function CheckoutPage() {
 
           {/* Order Review & Submit Column */}
           <div className="lg:col-span-5">
-            <div className="bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-5 sticky top-24">
-              <h2 className="text-base font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
-                <span>Order Summary</span>
-                <span className="text-xs font-normal text-slate-500">
-                  {totalItems} {totalItems === 1 ? 'item' : 'items'}
+            <div className="glass-panel rounded-3xl border border-[var(--glass-border)] p-6 shadow-xl space-y-5 sticky top-24 backdrop-blur-xl">
+              <h2 className="text-base font-bold border-b border-[var(--glass-border)] pb-3 flex items-center justify-between">
+                <span>{t('checkout.orderSummary', 'Order Summary')}</span>
+                <span className="text-xs font-normal text-[var(--text-secondary)]">
+                  {formatNumber(totalItems)} {isBangla ? 'টি পণ্য' : totalItems === 1 ? 'item' : 'items'}
                 </span>
               </h2>
 
               {/* Items List */}
-              <div className="max-h-64 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 pr-1">
+              <div className="max-h-64 overflow-y-auto divide-y divide-[var(--glass-border)] pr-1">
                 {items.map((item) => (
                   <div key={item.id} className="py-2.5 flex items-center justify-between gap-3 text-xs">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 p-1 shrink-0 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 p-1 shrink-0 border border-[var(--glass-border)] flex items-center justify-center">
                         <img
                           src={item.imageUrl || '/logo-icon.png'}
                           alt={item.name}
@@ -378,40 +403,40 @@ export default function CheckoutPage() {
                         />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+                        <p className="font-semibold truncate">
                           {item.name}
                         </p>
-                        <p className="text-[10px] text-slate-400 font-mono">
-                          Qty: {item.quantity} × ৳{item.price.toLocaleString()}
+                        <p className="text-[10px] text-[var(--text-secondary)] font-mono">
+                          {isBangla ? 'পরিমাণ' : 'Qty'}: {formatNumber(item.quantity)} × {formatCurrency(item.price)}
                         </p>
                       </div>
                     </div>
-                    <span className="font-mono font-bold text-slate-900 dark:text-white shrink-0">
-                      ৳{(item.price * item.quantity).toLocaleString()}
+                    <span className="font-mono font-bold shrink-0 text-[#008CFF]">
+                      {formatCurrency(item.price * item.quantity)}
                     </span>
                   </div>
                 ))}
               </div>
 
               {/* Cost Calculations */}
-              <div className="space-y-2.5 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
-                <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                  <span>Subtotal</span>
-                  <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                    ৳{subtotal.toLocaleString()}
+              <div className="space-y-2.5 pt-3 border-t border-[var(--glass-border)] text-xs">
+                <div className="flex justify-between text-[var(--text-secondary)]">
+                  <span>{t('cart.subtotal', 'Subtotal')}</span>
+                  <span className="font-mono font-bold text-[var(--text-primary)]">
+                    {formatCurrency(subtotal)}
                   </span>
                 </div>
-                <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                  <span>Delivery ({district})</span>
-                  <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                    ৳{deliveryCharge.toLocaleString()}
+                <div className="flex justify-between text-[var(--text-secondary)]">
+                  <span>{t('cart.shipping', 'Delivery')} ({district})</span>
+                  <span className="font-mono font-bold text-[var(--text-primary)]">
+                    {formatCurrency(deliveryCharge)}
                   </span>
                 </div>
                 {appliedCoupon && (
                   <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-bold">
-                    <span>Discount ({appliedCoupon.code})</span>
+                    <span>{t('cart.discount', 'Discount')} ({appliedCoupon.code})</span>
                     <span className="font-mono">
-                      -৳{appliedCoupon.discountAmount.toLocaleString()}
+                      -{formatCurrency(appliedCoupon.discountAmount)}
                     </span>
                   </div>
                 )}
@@ -423,29 +448,31 @@ export default function CheckoutPage() {
                       type="text"
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                      placeholder="Promo / Coupon Code"
-                      className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs uppercase font-mono font-bold focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+                      placeholder={t('cart.couponPlaceholder', 'Promo / Coupon Code')}
+                      className="flex-1 px-3 py-1.5 rounded-xl border border-[var(--glass-border)] bg-white/50 dark:bg-black/20 text-xs uppercase font-mono font-bold focus:outline-hidden focus:ring-1 focus:ring-[#008CFF]"
                     />
                     <button
                       type="button"
                       onClick={handleApplyCoupon}
                       disabled={couponLoading || !couponCode.trim()}
-                      className="px-3 py-1.5 rounded-lg bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 text-white text-xs font-bold shrink-0 transition-all cursor-pointer disabled:opacity-50"
+                      className="px-3.5 py-1.5 rounded-xl bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 text-white text-xs font-bold shrink-0 transition-all cursor-pointer disabled:opacity-50 active:scale-95"
                     >
-                      {couponLoading ? '...' : 'Apply'}
+                      {couponLoading ? '...' : t('cart.applyCoupon', 'Apply')}
                     </button>
                   </div>
                   {couponError && (
                     <p className="text-[11px] text-rose-500 mt-1 font-semibold">{couponError}</p>
                   )}
                   {appliedCoupon && (
-                    <p className="text-[11px] text-emerald-600 mt-1 font-bold">✓ Coupon applied: ৳{appliedCoupon.discountAmount} saved</p>
+                    <p className="text-[11px] text-emerald-600 mt-1 font-bold">
+                      ✓ {t('cart.couponApplied', 'Coupon applied:')} {formatCurrency(appliedCoupon.discountAmount)} saved
+                    </p>
                   )}
                 </div>
-                <div className="border-t border-slate-200 dark:border-slate-800 pt-3 flex justify-between items-baseline">
-                  <span className="text-sm font-bold text-slate-900 dark:text-white">Payable on Delivery</span>
-                  <span className="text-2xl font-black text-blue-600 dark:text-cyan-400 font-mono">
-                    ৳{grandTotal.toLocaleString()}
+                <div className="border-t border-[var(--glass-border)] pt-3 flex justify-between items-baseline">
+                  <span className="text-sm font-bold">{isBangla ? 'ডেলিভারিতে প্রদেয় মোট' : 'Payable on Delivery'}</span>
+                  <span className="text-2xl font-black text-[#008CFF] font-mono">
+                    {formatCurrency(grandTotal)}
                   </span>
                 </div>
               </div>
@@ -454,29 +481,29 @@ export default function CheckoutPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-700 hover:to-sky-600 disabled:opacity-60 text-white font-extrabold text-sm shadow-xl shadow-blue-500/25 transition-all flex items-center justify-center gap-2 group"
+                className="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#0070cc] hover:to-[#005bb5] disabled:opacity-60 text-white font-extrabold text-sm shadow-xl shadow-[#008CFF]/25 transition-all flex items-center justify-center gap-2 group active:scale-95"
               >
                 {isSubmitting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Placing Your Order...</span>
+                    <span>{t('checkout.processingOrder', 'Placing Your Order...')}</span>
                   </>
                 ) : (
                   <>
                     <Truck size={17} />
-                    <span>Confirm Order (Cash on Delivery)</span>
+                    <span>{isBangla ? 'অর্ডার নিশ্চিত করুন (ক্যাশ অন ডেলিভারি)' : 'Confirm Order (Cash on Delivery)'}</span>
                   </>
                 )}
               </button>
 
-              <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500">
+              <div className="space-y-2 pt-2 border-t border-[var(--glass-border)] text-[11px] text-[var(--text-secondary)]">
                 <div className="flex items-center gap-2">
                   <ShieldCheck size={14} className="text-emerald-500 shrink-0" />
-                  <span>Verified NEED ELECTRO Sales Order</span>
+                  <span>{isBangla ? 'যাচাইকৃত নিড ইলেক্ট্রো সেলস অর্ডার' : 'Verified NEED ELECTRO Sales Order'}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 size={14} className="text-blue-500 shrink-0" />
-                  <span>Synchronized with ERP showroom inventory</span>
+                  <CheckCircle2 size={14} className="text-[#008CFF] shrink-0" />
+                  <span>{isBangla ? 'শোরুম ইআরপি ইনভেন্টরির সাথে রিয়েল-টাইমে সিঙ্কড' : 'Synchronized with ERP showroom inventory'}</span>
                 </div>
               </div>
             </div>

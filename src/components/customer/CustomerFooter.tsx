@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import {
@@ -6,8 +8,11 @@ import {
   ChevronRight, Heart, PackageSearch, MessageCircle
 } from 'lucide-react';
 import { BUSINESS_INFO } from '@/lib/seoConfig';
+import { useLanguage } from '@/src/services/languageContext';
 
 export const CustomerFooter: React.FC = () => {
+  const { t, isBangla } = useLanguage();
+
   return (
     <footer className="bg-[#081621] text-slate-400 border-t border-slate-800/90 pt-14 pb-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -16,21 +21,24 @@ export const CustomerFooter: React.FC = () => {
           {/* Col 1: Brand & Contact Info */}
           <div className="lg:col-span-2 space-y-4">
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0084d6] to-cyan-500 flex items-center justify-center p-1.5 shadow-md shadow-blue-500/20">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#008CFF] to-cyan-500 flex items-center justify-center p-1.5 shadow-md shadow-blue-500/20">
                 <img src="/logo-icon.png" alt="NEED ELECTRO" className="w-full h-full object-contain" />
               </div>
               <div>
                 <span className="text-xl font-black text-white tracking-tight block">
                   {BUSINESS_INFO.name}
                 </span>
-                <span className="text-[11px] text-[#0084d6] font-semibold tracking-wide">
-                  - Trusted Electrical &amp; Technological Solutions -
+                <span className="text-[11px] text-[#008CFF] font-semibold tracking-wide">
+                  {isBangla ? '- বিশ্বস্ত ইলেকট্রিক্যাল ও প্রযুক্তি সমাধান -' : '- Trusted Electrical & Technological Solutions -'}
                 </span>
               </div>
             </Link>
 
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-md">
-              Moulvibazar's trusted destination for genuine laptops (HP, Dell, Lenovo), custom desktop computers, CCTV surveillance packages, certified electrician services, and flexible laptop EMI installment plans.
+              {t(
+                'footer.companyDesc',
+                "Moulvibazar's trusted destination for genuine laptops (HP, Dell, Lenovo), custom desktop computers, CCTV surveillance packages, certified electrician services, and flexible laptop EMI installment plans."
+              )}
             </p>
 
             <div className="space-y-2.5 text-xs text-slate-300 pt-2">

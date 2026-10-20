@@ -1,0 +1,230 @@
+/* ==========================================================================
+   NEED ELECTRO — Glassmorphism Design System & Utility Classes
+   Brand: Electric Blue (#008CFF), Dark Navy (#002B5B), White (#FFFFFF)
+   ========================================================================== */
+
+:root {
+  /* Glass Surface Tokens - Light Mode */
+  --glass-surface: rgba(255, 255, 255, 0.75);
+  --glass-surface-hover: rgba(255, 255, 255, 0.88);
+  --glass-surface-subtle: rgba(255, 255, 255, 0.55);
+  --glass-surface-solid: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(0, 43, 91, 0.08);
+  --glass-border-focus: rgba(0, 140, 255, 0.45);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 43, 91, 0.06);
+  --glass-shadow-lg: 0 16px 48px -8px rgba(0, 43, 91, 0.12);
+  --glass-blur: blur(14px);
+  --glass-blur-heavy: blur(24px);
+}
+
+[data-theme='dark'] {
+  /* Glass Surface Tokens - Dark Mode */
+  --glass-surface: rgba(8, 22, 33, 0.72);
+  --glass-surface-hover: rgba(13, 34, 52, 0.85);
+  --glass-surface-subtle: rgba(6, 17, 26, 0.55);
+  --glass-surface-solid: rgba(8, 22, 33, 0.95);
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-border-focus: rgba(0, 140, 255, 0.55);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+  --glass-shadow-lg: 0 16px 48px -8px rgba(0, 0, 0, 0.65);
+  --glass-blur: blur(16px);
+  --glass-blur-heavy: blur(28px);
+}
+
+/* Glass Panels */
+.glass-panel {
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-lg, 14px);
+  transition: all var(--transition-normal, 250ms cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.glass-panel-subtle {
+  background: var(--glass-surface-subtle);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md, 10px);
+}
+
+.glass-panel-solid {
+  background: var(--glass-surface-solid);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-lg);
+  border-radius: var(--radius-xl, 20px);
+}
+
+/* Interactive Glass Cards */
+.glass-card {
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-lg, 14px);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.2s ease,
+              background 0.2s ease;
+}
+
+.glass-card:hover {
+  background: var(--glass-surface-hover);
+  border-color: var(--glass-border-focus);
+  transform: translateY(-2px);
+  box-shadow: var(--glass-shadow-lg), 0 0 20px rgba(0, 140, 255, 0.15);
+}
+
+/* Glass Inputs & Forms */
+.glass-input {
+  background: var(--glass-surface-subtle) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid var(--glass-border) !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--radius-md, 10px) !important;
+  transition: all 0.2s ease !important;
+}
+
+.glass-input:focus {
+  background: var(--glass-surface) !important;
+  border-color: var(--brand-primary, #008CFF) !important;
+  box-shadow: 0 0 0 3px rgba(0, 140, 255, 0.2) !important;
+  outline: none !important;
+}
+
+/* Glass Buttons */
+.glass-button {
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  border-radius: var(--radius-md, 10px);
+  font-weight: 700;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.glass-button:hover {
+  background: var(--glass-surface-hover);
+  border-color: var(--glass-border-focus);
+  transform: translateY(-1px);
+}
+
+.glass-button-primary {
+  background: linear-gradient(135deg, rgba(0, 140, 255, 0.9) 0%, rgba(0, 43, 91, 0.9) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(0, 140, 255, 0.3);
+  border-radius: var(--radius-md, 10px);
+  font-weight: 700;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.glass-button-primary:hover {
+  background: linear-gradient(135deg, #008CFF 0%, #002B5B 100%);
+  box-shadow: 0 6px 22px rgba(0, 140, 255, 0.45);
+  transform: translateY(-1px);
+}
+
+/* Glass Status Badges */
+.glass-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid transparent;
+}
+
+.glass-badge-blue {
+  background: rgba(0, 140, 255, 0.12);
+  border-color: rgba(0, 140, 255, 0.28);
+  color: #008CFF;
+}
+
+.glass-badge-green {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.28);
+  color: #10b981;
+}
+
+.glass-badge-amber {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.28);
+  color: #f59e0b;
+}
+
+.glass-badge-rose {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.28);
+  color: #ef4444;
+}
+
+/* Glass Navigation Bar */
+.glass-navbar {
+  background: var(--glass-surface-solid);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Safe Area Utility */
+.safe-bottom-padding {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 16px));
+}
+
+/* Fallback for browsers that do NOT support backdrop-filter */
+@supports not (backdrop-filter: blur(10px)) {
+  .glass-panel,
+  .glass-card,
+  .glass-panel-subtle,
+  .glass-navbar {
+    background: #081621 !important;
+  }
+  [data-theme='light'] .glass-panel,
+  [data-theme='light'] .glass-card,
+  [data-theme='light'] .glass-panel-subtle,
+  [data-theme='light'] .glass-navbar {
+    background: #ffffff !important;
+  }
+}
+
+/* Accessibility: Respect Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .glass-card,
+  .glass-panel,
+  .glass-button,
+  .glass-button-primary {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* Bilingual Unicode Font Support */
+.font-bangla,
+html[lang='bn'],
+html[lang='bn'] body,
+html[lang='bn'] input,
+html[lang='bn'] button,
+html[lang='bn'] select,
+html[lang='bn'] textarea {
+  font-family: var(--font-bangla) !important;
+  line-height: 1.6;
+}
+

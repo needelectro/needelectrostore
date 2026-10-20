@@ -1,17 +1,20 @@
-// NEED ELECTRO ERP — Production Progressive Web App Service Worker (v2)
-const CACHE_NAME = 'need-electro-erp-v2.1';
+// NEED ELECTRO — Production Progressive Web App Service Worker (v3.0)
+const CACHE_NAME = 'need-electro-pwa-v3.0';
+
 const PRECACHE_ASSETS = [
+  '/',
+  '/offline',
   '/manifest.json',
   '/logo-icon.png',
   '/logo-transparent.png',
-  '/logo.svg'
+  '/logo.svg',
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(PRECACHE_ASSETS).catch((err) => {
-        console.warn('Pre-caching non-fatal warning:', err);
+        console.warn('NEED ELECTRO PWA pre-caching non-fatal warning:', err);
       });
     })
   );
@@ -24,7 +27,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
-            console.log('Clearing old service worker cache:', key);
+            console.log('NEED ELECTRO PWA: Clearing old cache:', key);
             return caches.delete(key);
           }
         })
@@ -36,15 +39,25 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // 1. NEVER cache /api routes or mutations (Always Live Network)
-  if (url.pathname.startsWith('/api') || event.request.method !== 'GET') {
+  // 1. NEVER cache /api routes, checkout endpoints, or non-GET requests (Strict Live Network)
+  if (
+    url.pathname.startsWith('/api') ||
+    url.pathname.startsWith('/checkout') ||
+    url.pathname.startsWith('/cart') ||
+    event.request.method !== 'GET'
+  ) {
     return;
   }
 
-  // 2. HTML navigation: Always Network First so new deployments update immediately
+  // 2. HTML navigation: Network First with offline fallback
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match('/'))
+      fetch(event.request).catch(async () => {
+        const offlinePage = await caches.match('/offline');
+        if (offlinePage) return offlinePage;
+        const rootPage = await caches.match('/');
+        return rootPage || new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+      })
     );
     return;
   }
@@ -71,7 +84,10 @@ self.addEventListener('fetch', (event) => {
     url.hostname === 'fonts.gstatic.com' ||
     url.pathname.endsWith('.png') ||
     url.pathname.endsWith('.svg') ||
-    url.pathname.endsWith('.ico')
+    url.pathname.endsWith('.ico') ||
+    url.pathname.endsWith('.webp') ||
+    url.pathname.endsWith('.jpg') ||
+    url.pathname.endsWith('.jpeg')
   ) {
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {

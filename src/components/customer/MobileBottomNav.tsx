@@ -5,10 +5,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Package, Heart, ShoppingBag, PackageSearch } from 'lucide-react';
 import { useCart } from '@/src/services/cartContext';
+import { useLanguage } from '@/src/services/languageContext';
 
 export const MobileBottomNav: React.FC = () => {
   const pathname = usePathname();
   const { openCart, totalItems } = useCart();
+  const { t, formatNumber } = useLanguage();
   const [wishlistCount, setWishlistCount] = useState<number>(0);
 
   // Sync wishlist count from localStorage
@@ -17,7 +19,7 @@ export const MobileBottomNav: React.FC = () => {
       try {
         const saved = JSON.parse(localStorage.getItem('customer_wishlist') || '[]');
         setWishlistCount(Array.isArray(saved) ? saved.length : 0);
-      } catch (e) {
+      } catch {
         setWishlistCount(0);
       }
     };
@@ -47,30 +49,33 @@ export const MobileBottomNav: React.FC = () => {
   return (
     <nav
       aria-label="Mobile Navigation"
-      className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/95 dark:bg-[#081621]/95 backdrop-blur-md border-t border-slate-200/90 dark:border-slate-800 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] pb-[max(0.5rem,env(safe-area-inset-bottom))] transition-transform duration-300 translate-y-0"
+      className="fixed bottom-0 left-0 right-0 z-40 md:hidden glass-panel border-t border-[var(--glass-border)] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] pb-[max(0.5rem,env(safe-area-inset-bottom))] transition-transform duration-300 backdrop-blur-xl"
+      style={{
+        backgroundColor: 'var(--glass-surface-subtle)',
+      }}
     >
-      <div className="grid grid-cols-5 h-14 items-center">
+      <div className="grid grid-cols-5 h-14 items-center max-w-lg mx-auto">
         {/* 1. Home */}
         <Link
           href="/"
-          aria-label="Home"
+          aria-label={t('nav.home', 'Home')}
           className="flex items-center justify-center h-full w-full focus:outline-none"
         >
           <div
-            className={`relative flex flex-col items-center justify-center h-full w-full py-1 tap-highlight-transparent transition-colors ${
+            className={`relative flex flex-col items-center justify-center h-full w-full py-1 transition-all duration-200 active:scale-95 ${
               isHome
-                ? 'text-[#0084d6] dark:text-cyan-400 font-bold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'text-[#008CFF] font-bold'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
             <div className="relative">
-              <Home className="w-5 h-5 stroke-[2]" />
+              <Home className={`w-5 h-5 transition-transform duration-200 ${isHome ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8]'}`} />
             </div>
             <span className="text-[10px] mt-0.5 tracking-tight leading-tight truncate max-w-full px-0.5 text-center">
-              Home
+              {t('nav.home', 'Home')}
             </span>
             {isHome && (
-              <span className="absolute bottom-0 w-6 h-0.5 bg-[#0084d6] dark:bg-cyan-400 rounded-full" />
+              <span className="absolute bottom-0 w-6 h-0.5 bg-[#008CFF] rounded-full shadow-sm shadow-[#008CFF]" />
             )}
           </div>
         </Link>
@@ -78,24 +83,24 @@ export const MobileBottomNav: React.FC = () => {
         {/* 2. Categories / Products */}
         <Link
           href="/laptops"
-          aria-label="Categories"
+          aria-label={t('nav.categories', 'Categories')}
           className="flex items-center justify-center h-full w-full focus:outline-none"
         >
           <div
-            className={`relative flex flex-col items-center justify-center h-full w-full py-1 tap-highlight-transparent transition-colors ${
+            className={`relative flex flex-col items-center justify-center h-full w-full py-1 transition-all duration-200 active:scale-95 ${
               isCategories
-                ? 'text-[#0084d6] dark:text-cyan-400 font-bold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'text-[#008CFF] font-bold'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
             <div className="relative">
-              <Package className="w-5 h-5 stroke-[2]" />
+              <Package className={`w-5 h-5 transition-transform duration-200 ${isCategories ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8]'}`} />
             </div>
             <span className="text-[10px] mt-0.5 tracking-tight leading-tight truncate max-w-full px-0.5 text-center">
-              Categories
+              {t('nav.categories', 'Categories')}
             </span>
             {isCategories && (
-              <span className="absolute bottom-0 w-6 h-0.5 bg-[#0084d6] dark:bg-cyan-400 rounded-full" />
+              <span className="absolute bottom-0 w-6 h-0.5 bg-[#008CFF] rounded-full shadow-sm shadow-[#008CFF]" />
             )}
           </div>
         </Link>
@@ -103,29 +108,29 @@ export const MobileBottomNav: React.FC = () => {
         {/* 3. Wishlist */}
         <Link
           href="/laptops"
-          aria-label="Wishlist"
+          aria-label={t('nav.wishlist', 'Wishlist')}
           className="flex items-center justify-center h-full w-full focus:outline-none"
         >
           <div
-            className={`relative flex flex-col items-center justify-center h-full w-full py-1 tap-highlight-transparent transition-colors ${
+            className={`relative flex flex-col items-center justify-center h-full w-full py-1 transition-all duration-200 active:scale-95 ${
               isWishlist
                 ? 'text-rose-500 font-bold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
             <div className="relative">
-              <Heart className="w-5 h-5 stroke-[2]" />
+              <Heart className={`w-5 h-5 transition-transform duration-200 ${isWishlist ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8]'}`} />
               {wishlistCount > 0 && (
                 <span className="absolute -top-1.5 -right-2 bg-rose-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
-                  {wishlistCount}
+                  {formatNumber(wishlistCount)}
                 </span>
               )}
             </div>
             <span className="text-[10px] mt-0.5 tracking-tight leading-tight truncate max-w-full px-0.5 text-center">
-              Wishlist
+              {t('nav.wishlist', 'Wishlist')}
             </span>
             {isWishlist && (
-              <span className="absolute bottom-0 w-6 h-0.5 bg-rose-500 rounded-full" />
+              <span className="absolute bottom-0 w-6 h-0.5 bg-rose-500 rounded-full shadow-sm shadow-rose-500" />
             )}
           </div>
         </Link>
@@ -134,45 +139,45 @@ export const MobileBottomNav: React.FC = () => {
         <button
           type="button"
           onClick={openCart}
-          aria-label="Shopping Cart"
+          aria-label={t('nav.cart', 'Cart')}
           className="flex items-center justify-center h-full w-full focus:outline-none"
         >
-          <div className="relative flex flex-col items-center justify-center h-full w-full py-1 tap-highlight-transparent transition-colors text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+          <div className="relative flex flex-col items-center justify-center h-full w-full py-1 transition-all duration-200 active:scale-95 text-[var(--text-secondary)] hover:text-[#008CFF]">
             <div className="relative">
-              <ShoppingBag className="w-5 h-5 stroke-[2]" />
+              <ShoppingBag className="w-5 h-5 stroke-[1.8]" />
               {totalItems > 0 && (
-                <span className="absolute -top-1.5 -right-2 bg-[#0084d6] text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
-                  {totalItems}
+                <span className="absolute -top-1.5 -right-2 bg-[#008CFF] text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-md shadow-[#008CFF]/40 animate-pulse">
+                  {formatNumber(totalItems)}
                 </span>
               )}
             </div>
             <span className="text-[10px] mt-0.5 tracking-tight leading-tight truncate max-w-full px-0.5 text-center">
-              Cart
+              {t('nav.cart', 'Cart')}
             </span>
           </div>
         </button>
 
-        {/* 5. Track Order / Account */}
+        {/* 5. Track Order / Services */}
         <Link
           href="/track-order"
-          aria-label="Track Order"
+          aria-label={t('nav.trackOrder', 'Track')}
           className="flex items-center justify-center h-full w-full focus:outline-none"
         >
           <div
-            className={`relative flex flex-col items-center justify-center h-full w-full py-1 tap-highlight-transparent transition-colors ${
+            className={`relative flex flex-col items-center justify-center h-full w-full py-1 transition-all duration-200 active:scale-95 ${
               isTrack
-                ? 'text-emerald-600 font-bold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'text-emerald-500 font-bold'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
             <div className="relative">
-              <PackageSearch className="w-5 h-5 stroke-[2] text-emerald-600 dark:text-emerald-400" />
+              <PackageSearch className={`w-5 h-5 transition-transform duration-200 ${isTrack ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8]'}`} />
             </div>
-            <span className="text-[10px] mt-0.5 tracking-tight leading-tight truncate max-w-full px-0.5 text-center text-emerald-600 dark:text-emerald-400 font-semibold">
-              Track
+            <span className="text-[10px] mt-0.5 tracking-tight leading-tight truncate max-w-full px-0.5 text-center">
+              {t('orders.trackOrder', 'Track')}
             </span>
             {isTrack && (
-              <span className="absolute bottom-0 w-6 h-0.5 bg-emerald-600 rounded-full" />
+              <span className="absolute bottom-0 w-6 h-0.5 bg-emerald-500 rounded-full shadow-sm shadow-emerald-500" />
             )}
           </div>
         </Link>
@@ -180,3 +185,5 @@ export const MobileBottomNav: React.FC = () => {
     </nav>
   );
 };
+
+export default MobileBottomNav;

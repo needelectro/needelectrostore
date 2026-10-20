@@ -60,7 +60,9 @@ export const metadata: Metadata = {
 };
 
 import { CartProvider } from '@/src/services/cartContext';
+import { LanguageProvider } from '@/src/services/languageContext';
 import { MobileBottomNav } from '@/src/components/customer/MobileBottomNav';
+import { PwaInstallPrompt } from '@/src/components/pwa/PwaInstallPrompt';
 
 export default function RootLayout({
   children,
@@ -89,16 +91,24 @@ export default function RootLayout({
                   var custTheme = localStorage.getItem('customer_theme') || 'light';
                   document.documentElement.setAttribute('data-theme', custTheme);
                 }
+                var savedLang = localStorage.getItem('need_electro_language') || 'en';
+                document.documentElement.setAttribute('lang', savedLang);
+                if (savedLang === 'bn') {
+                  document.documentElement.classList.add('font-bangla');
+                }
               } catch(e) {}
             `,
           }}
         />
       </head>
       <body>
-        <CartProvider>
-          {children}
-          <MobileBottomNav />
-        </CartProvider>
+        <LanguageProvider>
+          <CartProvider>
+            {children}
+            <MobileBottomNav />
+            <PwaInstallPrompt />
+          </CartProvider>
+        </LanguageProvider>
         <script
           dangerouslySetInnerHTML={{
             __html: `
