@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   MapPin, Phone, Mail, Clock, ShieldCheck, CreditCard,
   Laptop, Monitor, Camera, Zap, Cpu, Wifi, ExternalLink,
-  ChevronRight, Heart, PackageSearch, MessageCircle
+  ChevronRight, Heart, PackageSearch, MessageCircle, User
 } from 'lucide-react';
 import { BUSINESS_INFO } from '@/lib/seoConfig';
 import { useLanguage } from '@/src/services/languageContext';
@@ -143,6 +143,18 @@ export const CustomerFooter: React.FC = () => {
               Customer Services
             </h3>
             <ul className="space-y-2 text-xs">
+              <li>
+                <Link href="/customer/dashboard" className="text-[#008CFF] font-bold hover:underline flex items-center gap-1.5">
+                  <User size={13} className="text-[#008CFF]" />
+                  <span>Customer Dashboard &amp; Orders</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/customer/login" className="hover:text-[#0084d6] transition-colors flex items-center gap-1.5">
+                  <ChevronRight size={12} className="text-slate-600" />
+                  <span>Customer Sign In / Register</span>
+                </Link>
+              </li>
               <li>
                 <Link href="/guides" className="text-cyan-400 font-bold hover:underline flex items-center gap-1.5">
                   <ChevronRight size={12} className="text-cyan-400" />

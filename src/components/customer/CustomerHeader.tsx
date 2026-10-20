@@ -6,11 +6,12 @@ import {
   Search, Phone, MessageCircle, Menu, X, ChevronDown,
   Laptop, Monitor, Camera, Zap, Cpu, Wifi, Smartphone,
   MapPin, ShieldCheck, CreditCard, Clock, ArrowRight,
-  Sun, Moon, ShoppingBag, Heart, PackageSearch, Layers, Sparkles
+  Sun, Moon, ShoppingBag, Heart, PackageSearch, Layers, Sparkles, User
 } from 'lucide-react';
 import { BUSINESS_INFO, slugify } from '@/lib/seoConfig';
 import { NeedElectroLogo } from '@/src/components/NeedElectroLogo';
 import { useCart } from '@/src/services/cartContext';
+import { useCustomerAuth } from '@/src/services/customerAuthContext';
 import { CartDrawer } from '@/src/components/customer/CartDrawer';
 import { LanguageSwitcher } from '@/src/components/common/LanguageSwitcher';
 import { useLanguage } from '@/src/services/languageContext';
@@ -41,6 +42,7 @@ const CATEGORY_NAV_ITEMS = [
 
 export const CustomerHeader: React.FC = () => {
   const { openCart, totalItems } = useCart();
+  const { customer, logout } = useCustomerAuth();
   const { t, formatNumber, isBangla } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -268,11 +270,33 @@ export const CustomerHeader: React.FC = () => {
               className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-xs text-slate-300 hover:text-white transition-colors"
             >
               <Heart size={14} className="text-rose-400" />
-              <span className="font-semibold text-[11px]">{t('nav.wishlist', 'Wishlist')}</span>
               <span className="text-[10px] bg-slate-700 px-1.5 py-0.2 rounded-full font-bold ml-0.5">
                 {formatNumber(wishlistCount)}
               </span>
             </Link>
+
+            {/* Customer Account Button */}
+            {customer ? (
+              <Link
+                href="/customer/dashboard"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-white text-xs font-bold transition-all shadow-xs group"
+                title={`Account: ${customer.name}`}
+              >
+                <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-[#008CFF] to-sky-400 flex items-center justify-center text-[10px] text-white font-black shadow-xs">
+                  {customer.name.charAt(0).toUpperCase()}
+                </div>
+                <span className="hidden sm:inline max-w-[80px] truncate">{customer.name.split(' ')[0]}</span>
+              </Link>
+            ) : (
+              <Link
+                href="/customer/login"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-slate-200 hover:text-white text-xs font-semibold transition-all group"
+                title="Customer Sign In"
+              >
+                <User size={13} className="text-[#008CFF] group-hover:scale-110 transition-transform" />
+                <span className="hidden sm:inline">{t('nav.login', 'Sign In')}</span>
+              </Link>
+            )}
 
             {/* Shopping Cart Pill Button */}
             <button
@@ -445,6 +469,54 @@ export const CustomerHeader: React.FC = () => {
               </span>
               <LanguageSwitcher variant="segmented" />
             </div>
+
+            {/* Customer Account / Sign In Card */}
+            {customer ? (
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-900/30 to-slate-900/70 border border-blue-500/30 shadow-xs">
+                <div className="flex items-center gap-3 mb-2.5">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#008CFF] to-sky-400 flex items-center justify-center text-sm text-white font-black shadow-md shadow-blue-500/25">
+                    {customer.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{customer.name}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{customer.phone}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 dark:border-slate-800 text-[11px] font-bold">
+                  <Link
+                    href="/customer/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="py-1.5 px-2 rounded-lg bg-[#008CFF]/15 text-[#008CFF] dark:text-sky-300 hover:bg-[#008CFF]/25 text-center transition-colors"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/customer/orders"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="py-1.5 px-2 rounded-lg bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-700 text-center transition-colors"
+                  >
+                    My Orders
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/customer/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex-1 py-2 px-3 rounded-xl bg-[#008CFF] hover:bg-[#0070cc] text-white text-xs font-bold text-center transition-all shadow-sm"
+                >
+                  {isBangla ? 'লগইন করুন' : 'Customer Sign In'}
+                </Link>
+                <Link
+                  href="/customer/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex-1 py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold text-center border border-slate-200 dark:border-slate-700 transition-all"
+                >
+                  {isBangla ? 'অ্যাকাউন্ট খুলুন' : 'Register'}
+                </Link>
+              </div>
+            )}
 
             {/* Quick Track Order Banner */}
             <Link

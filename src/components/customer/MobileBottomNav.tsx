@@ -3,13 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Package, Heart, ShoppingBag, PackageSearch } from 'lucide-react';
+import { Home, Package, Heart, ShoppingBag, PackageSearch, User } from 'lucide-react';
 import { useCart } from '@/src/services/cartContext';
 import { useLanguage } from '@/src/services/languageContext';
+import { useCustomerAuth } from '@/src/services/customerAuthContext';
 
 export const MobileBottomNav: React.FC = () => {
   const pathname = usePathname();
   const { openCart, totalItems } = useCart();
+  const { customer } = useCustomerAuth();
   const { t, formatNumber } = useLanguage();
   const [wishlistCount, setWishlistCount] = useState<number>(0);
 
@@ -42,9 +44,11 @@ export const MobileBottomNav: React.FC = () => {
     pathname?.startsWith('/electrical-products') ||
     pathname?.startsWith('/computer-accessories') ||
     pathname?.startsWith('/networking') ||
-    pathname?.startsWith('/smart-devices');
+    pathname?.startsWith('/smart-devices') ||
+    pathname?.startsWith('/shop');
   const isWishlist = pathname === '/wishlist';
   const isTrack = pathname?.startsWith('/track-order');
+  const isAccount = pathname?.startsWith('/customer');
 
   return (
     <nav
@@ -105,37 +109,7 @@ export const MobileBottomNav: React.FC = () => {
           </div>
         </Link>
 
-        {/* 3. Wishlist */}
-        <Link
-          href="/laptops"
-          aria-label={t('nav.wishlist', 'Wishlist')}
-          className="flex items-center justify-center h-full w-full focus:outline-none"
-        >
-          <div
-            className={`relative flex flex-col items-center justify-center h-full w-full py-1 transition-all duration-200 active:scale-95 ${
-              isWishlist
-                ? 'text-rose-500 font-bold'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            <div className="relative">
-              <Heart className={`w-5 h-5 transition-transform duration-200 ${isWishlist ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8]'}`} />
-              {wishlistCount > 0 && (
-                <span className="absolute -top-1.5 -right-2 bg-rose-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
-                  {formatNumber(wishlistCount)}
-                </span>
-              )}
-            </div>
-            <span className="text-[10px] mt-0.5 tracking-tight leading-tight truncate max-w-full px-0.5 text-center">
-              {t('nav.wishlist', 'Wishlist')}
-            </span>
-            {isWishlist && (
-              <span className="absolute bottom-0 w-6 h-0.5 bg-rose-500 rounded-full shadow-sm shadow-rose-500" />
-            )}
-          </div>
-        </Link>
-
-        {/* 4. Cart Drawer Trigger */}
+        {/* 3. Cart Drawer Trigger */}
         <button
           type="button"
           onClick={openCart}
@@ -157,7 +131,7 @@ export const MobileBottomNav: React.FC = () => {
           </div>
         </button>
 
-        {/* 5. Track Order / Services */}
+        {/* 4. Track Order */}
         <Link
           href="/track-order"
           aria-label={t('nav.trackOrder', 'Track')}
@@ -178,6 +152,37 @@ export const MobileBottomNav: React.FC = () => {
             </span>
             {isTrack && (
               <span className="absolute bottom-0 w-6 h-0.5 bg-emerald-500 rounded-full shadow-sm shadow-emerald-500" />
+            )}
+          </div>
+        </Link>
+
+        {/* 5. Customer Account */}
+        <Link
+          href={customer ? '/customer/dashboard' : '/customer/login'}
+          aria-label={customer ? 'Account' : 'Sign In'}
+          className="flex items-center justify-center h-full w-full focus:outline-none"
+        >
+          <div
+            className={`relative flex flex-col items-center justify-center h-full w-full py-1 transition-all duration-200 active:scale-95 ${
+              isAccount
+                ? 'text-[#008CFF] font-bold'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+            }`}
+          >
+            <div className="relative">
+              {customer ? (
+                <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-[#008CFF] to-sky-400 flex items-center justify-center text-[10px] text-white font-black shadow-xs">
+                  {customer.name.charAt(0).toUpperCase()}
+                </div>
+              ) : (
+                <User className={`w-5 h-5 transition-transform duration-200 ${isAccount ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8]'}`} />
+              )}
+            </div>
+            <span className="text-[10px] mt-0.5 tracking-tight leading-tight truncate max-w-full px-0.5 text-center">
+              {customer ? (customer.name.split(' ')[0] || 'Account') : t('nav.login', 'Sign In')}
+            </span>
+            {isAccount && (
+              <span className="absolute bottom-0 w-6 h-0.5 bg-[#008CFF] rounded-full shadow-sm shadow-[#008CFF]" />
             )}
           </div>
         </Link>

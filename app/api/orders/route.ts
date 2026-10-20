@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { authenticateRequest, requireAuth, hasPermission } from '@/lib/auth';
+import { authenticateCustomer } from '@/lib/customerAuth';
 import { createWebsiteOrderSchema } from '@/lib/validations';
 
 export const dynamic = 'force-dynamic';
@@ -198,13 +199,16 @@ export async function POST(req: NextRequest) {
     });
     const branchId = mainBranch?.id || 'branch-main-1';
 
+    // Check for authenticated customer session
+    const authCustomer = await authenticateCustomer(req);
+
     // 5. Execute Atomic Transaction
     const transactionResult = await prisma.$transaction(async (tx) => {
-      // Find or create customer by phone number to unify sales history
+      // Find or create customer
       const cleanPhone = customerPhone.trim();
-      let customer = await tx.customer.findFirst({
-        where: { phone: cleanPhone },
-      });
+      let customer = authCustomer 
+        ? await tx.customer.findUnique({ where: { id: authCustomer.id } })
+        : await tx.customer.findFirst({ where: { phone: cleanPhone } });
 
       if (!customer) {
         const customerCode = `CUST-${Date.now().toString().slice(-6)}`;
@@ -228,6 +232,7 @@ export async function POST(req: NextRequest) {
         data: {
           id: websiteOrderId,
           orderNumber,
+          customerId: customer.id,
           customerName: customerName.trim(),
           customerPhone: cleanPhone,
           customerEmail: customerEmail || null,

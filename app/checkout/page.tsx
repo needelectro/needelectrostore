@@ -11,6 +11,7 @@ import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
 import { useCart } from '@/src/services/cartContext';
+import { useCustomerAuth } from '@/src/services/customerAuthContext';
 import { useLanguage } from '@/src/services/languageContext';
 
 const BANGLADESH_DISTRICTS = [
@@ -48,6 +49,25 @@ export default function CheckoutPage() {
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const { customer, isLoading: authLoading } = useCustomerAuth();
+
+  // Autofill from authenticated customer profile
+  React.useEffect(() => {
+    if (customer) {
+      setCustomerName((prev) => prev || customer.name || '');
+      setCustomerPhone((prev) => prev || customer.phone || '');
+      setCustomerEmail((prev) => prev || customer.email || '');
+      const defaultAddr = customer.addresses?.find((a: any) => a.isDefault) || customer.addresses?.[0];
+      if (defaultAddr) {
+        setDeliveryAddress((prev) => prev || defaultAddr.address || '');
+        if (defaultAddr.district) setDistrict(defaultAddr.district);
+      } else if (customer.address) {
+        setDeliveryAddress((prev) => prev || customer.address || '');
+        if (customer.district) setDistrict(customer.district);
+      }
+    }
+  }, [customer]);
 
   // Coupon state
   const [couponCode, setCouponCode] = useState('');
@@ -191,6 +211,87 @@ export default function CheckoutPage() {
     );
   }
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col">
+        <CustomerHeader />
+        <main className="flex-1 flex items-center justify-center p-12">
+          <div className="w-8 h-8 border-3 border-[#008CFF] border-t-transparent rounded-full animate-spin" />
+        </main>
+        <CustomerFooter />
+      </div>
+    );
+  }
+
+  // Mandatory Requirement 4: Require Login Before Purchasing
+  if (!customer) {
+    return (
+      <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col">
+        <CustomerHeader />
+        <Breadcrumb items={breadcrumbs} />
+        <main className="max-w-xl mx-auto w-full px-4 py-12 sm:py-16 flex-1 flex items-center justify-center">
+          <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 shadow-2xl backdrop-blur-xl w-full text-center space-y-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#002B5B] to-[#008CFF] text-white flex items-center justify-center mx-auto shadow-lg shadow-[#008CFF]/25">
+              <Lock size={28} />
+            </div>
+
+            <div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#008CFF]/10 text-[#008CFF] border border-[#008CFF]/20 mb-2">
+                <ShieldCheck size={13} />
+                <span>{isBangla ? 'অ্যাকাউন্ট প্রয়োজন' : 'Customer Account Required'}</span>
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                {isBangla ? 'অর্ডার সম্পন্ন করতে সাইন ইন করুন' : 'Sign In or Register to Checkout'}
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
+                {isBangla
+                  ? 'আপনার অর্ডার ও ওয়ারেন্টি ট্র্যাক করতে কাস্টমার অ্যাকাউন্ট প্রয়োজন। আপনার কার্ট সম্পূর্ণ সংরক্ষিত আছে!'
+                  : 'Please sign in or create an account to place your order. Your cart items are preserved and waiting!'}
+              </p>
+            </div>
+
+            {/* Cart summary preview */}
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <ShoppingBag size={16} className="text-[#008CFF]" />
+                <span className="font-semibold text-slate-700 dark:text-slate-300">
+                  {totalItems} {totalItems === 1 ? 'item' : 'items'} in your cart
+                </span>
+              </div>
+              <span className="font-mono font-black text-sm text-[#008CFF]">
+                {formatCurrency(subtotal)}
+              </span>
+            </div>
+
+            {/* Action buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              <Link
+                href="/customer/login?redirect=/checkout"
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#0070cc] hover:to-[#005ea8] text-white font-bold text-xs sm:text-sm shadow-lg shadow-[#008CFF]/25 flex items-center justify-center gap-2 transition-all active:scale-95"
+              >
+                <span>{isBangla ? 'লগইন করে চেকআউট' : 'Sign In & Checkout'}</span>
+                <ArrowLeft size={14} className="rotate-180" />
+              </Link>
+              <Link
+                href="/customer/register?redirect=/checkout"
+                className="w-full py-3 px-4 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 font-bold text-xs sm:text-sm shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95"
+              >
+                <span>{isBangla ? 'নতুন অ্যাকাউন্ট খুলুন' : 'Create Account'}</span>
+              </Link>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 flex flex-wrap items-center justify-center gap-4">
+              <span>✓ Doorstep Cash on Delivery</span>
+              <span>✓ Live SMS Tracking</span>
+              <span>✓ Official Warranty</span>
+            </div>
+          </div>
+        </main>
+        <CustomerFooter />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col">
       <CustomerHeader />
@@ -228,10 +329,53 @@ export default function CheckoutPage() {
           {/* Shipping Details Column */}
           <div className="lg:col-span-7 space-y-6">
             <div className="glass-panel rounded-3xl border border-[var(--glass-border)] p-6 shadow-xl space-y-5 backdrop-blur-xl">
-              <h2 className="text-base font-bold flex items-center gap-2 pb-3 border-b border-[var(--glass-border)]">
-                <User size={18} className="text-[#008CFF]" />
-                <span>{t('checkout.billingDetails', 'Customer Information')}</span>
-              </h2>
+              <div className="flex items-center justify-between pb-3 border-b border-[var(--glass-border)]">
+                <h2 className="text-base font-bold flex items-center gap-2">
+                  <User size={18} className="text-[#008CFF]" />
+                  <span>{t('checkout.billingDetails', 'Customer Information')}</span>
+                </h2>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-slate-500">Ordering as:</span>
+                  <span className="font-bold text-[#008CFF]">{customer.name}</span>
+                </div>
+              </div>
+
+              {/* Saved Address Pills Selector */}
+              {customer.addresses && customer.addresses.length > 0 && (
+                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      {isBangla ? 'সংরক্ষিত ঠিকানা নির্বাচন করুন:' : 'Select Saved Delivery Address:'}
+                    </span>
+                    <Link
+                      href="/customer/addresses"
+                      className="text-[11px] font-bold text-[#008CFF] hover:underline"
+                    >
+                      {isBangla ? '+ নতুন ঠিকানা' : '+ Manage Addresses'}
+                    </Link>
+                  </div>
+                  <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                    {customer.addresses.map((addr: any) => (
+                      <button
+                        key={addr.id}
+                        type="button"
+                        onClick={() => {
+                          setDeliveryAddress(addr.address);
+                          if (addr.district) setDistrict(addr.district);
+                        }}
+                        className={`p-2.5 rounded-xl text-left border transition-all shrink-0 text-xs ${
+                          deliveryAddress === addr.address
+                            ? 'border-[#008CFF] bg-[#008CFF]/10 text-[#008CFF] font-bold shadow-xs'
+                            : 'border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300'
+                        }`}
+                      >
+                        <span className="block font-bold">{addr.label || 'Address'}</span>
+                        <span className="text-[10px] text-slate-500 block truncate max-w-[150px]">{addr.address}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>

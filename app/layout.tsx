@@ -61,6 +61,7 @@ export const metadata: Metadata = {
 
 import { CartProvider } from '@/src/services/cartContext';
 import { LanguageProvider } from '@/src/services/languageContext';
+import { CustomerAuthProvider } from '@/src/services/customerAuthContext';
 import { MobileBottomNav } from '@/src/components/customer/MobileBottomNav';
 import { PwaInstallPrompt } from '@/src/components/pwa/PwaInstallPrompt';
 import { VoiceWelcome } from '@/src/components/common/VoiceWelcome';
@@ -104,12 +105,14 @@ export default function RootLayout({
       </head>
       <body>
         <LanguageProvider>
-          <CartProvider>
-            {children}
-            <MobileBottomNav />
-            <PwaInstallPrompt />
-            <VoiceWelcome />
-          </CartProvider>
+          <CustomerAuthProvider>
+            <CartProvider>
+              {children}
+              <MobileBottomNav />
+              <PwaInstallPrompt />
+              <VoiceWelcome />
+            </CartProvider>
+          </CustomerAuthProvider>
         </LanguageProvider>
         <script
           dangerouslySetInnerHTML={{

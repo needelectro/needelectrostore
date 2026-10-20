@@ -345,14 +345,45 @@ model Customer {
   notes          String?
   createdAt      DateTime @default(now()) @map("created_at")
 
+  // Customer Account & Authentication extensions
+  passwordHash   String?   @map("password_hash")
+  district       String?   @default("Moulvibazar")
+  deliveryArea   String?   @map("delivery_area")
+  addresses      Json?     // Saved addresses array: [{ id, label, address, district, area, isDefault }]
+  status         String    @default("ACTIVE") // ACTIVE, SUSPENDED
+  resetToken     String?   @map("reset_token")
+  resetExpires   DateTime? @map("reset_expires")
+  lastLoginAt    DateTime? @map("last_login_at")
+
   sales            Sale[]
   emiAccounts      EMIAccount[]
   customerPayments CustomerPayment[]
+  websiteOrders    WebsiteOrder[]
+  sessions         CustomerSession[]
 
   @@index([customerId])
   @@index([phone])
+  @@index([email])
   @@index([name])
   @@map("customers")
+}
+
+model CustomerSession {
+  id           String   @id
+  token        String   @unique
+  customerId   String   @map("customer_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  expiresAt    DateTime @map("expires_at")
+  lastActiveAt DateTime @default(now()) @map("last_active_at")
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  isRevoked    Boolean  @default(false) @map("is_revoked")
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([customerId])
+  @@map("customer_sessions")
 }
 
 // ---------------------------------------------------------
@@ -1276,6 +1307,7 @@ model Banner {
 model WebsiteOrder {
   id                String   @id
   orderNumber       String   @unique @map("order_number")
+  customerId        String?  @map("customer_id")
   customerName      String   @map("customer_name")
   customerPhone     String   @map("customer_phone")
   customerEmail     String?  @map("customer_email")
@@ -1296,7 +1328,10 @@ model WebsiteOrder {
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
 
+  customer          Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
   @@index([orderNumber])
+  @@index([customerId])
   @@index([customerPhone])
   @@index([orderStatus])
   @@map("website_orders")
