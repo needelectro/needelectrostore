@@ -171,36 +171,32 @@ export default async function HomePage() {
           </div>
 
           {/* Right 4 Cols: 2 Stacked Feature Cards (Desktop Only - on mobile combined into the auto-swiping carousel) */}
-          <div className="hidden lg:flex lg:col-span-4 flex-col justify-between gap-3">
+          <div className="hidden lg:flex lg:col-span-4 flex-col justify-between gap-3.5">
             {/* Card 1: Customer Care & Warranty */}
-            <div className="flex-1 rounded-2xl bg-gradient-to-br from-[#0a1c2e] to-[#040e19] text-white p-3.5 sm:p-4 border border-slate-700/80 shadow-md flex flex-col justify-between relative overflow-hidden group">
+            <div className="flex-1 rounded-2xl border border-slate-700/80 shadow-md flex flex-col justify-between relative overflow-hidden group min-h-[162px]">
               {/* High-res Warranty Care Banner Background */}
-              <div
-                className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-40 group-hover:scale-105 transition-all duration-700 pointer-events-none"
-                style={{ backgroundImage: "url('/banners/warranty-care-banner.jpg')" }}
+              <img
+                src="/banners/need-electro-service-warranty.jpg"
+                alt="NEED ELECTRO Trusted Service & Warranty"
+                className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#040e19] via-[#040e19]/80 to-[#040e19]/40 pointer-events-none" />
-              <div className="absolute -top-12 -right-12 w-32 h-32 bg-blue-500/15 rounded-full blur-2xl group-hover:scale-125 transition-transform pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/10 pointer-events-none" />
 
-              <div className="relative z-10">
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider mb-1 backdrop-blur-xs">
+              {/* Floating Top Badge */}
+              <div className="relative z-10 p-3 flex items-start justify-between">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-black/70 text-emerald-400 border border-emerald-500/40 uppercase tracking-wider backdrop-blur-md shadow-xs">
                   <ShieldCheck size={11} />
                   <span>Showroom Care &amp; Warranty</span>
                 </span>
-                <h3 className="text-sm sm:text-base font-black tracking-tight leading-snug drop-shadow-sm">
-                  Customer Support &amp; Official Warranty
-                </h3>
-                <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5 leading-snug line-clamp-2">
-                  Instant warranty claim processing, technical diagnosis &amp; phone guidance at Kusumbag Moulvibazar.
-                </p>
               </div>
 
-              <div className="relative z-10 pt-2 flex items-center justify-between">
+              {/* Bottom Interactive Bar */}
+              <div className="relative z-10 p-3 pt-0 flex items-center justify-between">
                 <a
                   href={`tel:${BUSINESS_INFO.phoneClean}`}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-sky-400 hover:text-sky-300 hover:underline"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-black/60 border border-white/20 text-xs font-bold text-sky-400 hover:text-white backdrop-blur-md shadow-xs transition-colors"
                 >
-                  <Phone size={12} />
+                  <Phone size={11} />
                   <span>{BUSINESS_INFO.phone}</span>
                 </a>
                 <a
@@ -209,48 +205,44 @@ export default async function HomePage() {
                   rel="noopener noreferrer"
                   className="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-emerald-600/30 transition-all active:scale-95"
                 >
-                  <MessageCircle size={12} />
+                  <MessageCircle size={11} />
                   <span>WhatsApp</span>
                 </a>
               </div>
             </div>
 
             {/* Card 2: Custom PC & Electrical Servicing */}
-            <div className="flex-1 rounded-2xl bg-gradient-to-br from-[#0e1e38] to-[#061021] text-white p-3.5 sm:p-4 border border-slate-700/80 shadow-md flex flex-col justify-between relative overflow-hidden group">
+            <div className="flex-1 rounded-2xl border border-slate-700/80 shadow-md flex flex-col justify-between relative overflow-hidden group min-h-[162px]">
               {/* High-res Custom Gaming PC & Engineering Banner Background */}
-              <div
-                className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-40 group-hover:scale-105 transition-all duration-700 pointer-events-none"
-                style={{ backgroundImage: "url('/banners/custom-pc-banner.jpg')" }}
+              <img
+                src="/banners/need-electro-custom-pc.jpg"
+                alt="NEED ELECTRO Custom Gaming PC & Workstations"
+                className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#061021] via-[#061021]/80 to-[#061021]/40 pointer-events-none" />
-              <div className="absolute -bottom-12 -right-12 w-32 h-32 bg-amber-500/15 rounded-full blur-2xl group-hover:scale-125 transition-transform pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/10 pointer-events-none" />
 
-              <div className="relative z-10">
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wider mb-1 backdrop-blur-xs">
+              {/* Floating Top Badge */}
+              <div className="relative z-10 p-3 flex items-start justify-between">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-black/70 text-amber-300 border border-amber-500/40 uppercase tracking-wider backdrop-blur-md shadow-xs">
                   <Zap size={11} />
-                  <span>Engineering Services</span>
+                  <span>Custom PC &amp; Engineering</span>
                 </span>
-                <h3 className="text-sm sm:text-base font-black tracking-tight leading-snug drop-shadow-sm">
-                  Custom PC &amp; Electrical Installation
-                </h3>
-                <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5 leading-snug line-clamp-2">
-                  Professional gaming desktop build, CCTV IP setup, and certified home/commercial wiring service.
-                </p>
               </div>
 
-              <div className="relative z-10 pt-2 flex items-center justify-between">
+              {/* Bottom Interactive Bar */}
+              <div className="relative z-10 p-3 pt-0 flex items-center justify-between">
                 <Link
                   href="/services/electrician"
                   className="px-3 py-1 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#0070cc] hover:to-[#005bb5] text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-blue-500/25 transition-all active:scale-95"
                 >
                   <span>Book Technician</span>
-                  <ArrowRight size={12} />
+                  <ArrowRight size={11} />
                 </Link>
                 <Link
-                  href="/laptop-emi"
-                  className="text-xs font-bold text-amber-400 hover:text-amber-300 hover:underline"
+                  href="/computers"
+                  className="px-2.5 py-1 rounded-xl bg-black/60 border border-white/20 text-xs font-bold text-amber-300 hover:text-white backdrop-blur-md shadow-xs transition-colors"
                 >
-                  Laptop EMI →
+                  Browse PCs →
                 </Link>
               </div>
             </div>
