@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
-  Search, Phone, MessageCircle, Menu, X, ChevronDown,
+  Search, Phone, MessageCircle, Menu, X, ChevronDown, ChevronLeft, ChevronRight,
   Laptop, Monitor, Camera, Zap, Cpu, Wifi, Smartphone,
   MapPin, ShieldCheck, CreditCard, Clock, ArrowRight,
   Sun, Moon, ShoppingBag, Heart, PackageSearch, Layers, Sparkles, User
@@ -51,6 +51,47 @@ export const CustomerHeader: React.FC = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [wishlistCount, setWishlistCount] = useState(0);
   const searchRef = useRef<HTMLDivElement>(null);
+  const navScrollRef = useRef<HTMLElement>(null);
+  const isNavPaused = useRef(false);
+
+  // Auto-scroll category navigation sub-bar continuously with pause-on-hover
+  useEffect(() => {
+    const el = navScrollRef.current;
+    if (!el) return;
+
+    let animId: number;
+    let lastTime = performance.now();
+    const scrollSpeed = 26; // 26px per second: silky smooth, easy to read
+
+    const tick = (now: number) => {
+      const dt = (now - lastTime) / 1000;
+      lastTime = now;
+
+      if (!isNavPaused.current && el) {
+        const halfWidth = el.scrollWidth / 2;
+        el.scrollLeft += scrollSpeed * dt;
+        if (el.scrollLeft >= halfWidth) {
+          el.scrollLeft -= halfWidth;
+        }
+      }
+      animId = requestAnimationFrame(tick);
+    };
+
+    animId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animId);
+  }, []);
+
+  const scrollNavLeft = () => {
+    if (navScrollRef.current) {
+      navScrollRef.current.scrollBy({ left: -220, behavior: 'smooth' });
+    }
+  };
+
+  const scrollNavRight = () => {
+    if (navScrollRef.current) {
+      navScrollRef.current.scrollBy({ left: 220, behavior: 'smooth' });
+    }
+  };
 
   // Theme state
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -420,16 +461,51 @@ export const CustomerHeader: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Horizontal Scrolling Sub-bar Category Navigation (Trust Computer MB Style) */}
-      <nav className="bg-[#f8fafc] dark:bg-[#0b1320] border-b border-slate-200/90 dark:border-slate-800/90 py-2 px-3 sm:px-4 overflow-x-auto scrollbar-none">
-        <div className="max-w-7xl mx-auto flex items-center gap-1.5 sm:gap-2 text-xs font-medium whitespace-nowrap min-w-max">
-          {CATEGORY_NAV_ITEMS.map((item) => {
+      {/* 2. Horizontal Auto-Scrolling Category Navigation Sub-bar with Infinite Loop */}
+      <div className="relative bg-[#f8fafc] dark:bg-[#0b1320] border-b border-slate-200/90 dark:border-slate-800/90 py-1.5 group/nav overflow-hidden select-none">
+        {/* Left Gradient Fade & Nudge Button */}
+        <div className="absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none bg-gradient-to-r from-[#f8fafc] dark:from-[#0b1320] to-transparent flex items-center justify-start pl-1">
+          <button
+            type="button"
+            onClick={scrollNavLeft}
+            aria-label="Scroll categories left"
+            className="pointer-events-auto opacity-0 group-hover/nav:opacity-100 transition-opacity w-5 h-5 rounded-full bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center hover:bg-[#008CFF] hover:text-white cursor-pointer"
+          >
+            <ChevronLeft size={13} />
+          </button>
+        </div>
+
+        {/* Right Gradient Fade & Nudge Button */}
+        <div className="absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none bg-gradient-to-l from-[#f8fafc] dark:from-[#0b1320] to-transparent flex items-center justify-end pr-1">
+          <button
+            type="button"
+            onClick={scrollNavRight}
+            aria-label="Scroll categories right"
+            className="pointer-events-auto opacity-0 group-hover/nav:opacity-100 transition-opacity w-5 h-5 rounded-full bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center hover:bg-[#008CFF] hover:text-white cursor-pointer"
+          >
+            <ChevronRight size={13} />
+          </button>
+        </div>
+
+        {/* Scrollable Track: Infinite seamlessly looped */}
+        <nav
+          ref={navScrollRef}
+          onMouseEnter={() => { isNavPaused.current = true; }}
+          onMouseLeave={() => { isNavPaused.current = false; }}
+          onTouchStart={() => { isNavPaused.current = true; }}
+          onTouchEnd={() => { isNavPaused.current = false; }}
+          className="overflow-x-auto scrollbar-none flex items-center gap-1.5 sm:gap-2 text-xs font-medium whitespace-nowrap px-4 w-full"
+        >
+          {/* Double track to enable 100% seamless infinite loop */}
+          {[...CATEGORY_NAV_ITEMS, ...CATEGORY_NAV_ITEMS].map((item, idx) => {
             const Icon = item.icon;
             return (
               <Link
-                key={item.name}
+                key={`${item.name}-${idx}`}
                 href={item.href}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-800 dark:text-slate-200 hover:text-[#0084d6] dark:hover:text-cyan-400 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-[#0084d6] dark:hover:border-slate-700 shadow-2xs transition-all text-[11px] sm:text-xs font-semibold"
+                onFocus={() => { isNavPaused.current = true; }}
+                onBlur={() => { isNavPaused.current = false; }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-800 dark:text-slate-200 hover:text-[#0084d6] dark:hover:text-cyan-400 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-[#0084d6] dark:hover:border-slate-700 shadow-2xs transition-all text-[11px] sm:text-xs font-semibold shrink-0 hover:scale-[1.02]"
               >
                 <Icon size={13} className="text-slate-500 dark:text-slate-400 shrink-0" />
                 <span>{item.name}</span>
@@ -441,8 +517,8 @@ export const CustomerHeader: React.FC = () => {
               </Link>
             );
           })}
-        </div>
-      </nav>
+        </nav>
+      </div>
     </header>
 
       {/* Mobile Menu Drawer Overlay */}
