@@ -399,8 +399,8 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* 5. Dual Promotional Campaign Banners Grid (0% Laptop EMI & Gigabit Wi-Fi 6) */}
-        <section aria-label="Special Offers and Campaigns" className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+        {/* 5. Dual Promotional Campaign Banners Grid (Desktop only - consolidated into single hero carousel on mobile) */}
+        <section aria-label="Special Offers and Campaigns" className="hidden md:grid md:grid-cols-2 gap-3 sm:gap-4">
           {/* Promo Card 1: Laptop EMI */}
           <div className="relative rounded-2xl overflow-hidden min-h-[155px] sm:min-h-[175px] flex flex-col justify-between p-4 sm:p-5 border border-slate-700/80 shadow-lg group transition-all">
             {/* Background Image with Hover Scale */}
@@ -487,8 +487,8 @@ export default async function HomePage() {
           <ProductTabsShowcase products={mappedProducts} />
         </section>
 
-        {/* 7. Full-Width Solar Inverter & Emergency IPS Power Banner */}
-        <section aria-label="Solar and IPS Power Solutions">
+        {/* 7. Full-Width Solar Inverter & Emergency IPS Power Banner (Desktop only - consolidated into single hero carousel on mobile) */}
+        <section aria-label="Solar and IPS Power Solutions" className="hidden md:block">
           <div className="relative rounded-2xl overflow-hidden border border-slate-700/80 shadow-xl p-4 sm:p-6 lg:p-7 group">
             {/* Background Solar IPS Banner Image with Zoom */}
             <div

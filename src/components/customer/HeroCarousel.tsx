@@ -79,13 +79,13 @@ const DEFAULT_SLIDES: BannerSlide[] = [
   },
 ];
 
-// In Mobile Mode: The 3 Banners Combined into 1 Auto-Swiping Banner
-const MOBILE_3_BANNERS: BannerSlide[] = [
+// All Banners Consolidated for Mobile Mode in ONE place with continuous auto-change
+const MOBILE_ALL_BANNERS: BannerSlide[] = [
   {
-    id: 'mobile-banner-1',
+    id: 'mob-1',
     badge: 'NEED ELECTRO FLAGSHIP',
     title: 'Your Partner in Technology',
-    subtitle: 'Explore genuine laptops, custom PCs, CCTV & electrical engineering with warranty.',
+    subtitle: 'Authentic laptops, custom PCs, CCTV & electrical engineering with warranty.',
     targetUrl: '/shop',
     buttonText: 'Explore Products',
     imageUrl: '/banners/need-electro-hero-partner.jpg',
@@ -93,9 +93,9 @@ const MOBILE_3_BANNERS: BannerSlide[] = [
     isFullBleed: true,
   },
   {
-    id: 'mobile-banner-2',
-    badge: 'TRUSTED SERVICE & WARRANTY',
-    title: 'Showroom Care & Official Warranty',
+    id: 'mob-2',
+    badge: 'SHOWROOM CARE & WARRANTY',
+    title: 'Customer Care & Official Warranty',
     subtitle: 'Instant warranty claim processing, technical diagnosis & phone guidance at Kusumbag Moulvibazar.',
     targetUrl: `tel:${BUSINESS_INFO.phoneClean}`,
     buttonText: `Call: ${BUSINESS_INFO.phone}`,
@@ -104,7 +104,7 @@ const MOBILE_3_BANNERS: BannerSlide[] = [
     isFullBleed: true,
   },
   {
-    id: 'mobile-banner-3',
+    id: 'mob-3',
     badge: 'CUSTOM PC & ENGINEERING',
     title: 'Custom Gaming PC & Workstations',
     subtitle: 'Professional gaming desktop build, CCTV IP setup, and certified home/commercial wiring service.',
@@ -112,6 +112,83 @@ const MOBILE_3_BANNERS: BannerSlide[] = [
     buttonText: 'Book Technician',
     imageUrl: '/banners/need-electro-custom-pc.jpg',
     secondaryType: 'emi',
+    isFullBleed: true,
+  },
+  {
+    id: 'mob-4',
+    badge: '0% EMI AVAILABLE',
+    title: 'Up to 12 Months 0% Interest Laptop EMI',
+    subtitle: 'Own genuine HP, Dell & Lenovo laptops with easy monthly credit card installments.',
+    targetUrl: '/laptop-emi',
+    buttonText: 'Calculate EMI',
+    imageUrl: '/banners/laptop-emi-promo-banner.jpg',
+    secondaryType: 'emi',
+    isFullBleed: true,
+  },
+  {
+    id: 'mob-5',
+    badge: 'GIGABIT SPEEDS',
+    title: 'Ultra-Fast Wi-Fi 6 & Enterprise Mesh',
+    subtitle: 'Eliminate Wi-Fi dead spots with dual-band gigabit routers & commercial Cat6 cabling setup.',
+    targetUrl: '/networking',
+    buttonText: 'Shop Routers',
+    imageUrl: '/banners/wifi-networking-banner.jpg',
+    secondaryType: 'delivery',
+    isFullBleed: true,
+  },
+  {
+    id: 'mob-6',
+    badge: '24/7 LOAD-SHEDDING POWER',
+    title: 'Pure Sine Wave Solar & IPS Systems',
+    subtitle: 'Heavy-duty pure sine wave inverters, deep-cycle tubular batteries & certified installation.',
+    targetUrl: '/electrical-products',
+    buttonText: 'Explore IPS',
+    imageUrl: '/banners/solar-ips-power-banner.jpg',
+    secondaryType: 'delivery',
+    isFullBleed: true,
+  },
+  {
+    id: 'mob-7',
+    badge: 'HP BUSINESS SERIES',
+    title: 'HP EliteBook & ProBook Laptops',
+    subtitle: 'Intel Core i5 & i7 processors, aluminum chassis, all-day battery with showroom warranty.',
+    targetUrl: '/laptops/hp',
+    buttonText: 'Shop HP Series',
+    imageUrl: '/banners/hp-elitebook-banner.jpg',
+    secondaryType: 'delivery',
+    isFullBleed: true,
+  },
+  {
+    id: 'mob-8',
+    badge: 'DELL OFFICIAL SERIES',
+    title: 'Dell Latitude & XPS Laptops',
+    subtitle: 'Ultra-portable performance, FHD InfinityEdge display & 16GB/32GB RAM.',
+    targetUrl: '/laptops/dell',
+    buttonText: 'Shop Dell Series',
+    imageUrl: '/banners/dell-latitude-banner.jpg',
+    secondaryType: 'delivery',
+    isFullBleed: true,
+  },
+  {
+    id: 'mob-9',
+    badge: 'LENOVO THINKPAD',
+    title: 'Lenovo ThinkPad X1 & T-Series',
+    subtitle: 'Legendary typing ergonomics, spill-resistant keyboard, carbon fiber durability.',
+    targetUrl: '/laptops/lenovo',
+    buttonText: 'Shop ThinkPad',
+    imageUrl: '/banners/lenovo-thinkpad-banner.jpg',
+    secondaryType: 'delivery',
+    isFullBleed: true,
+  },
+  {
+    id: 'mob-10',
+    badge: 'HIKVISION SMART CCTV',
+    title: 'Hikvision 4K & ColorVu Security',
+    subtitle: 'Full-color night vision, AI human & vehicle detection, and smartphone live streaming.',
+    targetUrl: '/cctv',
+    buttonText: 'Explore CCTV Packages',
+    imageUrl: '/banners/cctv-hikvision-banner.jpg',
+    secondaryType: 'delivery',
     isFullBleed: true,
   },
 ];
@@ -134,25 +211,27 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Determine slide deck
+  // In mobile mode: always consolidate all promotional & brand banners in ONE place
   const slides = isMobile
-    ? MOBILE_3_BANNERS
+    ? MOBILE_ALL_BANNERS
     : banners && banners.length > 0
     ? banners
     : DEFAULT_SLIDES;
 
-  // Auto-scroll ticker (Swipes every 4.5 seconds when not hovered)
+  // Auto-scroll ticker: continuously auto-swipes every 3.5 seconds
   useEffect(() => {
-    if (isHovered || slides.length <= 1) return;
+    if (slides.length <= 1) return;
+    // On desktop, pause on hover; on mobile, auto-change continuously without pause!
+    if (isHovered && !isMobile) return;
 
     timerRef.current = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
-    }, 4500);
+    }, 3500);
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isHovered, slides.length]);
+  }, [isHovered, isMobile, slides.length]);
 
   const prevSlide = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -166,7 +245,6 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.targetTouches[0].clientX;
-    setIsHovered(true);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -174,12 +252,11 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
   };
 
   const handleTouchEnd = () => {
-    setIsHovered(false);
     if (touchStartX.current !== null && touchEndX.current !== null) {
       const distance = touchStartX.current - touchEndX.current;
-      if (distance > 40) {
+      if (distance > 35) {
         nextSlide();
-      } else if (distance < -40) {
+      } else if (distance < -35) {
         prevSlide();
       }
     }
@@ -198,14 +275,15 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Mobile Slide Counter Badge */}
+      {/* Mobile Live Slide Counter Badge */}
       {isMobile && (
-        <div className="absolute top-2.5 right-2.5 z-30 px-2 py-0.5 rounded-full bg-black/70 border border-white/20 text-[9px] font-mono text-slate-200 backdrop-blur-md shadow-md">
-          {(current % slides.length) + 1} / {slides.length}
+        <div className="absolute top-2.5 right-2.5 z-30 px-2.5 py-0.5 rounded-full bg-black/75 border border-white/20 text-[9px] font-mono text-slate-200 backdrop-blur-md shadow-md flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+          <span>{(current % slides.length) + 1} / {slides.length}</span>
         </div>
       )}
 
-      {/* FULL-BLEED BANNER MODE (Like user's reference hero) */}
+      {/* FULL-BLEED BANNER MODE */}
       {active.isFullBleed ? (
         <Link
           href={active.targetUrl || '/shop'}
@@ -216,7 +294,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
             alt={active.title}
             className="w-full h-full object-cover object-center group-hover/full:scale-105 transition-transform duration-700 ease-out"
           />
-          {/* Subtle bottom vignette to support interactive buttons if needed */}
+          {/* Subtle bottom vignette to support interactive buttons */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/15 pointer-events-none" />
 
           {/* Floating Top Badge */}
