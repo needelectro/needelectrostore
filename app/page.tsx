@@ -171,80 +171,80 @@ export default async function HomePage() {
           </div>
 
           {/* Right 4 Cols: 2 Stacked Feature Cards (Desktop Only - on mobile combined into the auto-swiping carousel) */}
-          <div className="hidden lg:flex lg:col-span-4 flex-col justify-between gap-4">
+          <div className="hidden lg:flex lg:col-span-4 flex-col justify-between gap-3">
             {/* Card 1: Customer Care & Warranty */}
-            <div className="flex-1 rounded-2xl bg-gradient-to-br from-[#0a1c2e] to-[#040e19] text-white p-5 sm:p-6 border border-slate-700/80 shadow-md flex flex-col justify-between relative overflow-hidden group">
+            <div className="flex-1 rounded-2xl bg-gradient-to-br from-[#0a1c2e] to-[#040e19] text-white p-3.5 sm:p-4 border border-slate-700/80 shadow-md flex flex-col justify-between relative overflow-hidden group">
               {/* High-res Warranty Care Banner Background */}
               <div
                 className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-40 group-hover:scale-105 transition-all duration-700 pointer-events-none"
                 style={{ backgroundImage: "url('/banners/warranty-care-banner.jpg')" }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#040e19] via-[#040e19]/80 to-[#040e19]/40 pointer-events-none" />
-              <div className="absolute -top-12 -right-12 w-36 h-36 bg-blue-500/15 rounded-full blur-2xl group-hover:scale-125 transition-transform pointer-events-none" />
+              <div className="absolute -top-12 -right-12 w-32 h-32 bg-blue-500/15 rounded-full blur-2xl group-hover:scale-125 transition-transform pointer-events-none" />
 
               <div className="relative z-10">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider mb-2.5 backdrop-blur-xs">
-                  <ShieldCheck size={12} />
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider mb-1 backdrop-blur-xs">
+                  <ShieldCheck size={11} />
                   <span>Showroom Care &amp; Warranty</span>
                 </span>
-                <h3 className="text-base sm:text-lg font-black tracking-tight leading-snug drop-shadow-sm">
+                <h3 className="text-sm sm:text-base font-black tracking-tight leading-snug drop-shadow-sm">
                   Customer Support &amp; Official Warranty
                 </h3>
-                <p className="text-xs text-slate-300 mt-1.5 leading-relaxed line-clamp-2">
+                <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5 leading-snug line-clamp-2">
                   Instant warranty claim processing, technical diagnosis &amp; phone guidance at Kusumbag Moulvibazar.
                 </p>
               </div>
 
-              <div className="relative z-10 pt-3 flex items-center justify-between">
+              <div className="relative z-10 pt-2 flex items-center justify-between">
                 <a
                   href={`tel:${BUSINESS_INFO.phoneClean}`}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-400 hover:text-sky-300 hover:underline"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-sky-400 hover:text-sky-300 hover:underline"
                 >
-                  <Phone size={13} />
+                  <Phone size={12} />
                   <span>{BUSINESS_INFO.phone}</span>
                 </a>
                 <a
                   href={`https://wa.me/${BUSINESS_INFO.whatsappClean}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-emerald-600/30 transition-all active:scale-95"
+                  className="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-emerald-600/30 transition-all active:scale-95"
                 >
-                  <MessageCircle size={13} />
+                  <MessageCircle size={12} />
                   <span>WhatsApp</span>
                 </a>
               </div>
             </div>
 
             {/* Card 2: Custom PC & Electrical Servicing */}
-            <div className="flex-1 rounded-2xl bg-gradient-to-br from-[#0e1e38] to-[#061021] text-white p-5 sm:p-6 border border-slate-700/80 shadow-md flex flex-col justify-between relative overflow-hidden group">
+            <div className="flex-1 rounded-2xl bg-gradient-to-br from-[#0e1e38] to-[#061021] text-white p-3.5 sm:p-4 border border-slate-700/80 shadow-md flex flex-col justify-between relative overflow-hidden group">
               {/* High-res Custom Gaming PC & Engineering Banner Background */}
               <div
                 className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-40 group-hover:scale-105 transition-all duration-700 pointer-events-none"
                 style={{ backgroundImage: "url('/banners/custom-pc-banner.jpg')" }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#061021] via-[#061021]/80 to-[#061021]/40 pointer-events-none" />
-              <div className="absolute -bottom-12 -right-12 w-36 h-36 bg-amber-500/15 rounded-full blur-2xl group-hover:scale-125 transition-transform pointer-events-none" />
+              <div className="absolute -bottom-12 -right-12 w-32 h-32 bg-amber-500/15 rounded-full blur-2xl group-hover:scale-125 transition-transform pointer-events-none" />
 
               <div className="relative z-10">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wider mb-2.5 backdrop-blur-xs">
-                  <Zap size={12} />
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wider mb-1 backdrop-blur-xs">
+                  <Zap size={11} />
                   <span>Engineering Services</span>
                 </span>
-                <h3 className="text-base sm:text-lg font-black tracking-tight leading-snug drop-shadow-sm">
+                <h3 className="text-sm sm:text-base font-black tracking-tight leading-snug drop-shadow-sm">
                   Custom PC &amp; Electrical Installation
                 </h3>
-                <p className="text-xs text-slate-300 mt-1.5 leading-relaxed line-clamp-2">
+                <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5 leading-snug line-clamp-2">
                   Professional gaming desktop build, CCTV IP setup, and certified home/commercial wiring service.
                 </p>
               </div>
 
-              <div className="relative z-10 pt-3 flex items-center justify-between">
+              <div className="relative z-10 pt-2 flex items-center justify-between">
                 <Link
                   href="/services/electrician"
-                  className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#0070cc] hover:to-[#005bb5] text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-blue-500/25 transition-all active:scale-95"
+                  className="px-3 py-1 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#0070cc] hover:to-[#005bb5] text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-blue-500/25 transition-all active:scale-95"
                 >
                   <span>Book Technician</span>
-                  <ArrowRight size={13} />
+                  <ArrowRight size={12} />
                 </Link>
                 <Link
                   href="/laptop-emi"
@@ -408,9 +408,9 @@ export default async function HomePage() {
         </section>
 
         {/* 5. Dual Promotional Campaign Banners Grid (0% Laptop EMI & Gigabit Wi-Fi 6) */}
-        <section aria-label="Special Offers and Campaigns" className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <section aria-label="Special Offers and Campaigns" className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
           {/* Promo Card 1: Laptop EMI */}
-          <div className="relative rounded-3xl overflow-hidden min-h-[220px] sm:min-h-[260px] flex flex-col justify-between p-6 sm:p-7 border border-slate-700/80 shadow-xl group transition-all">
+          <div className="relative rounded-2xl overflow-hidden min-h-[155px] sm:min-h-[175px] flex flex-col justify-between p-4 sm:p-5 border border-slate-700/80 shadow-lg group transition-all">
             {/* Background Image with Hover Scale */}
             <div
               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none"
@@ -418,39 +418,39 @@ export default async function HomePage() {
             />
             {/* Vignette Overlay */}
             <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/95 via-slate-950/75 to-slate-950/35 pointer-events-none" />
-            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/15 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform" />
+            <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/15 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform" />
 
             {/* Content Top */}
-            <div className="relative z-10 space-y-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-blue-500/25 text-blue-300 border border-blue-400/40 backdrop-blur-md uppercase tracking-wider">
-                <CreditCard size={13} className="text-blue-400" />
+            <div className="relative z-10 space-y-1 sm:space-y-1.5">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-500/25 text-blue-300 border border-blue-400/40 backdrop-blur-md uppercase tracking-wider">
+                <CreditCard size={12} className="text-blue-400" />
                 <span>0% EMI Available</span>
               </span>
-              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-tight drop-shadow-md">
+              <h3 className="text-base sm:text-lg font-black text-white tracking-tight leading-snug drop-shadow-md">
                 Up to 12 Months 0% Interest Laptop EMI
               </h3>
-              <p className="text-xs sm:text-sm text-slate-200/90 leading-relaxed max-w-sm drop-shadow">
+              <p className="text-[11px] sm:text-xs text-slate-200/90 leading-snug max-w-sm drop-shadow line-clamp-2">
                 Own genuine HP, Dell &amp; Lenovo laptops with easy monthly credit card installments. Instant showroom eligibility check.
               </p>
             </div>
 
             {/* Content Bottom CTA */}
-            <div className="relative z-10 pt-4 flex items-center justify-between">
+            <div className="relative z-10 pt-2 flex items-center justify-between">
               <Link
                 href="/laptop-emi"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#005fb8] hover:from-[#007be0] hover:to-[#004e9a] text-white text-xs sm:text-sm font-bold shadow-lg shadow-blue-500/30 transition-all active:scale-95"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#005fb8] hover:from-[#007be0] hover:to-[#004e9a] text-white text-xs font-bold shadow-md shadow-blue-500/30 transition-all active:scale-95"
               >
                 <span>Calculate EMI &amp; Apply</span>
-                <ArrowRight size={14} />
+                <ArrowRight size={13} />
               </Link>
-              <span className="text-[11px] font-semibold text-slate-300 bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-xs hidden sm:inline-block">
+              <span className="text-[10px] font-semibold text-slate-300 bg-white/10 px-2 py-0.5 rounded-md backdrop-blur-xs hidden sm:inline-block">
                 18+ Partner Banks
               </span>
             </div>
           </div>
 
           {/* Promo Card 2: Wi-Fi 6 & Enterprise Networking */}
-          <div className="relative rounded-3xl overflow-hidden min-h-[220px] sm:min-h-[260px] flex flex-col justify-between p-6 sm:p-7 border border-slate-700/80 shadow-xl group transition-all">
+          <div className="relative rounded-2xl overflow-hidden min-h-[155px] sm:min-h-[175px] flex flex-col justify-between p-4 sm:p-5 border border-slate-700/80 shadow-lg group transition-all">
             {/* Background Image with Hover Scale */}
             <div
               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none"
@@ -458,32 +458,32 @@ export default async function HomePage() {
             />
             {/* Vignette Overlay */}
             <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/95 via-slate-950/75 to-slate-950/35 pointer-events-none" />
-            <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform" />
+            <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform" />
 
             {/* Content Top */}
-            <div className="relative z-10 space-y-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-cyan-500/25 text-cyan-300 border border-cyan-400/40 backdrop-blur-md uppercase tracking-wider">
-                <Wifi size={13} className="text-cyan-400" />
+            <div className="relative z-10 space-y-1 sm:space-y-1.5">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-cyan-500/25 text-cyan-300 border border-cyan-400/40 backdrop-blur-md uppercase tracking-wider">
+                <Wifi size={12} className="text-cyan-400" />
                 <span>Gigabit Speeds</span>
               </span>
-              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-tight drop-shadow-md">
+              <h3 className="text-base sm:text-lg font-black text-white tracking-tight leading-snug drop-shadow-md">
                 Ultra-Fast Wi-Fi 6 &amp; Structured Mesh
               </h3>
-              <p className="text-xs sm:text-sm text-slate-200/90 leading-relaxed max-w-sm drop-shadow">
+              <p className="text-[11px] sm:text-xs text-slate-200/90 leading-snug max-w-sm drop-shadow line-clamp-2">
                 Eliminate Wi-Fi dead spots with dual-band gigabit routers, PoE switches, and commercial Cat6 cabling setup.
               </p>
             </div>
 
             {/* Content Bottom CTA */}
-            <div className="relative z-10 pt-4 flex items-center justify-between">
+            <div className="relative z-10 pt-2 flex items-center justify-between">
               <Link
                 href="/networking"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-cyan-500/30 transition-all active:scale-95"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white text-xs font-bold shadow-md shadow-cyan-500/30 transition-all active:scale-95"
               >
                 <span>Shop Routers &amp; Switches</span>
-                <ArrowRight size={14} />
+                <ArrowRight size={13} />
               </Link>
-              <span className="text-[11px] font-semibold text-slate-300 bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-xs hidden sm:inline-block">
+              <span className="text-[10px] font-semibold text-slate-300 bg-white/10 px-2 py-0.5 rounded-md backdrop-blur-xs hidden sm:inline-block">
                 Up to 3000 Mbps
               </span>
             </div>
@@ -497,7 +497,7 @@ export default async function HomePage() {
 
         {/* 7. Full-Width Solar Inverter & Emergency IPS Power Banner */}
         <section aria-label="Solar and IPS Power Solutions">
-          <div className="relative rounded-3xl overflow-hidden border border-slate-700/80 shadow-2xl p-6 sm:p-10 group">
+          <div className="relative rounded-2xl overflow-hidden border border-slate-700/80 shadow-xl p-4 sm:p-6 lg:p-7 group">
             {/* Background Solar IPS Banner Image with Zoom */}
             <div
               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none"
@@ -505,93 +505,93 @@ export default async function HomePage() {
             />
             {/* High-Contrast Gradient Backdrop for readability */}
             <div className="absolute inset-0 bg-gradient-to-r from-[#030914]/95 via-[#030914]/90 to-[#030914]/65 pointer-events-none" />
-            <div className="absolute -right-10 top-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -right-10 top-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
-              <div className="lg:col-span-8 space-y-3.5">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 backdrop-blur-md">
-                  <Sun size={14} className="text-amber-400" />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-center relative z-10">
+              <div className="lg:col-span-8 space-y-2 sm:space-y-3">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 backdrop-blur-md">
+                  <Sun size={13} className="text-amber-400" />
                   <span>24/7 Load-Shedding Solution — Pure Sine Wave Solar &amp; IPS Systems</span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight drop-shadow-md">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight leading-tight drop-shadow-md">
                   Uninterrupted Power for Your Home, Office &amp; Lab
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-200 max-w-2xl leading-relaxed drop-shadow">
+                <p className="text-xs sm:text-[13px] text-slate-200 max-w-2xl leading-relaxed drop-shadow line-clamp-2">
                   Heavy-duty pure sine wave inverters, deep-cycle tubular batteries, and hybrid solar installations by certified engineers. Auto-switchover ensures zero reboot downtime for laptops, CCTV, and servers.
                 </p>
 
                 {/* Highlights */}
-                <div className="flex flex-wrap gap-2 pt-1 text-[11px] sm:text-xs text-slate-200">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 border border-white/15 backdrop-blur-xs">
-                    <CheckCircle2 size={13} className="text-emerald-400" /> 100% Pure Sine Wave
+                <div className="flex flex-wrap gap-1.5 pt-0.5 text-[10px] sm:text-[11px] text-slate-200">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/15 backdrop-blur-xs">
+                    <CheckCircle2 size={12} className="text-emerald-400" /> 100% Pure Sine Wave
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 border border-white/15 backdrop-blur-xs">
-                    <CheckCircle2 size={13} className="text-emerald-400" /> Up to 36 Months Battery Warranty
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/15 backdrop-blur-xs">
+                    <CheckCircle2 size={12} className="text-emerald-400" /> Up to 36 Months Battery Warranty
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 border border-white/15 backdrop-blur-xs">
-                    <CheckCircle2 size={13} className="text-emerald-400" /> On-site Setup Across Bangladesh
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 border border-white/15 backdrop-blur-xs">
+                    <CheckCircle2 size={12} className="text-emerald-400" /> On-site Setup Across Bangladesh
                   </span>
                 </div>
 
-                <div className="flex flex-wrap gap-3 pt-2">
+                <div className="flex flex-wrap gap-2.5 pt-1.5">
                   <Link
                     href="/electrical-products"
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs sm:text-sm transition-all shadow-lg shadow-amber-500/30 active:scale-95"
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs transition-all shadow-md shadow-amber-500/30 active:scale-95"
                   >
                     Explore IPS &amp; Solar Packages
                   </Link>
                   <Link
                     href="/services/electrician"
-                    className="px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/20 border border-white/25 text-white font-bold text-xs sm:text-sm backdrop-blur-md transition-colors flex items-center gap-2"
+                    className="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/20 border border-white/25 text-white font-bold text-xs backdrop-blur-md transition-colors flex items-center gap-1.5"
                   >
-                    <Wrench size={14} className="text-amber-400" />
+                    <Wrench size={13} className="text-amber-400" />
                     <span>Book Installation Engineer</span>
                   </Link>
                   <a
                     href={`tel:${BUSINESS_INFO.phoneClean}`}
-                    className="px-4 py-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-900/80 border border-slate-700 text-slate-200 font-semibold text-xs sm:text-sm transition-colors flex items-center gap-2"
+                    className="px-3.5 py-2 rounded-xl bg-slate-900/60 hover:bg-slate-900/80 border border-slate-700 text-slate-200 font-semibold text-xs transition-colors flex items-center gap-1.5"
                   >
-                    <Phone size={14} className="text-[#008CFF]" />
+                    <Phone size={13} className="text-[#008CFF]" />
                     <span>Call Hotline: {BUSINESS_INFO.phone}</span>
                   </a>
                 </div>
               </div>
 
               {/* Right Column Quick Packages Box */}
-              <div className="lg:col-span-4 bg-slate-950/80 border border-white/15 rounded-2xl p-5 backdrop-blur-md space-y-3 shadow-2xl">
-                <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
-                  <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Zap size={14} /> Power Capacity Guide
+              <div className="lg:col-span-4 bg-slate-950/80 border border-white/15 rounded-xl p-4 backdrop-blur-md space-y-2.5 shadow-xl">
+                <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                  <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Zap size={13} /> Power Capacity Guide
                   </span>
-                  <span className="text-[10px] text-emerald-400 bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
+                  <span className="text-[9px] text-emerald-400 bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
                     In Stock
                   </span>
                 </div>
-                <div className="space-y-2.5 text-xs text-slate-300">
-                  <div className="flex items-center justify-between py-1 border-b border-white/5">
+                <div className="space-y-2 text-xs text-slate-300">
+                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
                     <div>
-                      <div className="font-bold text-white">Home 600VA – 800VA</div>
-                      <div className="text-[11px] text-slate-400">4 Fans + 6 LED Lights</div>
+                      <div className="font-bold text-white text-xs">Home 600VA – 800VA</div>
+                      <div className="text-[10px] text-slate-400">4 Fans + 6 LED Lights</div>
                     </div>
-                    <span className="text-[11px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-1.5 py-0.5 rounded">
                       Economical
                     </span>
                   </div>
-                  <div className="flex items-center justify-between py-1 border-b border-white/5">
+                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
                     <div>
-                      <div className="font-bold text-white">Office 1000VA – 1500VA</div>
-                      <div className="text-[11px] text-slate-400">Laptops, Wi-Fi &amp; CCTV Wall</div>
+                      <div className="font-bold text-white text-xs">Office 1000VA – 1500VA</div>
+                      <div className="text-[10px] text-slate-400">Laptops, Wi-Fi &amp; CCTV Wall</div>
                     </div>
-                    <span className="text-[11px] font-bold text-blue-400 bg-blue-950/60 border border-blue-800/40 px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-bold text-blue-400 bg-blue-950/60 border border-blue-800/40 px-1.5 py-0.5 rounded">
                       Standard
                     </span>
                   </div>
-                  <div className="flex items-center justify-between py-1">
+                  <div className="flex items-center justify-between py-0.5">
                     <div>
-                      <div className="font-bold text-white">Commercial 2.5kVA+ Hybrid</div>
-                      <div className="text-[11px] text-slate-400">Full Solar Integration</div>
+                      <div className="font-bold text-white text-xs">Commercial 2.5kVA+ Hybrid</div>
+                      <div className="text-[10px] text-slate-400">Full Solar Integration</div>
                     </div>
-                    <span className="text-[11px] font-bold text-amber-400 bg-amber-950/60 border border-amber-800/40 px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-bold text-amber-400 bg-amber-950/60 border border-amber-800/40 px-1.5 py-0.5 rounded">
                       Heavy-Duty
                     </span>
                   </div>
@@ -600,9 +600,9 @@ export default async function HomePage() {
                   href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=Hello%20NEED%20ELECTRO,%20I%20am%20interested%20in%20an%20IPS%20or%20Solar%20package`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-600/30 transition-all active:scale-95"
+                  className="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/30 transition-all active:scale-95"
                 >
-                  <MessageCircle size={14} />
+                  <MessageCircle size={13} />
                   <span>Get Free WhatsApp Consultation</span>
                 </a>
               </div>

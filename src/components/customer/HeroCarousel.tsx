@@ -173,7 +173,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
 
   return (
     <div
-      className="relative rounded-2xl overflow-hidden shadow-xl border border-slate-700/80 bg-[#081621] text-white min-h-[310px] xs:min-h-[320px] sm:min-h-[360px] lg:h-[430px] flex flex-col justify-center select-none group"
+      className="relative rounded-2xl overflow-hidden shadow-lg border border-slate-700/80 bg-[#081621] text-white min-h-[240px] xs:min-h-[250px] sm:min-h-[280px] lg:h-[330px] flex flex-col justify-center select-none group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onTouchStart={handleTouchStart}
@@ -193,50 +193,50 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
 
       {/* Mobile Slide Counter Badge */}
       {isMobile && (
-        <div className="absolute top-3 right-3 z-20 px-2 py-0.5 rounded-full bg-black/60 border border-white/15 text-[10px] font-mono text-slate-300">
+        <div className="absolute top-2.5 right-2.5 z-20 px-2 py-0.5 rounded-full bg-black/60 border border-white/15 text-[9px] font-mono text-slate-300">
           {(current % slides.length) + 1} / {slides.length}
         </div>
       )}
 
       {/* Slide Content */}
-      <div className="relative z-10 px-4 sm:px-8 lg:px-10 py-5 sm:py-6 flex items-center h-full">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 lg:gap-8 items-center w-full">
+      <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center h-full">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 lg:gap-6 items-center w-full">
           {/* Text Left Column */}
-          <div className="md:col-span-7 space-y-2.5 sm:space-y-4">
+          <div className="md:col-span-7 space-y-1.5 sm:space-y-2.5">
             {active.badge && (
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-[#008CFF]/20 border border-[#008CFF]/40 text-sky-300 shadow-sm backdrop-blur-md">
-                <Sparkles size={12} className="text-sky-400 animate-pulse" />
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9.5px] sm:text-[10px] font-bold bg-[#008CFF]/20 border border-[#008CFF]/40 text-sky-300 shadow-sm backdrop-blur-md">
+                <Sparkles size={11} className="text-sky-400 animate-pulse" />
                 <span className="tracking-wide">{active.badge}</span>
               </div>
             )}
 
-            <h2 className="text-lg xs:text-xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white drop-shadow-md">
+            <h2 className="text-base xs:text-lg sm:text-2xl lg:text-3xl font-black tracking-tight leading-tight text-white drop-shadow-md">
               {active.title}
             </h2>
 
             {active.subtitle && (
-              <p className="text-xs sm:text-sm text-slate-300 max-w-lg leading-relaxed line-clamp-2 sm:line-clamp-3">
+              <p className="text-xs sm:text-[13px] text-slate-300 max-w-lg leading-snug line-clamp-2">
                 {active.subtitle}
               </p>
             )}
 
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-1.5 sm:pt-2">
+            <div className="flex flex-wrap items-center gap-2 pt-1">
               {/* Primary Action Button */}
               {active.targetUrl?.startsWith('tel:') ? (
                 <a
                   href={active.targetUrl}
-                  className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#0070cc] hover:to-[#005bb5] text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/30 transition-all flex items-center gap-1.5 sm:gap-2 active:scale-95"
+                  className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#0070cc] hover:to-[#005bb5] text-white font-bold text-xs shadow-md shadow-blue-500/30 transition-all flex items-center gap-1.5 active:scale-95"
                 >
-                  <Phone size={14} />
+                  <Phone size={13} />
                   <span>{active.buttonText || 'Call Hotline'}</span>
                 </a>
               ) : (
                 <Link
                   href={active.targetUrl || '/laptops'}
-                  className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#0070cc] hover:to-[#005bb5] text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/30 transition-all flex items-center gap-1.5 sm:gap-2 group/btn active:scale-95"
+                  className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#0070cc] hover:to-[#005bb5] text-white font-bold text-xs shadow-md shadow-blue-500/30 transition-all flex items-center gap-1.5 group/btn active:scale-95"
                 >
                   <span>{active.buttonText || 'Discover Now'}</span>
-                  <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                  <ArrowRight size={13} className="group-hover/btn:translate-x-1 transition-transform" />
                 </Link>
               )}
 
@@ -246,25 +246,25 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
                   href={`https://wa.me/${BUSINESS_INFO.whatsappClean}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/30 transition-all flex items-center gap-1.5 active:scale-95"
+                  className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-600/30 transition-all flex items-center gap-1.5 active:scale-95"
                 >
-                  <MessageCircle size={14} />
+                  <MessageCircle size={13} />
                   <span>WhatsApp</span>
                 </a>
               ) : active.secondaryType === 'emi' ? (
                 <Link
                   href="/laptop-emi"
-                  className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-bold text-xs sm:text-sm transition-all flex items-center gap-1.5 active:scale-95"
+                  className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-bold text-xs transition-all flex items-center gap-1.5 active:scale-95"
                 >
-                  <CreditCard size={14} className="text-amber-400" />
+                  <CreditCard size={13} className="text-amber-400" />
                   <span>Laptop EMI →</span>
                 </Link>
               ) : (
                 <Link
                   href="/delivery"
-                  className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold text-xs sm:text-sm backdrop-blur-md transition-colors flex items-center gap-1.5 active:scale-95"
+                  className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold text-xs backdrop-blur-md transition-colors flex items-center gap-1.5 active:scale-95"
                 >
-                  <ShieldCheck size={14} className="text-emerald-400" />
+                  <ShieldCheck size={13} className="text-emerald-400" />
                   <span>Cash on Delivery</span>
                 </Link>
               )}
@@ -273,7 +273,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
 
           {/* Graphic / Image Right Column: 16:10 Widescreen Glass Showcase */}
           <div className="hidden md:flex md:col-span-5 justify-center items-center">
-            <div className="relative w-full max-w-[340px] lg:max-w-[400px] aspect-[16/10] rounded-2xl overflow-hidden border border-white/20 shadow-2xl shadow-blue-500/20 group/img backdrop-blur-md bg-slate-900/50">
+            <div className="relative w-full max-w-[270px] lg:max-w-[310px] aspect-[16/10] rounded-xl overflow-hidden border border-white/20 shadow-xl shadow-blue-500/20 group/img backdrop-blur-md bg-slate-900/50">
               <img
                 src={active.imageUrl || '/banners/hp-elitebook-banner.jpg'}
                 alt={active.title}
@@ -282,14 +282,14 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10 pointer-events-none" />
               
               {/* Floating Brand Badge */}
-              <div className="absolute top-2.5 left-2.5 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold text-sky-300 border border-sky-400/30 flex items-center gap-1.5 shadow-md">
+              <div className="absolute top-2 left-2 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-bold text-sky-300 border border-sky-400/30 flex items-center gap-1 shadow-md">
                 <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
                 <span>{active.badge ? active.badge.split(' ')[0] : 'Brand'} Official</span>
               </div>
 
               {/* Floating Guarantee Badge */}
-              <div className="absolute bottom-2.5 right-2.5 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold text-emerald-400 border border-emerald-500/30 flex items-center gap-1 shadow-md">
-                <ShieldCheck size={12} className="text-emerald-400" />
+              <div className="absolute bottom-2 right-2 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-bold text-emerald-400 border border-emerald-500/30 flex items-center gap-1 shadow-md">
+                <ShieldCheck size={11} className="text-emerald-400" />
                 <span>100% Genuine</span>
               </div>
             </div>
@@ -303,20 +303,20 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
           <button
             onClick={prevSlide}
             aria-label="Previous Slide"
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 border border-white/20 text-white flex items-center justify-center backdrop-blur-xs transition-all opacity-80 hover:opacity-100"
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 hover:bg-black/70 border border-white/20 text-white flex items-center justify-center backdrop-blur-xs transition-all opacity-80 hover:opacity-100"
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={16} />
           </button>
           <button
             onClick={nextSlide}
             aria-label="Next Slide"
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 border border-white/20 text-white flex items-center justify-center backdrop-blur-xs transition-all opacity-80 hover:opacity-100"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 hover:bg-black/70 border border-white/20 text-white flex items-center justify-center backdrop-blur-xs transition-all opacity-80 hover:opacity-100"
           >
-            <ChevronRight size={18} />
+            <ChevronRight size={16} />
           </button>
 
           {/* Dots Indicator */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
             {slides.map((_, idx) => (
               <button
                 key={idx}
@@ -324,7 +324,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
                 aria-label={`Go to slide ${idx + 1}`}
                 className={`transition-all rounded-full ${
                   current === idx
-                    ? 'w-6 h-1.5 bg-[#0084d6]'
+                    ? 'w-5 h-1.5 bg-[#0084d6]'
                     : 'w-1.5 h-1.5 bg-white/40 hover:bg-white/70'
                 }`}
               />
