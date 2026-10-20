@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 export const BUSINESS_INFO = {
   name: 'NEED ELECTRO',
-  tagline: 'Trusted Electrical & Technological Solutions',
+  tagline: 'Trusted Electrical and Technological Solutions',
   legalName: 'NEED ELECTRO',
   founder: 'Amdadur Rahman',
   phone: '+880 1733-983752',
@@ -11,7 +11,7 @@ export const BUSINESS_INFO = {
   whatsappClean: '8801733983752',
   email: 'info.needelectro@gmail.com',
   supportEmail: 'contact.amdadur@gmail.com',
-  domain: process.env.NEXT_PUBLIC_SITE_URL || 'https://needelectroerp.vercel.app',
+  domain: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.needelectro.store',
   currency: 'BDT',
   currencySymbol: '৳',
   address: {
@@ -106,14 +106,33 @@ export function generateSeoMetadata({
     keywords: [
       ...keywords,
       'NEED ELECTRO',
+      'Computer shop in Moulvibazar',
+      'Computer price in Moulvibazar',
+      'Laptop shop in Moulvibazar',
+      'Laptop price in Moulvibazar',
+      'CCTV camera shop in Moulvibazar',
+      'CCTV camera price in Bangladesh',
+      'Tech gadgets in Moulvibazar',
+      'Tech gadgets price in Bangladesh',
+      'Laptop price in Bangladesh',
+      'HP EliteBook price in Bangladesh',
+      'Desktop computer price in Bangladesh',
+      'Computer accessories in Bangladesh',
+      'Electrical shop online Bangladesh',
+      'Electrical services in Moulvibazar',
+      'Electrician service in Bangladesh',
+      'CCTV installation service',
+      'Laptop and computer servicing',
+      'Networking and Wi-Fi installation',
+      'Electrical products online Bangladesh',
+      'Genuine laptop with warranty in Bangladesh',
       'Moulvibazar',
       'Sylhet',
       'Bangladesh',
-      'Laptop shop Moulvibazar',
-      'Computer shop Moulvibazar',
-      'CCTV Moulvibazar',
-      'Electrician Moulvibazar',
-      'মৌলভীবাজার ল্যাপটপ',
+      'মৌলভীবাজার ল্যাপটপ দোকান',
+      'কম্পিউটার দোকান মৌলভীবাজার',
+      'সিসিটিভি ক্যামেরা মৌলভীবাজার',
+      'ইলেকট্রিশিয়ান মৌলভীবাজার',
       'ল্যাপটপ কিস্তিতে',
     ],
     alternates: {
@@ -257,6 +276,9 @@ export function buildProductSchema(product: {
 }) {
   const canonical = getCanonicalUrl(`/product/${slugify(product.name)}-${product.sku.toLowerCase()}`);
   const img = product.imageUrl || `${BUSINESS_INFO.domain}/logo-dark-transparent.png`;
+  const isRefurbished = product.name.toLowerCase().includes('refurbished') || 
+                        product.name.toLowerCase().includes('used') ||
+                        (product.description && (product.description.toLowerCase().includes('used') || product.description.toLowerCase().includes('refurbished')));
 
   return {
     '@context': 'https://schema.org',
@@ -277,13 +299,48 @@ export function buildProductSchema(product: {
       priceCurrency: BUSINESS_INFO.currency,
       price: product.retailPrice > 0 ? product.retailPrice.toFixed(2) : '0.00',
       priceValidUntil: '2027-12-31',
-      itemCondition: 'https://schema.org/NewCondition',
+      itemCondition: isRefurbished ? 'https://schema.org/RefurbishedCondition' : 'https://schema.org/NewCondition',
       availability: product.currentStock > 0 
         ? 'https://schema.org/InStock' 
         : 'https://schema.org/OutOfStock',
       seller: {
         '@type': 'Organization',
         name: BUSINESS_INFO.name,
+      },
+      hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        applicableCountry: 'BD',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+        merchantReturnDays: 7,
+        returnMethod: 'https://schema.org/ReturnByMail',
+        returnFees: 'https://schema.org/FreeReturn',
+      },
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: '60.00',
+          currency: 'BDT',
+        },
+        shippingDestination: {
+          '@type': 'DefinedRegion',
+          addressCountry: 'BD',
+        },
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          handlingTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 0,
+            maxValue: 1,
+            unitCode: 'DAY',
+          },
+          transitTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 1,
+            maxValue: 3,
+            unitCode: 'DAY',
+          },
+        },
       },
     },
   };
@@ -599,6 +656,82 @@ export const BLOG_POSTS: BlogPost[] = [
       {
         question: 'Can I pay my monthly installments through bKash or Nagad?',
         answer: 'Yes! Customers can pay their monthly installment via bKash, Nagad, bank transfer, or directly at our Kusumbag, Moulvibazar showroom.',
+      },
+    ],
+  },
+  {
+    id: 'blog-6',
+    slug: 'hp-elitebook-series-price-guide-bangladesh',
+    title: 'HP EliteBook Price in Bangladesh: 840 G3 to G8 Comparison & Buying Guide',
+    bnTitle: 'বাংলাদেশে এইচপি এলিটবুক ল্যাপটপের দাম ও পূর্ণাঙ্গ মডেল তুলনা গাইড',
+    description: 'Detailed HP EliteBook price in Bangladesh breakdown. Compare HP EliteBook 840 G3, G5, G6, G7, and G8 specifications, thermal performance, battery backup, and current market prices at NEED ELECTRO.',
+    category: 'Laptops',
+    publishedDate: '2026-03-22',
+    readingTime: '7 min read',
+    author: 'Amdadur Rahman',
+    summary: 'The HP EliteBook series dominates the business and student laptop market in Bangladesh. Discover why the 840 series offers the best value for money, durable aluminum construction, and smooth multitasking performance.',
+    sections: [
+      {
+        heading: '1. Why HP EliteBook is the #1 Business Laptop in Bangladesh',
+        content: 'HP EliteBook laptops are engineered with CNC-machined aluminum chassis, spill-resistant backlit keyboards, and Bang & Olufsen tuned audio. They are designed for military-standard MIL-STD-810G durability, making them far sturdier than plastic consumer laptops.',
+      },
+      {
+        heading: '2. HP EliteBook 840 G5 vs G6 vs G7 Comparison',
+        content: 'The EliteBook 840 G5 and G6 feature 8th Gen Quad-Core Intel processors with dual-channel upgradable DDR4 RAM slots. The 840 G7 introduces a sleeker narrow-bezel design, 10th Gen Intel processors, and improved battery runtime exceeding 5 to 7 hours.',
+      },
+      {
+        heading: '3. Current Price Range in Bangladesh (2026)',
+        content: 'Pre-owned and certified refurbished HP EliteBooks range from ৳22,000 to ৳45,000 BDT depending on generation and configuration. Every unit sold by NEED ELECTRO includes an authentic HP charger, 7-day replacement warranty, and 2-year service warranty.',
+      },
+      {
+        heading: '4. Buying Safely in Moulvibazar & Nationwide Delivery',
+        content: 'Customers in Moulvibazar can visit our MR Plaza Kusumbag store for hands-on testing. We also ship across Bangladesh via courier with open-box verification before payment.',
+      },
+    ],
+    faqs: [
+      {
+        question: 'What is the price of an HP EliteBook 840 in Bangladesh?',
+        answer: 'At NEED ELECTRO, HP EliteBook 840 laptops start from approximately ৳22,500 for G3/G4 models up to ৳45,000+ for G7/G8 configurations with SSD and 16GB RAM.',
+      },
+      {
+        question: 'Can I upgrade RAM and SSD on HP EliteBook 840 laptops?',
+        answer: 'Yes! Unlike soldered ultrabooks, the HP EliteBook 840 series features two SO-DIMM RAM slots (supporting up to 32GB or 64GB) and standard M.2 NVMe SSD slots.',
+      },
+    ],
+  },
+  {
+    id: 'blog-7',
+    slug: 'laptop-ram-ssd-upgrade-guide-bangladesh',
+    title: 'Laptop RAM and SSD Upgrade Guide: Double Your PC Speed in Bangladesh',
+    bnTitle: 'ল্যাপটপের র‍্যাম ও এসএসডি আপগ্রেড গাইড: পুরনো ল্যাপটপের গতি দ্বিগুণ করুন',
+    description: 'Learn how upgrading from HDD to NVMe SSD and adding DDR4/DDR5 RAM can restore lightning-fast responsiveness to your laptop or desktop PC. Price guide and installation steps in Moulvibazar.',
+    category: 'Computers',
+    publishedDate: '2026-03-25',
+    readingTime: '5 min read',
+    author: 'Amdadur Rahman',
+    summary: 'Before spending ৳50,000 on a brand-new laptop, a ৳3,000 to ৳6,000 upgrade to a high-speed SSD and additional RAM can make your existing machine run 5 times faster. Here is how it works.',
+    sections: [
+      {
+        heading: '1. Why Traditional Hard Drives (HDD) Cause Extreme Slowness',
+        content: 'Traditional 5400 RPM hard drives have read/write speeds of only 80-120 MB/s. Modern Windows 11 updates constantly hammer the disk with background tasks, pegging disk usage at 100%. Upgrading to a SATA or NVMe SSD (delivering 500 to 3,500+ MB/s) cures this bottleneck instantly.',
+      },
+      {
+        heading: '2. Choosing Between DDR3, DDR4, and DDR5 RAM',
+        content: 'Check your CPU generation before buying. 4th to 5th gen laptops use DDR3L, 6th to 11th gen use DDR4 SO-DIMM, and 12th gen+ use DDR5. Moving from 4GB or 8GB to 16GB dual-channel allows effortless multitasking without stutter.',
+      },
+      {
+        heading: '3. Professional Cloned OS Migration at NEED ELECTRO',
+        content: 'You do not need to lose your files or reinstall Windows. Our Moulvibazar technician team provides 1-to-1 disk cloning, transferring all your software, documents, and license keys directly to your new NVMe SSD in under 30 minutes.',
+      },
+    ],
+    faqs: [
+      {
+        question: 'How much does an SSD upgrade cost in Bangladesh?',
+        answer: 'A high-quality 256GB NVMe SSD costs approximately ৳2,200 to ৳2,800 BDT, while 512GB drives range from ৳3,800 to ৳4,800 BDT including cloning and installation.',
+      },
+      {
+        question: 'Will an SSD upgrade improve gaming and video editing?',
+        answer: 'Yes! Games load in seconds, video project timelines scrub smoothly, and render cache writing becomes virtually instantaneous.',
       },
     ],
   },

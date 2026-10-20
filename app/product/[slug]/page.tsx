@@ -62,10 +62,19 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 
   const priceFormatted = Number(product.retailPrice).toLocaleString();
-  const title = `${product.name} | Price & Specs in Moulvibazar | NEED ELECTRO`;
-  const description = `${product.name} available at NEED ELECTRO Moulvibazar for ৳${priceFormatted} BDT. ${
-    product.warrantyPeriodMonths ? `${product.warrantyPeriodMonths} Months Warranty.` : ''
-  } 100% genuine with replacement guarantee and EMI installments in Moulvibazar.`;
+  const brandPart = product.brand ? `${product.brand} ` : '';
+  const modelPart = product.model ? ` ${product.model}` : '';
+  const isLaptop = product.category.toLowerCase().includes('laptop') || product.name.toLowerCase().includes('laptop');
+
+  const title = `${product.name} Price in Bangladesh | ${brandPart}${modelPart} | NEED ELECTRO`;
+  const description = `Buy 100% authentic ${product.name} at ৳${priceFormatted} BDT in Bangladesh. ${
+    product.warrantyPeriodMonths ? `${product.warrantyPeriodMonths} Months Warranty. ` : 'Official warranty. '
+  }Genuine hardware, cash on delivery nationwide & express delivery in Moulvibazar, Sylhet.`;
+
+  const brandKeywords = product.brand ? [`${product.brand} price in Bangladesh`, `${product.brand} Moulvibazar`] : [];
+  const laptopKeywords = isLaptop
+    ? ['Laptop price in Bangladesh', 'Genuine laptop with warranty in Bangladesh', 'Laptop price in Moulvibazar', 'HP EliteBook price in Bangladesh']
+    : [];
 
   return generateSeoMetadata({
     title,
@@ -73,10 +82,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     path: `/product/${slugify(product.name)}-${product.sku.toLowerCase()}`,
     keywords: [
       product.name,
+      `${product.name} price in Bangladesh`,
       `${product.name} price in Moulvibazar`,
-      `${product.brand} laptop Moulvibazar`,
-      `${product.sku} price Bangladesh`,
-      'মৌলভীবাজার ল্যাপটপ',
+      product.sku,
+      ...brandKeywords,
+      ...laptopKeywords,
+      'NEED ELECTRO',
+      'মৌলভীবাজার কম্পিউটার দোকান',
+      'ল্যাপটপের দাম বাংলাদেশ',
     ],
     ogImage: product.imageUrl || '/logo-dark-transparent.png',
   });
@@ -138,6 +151,10 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildBreadcrumbSchema(breadcrumbs)) }}
       />
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />

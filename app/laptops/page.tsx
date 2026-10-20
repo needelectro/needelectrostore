@@ -13,13 +13,17 @@ export const revalidate = 60; // Revalidate every minute
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Laptops in Moulvibazar | HP, Dell, Lenovo with Warranty & EMI',
-    description: 'Looking for genuine laptops in Moulvibazar? Explore authentic HP EliteBook, Dell Latitude, and Lenovo ThinkPad laptops at NEED ELECTRO. 7-day replacement, 2-year service warranty, and flexible laptop EMI installment options.',
+    title: 'Laptop Shop in Moulvibazar | Laptop Price in Bangladesh | NEED ELECTRO',
+    description: 'Looking for authentic laptops in Moulvibazar or nationwide in Bangladesh? Explore HP EliteBook, Dell Latitude, and Lenovo ThinkPad laptops at NEED ELECTRO. 7-day replacement, 2-year warranty, and flexible laptop EMI installment options.',
     path: '/laptops',
     keywords: [
+      'Laptop shop in Moulvibazar',
+      'Laptop price in Moulvibazar',
+      'Laptop price in Bangladesh',
+      'HP EliteBook price in Bangladesh',
+      'Genuine laptop with warranty in Bangladesh',
       'Laptop shop Moulvibazar',
       'Laptop seller Moulvibazar',
-      'Laptop price in Moulvibazar',
       'Used laptop in Moulvibazar',
       'HP laptop in Moulvibazar',
       'Dell laptop in Moulvibazar',
@@ -28,6 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'Student laptop Moulvibazar',
       'Laptop EMI in Moulvibazar',
       'মৌলভীবাজার ল্যাপটপ',
+      'ল্যাপটপের দাম বাংলাদেশ',
     ],
   });
 }

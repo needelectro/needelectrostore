@@ -12,16 +12,21 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Computer Shop in Moulvibazar | Desktop PCs & Components | NEED ELECTRO',
-    description: 'Looking for a reliable computer shop in Moulvibazar? NEED ELECTRO builds custom desktop PCs, gaming rigs, office workstations, and supplies monitors, processors, and parts with genuine warranty.',
+    title: 'Computer Shop in Moulvibazar | Desktop Computer Price in Bangladesh | NEED ELECTRO',
+    description: 'Looking for a reliable computer shop in Moulvibazar? NEED ELECTRO builds custom desktop PCs, gaming rigs, office workstations, and supplies monitors, processors, and parts with genuine warranty. Best desktop computer prices in Bangladesh.',
     path: '/computers',
     keywords: [
-      'Computer shop Moulvibazar',
+      'Computer shop in Moulvibazar',
+      'Computer price in Moulvibazar',
+      'Desktop computer price in Bangladesh',
       'Desktop computer Moulvibazar',
       'PC parts Moulvibazar',
       'Office computer Moulvibazar',
       'Gaming PC Moulvibazar',
+      'Computer accessories in Bangladesh',
+      'Desktop PC price Bangladesh',
       'মৌলভীবাজার কম্পিউটার দোকান',
+      'কম্পিউটার দাম বাংলাদেশ',
     ],
   });
 }

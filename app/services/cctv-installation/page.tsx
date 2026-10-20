@@ -10,14 +10,16 @@ import { Video, ShieldCheck, CheckCircle2, Phone, MessageCircle, Eye, Wifi, Hard
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'CCTV Camera Installation in Moulvibazar | Site Survey, Cabling & Setup | NEED ELECTRO',
-    description: 'Professional CCTV camera security installation in Moulvibazar. Site inspection, HD & IP camera setup, DVR/NVR surveillance hard drive storage, night vision, and mobile live viewing configuration by NEED ELECTRO technicians.',
+    title: 'CCTV Installation Service | CCTV Camera Setup in Moulvibazar | NEED ELECTRO',
+    description: 'Professional CCTV camera installation service in Moulvibazar and Bangladesh. Site inspection, HD & IP camera setup, DVR/NVR surveillance hard drive storage, night vision, and mobile live viewing configuration by certified NEED ELECTRO technicians.',
     path: '/services/cctv-installation',
     keywords: [
+      'CCTV installation service',
       'CCTV camera installation Moulvibazar',
+      'CCTV camera shop in Moulvibazar',
+      'CCTV camera price in Bangladesh',
       'CCTV setup Moulvibazar',
       'Security camera Moulvibazar',
-      'CCTV camera Moulvibazar',
       'IP camera installation Moulvibazar',
       'CCTV shop Moulvibazar',
       'মৌলভীবাজার সিসিটিভি ক্যামেরা',

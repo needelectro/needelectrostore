@@ -13,16 +13,21 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Electrical Products in Moulvibazar | Cables, Breakers & Switches | NEED ELECTRO',
-    description: 'Buy certified electrical products in Moulvibazar at NEED ELECTRO. Copper wiring cables, MCB circuit breakers, distribution boards, switches, and industrial electrical supplies with certified safety standards.',
+    title: 'Electrical Shop Online Bangladesh | Electrical Products in Moulvibazar | NEED ELECTRO',
+    description: 'Buy genuine electrical products online in Bangladesh from NEED ELECTRO. Copper wiring cables, MCB circuit breakers, distribution boards, switches, and industrial electrical supplies. Nationwide delivery and certified electrical services in Moulvibazar.',
     path: '/electrical-products',
     keywords: [
+      'Electrical shop online Bangladesh',
+      'Electrical products online Bangladesh',
+      'Electrical services in Moulvibazar',
+      'Electrician service in Bangladesh',
       'Electrical products in Moulvibazar',
       'Electrical shop in Moulvibazar',
-      'Circuit breaker Moulvibazar',
+      'Circuit breaker Bangladesh',
       'Copper cable Moulvibazar',
       'Electrical accessories Moulvibazar',
       'মৌলভীবাজার ইলেকট্রিক্যাল পণ্য',
+      'ইলেকট্রিক্যাল শপ বাংলাদেশ',
     ],
   });
 }

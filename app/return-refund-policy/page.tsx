@@ -1,0 +1,114 @@
+import React from 'react';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema } from '@/lib/seoConfig';
+import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
+import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
+import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
+import { RotateCcw, ShieldCheck, CheckCircle2, AlertCircle, Phone, ArrowRight } from 'lucide-react';
+
+export async function generateMetadata(): Promise<Metadata> {
+  return generateSeoMetadata({
+    title: 'Return and Refund Policy | 7 Days Replacement Guarantee | NEED ELECTRO',
+    description:
+      'Official return, exchange, and refund policy for NEED ELECTRO. 7-day hassle-free hardware replacement for laptops, CCTV cameras, and electrical equipment across Bangladesh.',
+    path: '/return-refund-policy',
+    keywords: [
+      'NEED ELECTRO return policy',
+      'Laptop replacement warranty',
+      'Refund policy Bangladesh',
+      'Tech return policy Moulvibazar',
+    ],
+  });
+}
+
+export default function ReturnRefundPolicyPage() {
+  const breadcrumbs = [
+    { name: 'Home', path: '/' },
+    { name: 'Return & Refund Policy', path: '/return-refund-policy' },
+  ];
+  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <CustomerHeader />
+      <Breadcrumb items={breadcrumbs} />
+
+      <section className="py-10 px-4 bg-gradient-to-b from-[#081621] to-[#040e19] text-white">
+        <div className="max-w-7xl mx-auto space-y-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#0084d6]/20 border border-[#0084d6]/40 text-sky-300">
+            <RotateCcw size={13} />
+            <span>Customer Protection &amp; Guarantees</span>
+          </div>
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
+            Return, Replacement &amp; Refund Policy
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
+            At {BUSINESS_INFO.name}, customer satisfaction and genuine hardware integrity are our highest priorities. Every hardware purchase is backed by our direct 7-Day Replacement Guarantee.
+          </p>
+        </div>
+      </section>
+
+      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 flex-1 space-y-8 text-xs sm:text-sm">
+        {/* 7-Day Guarantee Box */}
+        <div className="bg-gradient-to-r from-blue-50 to-sky-50 dark:from-slate-900 dark:to-slate-800/80 rounded-2xl p-6 border border-blue-200 dark:border-slate-800 space-y-3">
+          <div className="flex items-center gap-2 text-blue-700 dark:text-cyan-400 font-bold text-base">
+            <ShieldCheck size={20} />
+            <span>7-Day Replacement Guarantee</span>
+          </div>
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-xs sm:text-sm">
+            If any purchased laptop, computer, CCTV camera, or electrical equipment develops an inherent hardware defect or fails to perform according to original manufacturer specifications within 7 days of delivery, {BUSINESS_INFO.name} provides an immediate one-to-one product replacement with identical or superior specifications.
+          </p>
+        </div>
+
+        {/* Eligibility Conditions */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+            Eligibility Criteria for Returns &amp; Replacements
+          </h2>
+
+          <ul className="space-y-2.5 text-slate-700 dark:text-slate-300">
+            <li className="flex items-start gap-2.5">
+              <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+              <span><strong>Reporting Period:</strong> Notice of claim must be submitted within 7 calendar days from the date of physical delivery receipt.</span>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+              <span><strong>Hardware Condition:</strong> The item must retain its original cosmetic condition, serial number/IMEI sticker intact, and include all bundled chargers, power cables, and original packaging.</span>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+              <span><strong>Invoice Verification:</strong> The customer must present the physical cash memo or digital invoice generated by {BUSINESS_INFO.name}.</span>
+            </li>
+          </ul>
+        </div>
+
+        {/* Refund Policy */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-3">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+            Full Monetary Refund Conditions
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+            In the event that an identical or agreed substitute model is unavailable in our inventory to replace a defective unit within 7 business days, {BUSINESS_INFO.name} will issue a 100% monetary refund of the product purchase price through the customer’s original payment channel (Cash, bKash, Nagad, or Bank Transfer).
+          </p>
+        </div>
+
+        {/* How to initiate */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-3">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+            How to File a Claim
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+            Contact our dedicated customer support hotline at <a href={`tel:${BUSINESS_INFO.phoneClean}`} className="text-[#0084d6] font-bold">{BUSINESS_INFO.phone}</a> or send your invoice number and video of the hardware issue to WhatsApp at <a href={`https://wa.me/${BUSINESS_INFO.whatsappClean}`} className="text-emerald-600 font-bold">+{BUSINESS_INFO.whatsappClean}</a>. Alternatively, you may visit our showroom directly at MR Plaza, Kusumbag, Moulvibazar.
+          </p>
+        </div>
+      </main>
+
+      <CustomerFooter />
+    </div>
+  );
+}

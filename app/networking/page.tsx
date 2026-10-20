@@ -12,15 +12,18 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Networking Products in Moulvibazar | Wi-Fi Routers & Switches | NEED ELECTRO',
-    description: 'Looking for Wi-Fi routers, Gigabit switches, ONU fiber optic devices, and patch cables in Moulvibazar? Shop authentic Tenda, TP-Link, and networking gear at NEED ELECTRO with official warranty.',
+    title: 'Networking Products & Wi-Fi Routers in Bangladesh | NEED ELECTRO',
+    description: 'Looking for Wi-Fi routers, Gigabit switches, ONU fiber optic devices, and structured cabling? Shop authentic Tenda, TP-Link, and networking gear at NEED ELECTRO. Certified networking and Wi-Fi installation services.',
     path: '/networking',
     keywords: [
+      'Networking and Wi-Fi installation',
       'Networking products in Moulvibazar',
+      'WiFi router price in Bangladesh',
       'WiFi router in Moulvibazar',
       'Router price Moulvibazar',
       'Gigabit switch Moulvibazar',
       'Tenda router Moulvibazar',
+      'রাউটার দাম বাংলাদেশ',
       'মৌলভীবাজার রাউটার',
     ],
   });

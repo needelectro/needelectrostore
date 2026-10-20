@@ -12,16 +12,21 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Computer Accessories in Moulvibazar | Keyboards, Mice, SSDs & RAM | NEED ELECTRO',
-    description: 'Shop authentic computer accessories in Moulvibazar at NEED ELECTRO. High-speed NVMe M.2 SSDs, laptop & desktop RAM, wireless mice, mechanical keyboards, headphones, and converters with warranty.',
+    title: 'Computer Accessories in Bangladesh | Tech Gadgets & PC Parts | NEED ELECTRO',
+    description: 'Shop authentic computer accessories and tech gadgets in Bangladesh at NEED ELECTRO. High-speed NVMe M.2 SSDs, laptop & desktop RAM upgrades, mechanical keyboards, precision mice, and converters with official warranty.',
     path: '/computer-accessories',
     keywords: [
+      'Computer accessories in Bangladesh',
       'Computer accessories in Moulvibazar',
+      'Tech gadgets in Moulvibazar',
+      'Tech gadgets price in Bangladesh',
       'SSD price Moulvibazar',
       'RAM upgrade Moulvibazar',
       'Laptop charger Moulvibazar',
       'Keyboard and mouse Moulvibazar',
+      'NVMe SSD price Bangladesh',
       'মৌলভীবাজার কম্পিউটার এক্সেসরিজ',
+      'কম্পিউটার এক্সেসরিজ বাংলাদেশ',
     ],
   });
 }

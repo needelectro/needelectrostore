@@ -10,12 +10,13 @@ import { Wrench, ShieldCheck, Clock, CheckCircle2, Phone, MessageCircle, MapPin,
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Book Certified Electrician in Moulvibazar | Home & Commercial Wiring | NEED ELECTRO',
-    description: 'Book licensed and certified electricians in Moulvibazar at NEED ELECTRO. Same-day technician dispatch for home wiring, circuit breaker installation, DB panel maintenance, and short-circuit troubleshooting.',
+    title: 'Electrician Service in Bangladesh | Electrical Services in Moulvibazar | NEED ELECTRO',
+    description: 'Book licensed and certified electricians in Moulvibazar and Bangladesh at NEED ELECTRO. Same-day technician dispatch for home wiring, circuit breaker installation, DB panel maintenance, and short-circuit troubleshooting.',
     path: '/services/electrician',
     keywords: [
+      'Electrician service in Bangladesh',
+      'Electrical services in Moulvibazar',
       'Electrician in Moulvibazar',
-      'Electrician Moulvibazar',
       'Book electrician Moulvibazar',
       'Electrical service Moulvibazar',
       'Home electrician Moulvibazar',

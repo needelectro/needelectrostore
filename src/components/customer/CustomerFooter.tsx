@@ -148,6 +148,12 @@ export const CustomerFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
+                <Link href="/services/laptop-computer-repair" className="hover:text-[#0084d6] transition-colors flex items-center gap-1.5">
+                  <ChevronRight size={12} className="text-slate-600" />
+                  <span>💻 Laptop &amp; PC Servicing Lab</span>
+                </Link>
+              </li>
+              <li>
                 <Link href="/services/electrician" className="hover:text-[#0084d6] transition-colors flex items-center gap-1.5">
                   <ChevronRight size={12} className="text-slate-600" />
                   <span>⚡ Book Electrician (Moulvibazar)</span>
@@ -160,19 +166,19 @@ export const CustomerFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/electrical-services" className="hover:text-[#0084d6] transition-colors flex items-center gap-1.5">
+                <Link href="/services/networking" className="hover:text-[#0084d6] transition-colors flex items-center gap-1.5">
                   <ChevronRight size={12} className="text-slate-600" />
-                  <span>Electrical Engineering Services</span>
+                  <span>🌐 Networking &amp; Wi-Fi Setup</span>
                 </Link>
               </li>
               <li>
-                <Link href="/delivery" className="hover:text-[#0084d6] transition-colors flex items-center gap-1.5">
+                <Link href="/shipping-policy" className="hover:text-[#0084d6] transition-colors flex items-center gap-1.5">
                   <ChevronRight size={12} className="text-slate-600" />
-                  <span>Doorstep Delivery Policy</span>
+                  <span>Shipping &amp; Delivery Terms</span>
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="hover:text-[#0084d6] transition-colors flex items-center gap-1.5">
+                <Link href="/warranty-policy" className="hover:text-[#0084d6] transition-colors flex items-center gap-1.5">
                   <ChevronRight size={12} className="text-slate-600" />
                   <span>Warranty &amp; Return Terms</span>
                 </Link>
@@ -193,6 +199,12 @@ export const CustomerFooter: React.FC = () => {
                 <Link href="/moulvibazar" className="hover:text-[#0084d6] font-semibold text-slate-300 flex items-center gap-1.5">
                   <MapPin size={12} className="text-[#0084d6]" />
                   <span>Moulvibazar Town (Kusumbag)</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/sylhet" className="hover:text-[#0084d6] font-semibold text-slate-300 flex items-center gap-1.5">
+                  <MapPin size={12} className="text-[#0084d6]" />
+                  <span>Sylhet Division Express Hub</span>
                 </Link>
               </li>
               <li>
@@ -245,14 +257,16 @@ export const CustomerFooter: React.FC = () => {
           <p>
             © {new Date().getFullYear()} {BUSINESS_INFO.name}. All rights reserved. Registered Business in Moulvibazar, Bangladesh.
           </p>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center flex-wrap gap-3">
             <Link href="/about" className="hover:text-slate-300">About Us</Link>
             <span>•</span>
+            <Link href="/shipping-policy" className="hover:text-slate-300">Shipping Policy</Link>
+            <span>•</span>
+            <Link href="/return-refund-policy" className="hover:text-slate-300">Return &amp; Refund</Link>
+            <span>•</span>
+            <Link href="/warranty-policy" className="hover:text-slate-300">Warranty Policy</Link>
+            <span>•</span>
             <Link href="/track-order" className="hover:text-slate-300">Track Order</Link>
-            <span>•</span>
-            <Link href="/delivery" className="hover:text-slate-300">Delivery</Link>
-            <span>•</span>
-            <Link href="/faq" className="hover:text-slate-300">Warranty</Link>
             <span>•</span>
             <Link href="/contact" className="hover:text-slate-300">Contact</Link>
             <span>•</span>
