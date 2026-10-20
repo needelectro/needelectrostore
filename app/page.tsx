@@ -71,14 +71,14 @@ const CATEGORY_TILES = [
 ];
 
 const BRANDS = [
-  { name: 'HP', desc: 'EliteBook & ProBook', slug: '/laptops/hp', badge: 'Laptops', color: 'from-blue-600 to-sky-500' },
-  { name: 'Dell', desc: 'Latitude & XPS', slug: '/laptops/dell', badge: 'Laptops', color: 'from-sky-600 to-cyan-500' },
-  { name: 'Lenovo', desc: 'ThinkPad & Legion', slug: '/laptops/lenovo', badge: 'Laptops', color: 'from-rose-600 to-red-500' },
-  { name: 'Hikvision', desc: '4K IP & ColorVu', slug: '/cctv', badge: 'CCTV Security', color: 'from-emerald-600 to-teal-500' },
-  { name: 'Dahua', desc: 'Smart AI Cameras', slug: '/cctv', badge: 'Surveillance', color: 'from-teal-600 to-cyan-500' },
-  { name: 'TP-Link', desc: 'Wi-Fi 6 Routers', slug: '/networking', badge: 'Networking', color: 'from-indigo-600 to-blue-500' },
-  { name: 'Schneider', desc: 'Circuit Breakers', slug: '/electrical-products', badge: 'Electrical', color: 'from-emerald-700 to-green-600' },
-  { name: 'Super Star', desc: 'Switches & Lighting', slug: '/electrical-products', badge: 'Electrical', color: 'from-amber-600 to-orange-500' },
+  { name: 'HP', desc: 'EliteBook & ProBook' },
+  { name: 'Dell', desc: 'Latitude & Inspiron' },
+  { name: 'Lenovo', desc: 'ThinkPad & IdeaPad' },
+  { name: 'Hikvision', desc: 'IP Camera & NVR' },
+  { name: 'Dahua', desc: 'Smart Surveillance' },
+  { name: 'Schneider', desc: 'Circuit Breakers' },
+  { name: 'Super Star', desc: 'Electrical Fixtures' },
+  { name: 'TP-Link', desc: 'Wi-Fi 6 Routers' },
 ];
 
 export default async function HomePage() {
@@ -170,8 +170,8 @@ export default async function HomePage() {
             <HeroCarousel banners={banners} />
           </div>
 
-          {/* Right 4 Cols: 2 Stacked Feature Cards with Brand Banners */}
-          <div className="lg:col-span-4 flex flex-col justify-between gap-4">
+          {/* Right 4 Cols: 2 Stacked Feature Cards (Desktop Only - on mobile combined into the auto-swiping carousel) */}
+          <div className="hidden lg:flex lg:col-span-4 flex-col justify-between gap-4">
             {/* Card 1: Customer Care & Warranty */}
             <div className="flex-1 rounded-2xl bg-gradient-to-br from-[#0a1c2e] to-[#040e19] text-white p-5 sm:p-6 border border-slate-700/80 shadow-md flex flex-col justify-between relative overflow-hidden group">
               {/* High-res Warranty Care Banner Background */}
@@ -407,51 +407,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* 5. Official Brand Partners & Series Showcase */}
-        <section aria-label="Official Brand Partners">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                Official Brand Lineup
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Authorized showroom warranty, genuine serialized products &amp; official distributor supply
-              </p>
-            </div>
-            <Link
-              href="/laptops"
-              className="text-xs font-bold text-[#008CFF] hover:underline flex items-center gap-1"
-            >
-              <span>Explore All Brands</span>
-              <ChevronRight size={14} />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-            {BRANDS.map((brand) => (
-              <Link
-                key={brand.name}
-                href={brand.slug}
-                className="group bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-[#008CFF] dark:hover:border-sky-400 rounded-2xl p-3.5 text-center flex flex-col items-center justify-between transition-all hover:shadow-md hover:-translate-y-1"
-              >
-                <div className={`w-11 h-11 rounded-2xl bg-gradient-to-tr ${brand.color} text-white font-black text-xs flex items-center justify-center shadow-xs group-hover:scale-110 transition-transform mb-2`}>
-                  {brand.name.substring(0, 3).toUpperCase()}
-                </div>
-                <h3 className="font-extrabold text-xs text-slate-900 dark:text-white group-hover:text-[#008CFF] transition-colors leading-tight">
-                  {brand.name}
-                </h3>
-                <span className="text-[10px] text-slate-400 font-medium truncate max-w-full block mt-0.5">
-                  {brand.desc}
-                </span>
-                <span className="mt-2 text-[9px] font-bold text-[#008CFF] bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-full border border-blue-200/60 dark:border-blue-900">
-                  {brand.badge}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* 6. Products Showcase with Interactive Tabs (Trust Computer Style) */}
+        {/* 5. Products Showcase with Interactive Tabs (Trust Computer Style) */}
         <section aria-label="Featured Products">
           <ProductTabsShowcase products={mappedProducts} />
         </section>

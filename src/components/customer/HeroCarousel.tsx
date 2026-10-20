@@ -2,7 +2,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, ArrowRight, ShieldCheck, Sparkles, CreditCard, Laptop } from 'lucide-react';
+import {
+  ChevronLeft, ChevronRight, ArrowRight, ShieldCheck, Sparkles,
+  Phone, MessageCircle, Zap, CreditCard, Laptop
+} from 'lucide-react';
+import { BUSINESS_INFO } from '@/lib/seoConfig';
 
 export interface BannerSlide {
   id: string;
@@ -12,21 +16,24 @@ export interface BannerSlide {
   imageUrl?: string | null;
   targetUrl?: string | null;
   buttonText?: string | null;
+  secondaryType?: 'whatsapp' | 'emi' | 'delivery';
 }
 
 interface HeroCarouselProps {
   banners: BannerSlide[];
 }
 
+// 4 Desktop Brand Banners
 const DEFAULT_SLIDES: BannerSlide[] = [
   {
     id: 'default-1',
     badge: 'HP AUTHORIZED BUSINESS RANGE',
     title: 'HP EliteBook & ProBook Laptops',
-    subtitle: 'Intel Core i5 & i7 processors, all-day battery, military-grade aluminum chassis. Certified showroom warranty & express delivery across Bangladesh.',
+    subtitle: 'Intel Core i5 & i7 processors, aluminum chassis, all-day battery. Certified showroom warranty & express delivery across Bangladesh.',
     targetUrl: '/laptops/hp',
     buttonText: 'Shop HP Series',
     imageUrl: '/banners/hp-elitebook-banner.jpg',
+    secondaryType: 'delivery',
   },
   {
     id: 'default-2',
@@ -36,6 +43,7 @@ const DEFAULT_SLIDES: BannerSlide[] = [
     targetUrl: '/laptops/dell',
     buttonText: 'Shop Dell Series',
     imageUrl: '/banners/dell-latitude-banner.jpg',
+    secondaryType: 'delivery',
   },
   {
     id: 'default-3',
@@ -45,6 +53,7 @@ const DEFAULT_SLIDES: BannerSlide[] = [
     targetUrl: '/laptops/lenovo',
     buttonText: 'Shop ThinkPad',
     imageUrl: '/banners/lenovo-thinkpad-banner.jpg',
+    secondaryType: 'delivery',
   },
   {
     id: 'default-4',
@@ -54,20 +63,74 @@ const DEFAULT_SLIDES: BannerSlide[] = [
     targetUrl: '/cctv',
     buttonText: 'Explore CCTV Packages',
     imageUrl: '/banners/cctv-hikvision-banner.jpg',
+    secondaryType: 'delivery',
+  },
+];
+
+// In Mobile Mode: The 3 Banners Combined into 1 Auto-Swiping Banner
+const MOBILE_3_BANNERS: BannerSlide[] = [
+  {
+    id: 'mobile-banner-1',
+    badge: 'OFFICIAL SHOWROOM & NATIONWIDE DELIVERY',
+    title: 'Authentic Laptops & Tech in Bangladesh',
+    subtitle: 'Explore HP, Dell & Lenovo laptops with official warranty, open-box inspection, and doorstep Cash on Delivery across all 64 districts.',
+    targetUrl: '/laptops',
+    buttonText: 'Browse Laptops',
+    imageUrl: '/banners/hp-elitebook-banner.jpg',
+    secondaryType: 'delivery',
+  },
+  {
+    id: 'mobile-banner-2',
+    badge: 'SHOWROOM CARE & WARRANTY',
+    title: 'Customer Support & Official Warranty',
+    subtitle: 'Instant warranty claim processing, technical diagnosis & phone guidance at Kusumbag Moulvibazar.',
+    targetUrl: `tel:${BUSINESS_INFO.phoneClean}`,
+    buttonText: `Call: ${BUSINESS_INFO.phone}`,
+    imageUrl: '/banners/warranty-care-banner.jpg',
+    secondaryType: 'whatsapp',
+  },
+  {
+    id: 'mobile-banner-3',
+    badge: 'ENGINEERING SERVICES',
+    title: 'Custom PC & Electrical Installation',
+    subtitle: 'Professional gaming desktop build, CCTV IP setup, and certified home/commercial wiring service.',
+    targetUrl: '/services/electrician',
+    buttonText: 'Book Technician',
+    imageUrl: '/banners/custom-pc-banner.jpg',
+    secondaryType: 'emi',
   },
 ];
 
 export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
-  const slides = banners && banners.length > 0 ? banners : DEFAULT_SLIDES;
+  const [isMobile, setIsMobile] = useState(false);
   const [current, setCurrent] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+
+  // Responsive mobile mode detection
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Use the 3 combined banners on mobile; desktop uses full brand banners
+  const slides = isMobile
+    ? MOBILE_3_BANNERS
+    : banners && banners.length > 0
+    ? banners
+    : DEFAULT_SLIDES;
 
   useEffect(() => {
     if (isHovered || slides.length <= 1) return;
     timerRef.current = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
-    }, 6000);
+    }, 5000);
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -82,13 +145,40 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
     setCurrent((prev) => (prev + 1) % slides.length);
   };
 
-  const active = slides[current] || slides[0];
+  // Touch swipe gesture handlers for mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+    setIsHovered(true);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    setIsHovered(false);
+    if (touchStartX.current !== null && touchEndX.current !== null) {
+      const distance = touchStartX.current - touchEndX.current;
+      if (distance > 40) {
+        nextSlide();
+      } else if (distance < -40) {
+        prevSlide();
+      }
+    }
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
+
+  const active = slides[current % slides.length] || slides[0];
 
   return (
     <div
-      className="relative rounded-2xl overflow-hidden shadow-xl border border-slate-700/80 bg-[#081621] text-white h-[300px] xs:h-[340px] sm:h-[390px] lg:h-[430px] flex flex-col justify-center group"
+      className="relative rounded-2xl overflow-hidden shadow-xl border border-slate-700/80 bg-[#081621] text-white min-h-[310px] xs:min-h-[320px] sm:min-h-[360px] lg:h-[430px] flex flex-col justify-center select-none group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Dynamic Ambient Background Blur derived from active banner */}
       <div
@@ -101,8 +191,15 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
       <div className="absolute -top-24 -left-24 w-80 h-80 rounded-full bg-blue-500/20 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-sky-400/20 blur-3xl pointer-events-none" />
 
+      {/* Mobile Slide Counter Badge */}
+      {isMobile && (
+        <div className="absolute top-3 right-3 z-20 px-2 py-0.5 rounded-full bg-black/60 border border-white/15 text-[10px] font-mono text-slate-300">
+          {(current % slides.length) + 1} / {slides.length}
+        </div>
+      )}
+
       {/* Slide Content */}
-      <div className="relative z-10 px-4 sm:px-8 lg:px-10 py-4 sm:py-6 flex items-center h-full">
+      <div className="relative z-10 px-4 sm:px-8 lg:px-10 py-5 sm:py-6 flex items-center h-full">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 lg:gap-8 items-center w-full">
           {/* Text Left Column */}
           <div className="md:col-span-7 space-y-2.5 sm:space-y-4">
@@ -113,7 +210,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
               </div>
             )}
 
-            <h2 className="text-xl xs:text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white drop-shadow-md">
+            <h2 className="text-lg xs:text-xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white drop-shadow-md">
               {active.title}
             </h2>
 
@@ -123,21 +220,54 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners }) => {
               </p>
             )}
 
-            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 pt-1.5 sm:pt-2">
-              <Link
-                href={active.targetUrl || '/laptops'}
-                className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#0070cc] hover:to-[#005bb5] text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/30 transition-all flex items-center gap-1.5 sm:gap-2 group/btn active:scale-95"
-              >
-                <span>{active.buttonText || 'Discover Now'}</span>
-                <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
-              </Link>
-              <Link
-                href="/delivery"
-                className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold text-xs sm:text-sm backdrop-blur-md transition-colors flex items-center gap-2 active:scale-95"
-              >
-                <ShieldCheck size={14} className="text-emerald-400" />
-                <span>Cash on Delivery</span>
-              </Link>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-1.5 sm:pt-2">
+              {/* Primary Action Button */}
+              {active.targetUrl?.startsWith('tel:') ? (
+                <a
+                  href={active.targetUrl}
+                  className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#0070cc] hover:to-[#005bb5] text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/30 transition-all flex items-center gap-1.5 sm:gap-2 active:scale-95"
+                >
+                  <Phone size={14} />
+                  <span>{active.buttonText || 'Call Hotline'}</span>
+                </a>
+              ) : (
+                <Link
+                  href={active.targetUrl || '/laptops'}
+                  className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#0070cc] hover:to-[#005bb5] text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/30 transition-all flex items-center gap-1.5 sm:gap-2 group/btn active:scale-95"
+                >
+                  <span>{active.buttonText || 'Discover Now'}</span>
+                  <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                </Link>
+              )}
+
+              {/* Secondary Action Button */}
+              {active.secondaryType === 'whatsapp' ? (
+                <a
+                  href={`https://wa.me/${BUSINESS_INFO.whatsappClean}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/30 transition-all flex items-center gap-1.5 active:scale-95"
+                >
+                  <MessageCircle size={14} />
+                  <span>WhatsApp</span>
+                </a>
+              ) : active.secondaryType === 'emi' ? (
+                <Link
+                  href="/laptop-emi"
+                  className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-bold text-xs sm:text-sm transition-all flex items-center gap-1.5 active:scale-95"
+                >
+                  <CreditCard size={14} className="text-amber-400" />
+                  <span>Laptop EMI →</span>
+                </Link>
+              ) : (
+                <Link
+                  href="/delivery"
+                  className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold text-xs sm:text-sm backdrop-blur-md transition-colors flex items-center gap-1.5 active:scale-95"
+                >
+                  <ShieldCheck size={14} className="text-emerald-400" />
+                  <span>Cash on Delivery</span>
+                </Link>
+              )}
             </div>
           </div>
 
