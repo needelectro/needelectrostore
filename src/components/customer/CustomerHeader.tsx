@@ -146,15 +146,11 @@ export const CustomerHeader: React.FC = () => {
       {/* 1. Main Dark Top Navbar (Trust Computer MB Style: #081621) */}
       <div className="bg-[#081621] text-white border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3 sm:gap-6">
-          {/* Logo & Slogan */}
+          {/* Logo */}
           <div className="flex items-center shrink-0">
             <Link href="/" className="flex items-center gap-2 group">
               <NeedElectroLogo size="sm" theme="dark" showSisterConcern={false} />
             </Link>
-            <div className="hidden xl:block h-6 w-px bg-slate-700/80 mx-3" />
-            <span className="hidden xl:inline text-[11px] text-slate-300 font-medium tracking-wide whitespace-nowrap">
-              {isBangla ? '- বিশ্বস্ত ইলেকট্রিক্যাল ও প্রযুক্তি সমাধান -' : '- Trusted Electrical & Technological Solutions -'}
-            </span>
           </div>
 
           {/* Pill-shaped Search Bar */}
