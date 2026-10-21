@@ -316,11 +316,11 @@ export const CustomerHeader: React.FC = () => {
               </span>
             </Link>
 
-            {/* Customer Account Button */}
+            {/* Customer Account Button (hidden on mobile, accessible via mobile bottom nav) */}
             {customer ? (
               <Link
                 href="/customer/dashboard"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EAF4FF] hover:bg-blue-100/80 border border-blue-200/80 text-[#002B5B] text-xs font-bold transition-all shadow-2xs group"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EAF4FF] hover:bg-blue-100/80 border border-blue-200/80 text-[#002B5B] text-xs font-bold transition-all shadow-2xs group"
                 title={`Account: ${customer.name}`}
               >
                 <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-[#008CFF] to-sky-400 flex items-center justify-center text-[10px] text-white font-black shadow-xs">
@@ -331,7 +331,7 @@ export const CustomerHeader: React.FC = () => {
             ) : (
               <Link
                 href="/customer/login"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F4F6F8] hover:bg-[#EAF4FF] border border-slate-200 text-[#002B5B] text-xs font-semibold transition-all group"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F4F6F8] hover:bg-[#EAF4FF] border border-slate-200 text-[#002B5B] text-xs font-semibold transition-all group"
                 title="Customer Sign In"
               >
                 <User size={13} className="text-[#008CFF] group-hover:scale-110 transition-transform" />
@@ -339,12 +339,12 @@ export const CustomerHeader: React.FC = () => {
               </Link>
             )}
 
-            {/* Shopping Cart Pill Button */}
+            {/* Shopping Cart Pill Button (hidden on mobile, accessible via mobile bottom nav) */}
             <button
               type="button"
               onClick={openCart}
               aria-label="View shopping cart"
-              className="relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#008CFF] hover:bg-[#0070cc] text-white text-xs font-bold shadow-md shadow-blue-500/25 transition-all group"
+              className="hidden sm:flex relative items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#008CFF] hover:bg-[#0070cc] text-white text-xs font-bold shadow-md shadow-blue-500/25 transition-all group"
             >
               <ShoppingBag size={15} className="group-hover:scale-110 transition-transform" />
               <span className="hidden sm:inline font-semibold">{t('nav.cart', 'Cart')}</span>
