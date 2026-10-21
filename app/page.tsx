@@ -163,91 +163,82 @@ export default async function HomePage() {
           NEED ELECTRO — Authentic Laptops, CCTV, Computers &amp; Electrical Store in Bangladesh
         </h1>
 
-        {/* 1. Hero Section (Trust Computer MB 12-column Grid: 8 cols Carousel + 4 cols Stacked Cards) */}
-        <section aria-label="Hero Promotions" className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-stretch">
-          {/* Left 8 Cols: Carousel */}
-          <div className="lg:col-span-8">
-            <HeroCarousel banners={banners} />
-          </div>
-
-          {/* Right 4 Cols: 2 Stacked Feature Cards (Desktop Only - on mobile combined into the auto-swiping carousel) */}
-          <div className="hidden lg:flex lg:col-span-4 flex-col justify-between gap-3.5">
-            {/* Card 1: Customer Care & Warranty */}
-            <div className="flex-1 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col justify-between relative overflow-hidden group min-h-[162px] bg-white">
-              {/* High-res Warranty Care Banner Background */}
-              <img
-                src="/banners/need-electro-service-warranty.jpg"
-                alt="NEED ELECTRO Trusted Service & Warranty"
-                className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out opacity-90"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-white via-white/75 to-transparent pointer-events-none" />
-
-              {/* Floating Top Badge */}
-              <div className="relative z-10 p-3 flex items-start justify-between">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-white/95 text-emerald-700 border border-emerald-200 uppercase tracking-wider backdrop-blur-md shadow-xs">
-                  <ShieldCheck size={11} className="text-emerald-600" />
-                  <span>Showroom Care &amp; Warranty</span>
-                </span>
-              </div>
-
-              {/* Bottom Interactive Bar */}
-              <div className="relative z-10 p-3 pt-0 flex items-center justify-between">
-                <a
-                  href={`tel:${BUSINESS_INFO.phoneClean}`}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/95 border border-slate-200/90 text-xs font-bold text-[#002B5B] hover:text-[#008CFF] hover:border-blue-200 backdrop-blur-md shadow-xs transition-colors"
-                >
-                  <Phone size={11} className="text-[#008CFF]" />
-                  <span>{BUSINESS_INFO.phone}</span>
-                </a>
-                <a
-                  href={`https://wa.me/${BUSINESS_INFO.whatsappClean}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-emerald-600/20 transition-all active:scale-95"
-                >
-                  <MessageCircle size={11} />
-                  <span>WhatsApp</span>
-                </a>
-              </div>
-            </div>
-
-            {/* Card 2: Custom PC & Electrical Servicing */}
-            <div className="flex-1 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col justify-between relative overflow-hidden group min-h-[162px] bg-white">
-              {/* High-res Custom Gaming PC & Engineering Banner Background */}
-              <img
-                src="/banners/need-electro-custom-pc.jpg"
-                alt="NEED ELECTRO Custom Gaming PC & Workstations"
-                className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out opacity-90"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-white via-white/75 to-transparent pointer-events-none" />
-
-              {/* Floating Top Badge */}
-              <div className="relative z-10 p-3 flex items-start justify-between">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-white/95 text-[#008CFF] border border-blue-200 uppercase tracking-wider backdrop-blur-md shadow-xs">
-                  <Zap size={11} className="text-[#008CFF]" />
-                  <span>Custom PC &amp; Engineering</span>
-                </span>
-              </div>
-
-              {/* Bottom Interactive Bar */}
-              <div className="relative z-10 p-3 pt-0 flex items-center justify-between">
-                <Link
-                  href="/services/electrician"
-                  className="px-3 py-1 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#0070cc] hover:to-[#005bb5] text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-blue-500/20 transition-all active:scale-95"
-                >
-                  <span>Book Technician</span>
-                  <ArrowRight size={11} />
-                </Link>
-                <Link
-                  href="/computers"
-                  className="px-2.5 py-1 rounded-xl bg-white/95 border border-slate-200/90 text-xs font-bold text-[#002B5B] hover:text-[#008CFF] hover:border-blue-200 backdrop-blur-md shadow-xs transition-colors"
-                >
-                  Browse PCs →
-                </Link>
-              </div>
-            </div>
-          </div>
+        {/* 1. Hero Section — Full-Width Futuristic Banner Carousel */}
+        <section aria-label="Hero Promotions" className="w-full">
+          <HeroCarousel banners={banners} />
         </section>
+
+        {/* 2. Showroom Hotline & Custom Engineering Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Card 1: Customer Care & Warranty */}
+          <div className="rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col justify-between relative overflow-hidden group min-h-[140px] bg-white">
+            <img
+              src="/banners/need-electro-service-warranty.jpg"
+              alt="NEED ELECTRO Trusted Service & Warranty"
+              className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out opacity-90"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-white/40 pointer-events-none" />
+
+            <div className="relative z-10 p-4 flex items-start justify-between">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-white text-emerald-700 border border-emerald-200 uppercase tracking-wider shadow-xs">
+                <ShieldCheck size={11} className="text-emerald-600" />
+                <span>Showroom Care &amp; Warranty Support</span>
+              </span>
+            </div>
+
+            <div className="relative z-10 p-4 pt-0 flex items-center justify-between">
+              <a
+                href={`tel:${BUSINESS_INFO.phoneClean}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200/90 text-xs font-bold text-[#002B5B] hover:text-[#008CFF] shadow-xs transition-colors"
+              >
+                <Phone size={12} className="text-[#008CFF]" />
+                <span>Hotline: {BUSINESS_INFO.phone}</span>
+              </a>
+              <a
+                href={`https://wa.me/${BUSINESS_INFO.whatsappClean}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-xs transition-all active:scale-95"
+              >
+                <MessageCircle size={12} />
+                <span>WhatsApp</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Card 2: Custom PC & Electrical Servicing */}
+          <div className="rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col justify-between relative overflow-hidden group min-h-[140px] bg-white">
+            <img
+              src="/banners/need-electro-custom-pc.jpg"
+              alt="NEED ELECTRO Custom Gaming PC & Workstations"
+              className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out opacity-90"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-white/40 pointer-events-none" />
+
+            <div className="relative z-10 p-4 flex items-start justify-between">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-white text-[#008CFF] border border-blue-200 uppercase tracking-wider shadow-xs">
+                <Zap size={11} className="text-[#008CFF]" />
+                <span>Custom PC Builds &amp; Technical Services</span>
+              </span>
+            </div>
+
+            <div className="relative z-10 p-4 pt-0 flex items-center justify-between">
+              <Link
+                href="/services/electrician"
+                className="px-3.5 py-1.5 rounded-xl bg-[#008CFF] hover:bg-[#0070cc] text-white font-bold text-xs flex items-center gap-1 shadow-xs transition-all active:scale-95"
+              >
+                <span>Book Technician</span>
+                <ArrowRight size={12} />
+              </Link>
+              <Link
+                href="/computers"
+                className="px-3 py-1.5 rounded-xl bg-white border border-slate-200/90 text-xs font-bold text-[#002B5B] hover:text-[#008CFF] shadow-xs transition-colors"
+              >
+                Browse PCs →
+              </Link>
+            </div>
+          </div>
+        </div>
 
         {/* 2. Status / Operational Strip (Trust Computer MB Style: Rounded-full Pill) */}
         <section aria-label="Showroom Operational Notice">
