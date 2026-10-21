@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   Search, Phone, MessageCircle, Menu, X, ChevronDown, ChevronLeft, ChevronRight,
   Laptop, Monitor, Camera, Zap, Cpu, Wifi, Smartphone,
@@ -41,18 +42,30 @@ const CATEGORY_NAV_ITEMS = [
 ];
 
 export const CustomerHeader: React.FC = () => {
+  const pathname = usePathname();
   const { openCart, totalItems } = useCart();
   const { customer, logout } = useCustomerAuth();
   const { t, formatNumber, isBangla } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [wishlistCount, setWishlistCount] = useState(0);
   const searchRef = useRef<HTMLDivElement>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
+  const mobileSearchBtnRef = useRef<HTMLButtonElement>(null);
+  const mobileInputRef = useRef<HTMLInputElement>(null);
   const navScrollRef = useRef<HTMLElement>(null);
   const isNavPaused = useRef(false);
+
+  // Auto-close mobile drawer & mobile search on navigation
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setMobileSearchOpen(false);
+    setSearchOpen(false);
+  }, [pathname]);
 
   // Auto-scroll category navigation sub-bar continuously with pause-on-hover
   useEffect(() => {
@@ -161,11 +174,19 @@ export const CustomerHeader: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Click outside to dismiss search
+  // Click outside to dismiss desktop & mobile search
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (searchRef.current && !searchRef.current.contains(target)) {
         setSearchOpen(false);
+      }
+      if (
+        mobileSearchRef.current &&
+        !mobileSearchRef.current.contains(target) &&
+        !mobileSearchBtnRef.current?.contains(target)
+      ) {
+        setMobileSearchOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -353,6 +374,30 @@ export const CustomerHeader: React.FC = () => {
               </span>
             </button>
 
+            {/* Mobile Search Toggle Icon Button */}
+            <button
+              ref={mobileSearchBtnRef}
+              type="button"
+              onClick={() => {
+                setMobileSearchOpen((prev) => {
+                  const next = !prev;
+                  if (next) {
+                    setTimeout(() => mobileInputRef.current?.focus(), 80);
+                  }
+                  return next;
+                });
+              }}
+              aria-label={mobileSearchOpen ? 'Close search' : 'Open search'}
+              title="Search store"
+              className={`md:hidden p-1.5 rounded-full border flex items-center justify-center transition-all ${
+                mobileSearchOpen
+                  ? 'bg-[#008CFF] text-white border-[#008CFF] shadow-xs scale-105'
+                  : 'bg-[#F4F6F8] hover:bg-[#EAF4FF] text-[#002B5B] border-slate-200'
+              }`}
+            >
+              {mobileSearchOpen ? <X size={15} /> : <Search size={15} />}
+            </button>
+
             {/* Mobile Quick Call Button */}
             <a
               href={`tel:${BUSINESS_INFO.phoneClean}`}
@@ -363,12 +408,12 @@ export const CustomerHeader: React.FC = () => {
               <Phone size={15} />
             </a>
 
-            {/* Dark / Light Toggle */}
+            {/* Dark / Light Toggle (hidden on mobile topbar, available on desktop) */}
             <button
               type="button"
               onClick={toggleTheme}
               title={theme === 'light' ? 'Light Mode Active' : 'Switch to Light Mode'}
-              className="p-1.5 rounded-full bg-[#F4F6F8] hover:bg-slate-200 border border-slate-200 text-amber-500 transition-colors"
+              className="hidden md:inline-flex p-1.5 rounded-full bg-[#F4F6F8] hover:bg-slate-200 border border-slate-200 text-amber-500 transition-colors"
             >
               {theme === 'light' ? <Sun size={15} /> : <Moon size={15} />}
             </button>
@@ -384,81 +429,103 @@ export const CustomerHeader: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Search Bar inside header */}
-        <div ref={searchRef} className="md:hidden px-3 sm:px-4 pb-2.5 relative">
-          <div className="relative flex items-center">
-            <input
-              type="text"
-              placeholder="Search CCTV, PC, Laptop, Electricals..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setSearchOpen(true);
-              }}
-              onFocus={() => setSearchOpen(true)}
-              className="w-full bg-[#F4F6F8] text-slate-900 placeholder-slate-400 rounded-full pl-4 pr-10 py-2 text-xs font-medium border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#008CFF]/20 shadow-inner"
-            />
-            <button
-              type="button"
-              aria-label="Submit Search"
-              className="absolute right-1 top-1 bottom-1 w-7 h-7 rounded-full bg-[#008CFF] text-white flex items-center justify-center"
-            >
-              {isSearching ? (
-                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Search size={13} />
-              )}
-            </button>
-          </div>
-
-          {/* Mobile Search Suggestions Dropdown */}
-          {searchOpen && searchQuery.trim().length >= 2 && (
-            <div className="absolute top-full left-3 right-3 mt-1.5 rounded-2xl shadow-2xl overflow-hidden z-50 border border-slate-200 bg-white text-slate-900 max-h-72 overflow-y-auto">
-              <div className="p-2 border-b text-[10px] font-bold uppercase tracking-wider flex justify-between bg-slate-50 border-slate-200 text-slate-500">
-                <span>Suggestions ({searchResults.length})</span>
+        {/* Mobile Search Bar: only opened on-demand via topbar search icon */}
+        {mobileSearchOpen && (
+          <div
+            ref={mobileSearchRef}
+            className="md:hidden px-3 sm:px-4 py-2.5 bg-white border-t border-slate-100 shadow-sm relative animate-in fade-in slide-in-from-top-1 duration-150"
+          >
+            <div className="relative flex items-center">
+              <input
+                ref={mobileInputRef}
+                type="text"
+                placeholder={t('header.searchPlaceholder', 'Search CCTV, PC, Laptop, Electricals...')}
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setSearchOpen(true);
+                }}
+                onFocus={() => setSearchOpen(true)}
+                className="w-full bg-[#F4F6F8] text-slate-900 placeholder-slate-400 rounded-full pl-4 pr-16 py-2 text-xs font-medium border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#008CFF]/20 shadow-inner"
+              />
+              <div className="absolute right-1 top-1 bottom-1 flex items-center gap-1">
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSearchResults([]);
+                    }}
+                    className="w-6 h-6 rounded-full text-slate-400 hover:text-slate-600 flex items-center justify-center text-xs"
+                    aria-label="Clear query"
+                  >
+                    ✕
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={() => setSearchOpen(false)}
-                  className="text-slate-400 hover:text-slate-600"
+                  aria-label="Submit Search"
+                  className="w-7 h-7 rounded-full bg-[#008CFF] text-white flex items-center justify-center shadow-xs"
                 >
-                  ✕ Close
+                  {isSearching ? (
+                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Search size={13} />
+                  )}
                 </button>
               </div>
-              {searchResults.length > 0 ? (
-                <div className="divide-y divide-slate-100">
-                  {searchResults.map((p) => (
-                    <Link
-                      key={p.id}
-                      href={`/product/${p.slug}`}
-                      onClick={() => {
-                        setSearchOpen(false);
-                        setSearchQuery('');
-                      }}
-                      className="p-2.5 flex items-center justify-between hover:bg-slate-50 transition-colors"
-                    >
-                      <div className="pr-2">
-                        <p className="text-xs font-semibold line-clamp-1">{p.name}</p>
-                        <p className="text-[10px] text-slate-400">{p.brand} • {p.category}</p>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <span className="text-xs font-bold text-[#008CFF] font-mono block">
-                          ৳{p.retailPrice.toLocaleString()}
-                        </span>
-                        <span className={`text-[9px] font-bold ${p.currentStock > 0 ? 'text-emerald-500' : 'text-rose-400'}`}>
-                          {p.currentStock > 0 ? 'In Stock' : 'Pre-Order'}
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-4 text-center text-xs text-slate-500">
-                  {isSearching ? 'Searching...' : `No products found for "${searchQuery}"`}
-                </div>
-              )}
             </div>
-          )}
-        </div>
+
+            {/* Mobile Search Suggestions Dropdown */}
+            {searchOpen && searchQuery.trim().length >= 2 && (
+              <div className="absolute top-full left-3 right-3 mt-1.5 rounded-2xl shadow-2xl overflow-hidden z-50 border border-slate-200 bg-white text-slate-900 max-h-72 overflow-y-auto">
+                <div className="p-2 border-b text-[10px] font-bold uppercase tracking-wider flex justify-between bg-slate-50 border-slate-200 text-slate-500">
+                  <span>Suggestions ({searchResults.length})</span>
+                  <button
+                    type="button"
+                    onClick={() => setSearchOpen(false)}
+                    className="text-slate-400 hover:text-slate-600"
+                  >
+                    ✕ Close
+                  </button>
+                </div>
+                {searchResults.length > 0 ? (
+                  <div className="divide-y divide-slate-100">
+                    {searchResults.map((p) => (
+                      <Link
+                        key={p.id}
+                        href={`/product/${p.slug}`}
+                        onClick={() => {
+                          setSearchOpen(false);
+                          setMobileSearchOpen(false);
+                          setSearchQuery('');
+                        }}
+                        className="p-2.5 flex items-center justify-between hover:bg-slate-50 transition-colors"
+                      >
+                        <div className="pr-2">
+                          <p className="text-xs font-semibold line-clamp-1">{p.name}</p>
+                          <p className="text-[10px] text-slate-400">{p.brand} • {p.category}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="text-xs font-bold text-[#008CFF] font-mono block">
+                            ৳{formatNumber(p.retailPrice.toLocaleString())}
+                          </span>
+                          <span className={`text-[9px] font-bold ${p.currentStock > 0 ? 'text-emerald-500' : 'text-rose-400'}`}>
+                            {p.currentStock > 0 ? t('common.inStock', 'In Stock') : t('common.outOfStock', 'Pre-Order')}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-xs text-slate-500">
+                    {isSearching ? t('common.loading', 'Searching...') : `No products found for "${searchQuery}"`}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 2. Horizontal Auto-Scrolling Category Navigation Sub-bar with Infinite Loop */}
@@ -709,8 +776,20 @@ export const CustomerHeader: React.FC = () => {
               </div>
             </div>
 
-            {/* Contact & Hotline */}
+            {/* Theme & Contact Hotline */}
             <div className="pt-2 border-t border-slate-100 space-y-2 text-xs">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  {theme === 'light' ? <Sun size={15} className="text-amber-500" /> : <Moon size={15} className="text-sky-400" />}
+                  <span>{theme === 'light' ? 'Light Mode Active' : 'Dark Mode Active'}</span>
+                </div>
+                <span className="text-[10px] text-slate-400 font-normal">Switch Theme</span>
+              </button>
+
               <a
                 href={`tel:${BUSINESS_INFO.phoneClean}`}
                 className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] text-white font-bold shadow-md shadow-blue-500/20"
