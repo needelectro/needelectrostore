@@ -90,13 +90,13 @@ export const ProductTabsShowcase: React.FC<ProductTabsShowcaseProps> = ({ produc
   return (
     <div className="space-y-6">
       {/* Header and Filter Tabs */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-3 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-3 border-b border-slate-200">
         <div>
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0084d6] uppercase tracking-wider mb-1">
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#008CFF] uppercase tracking-wider mb-1">
             <Sparkles size={13} />
             <span>Top Picks in Moulvibazar</span>
           </div>
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#002B5B] tracking-tight">
             Featured Products
           </h2>
         </div>
@@ -112,8 +112,8 @@ export const ProductTabsShowcase: React.FC<ProductTabsShowcaseProps> = ({ produc
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
                   isActive
-                    ? 'bg-[#0084d6] text-white shadow-sm shadow-blue-500/25'
-                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800'
+                    ? 'bg-[#008CFF] text-white shadow-sm shadow-blue-500/25'
+                    : 'bg-white text-slate-600 hover:text-[#002B5B] hover:bg-[#EAF4FF] border border-slate-200 shadow-2xs'
                 }`}
               >
                 <Icon size={13} />
@@ -121,7 +121,7 @@ export const ProductTabsShowcase: React.FC<ProductTabsShowcaseProps> = ({ produc
                 {tab.count > 0 && (
                   <span
                     className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                      isActive ? 'bg-white/25 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                      isActive ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-600'
                     }`}
                   >
                     {tab.count}
@@ -135,8 +135,8 @@ export const ProductTabsShowcase: React.FC<ProductTabsShowcaseProps> = ({ produc
 
       {/* Grid of Product Cards */}
       {filteredProducts.length === 0 ? (
-        <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
-          <p className="font-bold text-slate-700 dark:text-slate-300">No products found in this category.</p>
+        <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 shadow-xs">
+          <p className="font-bold text-[#002B5B]">No products found in this category.</p>
           <p className="text-xs text-slate-500 mt-1">Please call 01733-983752 for instant product availability.</p>
         </div>
       ) : (

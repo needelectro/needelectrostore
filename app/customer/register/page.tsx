@@ -183,35 +183,35 @@ function FuturisticRegisterForm() {
         <div className="hidden lg:flex lg:col-span-5 flex-col justify-between space-y-8 pr-2 sticky top-28">
           <div className="space-y-4">
             <Link href="/" className="inline-block group">
-              <NeedElectroLogo size="lg" theme="dark" showTagline={false} showSisterConcern={false} />
+              <NeedElectroLogo size="lg" theme="light" showTagline={false} showSisterConcern={false} />
             </Link>
 
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-[#008CFF]/15 text-[#008CFF] border border-[#008CFF]/30 backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-[#EAF4FF] text-[#008CFF] border border-blue-200/80 backdrop-blur-md">
               <Radio size={13} className="text-[#008CFF] animate-pulse" />
               <span className="tracking-wider uppercase">
                 {isBangla ? 'ভেরিফায়েড কাস্টমার অনবোর্ডিং' : 'Verified Customer Onboarding'}
               </span>
             </div>
 
-            <h1 className="text-3xl xl:text-4xl font-black text-white tracking-tight leading-tight">
+            <h1 className="text-3xl xl:text-4xl font-black text-[#002B5B] tracking-tight leading-tight">
               {isBangla ? (
                 <>
                   প্রযুক্তির নতুন দিগন্তে <br />
-                  <span className="bg-gradient-to-r from-sky-400 via-[#008CFF] to-blue-500 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-[#008CFF] to-blue-600 bg-clip-text text-transparent">
                     আপনার স্বাগতম
                   </span>
                 </>
               ) : (
                 <>
                   Powering Your <br />
-                  <span className="bg-gradient-to-r from-sky-400 via-[#008CFF] to-blue-500 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-[#008CFF] to-blue-600 bg-clip-text text-transparent">
                     Digital World.
                   </span>
                 </>
               )}
             </h1>
 
-            <p className="text-sm text-slate-300 leading-relaxed max-w-md">
+            <p className="text-sm text-slate-600 leading-relaxed max-w-md">
               {isBangla
                 ? 'NEED ELECTRO-তে যোগ দিন এবং জেনুইন ল্যাপটপ, সিসিটিভি ক্যামেরা, সোলার আইপিএস এবং ইলেকট্রিক্যাল সমাধানের নির্ভরযোগ্য সেবা গ্রহণ করুন।'
                 : 'Join NEED ELECTRO and discover a smarter, faster, and more secure way to shop for modern technology and electrical equipment.'}
@@ -219,60 +219,60 @@ function FuturisticRegisterForm() {
           </div>
 
           {/* Futuristic Telemetry Matrix Box */}
-          <div className="relative rounded-3xl p-6 border border-cyan-500/20 bg-gradient-to-b from-slate-900/40 via-slate-900/70 to-slate-950/80 backdrop-blur-xl overflow-hidden shadow-2xl shadow-[#008CFF]/10">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#008CFF0a_1px,transparent_1px),linear-gradient(to_bottom,#008CFF0a_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
-            <div className="absolute -top-10 -right-10 w-44 h-44 bg-[#008CFF]/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative rounded-3xl p-6 border border-slate-200/90 bg-white/90 backdrop-blur-xl overflow-hidden shadow-md">
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#008CFF08_1px,transparent_1px),linear-gradient(to_bottom,#008CFF08_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
+            <div className="absolute -top-10 -right-10 w-44 h-44 bg-[#008CFF]/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative z-10 space-y-4">
-              <div className="flex items-center justify-between border-b border-cyan-500/15 pb-3">
-                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-sky-400 flex items-center gap-2">
-                  <Cpu size={14} className="text-[#008CFF] animate-spin-slow" />
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#008CFF] flex items-center gap-2">
+                  <Cpu size={14} className="text-[#008CFF]" />
                   <span>Platform Privileges</span>
                 </span>
-                <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded-full border border-cyan-500/30">
+                <span className="text-[10px] font-mono text-[#008CFF] bg-[#EAF4FF] px-2 py-0.5 rounded-full border border-blue-200">
                   Instant Access
                 </span>
               </div>
 
               {/* 4 Privilege Telemetry Points */}
               <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-[#008CFF]/40 transition-colors">
-                  <div className="flex items-center gap-2 text-sky-400 font-bold mb-1">
+                <div className="p-3 rounded-2xl bg-[#F4F6F8] border border-slate-200/80 hover:border-[#008CFF] transition-colors">
+                  <div className="flex items-center gap-2 text-[#008CFF] font-bold mb-1">
                     <Laptop size={14} />
                     <span>Official Warranty</span>
                   </div>
-                  <p className="text-[11px] text-slate-300">100% genuine serialized device warranty &amp; support</p>
+                  <p className="text-[11px] text-slate-600">100% genuine serialized device warranty &amp; support</p>
                 </div>
 
-                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-[#008CFF]/40 transition-colors">
-                  <div className="flex items-center gap-2 text-emerald-400 font-bold mb-1">
+                <div className="p-3 rounded-2xl bg-[#F4F6F8] border border-slate-200/80 hover:border-[#008CFF] transition-colors">
+                  <div className="flex items-center gap-2 text-emerald-600 font-bold mb-1">
                     <Zap size={14} />
                     <span>Fast Delivery</span>
                   </div>
-                  <p className="text-[11px] text-slate-300">Same-day Moulvibazar &amp; Sylhet priority dispatch</p>
+                  <p className="text-[11px] text-slate-600">Same-day Moulvibazar &amp; Sylhet priority dispatch</p>
                 </div>
 
-                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-[#008CFF]/40 transition-colors">
-                  <div className="flex items-center gap-2 text-cyan-400 font-bold mb-1">
+                <div className="p-3 rounded-2xl bg-[#F4F6F8] border border-slate-200/80 hover:border-[#008CFF] transition-colors">
+                  <div className="flex items-center gap-2 text-cyan-600 font-bold mb-1">
                     <ShieldCheck size={14} />
                     <span>Direct ERP Sync</span>
                   </div>
-                  <p className="text-[11px] text-slate-300">Live order tracking, invoice print &amp; repair status</p>
+                  <p className="text-[11px] text-slate-600">Live order tracking, invoice print &amp; repair status</p>
                 </div>
 
-                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-[#008CFF]/40 transition-colors">
-                  <div className="flex items-center gap-2 text-amber-400 font-bold mb-1">
+                <div className="p-3 rounded-2xl bg-[#F4F6F8] border border-slate-200/80 hover:border-[#008CFF] transition-colors">
+                  <div className="flex items-center gap-2 text-amber-600 font-bold mb-1">
                     <Camera size={14} />
                     <span>Verified Techs</span>
                   </div>
-                  <p className="text-[11px] text-slate-300">Certified electrician &amp; CCTV field engineer support</p>
+                  <p className="text-[11px] text-slate-600">Certified electrician &amp; CCTV field engineer support</p>
                 </div>
               </div>
 
               {/* Telemetry Footer Pill */}
-              <div className="pt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-white/5 font-mono">
-                <span className="flex items-center gap-1.5 text-slate-300">
-                  <Shield size={13} className="text-emerald-400" />
+              <div className="pt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 font-mono">
+                <span className="flex items-center gap-1.5 text-slate-600">
+                  <Shield size={13} className="text-emerald-600" />
                   256-Bit SSL Secured
                 </span>
                 <span>Sylhet Division Hub</span>
@@ -280,7 +280,7 @@ function FuturisticRegisterForm() {
             </div>
           </div>
 
-          <p className="text-xs text-slate-400 italic">
+          <p className="text-xs text-slate-500 italic">
             {isBangla
               ? 'NEED ELECTRO — নির্ভরযোগ্য ইলেকট্রিক্যাল এবং প্রযুক্তি সমাধান।'
               : 'NEED ELECTRO — Trusted Electrical and Technological Solutions.'}
@@ -289,27 +289,27 @@ function FuturisticRegisterForm() {
 
         {/* ================= RIGHT PANEL: Glass Registration Card ================= */}
         <div className="lg:col-span-7 w-full max-w-xl mx-auto lg:max-w-none">
-          <div className="relative rounded-3xl border border-cyan-500/30 bg-slate-900/75 dark:bg-[#071324]/85 backdrop-blur-2xl p-6 sm:p-9 shadow-[0_0_50px_rgba(0,140,255,0.15)] overflow-hidden">
+          <div className="relative rounded-3xl border border-slate-200 bg-white/95 backdrop-blur-2xl p-6 sm:p-9 shadow-xl overflow-hidden">
             {/* Top glowing neon beam */}
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#008CFF] to-transparent pointer-events-none" />
-            <div className="absolute -bottom-20 -right-20 w-52 h-52 bg-[#008CFF]/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-20 -right-20 w-52 h-52 bg-[#008CFF]/10 rounded-full blur-3xl pointer-events-none" />
 
             {/* Mobile Header (Shown on mobile screens) */}
             <div className="lg:hidden text-center mb-6">
               <Link href="/" className="inline-block mb-3">
-                <NeedElectroLogo size="sm" theme="dark" showTagline={false} showSisterConcern={false} />
+                <NeedElectroLogo size="sm" theme="light" showTagline={false} showSisterConcern={false} />
               </Link>
             </div>
 
             <div className="mb-6">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#008CFF]/20 text-sky-300 border border-[#008CFF]/30 uppercase tracking-widest mb-2 backdrop-blur-xs">
-                <Sparkles size={11} className="text-sky-400" />
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#EAF4FF] text-[#008CFF] border border-blue-200 uppercase tracking-widest mb-2 backdrop-blur-xs">
+                <Sparkles size={11} className="text-[#008CFF]" />
                 <span>Customer Registration</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-black text-[#002B5B] tracking-tight">
                 {isBangla ? 'নতুন অ্যাকাউন্ট তৈরি করুন' : 'Create Your Account'}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 mt-1">
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
                 {isBangla
                   ? 'NEED ELECTRO-তে যোগ দিয়ে প্রযুক্তি কেনাকাটা আরও সহজ করুন।'
                   : 'Join NEED ELECTRO and discover a smarter way to shop.'}
@@ -333,7 +333,7 @@ function FuturisticRegisterForm() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Full Name */}
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-[#002B5B] uppercase tracking-wider mb-1.5">
                   {isBangla ? 'সম্পূর্ণ নাম *' : 'Full Name *'}
                 </label>
                 <div className="relative">
@@ -346,7 +346,7 @@ function FuturisticRegisterForm() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={isBangla ? 'যেমনঃ মো: রহিম চৌধুরী' : 'e.g. Md. Rahim Chowdhury'}
-                    className="w-full bg-slate-950/70 border border-slate-700/80 hover:border-slate-600 focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/25 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none"
+                    className="w-full bg-[#F4F6F8] border border-slate-200 hover:border-slate-300 focus:bg-white focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/20 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-900 placeholder-slate-400 transition-all outline-none"
                   />
                 </div>
               </div>
@@ -354,7 +354,7 @@ function FuturisticRegisterForm() {
               {/* Mobile Phone & Email Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-[#002B5B] uppercase tracking-wider mb-1.5">
                     {isBangla ? 'মোবাইল নম্বর *' : 'Mobile Number *'}
                   </label>
                   <div className="relative">
@@ -367,13 +367,13 @@ function FuturisticRegisterForm() {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="017XXXXXXXX"
-                      className="w-full bg-slate-950/70 border border-slate-700/80 hover:border-slate-600 focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/25 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-mono placeholder-slate-500 transition-all outline-none"
+                      className="w-full bg-[#F4F6F8] border border-slate-200 hover:border-slate-300 focus:bg-white focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/20 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-900 font-mono placeholder-slate-400 transition-all outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-[#002B5B] uppercase tracking-wider mb-1.5">
                     {isBangla ? 'ইমেইল (ঐচ্ছিক)' : 'Email Address (Optional)'}
                   </label>
                   <div className="relative">
@@ -385,7 +385,7 @@ function FuturisticRegisterForm() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="name@example.com"
-                      className="w-full bg-slate-950/70 border border-slate-700/80 hover:border-slate-600 focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/25 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none"
+                      className="w-full bg-[#F4F6F8] border border-slate-200 hover:border-slate-300 focus:bg-white focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/20 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-900 placeholder-slate-400 transition-all outline-none"
                     />
                   </div>
                 </div>
@@ -394,7 +394,7 @@ function FuturisticRegisterForm() {
               {/* District & Delivery Area Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-[#002B5B] uppercase tracking-wider mb-1.5">
                     {isBangla ? 'জেলা *' : 'District *'}
                   </label>
                   <div className="relative">
@@ -404,10 +404,10 @@ function FuturisticRegisterForm() {
                     <select
                       value={district}
                       onChange={(e) => setDistrict(e.target.value)}
-                      className="w-full bg-slate-950/70 border border-slate-700/80 hover:border-slate-600 focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/25 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white transition-all outline-none"
+                      className="w-full bg-[#F4F6F8] border border-slate-200 hover:border-slate-300 focus:bg-white focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/20 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-900 transition-all outline-none"
                     >
                       {BANGLADESH_DISTRICTS.map((d) => (
-                        <option key={d} value={d} className="bg-slate-900 text-white">
+                        <option key={d} value={d} className="bg-white text-slate-900">
                           {d}
                         </option>
                       ))}
@@ -416,7 +416,7 @@ function FuturisticRegisterForm() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-[#002B5B] uppercase tracking-wider mb-1.5">
                     {isBangla ? 'থানা / উপজেলা / এলাকা' : 'Area / Upazila'}
                   </label>
                   <div className="relative">
@@ -428,7 +428,7 @@ function FuturisticRegisterForm() {
                       value={deliveryArea}
                       onChange={(e) => setDeliveryArea(e.target.value)}
                       placeholder={isBangla ? 'যেমনঃ কুসুমবাগ, শ্রীমঙ্গল রোড' : 'e.g. Kusumbag, Sreemangal Rd'}
-                      className="w-full bg-slate-950/70 border border-slate-700/80 hover:border-slate-600 focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/25 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none"
+                      className="w-full bg-[#F4F6F8] border border-slate-200 hover:border-slate-300 focus:bg-white focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/20 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-900 placeholder-slate-400 transition-all outline-none"
                     />
                   </div>
                 </div>
@@ -436,7 +436,7 @@ function FuturisticRegisterForm() {
 
               {/* Delivery Address */}
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-[#002B5B] uppercase tracking-wider mb-1.5">
                   {isBangla ? 'বিস্তারিত ডেলিভারি ঠিকানা *' : 'Detailed Delivery Address *'}
                 </label>
                 <textarea
@@ -445,7 +445,7 @@ function FuturisticRegisterForm() {
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder={isBangla ? 'বাসা/রোড নম্বর, হোল্ডিং, এলাকার বিবরণ...' : 'House, Road, Holding, landmark details...'}
-                  className="w-full bg-slate-950/70 border border-slate-700/80 hover:border-slate-600 focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/25 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none resize-none"
+                  className="w-full bg-[#F4F6F8] border border-slate-200 hover:border-slate-300 focus:bg-white focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/20 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 transition-all outline-none resize-none"
                 />
               </div>
 
@@ -453,7 +453,7 @@ function FuturisticRegisterForm() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Password Field */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-[#002B5B] uppercase tracking-wider mb-1.5">
                     {isBangla ? 'পাসওয়ার্ড *' : 'Password *'}
                   </label>
                   <div className="relative">
@@ -467,13 +467,13 @@ function FuturisticRegisterForm() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-slate-950/70 border border-slate-700/80 hover:border-slate-600 focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/25 rounded-xl pl-10 pr-10 py-2.5 sm:py-3 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none"
+                      className="w-full bg-[#F4F6F8] border border-slate-200 hover:border-slate-300 focus:bg-white focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/20 rounded-xl pl-10 pr-10 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-900 placeholder-slate-400 transition-all outline-none"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                     >
                       {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
@@ -482,7 +482,7 @@ function FuturisticRegisterForm() {
 
                 {/* Confirm Password Field */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-[#002B5B] uppercase tracking-wider mb-1.5">
                     {isBangla ? 'কনফার্ম পাসওয়ার্ড *' : 'Confirm Password *'}
                   </label>
                   <div className="relative">
@@ -496,19 +496,19 @@ function FuturisticRegisterForm() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
-                      className={`w-full bg-slate-950/70 border rounded-xl pl-10 pr-10 py-2.5 sm:py-3 text-xs sm:text-sm text-white placeholder-slate-500 transition-all outline-none ${
+                      className={`w-full bg-[#F4F6F8] border rounded-xl pl-10 pr-10 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-900 placeholder-slate-400 transition-all outline-none ${
                         passwordsMatch
-                          ? 'border-emerald-500/80 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/25'
+                          ? 'border-emerald-500 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
                           : passwordsMismatch
-                          ? 'border-rose-500/80 focus:border-rose-400 focus:ring-2 focus:ring-rose-500/25'
-                          : 'border-slate-700/80 hover:border-slate-600 focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/25'
+                          ? 'border-rose-400 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20'
+                          : 'border-slate-200 hover:border-slate-300 focus:bg-white focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/20'
                       }`}
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                     >
                       {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
@@ -518,9 +518,9 @@ function FuturisticRegisterForm() {
 
               {/* Real-time Password Strength Meter & Matching Indicator */}
               {password.length > 0 && (
-                <div className="p-3 rounded-2xl bg-slate-950/50 border border-slate-800 space-y-2">
+                <div className="p-3 rounded-2xl bg-[#F4F6F8] border border-slate-200 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-400">
+                    <span className="text-slate-600">
                       {isBangla ? 'পাসওয়ার্ডের শক্তি:' : 'Password Strength:'}
                     </span>
                     <span className={`font-mono font-bold ${strength.text}`}>
@@ -530,22 +530,22 @@ function FuturisticRegisterForm() {
 
                   {/* 4-Step Animated Strength Bar */}
                   <div className="grid grid-cols-4 gap-1.5 h-1.5 w-full">
-                    <div className={`h-full rounded-full transition-all duration-300 ${strength.score >= 1 ? strength.color : 'bg-slate-800'}`} />
-                    <div className={`h-full rounded-full transition-all duration-300 ${strength.score >= 2 ? strength.color : 'bg-slate-800'}`} />
-                    <div className={`h-full rounded-full transition-all duration-300 ${strength.score >= 3 ? strength.color : 'bg-slate-800'}`} />
-                    <div className={`h-full rounded-full transition-all duration-300 ${strength.score >= 4 ? strength.color : 'bg-slate-800'}`} />
+                    <div className={`h-full rounded-full transition-all duration-300 ${strength.score >= 1 ? strength.color : 'bg-slate-200'}`} />
+                    <div className={`h-full rounded-full transition-all duration-300 ${strength.score >= 2 ? strength.color : 'bg-slate-200'}`} />
+                    <div className={`h-full rounded-full transition-all duration-300 ${strength.score >= 3 ? strength.color : 'bg-slate-200'}`} />
+                    <div className={`h-full rounded-full transition-all duration-300 ${strength.score >= 4 ? strength.color : 'bg-slate-200'}`} />
                   </div>
 
                   {/* Password Match Confirmation Status */}
                   {confirmPassword.length > 0 && (
                     <div className="pt-1 flex items-center gap-1.5 text-xs font-medium">
                       {passwordsMatch ? (
-                        <span className="text-emerald-400 flex items-center gap-1">
+                        <span className="text-emerald-600 flex items-center gap-1 font-bold">
                           <Check size={13} className="stroke-[3]" />
                           {isBangla ? 'পাসওয়ার্ড মিলেছে' : 'Passwords match'}
                         </span>
                       ) : (
-                        <span className="text-rose-400 flex items-center gap-1">
+                        <span className="text-rose-500 flex items-center gap-1 font-bold">
                           <X size={13} className="stroke-[3]" />
                           {isBangla ? 'পাসওয়ার্ড মিলছে না' : 'Passwords do not match'}
                         </span>
@@ -562,9 +562,9 @@ function FuturisticRegisterForm() {
                     type="checkbox"
                     checked={agreedTerms}
                     onChange={(e) => setAgreedTerms(e.target.checked)}
-                    className="w-4 h-4 mt-0.5 rounded bg-slate-900 border-slate-700 text-[#008CFF] focus:ring-[#008CFF] focus:ring-offset-slate-900 cursor-pointer shrink-0"
+                    className="w-4 h-4 mt-0.5 rounded bg-white border-slate-300 text-[#008CFF] focus:ring-[#008CFF] cursor-pointer shrink-0"
                   />
-                  <span className="text-xs text-slate-300 leading-relaxed">
+                  <span className="text-xs text-slate-600 leading-relaxed">
                     {isBangla ? (
                       <>
                         আমি NEED ELECTRO-এর{' '}
@@ -598,7 +598,7 @@ function FuturisticRegisterForm() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#005fb8] hover:from-[#007be0] hover:to-[#004e9a] text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-60 cursor-pointer group/btn"
+                className="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#0070cc] hover:to-[#005bb5] text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-60 cursor-pointer group/btn"
               >
                 {isSubmitting ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -612,16 +612,16 @@ function FuturisticRegisterForm() {
             </form>
 
             {/* Divider & Sign In Redirection */}
-            <div className="mt-6 pt-5 border-t border-slate-800 text-center space-y-3">
+            <div className="mt-6 pt-5 border-t border-slate-200 text-center space-y-3">
               <div className="relative flex items-center justify-center">
-                <span className="bg-[#071324] px-3 text-[11px] font-mono text-slate-400 uppercase tracking-wider">
+                <span className="bg-white px-3 text-[11px] font-mono text-slate-400 uppercase tracking-wider">
                   {isBangla ? 'ইতিমধ্যে অ্যাকাউন্ট আছে?' : 'Already have an account?'}
                 </span>
               </div>
 
               <Link
                 href={`/customer/login?redirect=${encodeURIComponent(redirectUrl)}`}
-                className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-700 hover:border-[#008CFF] bg-slate-900/60 hover:bg-slate-800 text-slate-200 hover:text-white font-bold text-xs sm:text-sm transition-all"
+                className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 hover:border-[#008CFF] bg-[#F4F6F8] hover:bg-slate-100 text-[#002B5B] font-bold text-xs sm:text-sm transition-all"
               >
                 <span>{isBangla ? 'সাইন ইন করুন' : 'Sign In to Your Account'}</span>
                 <ArrowRight size={14} className="text-[#008CFF]" />
@@ -643,18 +643,18 @@ export default function CustomerRegisterPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#030914] text-slate-100 flex flex-col relative overflow-hidden font-sans">
-      {/* Background Cyber Grid & Radiant Neon Orbs */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#008CFF0c_1px,transparent_1px),linear-gradient(to_bottom,#008CFF0c_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-600/20 via-cyan-500/10 to-transparent pointer-events-none" />
-      <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-[#008CFF]/15 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-blue-700/15 blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-[#F4F6F8] text-[#002B5B] flex flex-col relative overflow-hidden font-sans">
+      {/* Background Soft Tech Grid & Ambient Glow */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#008CFF08_1px,transparent_1px),linear-gradient(to_bottom,#008CFF08_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-400/10 via-sky-300/5 to-transparent pointer-events-none" />
+      <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-[#008CFF]/8 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-blue-300/10 blur-3xl pointer-events-none" />
 
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
       
       <main className="flex-1 flex items-center justify-center relative z-10">
-        <Suspense fallback={<div className="p-12 text-center text-sm font-mono text-sky-400">Loading Secure Portal...</div>}>
+        <Suspense fallback={<div className="p-12 text-center text-sm font-mono text-[#008CFF]">Loading Secure Portal...</div>}>
           <FuturisticRegisterForm />
         </Suspense>
       </main>

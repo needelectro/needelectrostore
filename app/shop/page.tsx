@@ -85,7 +85,7 @@ export default async function ShopMasterPage() {
   const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#F4F6F8] text-[#002B5B] flex flex-col">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
@@ -94,30 +94,30 @@ export default async function ShopMasterPage() {
       <Breadcrumb items={breadcrumbs} />
 
       {/* Hero Section */}
-      <section className="py-10 px-4 bg-gradient-to-b from-[#081621] to-[#040e19] text-white">
+      <section className="py-12 px-4 bg-gradient-to-br from-white via-[#F4F6F8] to-[#EAF4FF] border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#0084d6]/20 border border-[#0084d6]/40 text-sky-300">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#EAF4FF] border border-[#008CFF]/20 text-[#008CFF]">
             <Layers size={13} />
             <span>Official NEED ELECTRO E-Commerce Catalog</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-[#002B5B] tracking-tight leading-tight">
             Shop Authentic Laptops, Computers, CCTV &amp; Electricals
           </h1>
-          <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 max-w-3xl leading-relaxed">
             Welcome to the complete NEED ELECTRO catalog. Order genuine hardware with official manufacturer warranty, 7-day replacement guarantee, and nationwide Cash on Delivery to all 64 districts in Bangladesh.
           </p>
 
-          <div className="flex flex-wrap items-center gap-3 pt-2 text-xs text-slate-300">
-            <span className="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700">
-              <Truck size={14} className="text-[#0084d6]" />
+          <div className="flex flex-wrap items-center gap-3 pt-2 text-xs text-slate-600">
+            <span className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-2xs">
+              <Truck size={14} className="text-[#008CFF]" />
               <span>Doorstep COD: ৳60 (Sylhet Div) / ৳120 (Nationwide)</span>
             </span>
-            <span className="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700">
-              <ShieldCheck size={14} className="text-emerald-400" />
+            <span className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-2xs">
+              <ShieldCheck size={14} className="text-emerald-600" />
               <span>100% Tested Genuine Hardware</span>
             </span>
-            <span className="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700">
-              <CreditCard size={14} className="text-amber-400" />
+            <span className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-2xs">
+              <CreditCard size={14} className="text-amber-500" />
               <span>Flexible EMI Available</span>
             </span>
           </div>
@@ -127,7 +127,7 @@ export default async function ShopMasterPage() {
       {/* Categories Showcase */}
       <section className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <div>
-          <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+          <h2 className="text-lg sm:text-xl font-bold text-[#002B5B]">
             Browse By Category
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">Explore our dedicated department catalogs</p>
@@ -140,12 +140,12 @@ export default async function ShopMasterPage() {
               <Link
                 key={c.name}
                 href={c.href}
-                className="group bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-[#0084d6] dark:hover:border-cyan-400 rounded-2xl p-4 text-center flex flex-col items-center justify-center space-y-2 transition-all hover:shadow-md hover:-translate-y-1"
+                className="group bg-white border border-slate-200/90 hover:border-[#008CFF] rounded-2xl p-4 text-center flex flex-col items-center justify-center space-y-2 transition-all hover:shadow-md hover:-translate-y-1"
               >
                 <div className={`w-11 h-11 rounded-2xl bg-gradient-to-tr ${c.color} text-white flex items-center justify-center shadow-xs group-hover:scale-110 transition-transform`}>
                   <Icon size={20} />
                 </div>
-                <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-[#0084d6] transition-colors leading-tight">
+                <h3 className="font-bold text-xs sm:text-sm text-[#002B5B] group-hover:text-[#008CFF] transition-colors leading-tight">
                   {c.name}
                 </h3>
                 <span className="text-[10px] text-slate-400 font-medium truncate max-w-full block">
@@ -159,16 +159,16 @@ export default async function ShopMasterPage() {
 
       {/* Products Grid */}
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-12 flex-1 space-y-6">
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           <div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+            <h2 className="text-xl sm:text-2xl font-black text-[#002B5B]">
               All Available Products ({products.length})
             </h2>
             <p className="text-xs text-slate-500">Live synchronized inventory from NEED ELECTRO database</p>
           </div>
           <Link
             href="/track-order"
-            className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+            className="text-xs font-bold text-emerald-600 hover:underline flex items-center gap-1"
           >
             <span>Track Existing Order</span>
             <ChevronRight size={14} />
@@ -200,8 +200,8 @@ export default async function ShopMasterPage() {
             ))}
           </div>
         ) : (
-          <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
-            <p className="font-bold text-slate-700 dark:text-slate-300">Loading catalog items...</p>
+          <div className="p-12 text-center bg-white rounded-2xl border border-slate-200">
+            <p className="font-bold text-[#002B5B]">Loading catalog items...</p>
             <p className="text-xs text-slate-500 mt-1">Please call {BUSINESS_INFO.phone} for immediate order placement.</p>
           </div>
         )}

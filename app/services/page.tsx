@@ -119,7 +119,7 @@ export default function ServicesHubPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#F4F6F8] text-[#002B5B] flex flex-col">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
@@ -132,25 +132,25 @@ export default function ServicesHubPage() {
       <Breadcrumb items={breadcrumbs} />
 
       {/* Hero */}
-      <section className="py-12 px-4 bg-gradient-to-b from-[#081621] to-[#040e19] text-white">
+      <section className="py-12 px-4 bg-gradient-to-br from-white via-[#F4F6F8] to-[#EAF4FF] border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#0084d6]/20 border border-[#0084d6]/40 text-sky-300">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#EAF4FF] border border-[#008CFF]/20 text-[#008CFF]">
             <Wrench size={13} />
             <span>On-Site Technical &amp; Engineering Services</span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-[#002B5B] tracking-tight leading-tight">
             Certified Electrical, CCTV &amp; Computer Services in Moulvibazar
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 max-w-3xl leading-relaxed">
             From residential wiring and circuit breaker maintenance to high-definition CCTV security deployment and chip-level laptop servicing, {BUSINESS_INFO.name} offers certified engineering with guaranteed warranty and transparent pricing.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <a
               href={`tel:${BUSINESS_INFO.phoneClean}`}
-              className="px-5 py-2.5 rounded-xl bg-[#0084d6] hover:bg-[#0073bc] text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-blue-500/25 transition-all"
+              className="px-5 py-2.5 rounded-xl bg-[#008CFF] hover:bg-[#0070cc] text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all active:scale-95"
             >
               <Phone size={14} />
               <span>Call Hotline: {BUSINESS_INFO.phone}</span>
@@ -159,7 +159,7 @@ export default function ServicesHubPage() {
               href={`https://wa.me/${BUSINESS_INFO.whatsappClean}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-colors"
+              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-colors"
             >
               <MessageCircle size={14} />
               <span>WhatsApp Booking</span>
@@ -171,7 +171,7 @@ export default function ServicesHubPage() {
       {/* Services Grid */}
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 flex-1 space-y-8">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+          <h2 className="text-xl sm:text-2xl font-black text-[#002B5B]">
             Our Core Technical Services
           </h2>
           <p className="text-xs text-slate-500 mt-1">Available across Moulvibazar Sadar, Sreemangal, Kulaura, Rajnagar, and Sylhet</p>
@@ -183,29 +183,29 @@ export default function ServicesHubPage() {
             return (
               <div
                 key={srv.id}
-                className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 shadow-xs hover:shadow-lg transition-all flex flex-col justify-between space-y-4"
+                className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${srv.color} text-white flex items-center justify-center shadow-sm`}>
+                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${srv.color} text-white flex items-center justify-center shadow-xs`}>
                       <Icon size={24} />
                     </div>
-                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-[#002B5B]">
                       {srv.badge}
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  <h3 className="text-lg font-bold text-[#002B5B]">
                     {srv.title}
                   </h3>
 
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  <p className="text-xs text-slate-600 leading-relaxed">
                     {srv.description}
                   </p>
 
-                  <ul className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <ul className="space-y-1.5 pt-2 border-t border-slate-100">
                     {srv.features.map((f, i) => (
-                      <li key={i} className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300">
+                      <li key={i} className="flex items-center gap-2 text-xs text-slate-700">
                         <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
                         <span>{f}</span>
                       </li>
@@ -216,7 +216,7 @@ export default function ServicesHubPage() {
                 <div className="pt-2">
                   <Link
                     href={srv.href}
-                    className="w-full py-2.5 px-4 rounded-xl bg-[#0084d6] hover:bg-[#0073bc] text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-xs"
+                    className="w-full py-2.5 px-4 rounded-xl bg-[#008CFF] hover:bg-[#0070cc] text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-xs"
                   >
                     <span>{srv.cta}</span>
                     <ArrowRight size={14} />
@@ -228,29 +228,29 @@ export default function ServicesHubPage() {
         </div>
 
         {/* Showroom & Service Guarantee */}
-        <section className="bg-gradient-to-br from-[#081621] to-[#040e19] text-white rounded-3xl p-6 sm:p-8 border border-slate-800 space-y-4">
-          <div className="flex items-center gap-2 text-amber-400 font-bold text-xs">
+        <section className="bg-gradient-to-br from-[#EAF4FF] via-white to-sky-50 text-[#002B5B] rounded-3xl p-6 sm:p-8 border border-slate-200/90 space-y-4 shadow-xs">
+          <div className="flex items-center gap-2 text-[#008CFF] font-bold text-xs">
             <Award size={15} />
             <span>Guaranteed Quality &amp; Genuine Spares</span>
           </div>
-          <h3 className="text-xl sm:text-2xl font-black">
+          <h3 className="text-xl sm:text-2xl font-black text-[#002B5B]">
             Why Moulvibazar Residents Rely on NEED ELECTRO
           </h3>
-          <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
             Unlike informal freelancers, our technicians operate from a physical, registered showroom at MR Plaza in Kusumbag. Every replacement component, cable, breaker, and camera comes with official warranty protection and direct showroom support.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs">
-            <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-2.5">
-              <Clock size={16} className="text-[#0084d6] shrink-0" />
-              <span>Prompt Emergency Dispatch</span>
+            <div className="bg-white border border-slate-200/80 rounded-xl p-3 flex items-center gap-2.5 shadow-2xs">
+              <Clock size={16} className="text-[#008CFF] shrink-0" />
+              <span className="font-medium text-slate-700">Prompt Emergency Dispatch</span>
             </div>
-            <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-2.5">
-              <ShieldCheck size={16} className="text-emerald-400 shrink-0" />
-              <span>Transparent Pricing &amp; No Hidden Fees</span>
+            <div className="bg-white border border-slate-200/80 rounded-xl p-3 flex items-center gap-2.5 shadow-2xs">
+              <ShieldCheck size={16} className="text-emerald-500 shrink-0" />
+              <span className="font-medium text-slate-700">Transparent Pricing &amp; No Hidden Fees</span>
             </div>
-            <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-2.5">
-              <MapPin size={16} className="text-rose-400 shrink-0" />
-              <span>Kusumbag Showroom Verification</span>
+            <div className="bg-white border border-slate-200/80 rounded-xl p-3 flex items-center gap-2.5 shadow-2xs">
+              <MapPin size={16} className="text-[#008CFF] shrink-0" />
+              <span className="font-medium text-slate-700">Kusumbag Showroom Verification</span>
             </div>
           </div>
         </section>

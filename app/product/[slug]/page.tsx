@@ -203,7 +203,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#F4F6F8] text-[#002B5B] flex flex-col">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
@@ -239,43 +239,43 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
         {/* Detailed Technical Specifications Table */}
         {product.specs && typeof product.specs === 'object' && Object.keys(product.specs).length > 0 && (
           <div className="mt-14 space-y-4">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-3">
+            <h2 className="text-xl font-bold text-[#002B5B] border-b border-slate-200 pb-3">
               Technical Specifications
             </h2>
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
+            <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-xs">
               <table className="w-full text-xs text-left">
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
+                <tbody className="divide-y divide-slate-100">
                   {Object.entries(product.specs).map(([key, value]) => {
                     if (!value || typeof value === 'object') return null;
                     const readableKey = key
                       .replace(/([A-Z])/g, ' $1')
                       .replace(/^./, str => str.toUpperCase());
                     return (
-                      <tr key={key} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                        <td className="py-3 px-5 font-semibold text-slate-500 dark:text-slate-400 w-1/3 bg-slate-50 dark:bg-slate-950/40">
+                      <tr key={key} className="hover:bg-slate-50 transition-colors">
+                        <td className="py-3 px-5 font-semibold text-slate-500 w-1/3 bg-slate-50/70">
                           {readableKey}
                         </td>
-                        <td className="py-3 px-5 text-slate-900 dark:text-slate-100 font-medium">
+                        <td className="py-3 px-5 text-[#002B5B] font-medium">
                           {String(value)}
                         </td>
                       </tr>
                     );
                   })}
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3 px-5 font-semibold text-slate-500 dark:text-slate-400 w-1/3 bg-slate-50 dark:bg-slate-950/40">
+                  <tr className="hover:bg-slate-50 transition-colors">
+                    <td className="py-3 px-5 font-semibold text-slate-500 w-1/3 bg-slate-50/70">
                       Warranty Coverage
                     </td>
-                    <td className="py-3 px-5 text-slate-900 dark:text-slate-100 font-medium">
+                    <td className="py-3 px-5 text-[#002B5B] font-medium">
                       {product.warrantyPeriodMonths 
                         ? `${product.warrantyPeriodMonths} Months Official / Service Warranty`
                         : '7-Day Replacement Guarantee & 2-Year Service Warranty'}
                     </td>
                   </tr>
-                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3 px-5 font-semibold text-slate-500 dark:text-slate-400 w-1/3 bg-slate-50 dark:bg-slate-950/40">
+                  <tr className="hover:bg-slate-50 transition-colors">
+                    <td className="py-3 px-5 font-semibold text-slate-500 w-1/3 bg-slate-50/70">
                       Product Condition
                     </td>
-                    <td className="py-3 px-5 text-slate-900 dark:text-slate-100 font-medium">
+                    <td className="py-3 px-5 text-[#002B5B] font-medium">
                       100% Tested Hardware (Fresh Cosmetic Condition, Verified Motherboard & Battery)
                     </td>
                   </tr>
@@ -289,8 +289,8 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
         {relatedProducts.length > 0 && (
           <div className="mt-16 space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Similar Products You Might Like</h2>
-              <Link href={isLaptop ? '/laptops' : `/${slugify(product.category)}`} className="text-xs font-bold text-blue-600 dark:text-cyan-400 hover:underline">
+              <h2 className="text-xl font-bold text-[#002B5B]">Similar Products You Might Like</h2>
+              <Link href={isLaptop ? '/laptops' : `/${slugify(product.category)}`} className="text-xs font-bold text-[#008CFF] hover:underline">
                 View More in {product.category} →
               </Link>
             </div>

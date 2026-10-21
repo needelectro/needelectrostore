@@ -192,34 +192,34 @@ export const CustomerHeader: React.FC = () => {
         style={{ position: 'sticky', top: 0, zIndex: 40 }}
       >
 
-      {/* 1. Main Dark Top Navbar (Trust Computer MB Style: #081621) */}
-      <div className="bg-[#081621] text-white border-b border-slate-800">
+      {/* 1. Main Futuristic Light Top Navbar */}
+      <div className="bg-white/95 backdrop-blur-md text-[#002B5B] border-b border-slate-200/80 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3 sm:gap-6">
-          {/* Logo */}
+          {/* Logo with light theme */}
           <div className="flex items-center shrink-0">
             <Link href="/" className="flex items-center gap-2 group">
-              <NeedElectroLogo size="sm" theme="dark" showTagline={false} showSisterConcern={false} />
+              <NeedElectroLogo size="sm" theme="light" showTagline={false} showSisterConcern={false} />
             </Link>
           </div>
 
-          {/* Pill-shaped Search Bar */}
+          {/* Pill-shaped Futuristic Search Bar */}
           <div ref={searchRef} className="relative flex-1 max-w-xl hidden md:block">
             <div className="relative flex items-center">
               <input
                 type="text"
-                placeholder={t('header.searchPlaceholder', 'Search for products, brands, electricals or laptops...')}
+                placeholder={t('header.searchPlaceholder', 'Search laptops, computers, CCTV, electrical, tools...')}
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setSearchOpen(true);
                 }}
                 onFocus={() => setSearchOpen(true)}
-                className="w-full bg-white text-slate-900 placeholder-slate-400 rounded-full pl-5 pr-11 py-2 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#008CFF] shadow-inner transition-all"
+                className="w-full bg-[#F4F6F8] hover:bg-slate-100/90 focus:bg-white text-slate-900 placeholder-slate-400 rounded-full pl-5 pr-11 py-2 text-xs sm:text-sm font-medium border border-slate-200/90 focus:border-[#008CFF] focus:outline-none focus:ring-2 focus:ring-[#008CFF]/20 shadow-inner transition-all"
               />
               <button
                 type="button"
                 aria-label="Search"
-                className="absolute right-1 top-1 bottom-1 w-8 h-8 rounded-full bg-[#008CFF] hover:bg-[#0070cc] text-white flex items-center justify-center transition-colors shadow-2xs"
+                className="absolute right-1 top-1 bottom-1 w-8 h-8 rounded-full bg-[#008CFF] hover:bg-[#0070cc] text-white flex items-center justify-center transition-colors shadow-xs"
               >
                 {isSearching ? (
                   <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -231,7 +231,7 @@ export const CustomerHeader: React.FC = () => {
 
             {/* Search Dropdown Results */}
             {searchOpen && searchQuery.trim().length >= 2 && (
-              <div className="absolute top-full left-0 right-0 mt-2 rounded-2xl shadow-2xl overflow-hidden z-50 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+              <div className="absolute top-full left-0 right-0 mt-2 rounded-2xl shadow-2xl overflow-hidden z-50 border border-slate-200/90 bg-white text-slate-900">
                 <div className="p-2.5 border-b text-[11px] font-bold uppercase tracking-wider flex justify-between bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400">
                   <span>{isBangla ? 'পণ্য পরামর্শ' : 'Search Suggestions'}</span>
                   <span>{formatNumber(searchResults.length)} {isBangla ? 'টি ফলাফল' : 'matches'}</span>
@@ -281,15 +281,15 @@ export const CustomerHeader: React.FC = () => {
           {/* Action Items on Right */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             {/* Showroom Pill */}
-            <div className="hidden 2xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/80 text-[11px] text-slate-300">
+            <div className="hidden 2xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EAF4FF] border border-blue-200/80 text-[11px] text-[#002B5B] font-semibold">
               <MapPin size={12} className="text-[#008CFF]" />
-              <span className="font-medium">{isBangla ? 'মৌলভীবাজার' : 'Moulvibazar'}</span>
+              <span>{isBangla ? 'মৌলভীবাজার' : 'Moulvibazar'}</span>
             </div>
 
             {/* Hotline Pill */}
             <a
               href={`tel:${BUSINESS_INFO.phoneClean}`}
-              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-[11px] text-slate-200 font-bold transition-colors"
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F4F6F8] hover:bg-[#EAF4FF] border border-slate-200 text-[11px] text-[#002B5B] font-bold transition-colors"
             >
               <Phone size={12} className="text-[#008CFF]" />
               <span>{isBangla ? formatNumber(BUSINESS_INFO.phone) : BUSINESS_INFO.phone}</span>
@@ -298,7 +298,7 @@ export const CustomerHeader: React.FC = () => {
             {/* Track Order Button */}
             <Link
               href="/track-order"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white text-xs font-bold shadow-md shadow-emerald-500/20 transition-all transform hover:-translate-y-0.5"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all transform hover:-translate-y-0.5"
             >
               <PackageSearch size={14} />
               <span>{t('orders.trackOrder', 'Track Order')}</span>
@@ -308,10 +308,10 @@ export const CustomerHeader: React.FC = () => {
             <Link
               href="/laptops"
               aria-label="Wishlist"
-              className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-xs text-slate-300 hover:text-white transition-colors"
+              className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-[#F4F6F8] hover:bg-slate-100 border border-slate-200 text-xs text-slate-700 hover:text-[#008CFF] transition-colors"
             >
-              <Heart size={14} className="text-rose-400" />
-              <span className="text-[10px] bg-slate-700 px-1.5 py-0.2 rounded-full font-bold ml-0.5">
+              <Heart size={14} className="text-rose-500" />
+              <span className="text-[10px] bg-slate-200 px-1.5 py-0.2 rounded-full font-bold ml-0.5 text-slate-800">
                 {formatNumber(wishlistCount)}
               </span>
             </Link>
@@ -320,7 +320,7 @@ export const CustomerHeader: React.FC = () => {
             {customer ? (
               <Link
                 href="/customer/dashboard"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-white text-xs font-bold transition-all shadow-xs group"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EAF4FF] hover:bg-blue-100/80 border border-blue-200/80 text-[#002B5B] text-xs font-bold transition-all shadow-2xs group"
                 title={`Account: ${customer.name}`}
               >
                 <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-[#008CFF] to-sky-400 flex items-center justify-center text-[10px] text-white font-black shadow-xs">
@@ -331,7 +331,7 @@ export const CustomerHeader: React.FC = () => {
             ) : (
               <Link
                 href="/customer/login"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-slate-200 hover:text-white text-xs font-semibold transition-all group"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F4F6F8] hover:bg-[#EAF4FF] border border-slate-200 text-[#002B5B] text-xs font-semibold transition-all group"
                 title="Customer Sign In"
               >
                 <User size={13} className="text-[#008CFF] group-hover:scale-110 transition-transform" />
@@ -344,7 +344,7 @@ export const CustomerHeader: React.FC = () => {
               type="button"
               onClick={openCart}
               aria-label="View shopping cart"
-              className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#008CFF] hover:bg-[#0070cc] text-white text-xs font-bold shadow-md shadow-blue-500/25 transition-all group"
+              className="relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#008CFF] hover:bg-[#0070cc] text-white text-xs font-bold shadow-md shadow-blue-500/25 transition-all group"
             >
               <ShoppingBag size={15} className="group-hover:scale-110 transition-transform" />
               <span className="hidden sm:inline font-semibold">{t('nav.cart', 'Cart')}</span>
@@ -356,7 +356,7 @@ export const CustomerHeader: React.FC = () => {
             {/* Mobile Quick Call Button */}
             <a
               href={`tel:${BUSINESS_INFO.phoneClean}`}
-              className="md:hidden p-1.5 rounded-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center"
+              className="md:hidden p-1.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center"
               aria-label="Call Sales Hotline"
               title="Call Sales Hotline"
             >
@@ -367,8 +367,8 @@ export const CustomerHeader: React.FC = () => {
             <button
               type="button"
               onClick={toggleTheme}
-              title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
-              className="p-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-amber-400 transition-colors"
+              title={theme === 'light' ? 'Light Mode Active' : 'Switch to Light Mode'}
+              className="p-1.5 rounded-full bg-[#F4F6F8] hover:bg-slate-200 border border-slate-200 text-amber-500 transition-colors"
             >
               {theme === 'light' ? <Sun size={15} /> : <Moon size={15} />}
             </button>
@@ -376,7 +376,7 @@ export const CustomerHeader: React.FC = () => {
             {/* Mobile Menu Hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-1.5 rounded-lg bg-slate-800 text-white hover:bg-slate-700 transition-colors"
+              className="md:hidden p-1.5 rounded-lg bg-[#F4F6F8] text-[#002B5B] hover:bg-slate-200 border border-slate-200 transition-colors"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -396,12 +396,12 @@ export const CustomerHeader: React.FC = () => {
                 setSearchOpen(true);
               }}
               onFocus={() => setSearchOpen(true)}
-              className="w-full bg-white text-slate-900 placeholder-slate-400 rounded-full pl-4 pr-10 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#0084d6] shadow-inner"
+              className="w-full bg-[#F4F6F8] text-slate-900 placeholder-slate-400 rounded-full pl-4 pr-10 py-2 text-xs font-medium border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#008CFF]/20 shadow-inner"
             />
             <button
               type="button"
               aria-label="Submit Search"
-              className="absolute right-1 top-1 bottom-1 w-7 h-7 rounded-full bg-[#0084d6] text-white flex items-center justify-center"
+              className="absolute right-1 top-1 bottom-1 w-7 h-7 rounded-full bg-[#008CFF] text-white flex items-center justify-center"
             >
               {isSearching ? (
                 <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -413,8 +413,8 @@ export const CustomerHeader: React.FC = () => {
 
           {/* Mobile Search Suggestions Dropdown */}
           {searchOpen && searchQuery.trim().length >= 2 && (
-            <div className="absolute top-full left-3 right-3 mt-1.5 rounded-2xl shadow-2xl overflow-hidden z-50 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 max-h-72 overflow-y-auto">
-              <div className="p-2 border-b text-[10px] font-bold uppercase tracking-wider flex justify-between bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500">
+            <div className="absolute top-full left-3 right-3 mt-1.5 rounded-2xl shadow-2xl overflow-hidden z-50 border border-slate-200 bg-white text-slate-900 max-h-72 overflow-y-auto">
+              <div className="p-2 border-b text-[10px] font-bold uppercase tracking-wider flex justify-between bg-slate-50 border-slate-200 text-slate-500">
                 <span>Suggestions ({searchResults.length})</span>
                 <button
                   type="button"
@@ -425,7 +425,7 @@ export const CustomerHeader: React.FC = () => {
                 </button>
               </div>
               {searchResults.length > 0 ? (
-                <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                <div className="divide-y divide-slate-100">
                   {searchResults.map((p) => (
                     <Link
                       key={p.id}
@@ -434,14 +434,14 @@ export const CustomerHeader: React.FC = () => {
                         setSearchOpen(false);
                         setSearchQuery('');
                       }}
-                      className="p-2.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                      className="p-2.5 flex items-center justify-between hover:bg-slate-50 transition-colors"
                     >
                       <div className="pr-2">
                         <p className="text-xs font-semibold line-clamp-1">{p.name}</p>
                         <p className="text-[10px] text-slate-400">{p.brand} • {p.category}</p>
                       </div>
                       <div className="text-right shrink-0">
-                        <span className="text-xs font-bold text-[#0084d6] font-mono block">
+                        <span className="text-xs font-bold text-[#008CFF] font-mono block">
                           ৳{p.retailPrice.toLocaleString()}
                         </span>
                         <span className={`text-[9px] font-bold ${p.currentStock > 0 ? 'text-emerald-500' : 'text-rose-400'}`}>
@@ -462,26 +462,26 @@ export const CustomerHeader: React.FC = () => {
       </div>
 
       {/* 2. Horizontal Auto-Scrolling Category Navigation Sub-bar with Infinite Loop */}
-      <div className="relative bg-[#f8fafc] dark:bg-[#0b1320] border-b border-slate-200/90 dark:border-slate-800/90 py-1.5 group/nav overflow-hidden select-none">
+      <div className="relative bg-[#F8FAFC] border-b border-slate-200/80 py-1.5 group/nav overflow-hidden select-none">
         {/* Left Gradient Fade & Nudge Button */}
-        <div className="absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none bg-gradient-to-r from-[#f8fafc] dark:from-[#0b1320] to-transparent flex items-center justify-start pl-1">
+        <div className="absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none bg-gradient-to-r from-[#F8FAFC] to-transparent flex items-center justify-start pl-1">
           <button
             type="button"
             onClick={scrollNavLeft}
             aria-label="Scroll categories left"
-            className="pointer-events-auto opacity-0 group-hover/nav:opacity-100 transition-opacity w-5 h-5 rounded-full bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center hover:bg-[#008CFF] hover:text-white cursor-pointer"
+            className="pointer-events-auto opacity-0 group-hover/nav:opacity-100 transition-opacity w-5 h-5 rounded-full bg-white shadow-md border border-slate-200 text-slate-600 flex items-center justify-center hover:bg-[#008CFF] hover:text-white cursor-pointer"
           >
             <ChevronLeft size={13} />
           </button>
         </div>
 
         {/* Right Gradient Fade & Nudge Button */}
-        <div className="absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none bg-gradient-to-l from-[#f8fafc] dark:from-[#0b1320] to-transparent flex items-center justify-end pr-1">
+        <div className="absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none bg-gradient-to-l from-[#F8FAFC] to-transparent flex items-center justify-end pr-1">
           <button
             type="button"
             onClick={scrollNavRight}
             aria-label="Scroll categories right"
-            className="pointer-events-auto opacity-0 group-hover/nav:opacity-100 transition-opacity w-5 h-5 rounded-full bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center hover:bg-[#008CFF] hover:text-white cursor-pointer"
+            className="pointer-events-auto opacity-0 group-hover/nav:opacity-100 transition-opacity w-5 h-5 rounded-full bg-white shadow-md border border-slate-200 text-slate-600 flex items-center justify-center hover:bg-[#008CFF] hover:text-white cursor-pointer"
           >
             <ChevronRight size={13} />
           </button>
@@ -505,12 +505,12 @@ export const CustomerHeader: React.FC = () => {
                 href={item.href}
                 onFocus={() => { isNavPaused.current = true; }}
                 onBlur={() => { isNavPaused.current = false; }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-800 dark:text-slate-200 hover:text-[#0084d6] dark:hover:text-cyan-400 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-[#0084d6] dark:hover:border-slate-700 shadow-2xs transition-all text-[11px] sm:text-xs font-semibold shrink-0 hover:scale-[1.02]"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[#002B5B] hover:text-[#008CFF] bg-white border border-slate-200/90 hover:border-blue-200 shadow-2xs transition-all text-[11px] sm:text-xs font-semibold shrink-0 hover:scale-[1.02]"
               >
-                <Icon size={13} className="text-slate-500 dark:text-slate-400 shrink-0" />
+                <Icon size={13} className="text-[#008CFF] shrink-0" />
                 <span>{item.name}</span>
                 {item.badge && (
-                  <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-1.5 py-0.2 rounded-full text-[9px] font-bold">
+                  <span className="bg-[#EAF4FF] text-[#008CFF] px-1.5 py-0.2 rounded-full text-[9px] font-bold">
                     {item.badge}
                   </span>
                 )}
@@ -523,21 +523,21 @@ export const CustomerHeader: React.FC = () => {
 
       {/* Mobile Menu Drawer Overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex flex-col justify-start">
-          <div className="bg-[#081621] text-white border-b border-slate-800 px-4 py-3 flex items-center justify-between shadow-lg">
+        <div className="md:hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex flex-col justify-start">
+          <div className="bg-white text-[#002B5B] border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-sm">
             <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2">
-              <NeedElectroLogo size="sm" theme="dark" showTagline={false} showSisterConcern={false} />
+              <NeedElectroLogo size="sm" theme="light" showTagline={false} showSisterConcern={false} />
             </Link>
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
+              className="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:text-slate-900"
               aria-label="Close menu"
             >
               <X size={20} />
             </button>
           </div>
 
-          <div className="bg-white dark:bg-slate-950 flex-1 overflow-y-auto px-4 py-4 space-y-4 text-slate-900 dark:text-slate-100">
+          <div className="bg-white flex-1 overflow-y-auto px-4 py-4 space-y-4 text-slate-900">
             {/* Language Switcher Card */}
             <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -710,12 +710,12 @@ export const CustomerHeader: React.FC = () => {
             </div>
 
             {/* Contact & Hotline */}
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2 text-xs">
+            <div className="pt-2 border-t border-slate-100 space-y-2 text-xs">
               <a
                 href={`tel:${BUSINESS_INFO.phoneClean}`}
-                className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-[#081621] text-white font-bold shadow-xs"
+                className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] text-white font-bold shadow-md shadow-blue-500/20"
               >
-                <Phone size={14} className="text-[#0084d6]" />
+                <Phone size={14} className="text-white" />
                 <span>Call Hotline: {BUSINESS_INFO.phone}</span>
               </a>
               <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">

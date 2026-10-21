@@ -20,7 +20,7 @@ export default function GlobalErrorPage({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-[#f2f4f8] text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#F4F6F8] text-[#002B5B] flex flex-col font-sans">
       <CustomerHeader />
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16 flex flex-col items-center justify-center text-center">

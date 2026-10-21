@@ -89,9 +89,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-[#0084d6] dark:hover:border-blue-500 rounded-2xl overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative h-full">
+    <div className="bg-white border border-slate-200/90 hover:border-[#008CFF] rounded-2xl overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative h-full">
       {/* Top Image Box: Generous 4:3 aspect ratio */}
-      <div className="relative aspect-[4/3] w-full bg-slate-50/90 dark:bg-slate-950/70 overflow-hidden border-b border-slate-100 dark:border-slate-800/80 p-3 sm:p-4 flex items-center justify-center">
+      <div className="relative aspect-[4/3] w-full bg-[#F4F6F8]/60 overflow-hidden border-b border-slate-100 p-3 sm:p-4 flex items-center justify-center">
         <Link href={`/product/${slug}`} className="w-full h-full flex items-center justify-center">
           <img
             src={imgUrl}
@@ -111,8 +111,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <span
             className={`px-2 py-0.5 rounded-md text-[9.5px] sm:text-[10.5px] font-bold tracking-wide flex items-center gap-1.5 shadow-xs ${
               isAvailable
-                ? 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700'
-                : 'bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-700'
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                : 'bg-rose-50 text-rose-700 border border-rose-200'
             }`}
           >
             <span
@@ -131,7 +131,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="WhatsApp Inquiry"
-            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 dark:bg-slate-800/90 hover:bg-emerald-50 dark:hover:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-slate-200/80 dark:border-slate-700 shadow-xs flex items-center justify-center transition-all opacity-90 hover:opacity-100 hover:scale-105"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/95 hover:bg-emerald-50 text-emerald-600 border border-slate-200/90 shadow-xs flex items-center justify-center transition-all opacity-90 hover:opacity-100 hover:scale-105"
             title="Chat on WhatsApp"
           >
             <MessageCircle size={14} />
@@ -140,7 +140,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             type="button"
             onClick={handleToggleWishlist}
             aria-label="Add to wishlist"
-            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 dark:bg-slate-800/90 hover:bg-white text-slate-400 hover:text-rose-500 border border-slate-200/80 dark:border-slate-700 shadow-xs flex items-center justify-center transition-all opacity-90 hover:opacity-100 hover:scale-105"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/95 hover:bg-white text-slate-400 hover:text-rose-500 border border-slate-200/90 shadow-xs flex items-center justify-center transition-all opacity-90 hover:opacity-100 hover:scale-105"
           >
             <Heart
               size={14}
@@ -150,20 +150,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
 
         {/* Warranty Badge at bottom of image */}
-        <div className="absolute bottom-2 left-2.5 px-2 py-0.5 rounded-md bg-black/65 backdrop-blur-xs text-[9px] sm:text-[10px] font-semibold text-sky-300 border border-white/10 flex items-center gap-1 pointer-events-none z-10">
-          <ShieldCheck size={11} className="text-sky-400" />
+        <div className="absolute bottom-2 left-2.5 px-2 py-0.5 rounded-md bg-white/95 backdrop-blur-md text-[9px] sm:text-[10px] font-semibold text-[#002B5B] border border-slate-200/90 shadow-2xs flex items-center gap-1 pointer-events-none z-10">
+          <ShieldCheck size={11} className="text-[#008CFF]" />
           <span>{warrantyText}</span>
         </div>
       </div>
 
       {/* Card Body: Spacious and well-proportioned */}
-      <div className="p-3.5 sm:p-4 bg-white dark:bg-slate-900 flex-1 flex flex-col justify-between gap-2.5">
+      <div className="p-3.5 sm:p-4 bg-white flex-1 flex flex-col justify-between gap-2.5">
         {/* Category & Brand row */}
         <div className="flex items-center justify-between text-[10px] sm:text-xs text-slate-400 font-medium leading-none">
-          <span className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider truncate max-w-[65%]">
+          <span className="text-slate-500 font-bold uppercase tracking-wider truncate max-w-[65%]">
             {product.brand} • {product.category}
           </span>
-          <span className="font-mono text-[9px] sm:text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-500 font-semibold">
+          <span className="font-mono text-[9px] sm:text-[10px] bg-[#F4F6F8] px-1.5 py-0.5 rounded text-slate-600 font-semibold border border-slate-200/60">
             {product.sku}
           </span>
         </div>
@@ -171,7 +171,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Product Title */}
         <Link href={`/product/${slug}`} className="block">
           <h3
-            className="text-xs sm:text-sm md:text-[15px] font-bold text-slate-900 dark:text-slate-100 group-hover:text-[#0084d6] transition-colors line-clamp-2 leading-snug min-h-[2.25rem] sm:min-h-[2.6rem]"
+            className="text-xs sm:text-sm md:text-[15px] font-bold text-[#002B5B] group-hover:text-[#008CFF] transition-colors line-clamp-2 leading-snug min-h-[2.25rem] sm:min-h-[2.6rem]"
             title={product.name}
           >
             {product.name}
@@ -181,7 +181,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Pricing row */}
         <div className="flex items-baseline justify-between gap-1.5 pt-0.5">
           <div className="flex items-baseline gap-1.5 flex-wrap">
-            <span className="text-sm sm:text-base md:text-lg font-black text-[#0084d6] font-mono">
+            <span className="text-sm sm:text-base md:text-lg font-black text-[#008CFF] font-mono">
               ৳{product.retailPrice.toLocaleString()}
             </span>
             {savings > 0 && (
@@ -191,7 +191,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             )}
           </div>
           {savings > 0 && (
-            <span className="text-[9px] sm:text-[10.5px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-200/50 dark:border-emerald-800/50 shrink-0">
+            <span className="text-[9px] sm:text-[10.5px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/70 shrink-0">
               Save ৳{savings.toLocaleString()}
             </span>
           )}
@@ -204,10 +204,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           disabled={!isAvailable}
           className={`w-full py-2 sm:py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-xs ${
             !isAvailable
-              ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+              ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
               : added
               ? 'bg-emerald-600 text-white shadow-emerald-500/25 scale-[0.98]'
-              : 'bg-[#0084d6] hover:bg-[#0073bc] text-white shadow-blue-500/20 hover:shadow-blue-500/35 active:scale-[0.98]'
+              : 'bg-[#008CFF] hover:bg-[#0070cc] text-white shadow-blue-500/20 hover:shadow-blue-500/35 active:scale-[0.98]'
           }`}
         >
           {added ? (

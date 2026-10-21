@@ -42,8 +42,47 @@
   --safe-area-right: env(safe-area-inset-right, 0px);
 }
 
-/* Dark Theme (Default - Aligned with #081621 Customer Storefront) */
-[data-theme='dark'], :root:not([data-theme='light']) {
+/* Light Theme (Default Futuristic Storefront Palette) */
+:root, [data-theme='light'] {
+  color-scheme: light;
+  --brand-primary: #008CFF;
+  --brand-primary-hover: #0070cc;
+  --brand-navy: #002B5B;
+  --brand-soft-blue: #EAF4FF;
+
+  --bg-app: #FFFFFF;
+  --bg-secondary: #F4F6F8;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F8FAFC;
+  --bg-card-muted: #EAF4FF;
+  --bg-sidebar: #FFFFFF;
+  --bg-header: rgba(255, 255, 255, 0.95);
+  --bg-modal: #FFFFFF;
+  --bg-input: #F4F6F8;
+  --bg-input-focus: #FFFFFF;
+  --bg-active: rgba(0, 140, 255, 0.08);
+  --bg-hover: rgba(0, 140, 255, 0.04);
+
+  --border-color: #E2E8F0;
+  --border-focus: #008CFF;
+  --border-subtle: #EDF2F7;
+
+  --text-primary: #002B5B;
+  --text-secondary: #334155;
+  --text-muted: #64748B;
+  --text-inverse: #FFFFFF;
+
+  --shadow-sm: 0 1px 3px 0 rgba(0, 43, 91, 0.05);
+  --shadow-md: 0 4px 14px -2px rgba(0, 43, 91, 0.08), 0 2px 6px -1px rgba(0, 43, 91, 0.04);
+  --shadow-lg: 0 12px 30px -4px rgba(0, 43, 91, 0.12), 0 4px 12px -2px rgba(0, 43, 91, 0.06);
+  --shadow-glow: 0 0 24px rgba(0, 140, 255, 0.18);
+
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(226, 232, 240, 0.8);
+}
+
+/* Dark Theme (Optional Admin / Override) */
+[data-theme='dark'] {
   color-scheme: dark;
   --bg-app: #081621;
   --bg-card: #0d1e2e;
@@ -54,11 +93,11 @@
   --bg-modal: #0d1e2e;
   --bg-input: #0f2234;
   --bg-input-focus: #142a40;
-  --bg-active: rgba(0, 132, 214, 0.18);
+  --bg-active: rgba(0, 140, 255, 0.18);
   --bg-hover: rgba(255, 255, 255, 0.05);
 
   --border-color: rgba(255, 255, 255, 0.10);
-  --border-focus: #0084d6;
+  --border-focus: #008CFF;
   --border-subtle: rgba(255, 255, 255, 0.06);
 
   --text-primary: #f8fafc;
@@ -69,41 +108,8 @@
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
   --shadow-md: 0 4px 12px -1px rgba(0, 0, 0, 0.6), 0 2px 6px -2px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 12px 30px -4px rgba(0, 0, 0, 0.7), 0 4px 10px -3px rgba(0, 0, 0, 0.6);
-  --shadow-glow: 0 0 20px rgba(0, 132, 214, 0.2);
+  --shadow-glow: 0 0 20px rgba(0, 140, 255, 0.2);
 
   --glass-bg: rgba(13, 30, 46, 0.85);
   --glass-border: rgba(255, 255, 255, 0.09);
-}
-
-/* Light Theme (Aligned with #f2f4f8 Customer Storefront) */
-[data-theme='light'] {
-  color-scheme: light;
-  --bg-app: #f2f4f8;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f8fafc;
-  --bg-card-muted: #eef2f6;
-  --bg-sidebar: #ffffff;
-  --bg-header: rgba(255, 255, 255, 0.95);
-  --bg-modal: #ffffff;
-  --bg-input: #f8fafc;
-  --bg-input-focus: #ffffff;
-  --bg-active: rgba(0, 132, 214, 0.1);
-  --bg-hover: rgba(0, 0, 0, 0.04);
-
-  --border-color: #e2e8f0;
-  --border-focus: #0084d6;
-  --border-subtle: #edf2f7;
-
-  --text-primary: #081621;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --text-inverse: #ffffff;
-
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.12), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-glow: 0 0 20px rgba(0, 132, 214, 0.15);
-
-  --glass-bg: rgba(255, 255, 255, 0.9);
-  --glass-border: rgba(0, 0, 0, 0.08);
 }

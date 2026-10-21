@@ -46,7 +46,7 @@ export default function CustomerProfilePage() {
 
   if (isLoading || !customer) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] dark:bg-[#070d1e] text-slate-800 dark:text-slate-100 flex flex-col">
+      <div className="min-h-screen bg-[#F4F6F8] text-[#002B5B] flex flex-col">
         <CustomerHeader />
         <main className="flex-1 flex items-center justify-center p-12">
           <div className="w-8 h-8 border-3 border-[#008CFF] border-t-transparent rounded-full animate-spin" />
@@ -135,7 +135,7 @@ export default function CustomerProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#070d1e] text-slate-800 dark:text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#F4F6F8] text-[#002B5B] flex flex-col font-sans">
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 
