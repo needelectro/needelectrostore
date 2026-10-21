@@ -190,9 +190,11 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({
       aria-label="Promotional Showcase"
       className="relative w-full rounded-xl sm:rounded-2xl overflow-hidden shadow-xs border border-slate-200/90 bg-white select-none group focus:outline-none focus:ring-2 focus:ring-[#008CFF]/40"
     >
-      {/* Compact Responsive Viewport:
-          Mobile: ~140px; Tablet: ~185–225px; Desktop: ~250px */}
-      <div className="relative w-full h-[140px] sm:h-[185px] md:h-[225px] lg:h-[250px] overflow-hidden bg-slate-50">
+      {/* Responsive Viewport maintaining landscape proportions and full product visibility:
+          Mobile: aspect-[16/9] min-h-[160px]
+          Tablet: aspect-[16/7.5] min-h-[230px]
+          Desktop: aspect-[16/5.6] min-h-[300px] max-h-[395px] */}
+      <div className="relative w-full aspect-[16/9] sm:aspect-[16/7.5] md:aspect-[16/6.4] lg:aspect-[16/5.6] min-h-[160px] sm:min-h-[230px] md:min-h-[280px] lg:min-h-[310px] max-h-[395px] overflow-hidden bg-slate-100">
         <div
           className={`flex w-full h-full ${
             prefersReducedMotion ? 'transition-none' : 'transition-transform duration-500 ease-out'
@@ -209,20 +211,30 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({
             const SlideContent = (
               <div className="w-full h-full relative overflow-hidden bg-white flex items-center justify-center">
                 {!isErrored ? (
-                  <picture className="w-full h-full block">
-                    {slide.mobileImageUrl && (
-                      <source media="(max-width: 640px)" srcSet={slide.mobileImageUrl} />
-                    )}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <>
+                    {/* Ambient subtle background glow */}
                     <img
                       src={chosenSrc}
-                      alt={slide.title || 'NEED ELECTRO Promotional Banner'}
-                      loading={index === 0 ? 'eager' : 'lazy'}
-                      decoding="async"
-                      onError={() => handleImageError(slide.id)}
-                      className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.01]"
+                      alt=""
+                      aria-hidden="true"
+                      className="absolute inset-0 w-full h-full object-cover object-center blur-2xl opacity-30 scale-105 pointer-events-none"
                     />
-                  </picture>
+
+                    <picture className="w-full h-full block relative z-10">
+                      {slide.mobileImageUrl && (
+                        <source media="(max-width: 640px)" srcSet={slide.mobileImageUrl} />
+                      )}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={chosenSrc}
+                        alt={slide.title || 'NEED ELECTRO Promotional Banner'}
+                        loading={index === 0 ? 'eager' : 'lazy'}
+                        decoding="async"
+                        onError={() => handleImageError(slide.id)}
+                        className="w-full h-full object-cover object-[center_32%] transition-transform duration-700 ease-out group-hover:scale-[1.01]"
+                      />
+                    </picture>
+                  </>
                 ) : (
                   <div className="w-full h-full bg-[#F4F6F8] flex items-center justify-center p-4">
                     {/* eslint-disable-next-line @next/next/no-img-element */}

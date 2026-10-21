@@ -596,7 +596,7 @@ export const BannersManager: React.FC = () => {
                   <img
                     src={(previewMode === 'mobile' && mobileImageUrl) ? mobileImageUrl : imageUrl || '/banners/need-electro-laptops-flagship.jpg'}
                     alt="Preview"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-[center_32%]"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/banners/need-electro-laptops-flagship.jpg';
                     }}
