@@ -47,6 +47,54 @@ export const metadata: Metadata = {
     'মৌলভীবাজার সিসিটিভি',
   ],
   authors: [{ name: 'Amdadur Rahman' }],
+  creator: 'NEED ELECTRO',
+  publisher: 'NEED ELECTRO',
+  category: 'technology',
+  alternates: {
+    canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.needelectro.store',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.needelectro.store',
+    siteName: 'NEED ELECTRO',
+    title: 'NEED ELECTRO | Laptop, Computer, CCTV & Electrical Store in Bangladesh',
+    description:
+      'Premier destination for authentic laptops (HP, Dell, Lenovo), custom computers, CCTV security camera systems, electrical products, certified electrician services, and laptop EMI in Moulvibazar, Sylhet & nationwide across Bangladesh.',
+    images: [
+      {
+        url: '/banners/need-electro-hero-partner.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'NEED ELECTRO - Authentic Laptops, CCTV & Electrical Solutions',
+      },
+      {
+        url: '/logo-dark-transparent.png',
+        width: 800,
+        height: 600,
+        alt: 'NEED ELECTRO Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'NEED ELECTRO | Laptop, Computer, CCTV & Electrical Store in Bangladesh',
+    description:
+      'Premier destination for authentic laptops, computers, CCTV security cameras & electrician services in Moulvibazar, Sylhet.',
+    images: ['/banners/need-electro-hero-partner.jpg'],
+    creator: '@needelectro',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -54,8 +102,13 @@ export const metadata: Metadata = {
     title: 'NEED ELECTRO',
   },
   icons: {
-    icon: '/logo-icon.png',
-    apple: '/logo-icon.png',
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/logo-icon.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/logo-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
 };
 

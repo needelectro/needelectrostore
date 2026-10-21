@@ -93,8 +93,9 @@ node scripts/migrate-sqlite-to-postgres.mjs
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://[ref].supabase.co` | Supabase Project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `eyJhbG...` | Supabase Anon Key |
 | `SUPABASE_SERVICE_ROLE_KEY` | `eyJhbG...` | Supabase Service Role Key |
-| `APP_URL` | `https://needelectroerp.vercel.app` | Production Domain |
-| `NEXT_PUBLIC_APP_URL` | `https://needelectroerp.vercel.app` | Client-accessible Production Domain |
+| `APP_URL` | `https://needelectro.store` | Production Domain |
+| `NEXT_PUBLIC_APP_URL` | `https://needelectro.store` | Client-accessible Production Domain |
+| `NEXT_PUBLIC_SITE_URL` | `https://www.needelectro.store` | Public Canonical Store Domain for SEO, Sitemaps & OpenGraph |
 | `SUPER_ADMIN_EMAIL` | `contact.amdadur@gmail.com` | Master Super Admin Email |
 | `SUPER_ADMIN_PASSWORD` | `[SecureDeploymentSecret]` | Initial Super Admin Password |
 | `AUTH_SECRET` | `[Random32HexKey]` | Secret key for JWT sessions |
