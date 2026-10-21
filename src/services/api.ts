@@ -761,6 +761,39 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(settingsData)
     })
+  },
+
+  // 26. AI Product Image Recovery Engine
+  imageRecovery: {
+    getStatus: () => request<{ success: boolean; data: any }>('/api/admin/image-recovery'),
+    scanCatalog: () => request<{ success: boolean; data: any; message: string }>('/api/admin/image-recovery', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'scan' })
+    }),
+    startBatch: (limit?: number, forceAutoApprove?: boolean) => request<{ success: boolean; data: any; message: string }>('/api/admin/image-recovery', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'start_batch', limit, forceAutoApprove })
+    }),
+    pauseJob: () => request<{ success: boolean; message: string }>('/api/admin/image-recovery', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'pause' })
+    }),
+    resumeJob: () => request<{ success: boolean; message: string; data?: any }>('/api/admin/image-recovery', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'resume' })
+    }),
+    approveCandidate: (productId: string, customImageUrl?: string) => request<{ success: boolean; imageUrl?: string; message: string }>('/api/admin/image-recovery', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'approve_review', productId, customImageUrl })
+    }),
+    rejectCandidate: (productId: string, reason?: string) => request<{ success: boolean; message: string }>('/api/admin/image-recovery', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'reject_review', productId, reason })
+    }),
+    updateSettings: (settings: any) => request<{ success: boolean; data: any; message: string }>('/api/admin/image-recovery', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'update_settings', settings })
+    })
   }
 };
 

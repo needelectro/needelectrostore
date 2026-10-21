@@ -153,6 +153,30 @@ export async function POST(req: NextRequest) {
       return { product };
     });
 
+    // FUTURE PRODUCT IMAGE POLICY:
+    // If the new product has no image and automatic recovery is enabled, process asynchronously
+    if (!productData.imageUrl || productData.imageUrl.trim() === '') {
+      try {
+        const { recoveryStateStore } = await import('@/lib/imageRecovery/stateStore');
+        const { recoveryEngine } = await import('@/lib/imageRecovery/recoveryEngine');
+        const recoverySettings = recoveryStateStore.getSettings();
+        if (recoverySettings.autoRecoverFutureProducts) {
+          setTimeout(async () => {
+            try {
+              await recoveryEngine.processSingleProduct(result.product, {
+                userId: user.id,
+                userName: user.name,
+              });
+            } catch (asyncErr) {
+              console.error('Background image recovery error for new product:', asyncErr);
+            }
+          }, 500);
+        }
+      } catch (recoveryHookErr) {
+        console.warn('Image recovery trigger notice:', recoveryHookErr);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Product created successfully.',
