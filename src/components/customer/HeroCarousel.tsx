@@ -190,11 +190,8 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({
       aria-label="Promotional Showcase"
       className="relative w-full rounded-xl sm:rounded-2xl overflow-hidden shadow-xs border border-slate-200/90 bg-white select-none group focus:outline-none focus:ring-2 focus:ring-[#008CFF]/40"
     >
-      {/* Responsive Viewport maintaining landscape proportions and full product visibility:
-          Mobile: aspect-[16/9] min-h-[160px]
-          Tablet: aspect-[16/7.5] min-h-[230px]
-          Desktop: aspect-[16/5.6] min-h-[300px] max-h-[395px] */}
-      <div className="relative w-full aspect-[16/9] sm:aspect-[16/7.5] md:aspect-[16/6.4] lg:aspect-[16/5.6] min-h-[160px] sm:min-h-[230px] md:min-h-[280px] lg:min-h-[310px] max-h-[395px] overflow-hidden bg-slate-100">
+      {/* Responsive Viewport perfectly matched to 16:6 panoramic banner aspect ratio (1376x515) with zero clipping */}
+      <div className="relative w-full aspect-[16/6] min-h-[140px] sm:min-h-[190px] md:min-h-[250px] lg:min-h-[290px] max-h-[430px] overflow-hidden bg-slate-100">
         <div
           className={`flex w-full h-full ${
             prefersReducedMotion ? 'transition-none' : 'transition-transform duration-500 ease-out'
@@ -231,7 +228,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({
                         loading={index === 0 ? 'eager' : 'lazy'}
                         decoding="async"
                         onError={() => handleImageError(slide.id)}
-                        className="w-full h-full object-cover object-[center_32%] transition-transform duration-700 ease-out group-hover:scale-[1.01]"
+                        className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.01]"
                       />
                     </picture>
                   </>

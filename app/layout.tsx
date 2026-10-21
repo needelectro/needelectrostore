@@ -63,7 +63,7 @@ export const metadata: Metadata = {
       'Premier destination for authentic laptops (HP, Dell, Lenovo), custom computers, CCTV security camera systems, electrical products, certified electrician services, and laptop EMI in Moulvibazar, Sylhet & nationwide across Bangladesh.',
     images: [
       {
-        url: '/banners/need-electro-hero-partner.jpg',
+        url: '/banners/need-electro-laptops-flagship.jpg',
         width: 1200,
         height: 630,
         alt: 'NEED ELECTRO - Authentic Laptops, CCTV & Electrical Solutions',
@@ -81,7 +81,7 @@ export const metadata: Metadata = {
     title: 'NEED ELECTRO | Laptop, Computer, CCTV & Electrical Store in Bangladesh',
     description:
       'Premier destination for authentic laptops, computers, CCTV security cameras & electrician services in Moulvibazar, Sylhet.',
-    images: ['/banners/need-electro-hero-partner.jpg'],
+    images: ['/banners/need-electro-laptops-flagship.jpg'],
     creator: '@needelectro',
   },
   robots: {

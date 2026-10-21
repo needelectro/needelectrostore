@@ -110,7 +110,7 @@ export const BannersManager: React.FC = () => {
     setTitle('');
     setSubtitle('');
     setBadge('OFFICIAL SHOWROOM PROMOTION');
-    setImageUrl('/banners/lenovo-thinkpad-banner.jpg');
+    setImageUrl('/banners/need-electro-laptops-flagship.jpg');
     setMobileImageUrl('');
     setTargetUrl('/laptops');
     setButtonText('Shop Now');
@@ -698,7 +698,7 @@ export const BannersManager: React.FC = () => {
                   <input
                     type="text"
                     required
-                    placeholder="/banners/lenovo-thinkpad-banner.jpg"
+                    placeholder="/banners/need-electro-laptops-flagship.jpg"
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
                     className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg font-mono text-xs"
