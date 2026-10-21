@@ -1,53 +1,97 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Image as ImageIcon, Plus, Edit2, Trash2, CheckCircle2,
-  XCircle, ExternalLink, RefreshCw, Eye, ArrowUpDown, Sparkles, AlertCircle
+  XCircle, ExternalLink, RefreshCw, Eye, ArrowUpDown, Sparkles,
+  AlertCircle, Upload, Calendar, Link2, Monitor, Smartphone,
+  Layers, Clock, ToggleLeft, ToggleRight, X, ArrowRight, ShieldCheck
 } from 'lucide-react';
+import { api } from '@/src/services/api';
 
-interface Banner {
+export interface Banner {
   id: string;
   title: string;
   subtitle?: string | null;
   badge?: string | null;
-  imageUrl?: string | null;
+  imageUrl: string;
+  mobileImageUrl?: string | null;
   targetUrl?: string | null;
   buttonText?: string | null;
   sortOrder: number;
   isActive: boolean;
-  placement: string;
-  createdAt: string;
+  startDate?: string | null;
+  endDate?: string | null;
+  placement?: string;
+  createdAt?: string;
+  campaignStatus?: 'ACTIVE' | 'SCHEDULED' | 'EXPIRED' | 'DISABLED';
 }
+
+const COMMON_DESTINATIONS = [
+  { label: 'All Laptops', value: '/laptops' },
+  { label: 'Lenovo ThinkPad', value: '/laptops/lenovo' },
+  { label: 'HP EliteBook & ProBook', value: '/laptops/hp' },
+  { label: 'Dell Latitude & XPS', value: '/laptops/dell' },
+  { label: 'CCTV & Surveillance', value: '/cctv' },
+  { label: 'Custom Desktop PCs', value: '/computers' },
+  { label: 'Electrical Products', value: '/electrical-products' },
+  { label: 'Computer Accessories', value: '/computer-accessories' },
+  { label: 'Networking & Routers', value: '/networking' },
+  { label: 'Technical Services', value: '/services' },
+  { label: 'Laptop EMI Financing', value: '/laptops' },
+  { label: 'Hotline Call (+880 1733-983752)', value: 'tel:+8801733983752' }
+];
 
 export const BannersManager: React.FC = () => {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Filter state
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'SCHEDULED' | 'EXPIRED' | 'DISABLED'>('ALL');
+
+  // Modal & Form states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingDesktop, setUploadingDesktop] = useState(false);
+  const [uploadingMobile, setUploadingMobile] = useState(false);
 
-  // Form states
+  // Form inputs
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [badge, setBadge] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [mobileImageUrl, setMobileImageUrl] = useState('');
   const [targetUrl, setTargetUrl] = useState('/laptops');
-  const [buttonText, setButtonText] = useState('Discover Now');
+  const [buttonText, setButtonText] = useState('Shop Now');
   const [sortOrder, setSortOrder] = useState(0);
   const [isActive, setIsActive] = useState(true);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [placement, setPlacement] = useState('HERO');
+
+  // Preview state inside modal
+  const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
+
+  const desktopFileInputRef = useRef<HTMLInputElement>(null);
+  const mobileFileInputRef = useRef<HTMLInputElement>(null);
+
+  const showToast = (type: 'success' | 'error', message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3500);
+  };
 
   const fetchBanners = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/banners?activeOnly=false');
-      const json = await res.json();
-      if (json.success) {
-        setBanners(json.data || []);
+      const res = await api.banners.getBanners({ activeOnly: false });
+      if (res.success) {
+        setBanners(res.data || []);
       } else {
-        throw new Error(json.error || 'Failed to load banners');
+        throw new Error('Failed to load banners');
       }
     } catch (err: any) {
       console.error('Fetch banners error:', err);
@@ -65,12 +109,17 @@ export const BannersManager: React.FC = () => {
     setEditingBanner(null);
     setTitle('');
     setSubtitle('');
-    setBadge('Official Showroom & Nationwide Delivery');
-    setImageUrl('/logo-dark-transparent.png');
+    setBadge('OFFICIAL SHOWROOM PROMOTION');
+    setImageUrl('/banners/lenovo-thinkpad-banner.jpg');
+    setMobileImageUrl('');
     setTargetUrl('/laptops');
-    setButtonText('Browse Laptops');
-    setSortOrder(banners.length);
+    setButtonText('Shop Now');
+    setSortOrder(banners.length + 1);
     setIsActive(true);
+    setStartDate('');
+    setEndDate('');
+    setPlacement('HERO');
+    setPreviewMode('desktop');
     setIsModalOpen(true);
   };
 
@@ -80,17 +129,53 @@ export const BannersManager: React.FC = () => {
     setSubtitle(b.subtitle || '');
     setBadge(b.badge || '');
     setImageUrl(b.imageUrl || '');
+    setMobileImageUrl(b.mobileImageUrl || '');
     setTargetUrl(b.targetUrl || '/laptops');
-    setButtonText(b.buttonText || 'Discover Now');
+    setButtonText(b.buttonText || 'Shop Now');
     setSortOrder(b.sortOrder || 0);
     setIsActive(b.isActive);
+    setStartDate(b.startDate ? new Date(b.startDate).toISOString().slice(0, 16) : '');
+    setEndDate(b.endDate ? new Date(b.endDate).toISOString().slice(0, 16) : '');
+    setPlacement(b.placement || 'HERO');
+    setPreviewMode('desktop');
     setIsModalOpen(true);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isMobileCrop = false) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (isMobileCrop) setUploadingMobile(true);
+    else setUploadingDesktop(true);
+
+    try {
+      const res = await api.banners.uploadImage(file, 'banners');
+      if (res.success && res.publicUrl) {
+        if (isMobileCrop) {
+          setMobileImageUrl(res.publicUrl);
+        } else {
+          setImageUrl(res.publicUrl);
+        }
+        showToast('success', `${isMobileCrop ? 'Mobile' : 'Desktop'} banner image uploaded successfully!`);
+      } else {
+        throw new Error(res.error || 'Upload failed');
+      }
+    } catch (err: any) {
+      showToast('error', err.message || 'Failed to upload image');
+    } finally {
+      if (isMobileCrop) setUploadingMobile(false);
+      else setUploadingDesktop(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
-      alert('Title is required');
+      showToast('error', 'Campaign Title is required');
+      return;
+    }
+    if (!imageUrl.trim()) {
+      showToast('error', 'Desktop Banner image is required');
       return;
     }
 
@@ -100,346 +185,657 @@ export const BannersManager: React.FC = () => {
         title: title.trim(),
         subtitle: subtitle.trim() || undefined,
         badge: badge.trim() || undefined,
-        imageUrl: imageUrl.trim() || undefined,
-        targetUrl: targetUrl.trim() || undefined,
-        buttonText: buttonText.trim() || undefined,
+        imageUrl: imageUrl.trim(),
+        mobileImageUrl: mobileImageUrl.trim() || undefined,
+        targetUrl: targetUrl.trim() || '/laptops',
+        buttonText: buttonText.trim() || 'Shop Now',
         sortOrder: Number(sortOrder) || 0,
         isActive,
-        placement: 'HOMEPAGE_HERO',
+        startDate: startDate ? new Date(startDate).toISOString() : undefined,
+        endDate: endDate ? new Date(endDate).toISOString() : undefined,
+        placement: placement || 'HERO',
       };
 
-      const url = editingBanner ? `/api/banners/${editingBanner.id}` : '/api/banners';
-      const method = editingBanner ? 'PUT' : 'POST';
-
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || 'Failed to save banner');
+      if (editingBanner) {
+        await api.banners.updateBanner(editingBanner.id, payload);
+        showToast('success', 'Banner campaign updated successfully!');
+      } else {
+        await api.banners.createBanner(payload);
+        showToast('success', 'New banner campaign created successfully!');
       }
 
       setIsModalOpen(false);
       fetchBanners();
     } catch (err: any) {
-      alert(err.message || 'Failed to save banner');
+      showToast('error', err.message || 'Failed to save banner');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this promotional banner?')) return;
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to permanently delete banner "${name}"?`)) return;
     try {
-      const res = await fetch(`/api/banners/${id}`, { method: 'DELETE' });
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || 'Failed to delete banner');
-      }
-      setBanners(prev => prev.filter(b => b.id !== id));
+      await api.banners.deleteBanner(id);
+      showToast('success', 'Banner campaign deleted');
+      fetchBanners();
     } catch (err: any) {
-      alert(err.message || 'Failed to delete banner');
+      showToast('error', err.message || 'Failed to delete banner');
     }
   };
 
   const handleToggleActive = async (b: Banner) => {
     try {
-      const res = await fetch(`/api/banners/${b.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isActive: !b.isActive }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        setBanners(prev => prev.map(item => item.id === b.id ? { ...item, isActive: !item.isActive } : item));
-      }
+      await api.banners.updateBanner(b.id, { isActive: !b.isActive });
+      showToast('success', `Banner ${!b.isActive ? 'activated' : 'deactivated'}`);
+      fetchBanners();
     } catch (err: any) {
-      alert('Failed to update banner status');
+      showToast('error', err.message);
     }
   };
 
+  // Filtered list
+  const filteredBanners = banners.filter((b) => {
+    if (statusFilter === 'ALL') return true;
+    return b.campaignStatus === statusFilter;
+  });
+
+  // Stats calculation
+  const totalCount = banners.length;
+  const activeCount = banners.filter((b) => b.campaignStatus === 'ACTIVE').length;
+  const scheduledCount = banners.filter((b) => b.campaignStatus === 'SCHEDULED').length;
+  const expiredCount = banners.filter((b) => b.campaignStatus === 'EXPIRED').length;
+
   return (
-    <div className="space-y-6">
-      {/* Top Action Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-slate-900/90 text-white border border-slate-800 shadow-md">
+    <div className="p-6 max-w-7xl mx-auto space-y-6">
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border text-sm font-semibold transition-all ${
+            toast.type === 'success'
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              : 'bg-rose-50 text-rose-800 border-rose-200'
+          }`}
+        >
+          {toast.type === 'success' ? (
+            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+          ) : (
+            <AlertCircle className="w-5 h-5 text-rose-600" />
+          )}
+          <span>{toast.message}</span>
+        </div>
+      )}
+
+      {/* Header Banner */}
+      <div className="bg-gradient-to-r from-blue-700 via-sky-600 to-indigo-700 rounded-3xl p-8 text-white shadow-xl shadow-blue-500/10 border border-blue-400/20 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#0084d6]/20 border border-[#0084d6]/40 text-sky-300 mb-1">
-            <Sparkles size={13} className="text-[#0084d6]" />
-            <span>Customer Storefront Live Synchronizer</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-bold tracking-wider uppercase mb-3">
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            Storefront Merchandising
           </div>
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight">
-            Homepage Hero Carousel &amp; Banners
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Manage the primary hero slides displayed on the customer website matching the Trust Computer MB layout.
+          <h1 className="text-3xl font-extrabold tracking-tight text-white">
+            Banner &amp; Promotion Manager
+          </h1>
+          <p className="text-blue-100 text-sm mt-1 max-w-2xl font-medium leading-relaxed">
+            Configure desktop and mobile promotional sliders, schedule time-limited campaigns,
+            and guide customers directly to featured product offers.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <button
-            type="button"
             onClick={fetchBanners}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors"
-            title="Refresh Banners"
+            disabled={loading}
+            className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/25 font-semibold text-sm flex items-center gap-2 transition-all active:scale-95"
           >
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
           </button>
-          <a
-            href="/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors"
-          >
-            <span>Preview Storefront</span>
-            <ExternalLink size={14} />
-          </a>
+
           <button
-            type="button"
             onClick={openCreateModal}
-            className="px-4 py-2.5 rounded-xl bg-[#0084d6] hover:bg-[#0073bc] text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-blue-500/20 transition-all"
+            className="px-5 py-2.5 rounded-xl bg-white text-[#002B5B] hover:bg-blue-50 font-black text-sm shadow-md flex items-center gap-2 transition-all active:scale-95"
           >
-            <Plus size={16} />
-            <span>Add New Banner</span>
+            <Plus className="w-4 h-4 text-[#008CFF]" />
+            New Banner Campaign
           </button>
         </div>
       </div>
 
-      {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2">
-          <AlertCircle size={16} />
-          <span>{error}</span>
+      {/* KPI Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div
+          onClick={() => setStatusFilter('ALL')}
+          className={`cursor-pointer rounded-2xl p-5 border shadow-xs transition-all ${
+            statusFilter === 'ALL'
+              ? 'bg-blue-50/60 border-blue-300 ring-2 ring-blue-500/30'
+              : 'bg-white border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total Campaigns</div>
+          <div className="text-2xl font-black text-[#002B5B]">{totalCount}</div>
+          <div className="text-xs text-slate-400 mt-1">Configured slides</div>
         </div>
-      )}
+
+        <div
+          onClick={() => setStatusFilter('ACTIVE')}
+          className={`cursor-pointer rounded-2xl p-5 border shadow-xs transition-all ${
+            statusFilter === 'ACTIVE'
+              ? 'bg-emerald-50 border-emerald-300 ring-2 ring-emerald-500/30'
+              : 'bg-white border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">Active on Store</div>
+          <div className="text-2xl font-black text-emerald-600">{activeCount}</div>
+          <div className="text-xs text-emerald-700/80 mt-1">Live in rotation</div>
+        </div>
+
+        <div
+          onClick={() => setStatusFilter('SCHEDULED')}
+          className={`cursor-pointer rounded-2xl p-5 border shadow-xs transition-all ${
+            statusFilter === 'SCHEDULED'
+              ? 'bg-purple-50 border-purple-300 ring-2 ring-purple-500/30'
+              : 'bg-white border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-1">Scheduled Future</div>
+          <div className="text-2xl font-black text-purple-600">{scheduledCount}</div>
+          <div className="text-xs text-purple-700/80 mt-1">Upcoming campaigns</div>
+        </div>
+
+        <div
+          onClick={() => setStatusFilter('EXPIRED')}
+          className={`cursor-pointer rounded-2xl p-5 border shadow-xs transition-all ${
+            statusFilter === 'EXPIRED'
+              ? 'bg-amber-50 border-amber-300 ring-2 ring-amber-500/30'
+              : 'bg-white border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">Expired / Past</div>
+          <div className="text-2xl font-black text-amber-600">{expiredCount}</div>
+          <div className="text-xs text-amber-700/80 mt-1">Automatically hidden</div>
+        </div>
+      </div>
+
+      {/* Filter Tabs */}
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
+        {(['ALL', 'ACTIVE', 'SCHEDULED', 'EXPIRED', 'DISABLED'] as const).map((s) => (
+          <button
+            key={s}
+            onClick={() => setStatusFilter(s)}
+            className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              statusFilter === s
+                ? 'bg-[#008CFF] text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            {s === 'ALL' ? 'All Banners' : s.charAt(0) + s.slice(1).toLowerCase()}
+          </button>
+        ))}
+      </div>
 
       {/* Banners Grid */}
       {loading ? (
-        <div className="p-12 text-center text-slate-400">
-          <div className="w-8 h-8 border-2 border-[#0084d6] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-xs">Loading promotional slides...</p>
+        <div className="p-16 text-center text-slate-400">
+          <div className="w-8 h-8 border-2 border-[#008CFF] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-xs font-semibold">Loading promotional banners...</p>
         </div>
-      ) : banners.length === 0 ? (
-        <div className="p-12 text-center bg-slate-900/60 rounded-2xl border border-slate-800">
-          <ImageIcon size={36} className="mx-auto text-slate-600 mb-3" />
-          <p className="text-sm font-bold text-slate-300">No promotional banners configured yet.</p>
-          <p className="text-xs text-slate-500 mt-1 mb-4">The customer storefront is currently using default showcase slides.</p>
+      ) : filteredBanners.length === 0 ? (
+        <div className="p-16 text-center bg-white rounded-3xl border border-slate-200 shadow-xs">
+          <ImageIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <h3 className="text-base font-bold text-slate-800">No banners found</h3>
+          <p className="text-xs text-slate-500 mt-1 mb-4 max-w-sm mx-auto">
+            No promotional campaigns match the selected filter. Click below to add a new banner.
+          </p>
           <button
-            type="button"
             onClick={openCreateModal}
-            className="px-4 py-2 rounded-xl bg-[#0084d6] text-white font-bold text-xs"
+            className="px-4 py-2 rounded-xl bg-[#008CFF] text-white font-bold text-xs shadow-sm hover:bg-[#0070cc]"
           >
-            Create First Banner
+            Add New Banner
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {banners.map((b) => (
-            <div
-              key={b.id}
-              className={`rounded-2xl border overflow-hidden flex flex-col justify-between transition-all shadow-sm ${
-                b.isActive 
-                  ? 'bg-slate-900 border-slate-800 hover:border-[#0084d6]' 
-                  : 'bg-slate-950/60 border-slate-800/60 opacity-60'
-              }`}
-            >
-              <div>
-                {/* Image Preview Box */}
-                <div className="aspect-[16/9] bg-[#081621] p-4 flex items-center justify-center relative border-b border-slate-800">
-                  <img
-                    src={b.imageUrl || '/logo-dark-transparent.png'}
-                    alt={b.title}
-                    className="max-h-full max-w-full object-contain filter drop-shadow-md"
-                  />
-                  <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-                    <span className="bg-slate-800/90 text-slate-300 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-slate-700">
-                      Sort: {b.sortOrder}
-                    </span>
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        b.isActive ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400'
-                      }`}
-                    >
-                      {b.isActive ? 'Active on Store' : 'Inactive'}
-                    </span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredBanners.map((b) => {
+            const status = b.campaignStatus || (b.isActive ? 'ACTIVE' : 'DISABLED');
+            return (
+              <div
+                key={b.id}
+                className={`bg-white rounded-2xl border overflow-hidden flex flex-col justify-between shadow-xs hover:shadow-md transition-all ${
+                  b.isActive ? 'border-slate-200 hover:border-[#008CFF]/50' : 'border-slate-200 opacity-60'
+                }`}
+              >
+                <div>
+                  {/* Banner Image Preview Container */}
+                  <div className="relative aspect-[16/8] bg-slate-100 overflow-hidden border-b border-slate-200 group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={b.imageUrl}
+                      alt={b.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                    />
+
+                    {/* Status Badges Overlay */}
+                    <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-10">
+                      <span className="bg-white/95 backdrop-blur-md text-slate-700 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-slate-200 shadow-xs">
+                        Order #{b.sortOrder}
+                      </span>
+
+                      <span
+                        className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full shadow-xs ${
+                          status === 'ACTIVE'
+                            ? 'bg-emerald-500 text-white'
+                            : status === 'SCHEDULED'
+                            ? 'bg-purple-600 text-white'
+                            : status === 'EXPIRED'
+                            ? 'bg-amber-500 text-white'
+                            : 'bg-slate-500 text-white'
+                        }`}
+                      >
+                        {status}
+                      </span>
+                    </div>
+
+                    {/* Mobile Crop Indicator */}
+                    {b.mobileImageUrl && (
+                      <div className="absolute top-2.5 right-2.5 bg-white/95 backdrop-blur-md px-2 py-0.5 rounded-full text-[10px] font-bold text-blue-700 border border-blue-200 flex items-center gap-1 shadow-xs">
+                        <Smartphone className="w-3 h-3" /> Mobile Variant
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Banner Details */}
+                  <div className="p-5 space-y-2.5">
+                    {b.badge && (
+                      <span className="text-[10px] font-bold text-[#008CFF] uppercase tracking-wider block truncate">
+                        {b.badge}
+                      </span>
+                    )}
+
+                    <h3 className="font-bold text-base text-[#002B5B] line-clamp-1">
+                      {b.title}
+                    </h3>
+
+                    {b.subtitle && (
+                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                        {b.subtitle}
+                      </p>
+                    )}
+
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                      <span className="font-semibold flex items-center gap-1 text-[#008CFF]">
+                        <Link2 className="w-3.5 h-3.5" />
+                        <span className="truncate max-w-[180px]">{b.targetUrl || '/laptops'}</span>
+                      </span>
+
+                      <span className="px-2 py-0.5 bg-slate-100 rounded text-[11px] font-semibold text-slate-700">
+                        {b.buttonText || 'Shop Now'}
+                      </span>
+                    </div>
+
+                    {(b.startDate || b.endDate) && (
+                      <div className="text-[11px] text-slate-400 flex items-center gap-1 font-mono pt-1">
+                        <Calendar className="w-3 h-3" />
+                        <span>
+                          {b.startDate ? new Date(b.startDate).toLocaleDateString() : 'Start'} &rarr;{' '}
+                          {b.endDate ? new Date(b.endDate).toLocaleDateString() : 'Continuous'}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div className="p-4 space-y-2">
-                  {b.badge && (
-                    <span className="text-[10px] font-bold text-sky-400 uppercase tracking-wider block">
-                      {b.badge}
-                    </span>
-                  )}
-                  <h3 className="font-bold text-sm text-white line-clamp-1">
-                    {b.title}
-                  </h3>
-                  {b.subtitle && (
-                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                      {b.subtitle}
-                    </p>
-                  )}
-                  <div className="pt-2 flex items-center gap-2 text-xs text-slate-500 font-mono">
-                    <span>Link:</span>
-                    <span className="text-[#0084d6] truncate">{b.targetUrl || '/laptops'}</span>
+                {/* Card Actions Footer */}
+                <div className="p-3.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleActive(b)}
+                    className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${
+                      b.isActive
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                        : 'bg-slate-200 text-slate-600 border-slate-300 hover:bg-slate-300'
+                    }`}
+                  >
+                    {b.isActive ? 'Active on Store' : 'Inactive'}
+                  </button>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => openEditModal(b)}
+                      className="p-2 rounded-xl text-slate-600 hover:text-[#008CFF] hover:bg-blue-50 border border-transparent hover:border-blue-200 transition-colors"
+                      title="Edit Campaign"
+                    >
+                      <Edit2 size={15} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(b.id, b.title)}
+                      className="p-2 rounded-xl text-rose-500 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors"
+                      title="Delete Campaign"
+                    >
+                      <Trash2 size={15} />
+                    </button>
                   </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* CREATE / EDIT MODAL */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-xl font-extrabold text-[#002B5B]">
+                  {editingBanner ? 'Edit Banner Campaign' : 'Create New Banner Campaign'}
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Configure desktop artwork, mobile crops, call-to-actions, and campaign scheduling.
+                </p>
+              </div>
+
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body: Split Form & Live Preview */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Live Interactive Preview Box */}
+              <div className="bg-[#F4F6F8] rounded-2xl p-4 border border-slate-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <Eye className="w-4 h-4 text-[#008CFF]" />
+                    Live Campaign Preview
+                  </span>
+
+                  <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewMode('desktop')}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                        previewMode === 'desktop'
+                          ? 'bg-[#008CFF] text-white shadow-2xs'
+                          : 'text-slate-600 hover:text-slate-800'
+                      }`}
+                    >
+                      <Monitor className="w-3.5 h-3.5" /> Desktop
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewMode('mobile')}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                        previewMode === 'mobile'
+                          ? 'bg-[#008CFF] text-white shadow-2xs'
+                          : 'text-slate-600 hover:text-slate-800'
+                      }`}
+                    >
+                      <Smartphone className="w-3.5 h-3.5" /> Mobile
+                    </button>
+                  </div>
+                </div>
+
+                {/* Preview Frame */}
+                <div
+                  className={`mx-auto rounded-2xl overflow-hidden border border-slate-300 shadow-sm relative transition-all ${
+                    previewMode === 'desktop'
+                      ? 'w-full aspect-[16/6] min-h-[160px]'
+                      : 'w-72 aspect-[4/3] min-h-[220px]'
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={(previewMode === 'mobile' && mobileImageUrl) ? mobileImageUrl : imageUrl || '/banners/lenovo-thinkpad-banner.jpg'}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/banners/lenovo-thinkpad-banner.jpg';
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/70 to-transparent pointer-events-none" />
+
+                  <div className="absolute inset-0 p-4 sm:p-6 flex flex-col justify-center max-w-md">
+                    {badge && (
+                      <span className="text-[9px] font-bold text-[#008CFF] uppercase tracking-wider mb-1">
+                        {badge}
+                      </span>
+                    )}
+                    <h4 className="text-base sm:text-xl font-black text-[#002B5B] leading-tight line-clamp-2">
+                      {title || 'Campaign Title Headline'}
+                    </h4>
+                    {subtitle && (
+                      <p className="text-[11px] sm:text-xs text-slate-600 line-clamp-2 mt-1">
+                        {subtitle}
+                      </p>
+                    )}
+                    <div className="mt-3">
+                      <span className="inline-block px-3 py-1.5 rounded-lg bg-[#008CFF] text-white font-bold text-[11px] shadow-xs">
+                        {buttonText || 'Shop Now'} &rarr;
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Form Input Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                {/* 1. Title */}
+                <div className="space-y-1 md:col-span-2">
+                  <label className="font-bold text-slate-700 block">Campaign Title *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Lenovo ThinkPad X1 Carbon Flagship Edition"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#008CFF]"
+                  />
+                </div>
+
+                {/* 2. Subtitle */}
+                <div className="space-y-1 md:col-span-2">
+                  <label className="font-bold text-slate-700 block">Supporting Description / Offer Details</label>
+                  <textarea
+                    rows={2}
+                    placeholder="e.g. Intel Core i7, 16GB RAM, military-grade carbon fiber chassis with showroom inspection."
+                    value={subtitle}
+                    onChange={(e) => setSubtitle(e.target.value)}
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#008CFF]"
+                  />
+                </div>
+
+                {/* 3. Badge Text */}
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 block">Badge / Overline Label</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. LENOVO LEGENDARY DURABILITY"
+                    value={badge}
+                    onChange={(e) => setBadge(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#008CFF]"
+                  />
+                </div>
+
+                {/* 4. CTA Button Label */}
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 block">CTA Button Label</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Shop ThinkPad"
+                    value={buttonText}
+                    onChange={(e) => setButtonText(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#008CFF]"
+                  />
+                </div>
+
+                {/* 5. Destination URL */}
+                <div className="space-y-1 md:col-span-2">
+                  <div className="flex justify-between items-center">
+                    <label className="font-bold text-slate-700">CTA Destination URL *</label>
+                    <select
+                      onChange={(e) => {
+                        if (e.target.value) setTargetUrl(e.target.value);
+                      }}
+                      className="text-[11px] font-semibold text-[#008CFF] bg-transparent border-none cursor-pointer focus:outline-none"
+                    >
+                      <option value="">Select Quick Destination &darr;</option>
+                      {COMMON_DESTINATIONS.map((d) => (
+                        <option key={d.value} value={d.value}>
+                          {d.label} ({d.value})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="/laptops/lenovo"
+                    value={targetUrl}
+                    onChange={(e) => setTargetUrl(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#008CFF]"
+                  />
+                </div>
+
+                {/* 6. Desktop Image Upload & URL */}
+                <div className="space-y-2 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                  <label className="font-bold text-slate-800 block flex items-center justify-between">
+                    <span>Desktop Artwork (1920&times;600) *</span>
+                    {uploadingDesktop && <span className="text-blue-600 font-semibold animate-pulse">Uploading...</span>}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="/banners/lenovo-thinkpad-banner.jpg"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg font-mono text-xs"
+                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="file"
+                      ref={desktopFileInputRef}
+                      onChange={(e) => handleFileUpload(e, false)}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => desktopFileInputRef.current?.click()}
+                      disabled={uploadingDesktop}
+                      className="px-3 py-1.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-slate-700 flex items-center gap-1.5 shadow-2xs"
+                    >
+                      <Upload className="w-3.5 h-3.5 text-blue-600" /> Upload File
+                    </button>
+                    <span className="text-[11px] text-slate-400">JPEG, PNG, WebP up to 5MB</span>
+                  </div>
+                </div>
+
+                {/* 7. Mobile Image Variant Upload & URL */}
+                <div className="space-y-2 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                  <label className="font-bold text-slate-800 block flex items-center justify-between">
+                    <span>Mobile Optimized Variant (Optional)</span>
+                    {uploadingMobile && <span className="text-blue-600 font-semibold animate-pulse">Uploading...</span>}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Leave blank to use responsive desktop crop"
+                    value={mobileImageUrl}
+                    onChange={(e) => setMobileImageUrl(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg font-mono text-xs"
+                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="file"
+                      ref={mobileFileInputRef}
+                      onChange={(e) => handleFileUpload(e, true)}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => mobileFileInputRef.current?.click()}
+                      disabled={uploadingMobile}
+                      className="px-3 py-1.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-slate-700 flex items-center gap-1.5 shadow-2xs"
+                    >
+                      <Upload className="w-3.5 h-3.5 text-blue-600" /> Upload Mobile File
+                    </button>
+                    <span className="text-[11px] text-slate-400">Recommended ~750&times;900px</span>
+                  </div>
+                </div>
+
+                {/* 8. Campaign Start Date */}
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 block">Campaign Start (Optional)</label>
+                  <input
+                    type="datetime-local"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#008CFF]"
+                  />
+                </div>
+
+                {/* 9. Campaign End Date */}
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 block">Campaign Expiry (Optional)</label>
+                  <input
+                    type="datetime-local"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#008CFF]"
+                  />
+                </div>
+
+                {/* 10. Display Order */}
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 block">Sort Order / Priority</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#008CFF]"
+                  />
+                </div>
+
+                {/* 11. Active Toggle */}
+                <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200 mt-5">
+                  <div>
+                    <div className="font-bold text-slate-800">Publish Immediately</div>
+                    <div className="text-[11px] text-slate-500">Enable in customer storefront carousel</div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={isActive}
+                    onChange={(e) => setIsActive(e.target.checked)}
+                    className="rounded text-[#008CFF] focus:ring-[#008CFF] w-5 h-5 cursor-pointer"
+                  />
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="p-3 bg-slate-950/80 border-t border-slate-800 flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => handleToggleActive(b)}
-                  className={`text-xs font-semibold px-2.5 py-1 rounded-lg border transition-colors ${
-                    b.isActive
-                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20'
-                      : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
-                  }`}
-                >
-                  {b.isActive ? 'Turn Off' : 'Activate'}
-                </button>
-
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => openEditModal(b)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-                    title="Edit Banner"
-                  >
-                    <Edit2 size={15} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(b.id)}
-                    className="p-1.5 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors"
-                    title="Delete Banner"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Create / Edit Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl text-white space-y-4">
-            <h3 className="text-lg font-black tracking-tight">
-              {editingBanner ? 'Edit Promotional Slide' : 'Create New Hero Slide'}
-            </h3>
-
-            <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
-              <div>
-                <label className="block text-slate-400 font-semibold mb-1">Banner Title *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Authentic Laptops & Tech in Bangladesh"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#0084d6]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-400 font-semibold mb-1">Subtitle / Marketing Copy</label>
-                <textarea
-                  rows={2}
-                  placeholder="e.g. Explore HP, Dell & Lenovo laptops with official warranty and doorstep COD."
-                  value={subtitle}
-                  onChange={(e) => setSubtitle(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#0084d6]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-400 font-semibold mb-1">Top Badge Label</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 0% EMI Available"
-                    value={badge}
-                    onChange={(e) => setBadge(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#0084d6]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-400 font-semibold mb-1">Button CTA Text</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Discover Now"
-                    value={buttonText}
-                    onChange={(e) => setButtonText(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#0084d6]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-400 font-semibold mb-1">Target Page URL</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. /laptops or /laptop-emi"
-                    value={targetUrl}
-                    onChange={(e) => setTargetUrl(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#0084d6]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-400 font-semibold mb-1">Sort Order (0, 1, 2...)</label>
-                  <input
-                    type="number"
-                    value={sortOrder}
-                    onChange={(e) => setSortOrder(Number(e.target.value))}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#0084d6]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-slate-400 font-semibold mb-1">Image / Asset URL</label>
-                <input
-                  type="text"
-                  placeholder="e.g. /logo-dark-transparent.png or Supabase Storage URL"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#0084d6]"
-                />
-              </div>
-
-              <div className="flex items-center gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  id="isActive"
-                  checked={isActive}
-                  onChange={(e) => setIsActive(e.target.checked)}
-                  className="rounded text-[#0084d6] focus:ring-0"
-                />
-                <label htmlFor="isActive" className="text-slate-300 font-semibold cursor-pointer">
-                  Display this banner actively on the customer website
-                </label>
-              </div>
-
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-800">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold"
+                  className="px-5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 rounded-xl bg-[#0084d6] hover:bg-[#0073bc] text-white font-bold flex items-center gap-1.5 shadow-md"
+                  className="px-6 py-2.5 rounded-xl bg-[#008CFF] hover:bg-[#0070cc] text-white font-bold text-xs shadow-md shadow-blue-500/20 disabled:opacity-50"
                 >
-                  {submitting ? 'Saving...' : editingBanner ? 'Save Changes' : 'Create Banner'}
+                  {submitting ? 'Saving...' : editingBanner ? 'Update Banner' : 'Create Banner'}
                 </button>
               </div>
             </form>
@@ -449,3 +845,5 @@ export const BannersManager: React.FC = () => {
     </div>
   );
 };
+
+export default BannersManager;

@@ -88,7 +88,13 @@ export default async function HomePage() {
   try {
     const [fetchedBanners, fetchedProducts] = await Promise.all([
       prisma.banner.findMany({
-        where: { isActive: true },
+        where: {
+          isActive: true,
+          AND: [
+            { OR: [{ startDate: null }, { startDate: { lte: new Date() } }] },
+            { OR: [{ endDate: null }, { endDate: { gte: new Date() } }] },
+          ],
+        },
         orderBy: { sortOrder: 'asc' },
       }).catch(() => []),
       prisma.product.findMany({

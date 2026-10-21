@@ -12,9 +12,24 @@ export async function GET(req: NextRequest) {
     const activeOnly = searchParams.get('activeOnly') !== 'false';
     const placement = searchParams.get('placement');
 
+    const now = new Date();
     const where: any = {};
     if (activeOnly) {
       where.isActive = true;
+      where.AND = [
+        {
+          OR: [
+            { startDate: null },
+            { startDate: { lte: now } },
+          ],
+        },
+        {
+          OR: [
+            { endDate: null },
+            { endDate: { gte: now } },
+          ],
+        },
+      ];
     }
     if (placement) {
       where.placement = placement;
@@ -28,10 +43,25 @@ export async function GET(req: NextRequest) {
       ],
     });
 
+    const enriched = banners.map((b) => {
+      let status: 'ACTIVE' | 'SCHEDULED' | 'EXPIRED' | 'DISABLED' = 'ACTIVE';
+      if (!b.isActive) {
+        status = 'DISABLED';
+      } else if (b.startDate && new Date(b.startDate) > now) {
+        status = 'SCHEDULED';
+      } else if (b.endDate && new Date(b.endDate) < now) {
+        status = 'EXPIRED';
+      }
+      return {
+        ...b,
+        campaignStatus: status,
+      };
+    });
+
     return NextResponse.json({
       success: true,
-      count: banners.length,
-      data: banners,
+      count: enriched.length,
+      data: enriched,
     });
   } catch (err: any) {
     console.error('Fetch banners error:', err);

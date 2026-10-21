@@ -10,6 +10,7 @@ import {
   Laptop, Calendar, DollarSign, Bell, Truck, Phone, MessageCircle
 } from 'lucide-react';
 import { api } from '@/src/services/api';
+import { BannersManager } from './BannersManager';
 
 type WebsiteHubTab = 
   | 'dashboard'
@@ -1005,138 +1006,8 @@ export const WebsiteManagementHub: React.FC<WebsiteManagementHubProps> = ({ onNa
       {/* SUB-SECTION C: BANNERS & CAMPAIGNS                            */}
       {/* ------------------------------------------------------------- */}
       {activeTab === 'banners' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0 0 4px 0' }}>
-                Promotional Banners &amp; Hero Sliders
-              </h3>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
-                Manage full-width hero slides, campaign countdowns, and mobile banner imagery.
-              </p>
-            </div>
-            <button
-              onClick={() => {
-                setEditingBanner(null);
-                setBannerForm({
-                  title: '',
-                  subtitle: '',
-                  badge: 'Official Showroom & Nationwide Delivery',
-                  imageUrl: '/logo-dark-transparent.png',
-                  mobileImageUrl: '',
-                  targetUrl: '/laptops',
-                  buttonText: 'Discover Now',
-                  sortOrder: banners.length,
-                  isActive: true,
-                  placement: 'HERO',
-                });
-                setIsBannerModalOpen(true);
-              }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '9px 16px',
-                borderRadius: '8px',
-                background: '#008CFF',
-                color: '#fff',
-                border: 'none',
-                fontWeight: 700,
-                fontSize: '0.85rem',
-                cursor: 'pointer'
-              }}
-            >
-              <Plus size={16} />
-              <span>Create New Banner</span>
-            </button>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
-            {banners.map(b => (
-              <div
-                key={b.id}
-                style={{
-                  background: 'var(--bg-card)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: '12px',
-                  overflow: 'hidden',
-                  display: 'flex',
-                  flexDirection: 'column'
-                }}
-              >
-                <div style={{ height: '140px', background: '#081621', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {b.imageUrl ? (
-                    <img src={b.imageUrl} alt={b.title} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                  ) : (
-                    <ImageIcon size={40} color="#64748b" />
-                  )}
-                  <span style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    padding: '2px 8px',
-                    borderRadius: '12px',
-                    fontSize: '0.7rem',
-                    fontWeight: 700,
-                    background: b.isActive ? '#10b981' : '#64748b',
-                    color: '#fff'
-                  }}>
-                    {b.isActive ? 'ACTIVE' : 'DISABLED'}
-                  </span>
-                </div>
-
-                <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                  <div>
-                    {b.badge && (
-                      <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#008CFF', textTransform: 'uppercase' }}>
-                        {b.badge}
-                      </span>
-                    )}
-                    <h4 style={{ fontSize: '1rem', fontWeight: 800, margin: '4px 0 6px 0' }}>{b.title}</h4>
-                    {b.subtitle && (
-                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0 0 10px 0' }}>{b.subtitle}</p>
-                    )}
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                      Target: <code style={{ color: '#008CFF' }}>{b.targetUrl || '/'}</code>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)' }}>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Order #{b.sortOrder}</span>
-                    <div style={{ display: 'flex', gap: '6px' }}>
-                      <button
-                        onClick={() => {
-                          setEditingBanner(b);
-                          setBannerForm({
-                            title: b.title,
-                            subtitle: b.subtitle || '',
-                            badge: b.badge || '',
-                            imageUrl: b.imageUrl,
-                            mobileImageUrl: b.mobileImageUrl || '',
-                            targetUrl: b.targetUrl || '/laptops',
-                            buttonText: b.buttonText || 'Discover Now',
-                            sortOrder: b.sortOrder,
-                            isActive: b.isActive,
-                            placement: b.placement || 'HERO',
-                          });
-                          setIsBannerModalOpen(true);
-                        }}
-                        style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-card-muted)', cursor: 'pointer' }}
-                      >
-                        <Edit2 size={14} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteBanner(b.id)}
-                        style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid rgba(239, 68, 68, 0.3)', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', cursor: 'pointer' }}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div style={{ marginTop: '-0.5rem' }}>
+          <BannersManager />
         </div>
       )}
 

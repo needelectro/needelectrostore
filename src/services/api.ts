@@ -690,7 +690,19 @@ export const api = {
     deleteBanner: (id: string) =>
       request<{ success: boolean; message: string }>(`/api/banners/${id}`, {
         method: 'DELETE'
-      })
+      }),
+    uploadImage: async (file: File, folder = 'banners') => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', folder);
+      const token = getSessionToken();
+      const res = await fetch('/api/storage/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      return res.json() as Promise<{ success: boolean; publicUrl?: string; error?: string }>;
+    }
   },
 
   // 21. Website Orders & Online Checkout
