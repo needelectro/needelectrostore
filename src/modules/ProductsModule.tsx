@@ -189,8 +189,8 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
     setRetailPrice('');
     setWholesalePrice('');
     setEmiPrice('');
-    setCurrentStock(1);
-    setMinStock(3);
+    setCurrentStock(0);
+    setMinStock(0);
     setSupplierId('');
     setWarrantyMonths('');
     setIsSerialized(false);
@@ -250,6 +250,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
 
     let res;
     if (editingProduct) {
+      // Preserve existing physical stock on edits to prevent accidental inventory alterations
       res = await updateProduct({
         ...editingProduct,
         name: name.trim(),
@@ -263,7 +264,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
         retailPrice: numRetail,
         wholesalePrice: numWholesale,
         emiPrice: numEmi,
-        currentStock: numStock,
+        currentStock: editingProduct.currentStock,
         minStock: numMinStock,
         supplierId,
         warrantyPeriodMonths: numWarranty,
@@ -802,7 +803,9 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
                 {/* Inventory & Tracking Settings */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 160px), 1fr))', gap: '1rem' }}>
                   <div className="form-group">
-                    <label className="form-label">Opening Stock Quantity</label>
+                    <label className="form-label">
+                      {editingProduct ? 'Current Physical Stock (On Hand)' : 'Opening Stock (Default: 0, Optional)'}
+                    </label>
                     <input
                       type="number"
                       className="form-input"
@@ -810,7 +813,17 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
                       value={currentStock}
                       onChange={e => setCurrentStock(e.target.value === '' ? '' : Number(e.target.value))}
                       min="0"
+                      disabled={!!editingProduct}
                     />
+                    {editingProduct ? (
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px', display: 'block' }}>
+                        Physical stock is managed via Purchases, Sales, &amp; Adjustments.
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px', display: 'block' }}>
+                        Leave as 0 if stock is not yet received. Product can still be published.
+                      </span>
+                    )}
                   </div>
                   <div className="form-group">
                     <label className="form-label">Low Stock Alert Level</label>

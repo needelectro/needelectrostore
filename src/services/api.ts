@@ -721,6 +721,11 @@ export const api = {
       request<{ success: boolean; message: string; order: any }>(`/api/orders/${id}`, {
         method: 'PUT',
         body: JSON.stringify(updates)
+      }),
+    generateInvoice: (id: string, options?: { allowZeroStockOverride?: boolean }) =>
+      request<{ success: boolean; message: string; invoiceNumber?: string; sale?: any; order?: any; requiresProcurement?: boolean; missingProducts?: any[] }>(`/api/orders/${id}/invoice`, {
+        method: 'POST',
+        body: JSON.stringify(options || {})
       })
   },
 

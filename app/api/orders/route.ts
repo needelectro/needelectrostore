@@ -186,26 +186,46 @@ export async function POST(req: NextRequest) {
 
     const totalNum = Math.max(0, subtotalNum - discountNum + deliveryChargeNum);
 
-    // 3. Generate Identifiers
-    const orderNumber = `NEC-ORD-${Date.now().toString().slice(-6)}`;
-    const saleInvoiceNumber = `INV-WEB-${Date.now().toString().slice(-6)}`;
-    const websiteOrderId = `word-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-    const saleId = `sale-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-
-    // 4. Resolve Main Branch for Fulfillment
-    const mainBranch = await prisma.branch.findFirst({
-      where: { active: true },
-      orderBy: { isWarehouse: 'asc' },
+    // 2.2 Idempotency / Duplicate Submission Prevention
+    // If an identical order from this phone was submitted within the last 30 seconds, return the existing order
+    const cleanPhone = customerPhone.trim();
+    const thirtySecondsAgo = new Date(Date.now() - 30 * 1000);
+    const existingRecentOrder = await prisma.websiteOrder.findFirst({
+      where: {
+        customerPhone: cleanPhone,
+        total: new Prisma.Decimal(totalNum),
+        createdAt: { gte: thirtySecondsAgo },
+      },
+      orderBy: { createdAt: 'desc' },
     });
-    const branchId = mainBranch?.id || 'branch-main-1';
+
+    if (existingRecentOrder) {
+      return NextResponse.json({
+        success: true,
+        message: 'Your order has been recorded successfully.',
+        orderNumber: existingRecentOrder.orderNumber,
+        order: existingRecentOrder,
+        isDuplicate: true,
+        summary: {
+          subtotal: Number(existingRecentOrder.subtotal),
+          deliveryCharge: Number(existingRecentOrder.deliveryCharge),
+          total: Number(existingRecentOrder.total),
+          paymentMethod: existingRecentOrder.paymentMethod,
+          district: existingRecentOrder.district,
+        },
+      });
+    }
+
+    // 3. Generate Unique Order Number
+    const orderNumber = `NEC-ORD-${Date.now().toString().slice(-6)}`;
+    const websiteOrderId = `word-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
 
     // Check for authenticated customer session
     const authCustomer = await authenticateCustomer(req);
 
-    // 5. Execute Atomic Transaction
+    // 4. Execute Atomic Transaction (Placing order does NOT deduct stock or create finalized Sale invoice)
     const transactionResult = await prisma.$transaction(async (tx) => {
       // Find or create customer
-      const cleanPhone = customerPhone.trim();
       let customer = authCustomer 
         ? await tx.customer.findUnique({ where: { id: authCustomer.id } })
         : await tx.customer.findFirst({ where: { phone: cleanPhone } });
@@ -227,7 +247,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // Create WebsiteOrder record
+      // Create WebsiteOrder record in PENDING state
       const websiteOrder = await tx.websiteOrder.create({
         data: {
           id: websiteOrderId,
@@ -246,74 +266,12 @@ export async function POST(req: NextRequest) {
           discount: new Prisma.Decimal(discountNum),
           total: new Prisma.Decimal(totalNum),
           orderStatus: 'PENDING',
-          paymentStatus: 'UNPAID', // Cash on Delivery: payment collected at doorstep
+          paymentStatus: 'UNPAID', // Cash on Delivery: payment collected upon delivery
           fulfillmentStatus: 'UNFULFILLED',
           items: orderItems,
-          saleInvoiceId: saleId,
+          saleInvoiceId: null, // Initialized as null; invoice is generated upon confirmation / billing in ERP
         },
       });
-
-      // Synchronize proper Sale record in ERP
-      // COD orders MUST NOT increment cash until collected! paidAmount: 0, dueAmount: total
-      const sale = await tx.sale.create({
-        data: {
-          id: saleId,
-          invoiceNumber: saleInvoiceNumber,
-          customerId: customer.id,
-          customerName: customerName.trim(),
-          customerPhone: cleanPhone,
-          customerEmail: customerEmail || null,
-          customerType: 'WEBSITE_ORDER',
-          branchId,
-          subtotal: new Prisma.Decimal(subtotalNum),
-          deliveryCharge: new Prisma.Decimal(deliveryChargeNum),
-          overallDiscount: new Prisma.Decimal(discountNum),
-          grandTotal: new Prisma.Decimal(totalNum),
-          paidAmount: new Prisma.Decimal(0),
-          dueAmount: new Prisma.Decimal(totalNum),
-          payments: [
-            {
-              method: paymentMethod,
-              amount: 0,
-              ref: `${paymentMethod}_PENDING_DELIVERY`,
-              account: 'UNCOLLECTED_COD',
-            },
-          ],
-          saleType: 'REGULAR',
-          status: 'PENDING',
-          billingAddress: `${deliveryAddress.trim()}, ${district.trim()}`,
-          shippingAddress: `${deliveryAddress.trim()}, ${district.trim()}`,
-          notes: `Website Order ${orderNumber} (Cash on Delivery). Notes: ${deliveryNotes || 'Standard delivery'}.`,
-          metadata: {
-            source: 'WEBSITE',
-            orderNumber,
-            websiteOrderId: websiteOrder.id,
-            district: district.trim(),
-            paymentStatus: 'UNPAID_COD',
-            fulfillmentStatus: 'UNFULFILLED',
-          },
-        },
-      });
-
-      // Create SaleItems
-      for (const item of orderItems) {
-        await tx.saleItem.create({
-          data: {
-            id: 'sitem-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
-            saleId: sale.id,
-            productId: item.productId,
-            productName: item.name,
-            sku: item.sku,
-            category: item.category,
-            quantity: item.quantity,
-            unitPrice: new Prisma.Decimal(item.price),
-            discount: new Prisma.Decimal(0),
-            total: new Prisma.Decimal(item.total),
-            warrantyMonths: item.warrantyMonths,
-            isSerialized: item.isSerialized,
-          },
-        });
-      }
 
       // Log Audit Entry
       await tx.auditLog.create({
@@ -324,18 +282,17 @@ export async function POST(req: NextRequest) {
           action: 'WEBSITE_ORDER_PLACED',
           module: 'SALES',
           recordId: websiteOrder.id,
-          details: `Direct COD order ${orderNumber} created for ${customerName} (${cleanPhone}). Total: ৳${totalNum.toLocaleString()} BDT. Synchronized to ERP invoice ${saleInvoiceNumber}.`,
+          details: `Direct COD order ${orderNumber} created for ${customerName} (${cleanPhone}). Total: ৳${totalNum.toLocaleString()} BDT. Status: PENDING.`,
         },
       });
 
-      return { websiteOrder, sale };
+      return { websiteOrder };
     });
 
     return NextResponse.json({
       success: true,
       message: 'Your order has been placed successfully! Our representative will call you shortly to confirm delivery.',
       orderNumber,
-      invoiceNumber: saleInvoiceNumber,
       order: transactionResult.websiteOrder,
       summary: {
         subtotal: subtotalNum,

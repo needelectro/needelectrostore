@@ -57,17 +57,17 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
 
-  const isAvailable = product.currentStock > 0;
+  const isInStock = product.currentStock > 0;
+  // Business Policy: allow_order_when_stock_is_zero = true
 
   const handleAddToCart = () => {
-    if (!isAvailable) return;
     addItem({
       id: product.id,
       name: product.name,
       sku: product.sku,
       price: product.retailPrice,
       imageUrl: product.imageUrl || null,
-      maxStock: product.currentStock,
+      maxStock: isInStock ? product.currentStock : 99,
       quantity,
     });
     setAdded(true);
@@ -76,14 +76,13 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   };
 
   const handleBuyNow = () => {
-    if (!isAvailable) return;
     addItem({
       id: product.id,
       name: product.name,
       sku: product.sku,
       price: product.retailPrice,
       imageUrl: product.imageUrl || null,
-      maxStock: product.currentStock,
+      maxStock: isInStock ? product.currentStock : 99,
       quantity,
     });
     router.push('/checkout');
@@ -109,12 +108,12 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           </span>
           <span
             className={`absolute top-4 right-4 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
-              isAvailable
+              isInStock
                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                : 'bg-rose-50 text-rose-700 border border-rose-200'
+                : 'bg-blue-50 text-[#008CFF] border border-blue-200'
             }`}
           >
-            {isAvailable ? 'In Stock' : 'Pre-Order'}
+            {isInStock ? 'In Stock' : 'Available to Order'}
           </span>
         </div>
 
@@ -210,8 +209,8 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
               <Truck size={14} className="text-[#008CFF]" />
               <span>Nationwide delivery: ৳60 (Sylhet Div) / ৳120 (All Bangladesh)</span>
             </span>
-            <span className="font-semibold text-emerald-600">
-              {isAvailable ? 'In Stock for Immediate Dispatch' : 'Available for Pre-Order'}
+            <span className={`font-semibold ${isInStock ? 'text-emerald-600' : 'text-[#008CFF]'}`}>
+              {isInStock ? 'In Stock for Immediate Dispatch' : 'Available to Order (Standard Procurement & Delivery)'}
             </span>
           </div>
         </div>
@@ -233,14 +232,14 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
               </span>
               <button
                 type="button"
-                onClick={() => setQuantity((q) => Math.min(product.currentStock || 99, q + 1))}
+                onClick={() => setQuantity((q) => Math.min(isInStock ? product.currentStock : 99, q + 1))}
                 className="px-3 py-2 text-slate-600 hover:bg-slate-200 transition-colors"
               >
                 <Plus size={14} />
               </button>
             </div>
             <span className="text-xs text-slate-400">
-              ({product.currentStock} units in warehouse)
+              {isInStock ? `(${product.currentStock} units in warehouse)` : '(Available to order on request)'}
             </span>
           </div>
 
@@ -249,11 +248,8 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             <button
               type="button"
               onClick={handleAddToCart}
-              disabled={!isAvailable}
               className={`py-3.5 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border transition-all shadow-xs ${
-                !isAvailable
-                  ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
-                  : added
+                added
                   ? 'bg-emerald-600 text-white border-emerald-600'
                   : 'bg-white hover:bg-slate-50 text-[#008CFF] border-[#008CFF]/40 hover:border-[#008CFF]'
               }`}
@@ -275,15 +271,10 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             <button
               type="button"
               onClick={handleBuyNow}
-              disabled={!isAvailable}
-              className={`py-3.5 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-all ${
-                !isAvailable
-                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                  : 'bg-[#008CFF] hover:bg-[#0070cc] text-white shadow-blue-500/20 active:scale-[0.99]'
-              }`}
+              className="py-3.5 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-all bg-[#008CFF] hover:bg-[#0070cc] text-white shadow-blue-500/20 active:scale-[0.99]"
             >
               <Truck size={16} />
-              <span>Buy Now (Cash on Delivery)</span>
+              <span>{isInStock ? 'Buy Now (Cash on Delivery)' : 'Order Now (Cash on Delivery)'}</span>
             </button>
           </div>
         </div>

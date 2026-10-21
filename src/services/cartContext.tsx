@@ -103,7 +103,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (existingIdx !== -1) {
         const next = [...prev];
         const existing = next[existingIdx];
-        const maxStock = product.currentStock || existing.currentStock || 99;
+        const maxStock = (product.currentStock && product.currentStock > 0) ? product.currentStock : ((existing.currentStock && existing.currentStock > 0) ? existing.currentStock : 99);
         const newQty = Math.min(existing.quantity + quantity, maxStock);
         next[existingIdx] = {
           ...existing,
@@ -122,8 +122,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         price: Number(product.retailPrice),
         quantity: Math.max(1, quantity),
         imageUrl: product.imageUrl || undefined,
-        currentStock: product.currentStock ?? 10,
-        maxStock: product.currentStock ?? 10,
+        currentStock: product.currentStock ?? 0,
+        maxStock: (product.currentStock && product.currentStock > 0) ? product.currentStock : 99,
         warrantyPeriodMonths: product.warrantyPeriodMonths || 0,
       };
 

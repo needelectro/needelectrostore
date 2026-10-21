@@ -39,8 +39,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const isLaptop = product.category.toLowerCase().includes('laptop') || product.name.toLowerCase().includes('laptop');
   const fallbackImage = isLaptop ? '/logo-dark-transparent.png' : '/logo-icon.png';
   const imgUrl = product.imageUrl || fallbackImage;
-  const isAvailable = product.currentStock > 0;
-
+  const isInStock = product.currentStock > 0;
+  // Business Policy: allow_order_when_stock_is_zero = true
   // Approximate regular price and savings if regular price is not explicitly set
   const regularPrice = product.regularPrice && product.regularPrice > product.retailPrice
     ? product.regularPrice
@@ -110,17 +110,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
           <span
             className={`px-2 py-0.5 rounded-md text-[9.5px] sm:text-[10.5px] font-bold tracking-wide flex items-center gap-1.5 shadow-xs ${
-              isAvailable
+              isInStock
                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                : 'bg-rose-50 text-rose-700 border border-rose-200'
+                : 'bg-blue-50 text-[#008CFF] border border-blue-200/80'
             }`}
           >
             <span
               className={`w-1.5 h-1.5 rounded-full ${
-                isAvailable ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
+                isInStock ? 'bg-emerald-500 animate-pulse' : 'bg-[#008CFF]'
               }`}
             />
-            <span>{isAvailable ? 'In Stock' : 'Out of Stock'}</span>
+            <span>{isInStock ? 'In Stock' : 'Available to Order'}</span>
           </span>
         </div>
 
@@ -197,15 +197,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
         </div>
 
-        {/* Full-width "Add to Cart" button */}
+        {/* Full-width "Add to Cart" / "Order Now" button */}
         <button
           type="button"
           onClick={handleAddToCart}
-          disabled={!isAvailable}
           className={`w-full py-2 sm:py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-xs ${
-            !isAvailable
-              ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-              : added
+            added
               ? 'bg-emerald-600 text-white shadow-emerald-500/25 scale-[0.98]'
               : 'bg-[#008CFF] hover:bg-[#0070cc] text-white shadow-blue-500/20 hover:shadow-blue-500/35 active:scale-[0.98]'
           }`}
@@ -215,13 +212,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <Check size={14} className="stroke-3" />
               <span>Added to Cart!</span>
             </>
-          ) : isAvailable ? (
+          ) : isInStock ? (
             <>
               <ShoppingBag size={14} />
               <span>Add to Cart</span>
             </>
           ) : (
-            <span>Out of Stock</span>
+            <>
+              <ShoppingBag size={14} />
+              <span>Order Now</span>
+            </>
           )}
         </button>
       </div>
