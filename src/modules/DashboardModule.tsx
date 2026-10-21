@@ -2121,7 +2121,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) 
             NEED ELECTRO
           </div>
           <div style={{ fontSize: '0.78rem', marginTop: '2px' }}>
-            Trusted Electrical & Technological Solutions • A Sister Concern of AMDADS Group
+            Trusted Electrical & Technological Solutions
           </div>
         </div>
 
