@@ -7,7 +7,8 @@ import {
   PackageSearch, Plus, Search, Edit2, Laptop, 
   Tag, Layers, Hash, Check, X, ShieldAlert, Trash2,
   UploadCloud, Image as ImageIcon, Link as LinkIcon, Star,
-  Eye, EyeOff, Loader2, Sparkles, CheckCircle2
+  Eye, EyeOff, Loader2, Sparkles, CheckCircle2,
+  FileText, Clipboard, ChevronDown, ChevronUp
 } from 'lucide-react';
 
 interface ProductsModuleProps {
@@ -65,6 +66,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
   const [display, setDisplay] = useState('');
   const [batteryCondition, setBatteryCondition] = useState('');
   const [physicalCondition, setPhysicalCondition] = useState('');
+  const [showLegacySpecs, setShowLegacySpecs] = useState(false);
 
   // Product Media & Storefront Visibility
   const [imageUrl, setImageUrl] = useState('');
@@ -1167,75 +1169,203 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({ onNavigate, init
                   </div>
                 </div>
 
-                {/* Tech Specs if Laptop */}
+                {/* ─── FULL PRODUCT SPECIFICATIONS & DESCRIPTION ─── */}
+                <div style={{
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-card-muted)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <FileText size={18} color="var(--brand-primary)" />
+                      <label className="form-label" style={{ margin: 0, fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-primary)' }}>
+                        Full Product Specifications &amp; Description
+                      </label>
+                    </div>
+                    <span style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      color: 'var(--brand-primary)',
+                      background: 'rgba(0, 140, 255, 0.08)',
+                      padding: '2px 8px',
+                      borderRadius: '6px',
+                      border: '1px solid rgba(0, 140, 255, 0.2)'
+                    }}>
+                      Optional • Single Copy-Paste Field
+                    </span>
+                  </div>
+
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, lineHeight: '1.4' }}>
+                    Paste the complete product specifications and overview here (Processor, RAM, Storage, Display, Graphics, Ports, Battery, Features, Box Contents). All line breaks, paragraphs, and formatting are preserved and automatically displayed on the storefront.
+                  </p>
+
+                  {/* Quick Format & Paste Helper Bar */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const text = await navigator.clipboard.readText();
+                          if (text) {
+                            setDescription(prev => prev ? `${prev}\n${text}` : text);
+                          }
+                        } catch {
+                          // Browser clipboard permissions fallback
+                        }
+                      }}
+                      className="btn btn-secondary btn-sm"
+                      style={{ fontSize: '0.72rem', padding: '3px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                      title="Paste from clipboard"
+                    >
+                      <Clipboard size={12} /> Paste from Clipboard
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const template = `Processor: \nRAM: \nStorage: \nDisplay: \nGraphics: \nPorts: \nBattery: \nOperating System: \nWarranty: 2 Years Showroom Warranty`;
+                        setDescription(prev => prev ? `${prev}\n\n${template}` : template);
+                      }}
+                      className="btn btn-ghost btn-sm"
+                      style={{ fontSize: '0.72rem', padding: '3px 8px', border: '1px solid var(--border-color)' }}
+                    >
+                      + Specs Template
+                    </button>
+                    {description && (
+                      <button
+                        type="button"
+                        onClick={() => setDescription('')}
+                        className="btn btn-ghost btn-sm"
+                        style={{ fontSize: '0.72rem', padding: '3px 8px', color: '#ef4444', marginLeft: 'auto' }}
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Large Multiline Textarea Editor */}
+                  <textarea
+                    rows={10}
+                    className="form-input"
+                    style={{
+                      width: '100%',
+                      minHeight: '220px',
+                      fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace, sans-serif',
+                      fontSize: '0.84rem',
+                      lineHeight: '1.6',
+                      padding: '0.85rem',
+                      resize: 'vertical',
+                      whiteSpace: 'pre-wrap',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-card)',
+                      color: 'var(--text-primary)',
+                    }}
+                    placeholder={`Paste the entire product specifications and description here in one go...\n\nExample:\nProcessor: Intel Core i7-1255U (10 Cores, 12 Threads, Up to 4.7 GHz)\nRAM: 16GB DDR5 4800MHz\nStorage: 512GB PCIe NVMe M.2 SSD\nDisplay: 14.0" WUXGA (1920x1200) IPS Anti-Glare 400 nits\nGraphics: Intel Iris Xe Graphics\nPorts: 2x Thunderbolt 4, 2x USB 3.2, 1x HDMI 2.0b, 1x Audio combo\nBattery: 57Wh with 65W Rapid Charge\nWarranty: 2 Years Official Showroom Warranty with 7-Day Replacement Guarantee`}
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
+                  />
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                    <span>✓ No separate mandatory fields required. One simple paste for complete specifications.</span>
+                    <span>{description.length} characters • {description.split('\n').filter(Boolean).length} lines</span>
+                  </div>
+                </div>
+
+                {/* Optional Collapsible Separate Hardware Attributes (for legacy backwards compatibility only) */}
                 {category === 'Laptop' && (
-                  <div style={{ border: '1px solid var(--border-color)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
-                    <div style={{ fontWeight: '700', fontSize: '0.85rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Laptop size={16} color="var(--brand-primary)" />
-                      Dedicated Laptop Hardware Specifications
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))', gap: '0.75rem' }}>
-                      <div className="form-group">
-                        <label className="form-label">Processor (CPU)</label>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="e.g. Intel Core i5 11th Gen"
-                          value={cpu}
-                          onChange={e => setCpu(e.target.value)}
-                        />
+                  <div style={{ border: '1px dashed var(--border-color)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', background: 'rgba(0,0,0,0.01)' }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowLegacySpecs(!showLegacySpecs)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        color: 'var(--text-secondary)'
+                      }}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Laptop size={14} color="var(--brand-primary)" />
+                        Separate Hardware Breakdown (Optional / Not Required)
+                      </span>
+                      {showLegacySpecs ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </button>
+
+                    {showLegacySpecs && (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))', gap: '0.75rem', marginTop: '0.75rem' }}>
+                        <div className="form-group">
+                          <label className="form-label" style={{ fontSize: '0.75rem' }}>Processor (CPU)</label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            placeholder="e.g. Intel Core i5 11th Gen"
+                            value={cpu}
+                            onChange={e => setCpu(e.target.value)}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label" style={{ fontSize: '0.75rem' }}>RAM Memory</label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            placeholder="e.g. 16GB DDR4"
+                            value={ram}
+                            onChange={e => setRam(e.target.value)}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label" style={{ fontSize: '0.75rem' }}>Storage (SSD/HDD)</label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            placeholder="e.g. 512GB NVMe SSD"
+                            value={storage}
+                            onChange={e => setStorage(e.target.value)}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label" style={{ fontSize: '0.75rem' }}>Display Size &amp; Panel</label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            placeholder='e.g. 14.0" FHD IPS'
+                            value={display}
+                            onChange={e => setDisplay(e.target.value)}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label" style={{ fontSize: '0.75rem' }}>Battery Health</label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            placeholder="e.g. 92% Health"
+                            value={batteryCondition}
+                            onChange={e => setBatteryCondition(e.target.value)}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label" style={{ fontSize: '0.75rem' }}>Condition Grade</label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            placeholder="e.g. Grade A+"
+                            value={physicalCondition}
+                            onChange={e => setPhysicalCondition(e.target.value)}
+                          />
+                        </div>
                       </div>
-                      <div className="form-group">
-                        <label className="form-label">RAM Memory</label>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="e.g. 16GB DDR4"
-                          value={ram}
-                          onChange={e => setRam(e.target.value)}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Storage (SSD/HDD)</label>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="e.g. 512GB NVMe SSD"
-                          value={storage}
-                          onChange={e => setStorage(e.target.value)}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Display Size & Panel</label>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="e.g. 14.0&quot; FHD IPS"
-                          value={display}
-                          onChange={e => setDisplay(e.target.value)}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Battery Health</label>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="e.g. 92% Health (4-5 hrs)"
-                          value={batteryCondition}
-                          onChange={e => setBatteryCondition(e.target.value)}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Physical Condition Grade</label>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="e.g. Grade A+ Pristine"
-                          value={physicalCondition}
-                          onChange={e => setPhysicalCondition(e.target.value)}
-                        />
-                      </div>
-                    </div>
+                    )}
                   </div>
                 )}
               </div>

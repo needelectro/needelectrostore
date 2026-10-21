@@ -9,6 +9,7 @@ import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
 import { ProductCard } from '@/src/components/customer/ProductCard';
 import { ProductDetailView } from '@/src/components/customer/ProductDetailView';
+import { ProductSpecificationsView } from '@/src/components/customer/ProductSpecificationsView';
 import {
   ShieldCheck, CheckCircle2, Phone, MessageCircle, Truck,
   CreditCard, Clock, MapPin, Laptop, Cpu, Check, ArrowRight
@@ -236,54 +237,14 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
           emiMonthly={emiMonthly}
         />
 
-        {/* Detailed Technical Specifications Table */}
-        {product.specs && typeof product.specs === 'object' && Object.keys(product.specs).length > 0 && (
-          <div className="mt-14 space-y-4">
-            <h2 className="text-xl font-bold text-[#002B5B] border-b border-slate-200 pb-3">
-              Technical Specifications
-            </h2>
-            <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-xs">
-              <table className="w-full text-xs text-left">
-                <tbody className="divide-y divide-slate-100">
-                  {Object.entries(product.specs).map(([key, value]) => {
-                    if (!value || typeof value === 'object') return null;
-                    const readableKey = key
-                      .replace(/([A-Z])/g, ' $1')
-                      .replace(/^./, str => str.toUpperCase());
-                    return (
-                      <tr key={key} className="hover:bg-slate-50 transition-colors">
-                        <td className="py-3 px-5 font-semibold text-slate-500 w-1/3 bg-slate-50/70">
-                          {readableKey}
-                        </td>
-                        <td className="py-3 px-5 text-[#002B5B] font-medium">
-                          {String(value)}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  <tr className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3 px-5 font-semibold text-slate-500 w-1/3 bg-slate-50/70">
-                      Warranty Coverage
-                    </td>
-                    <td className="py-3 px-5 text-[#002B5B] font-medium">
-                      {product.warrantyPeriodMonths 
-                        ? `${product.warrantyPeriodMonths} Months Official / Service Warranty`
-                        : '7-Day Replacement Guarantee & 2-Year Service Warranty'}
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3 px-5 font-semibold text-slate-500 w-1/3 bg-slate-50/70">
-                      Product Condition
-                    </td>
-                    <td className="py-3 px-5 text-[#002B5B] font-medium">
-                      100% Tested Hardware (Fresh Cosmetic Condition, Verified Motherboard & Battery)
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+        {/* Full Specifications & Description (Synced automatically from ERP) */}
+        <ProductSpecificationsView
+          description={product.description}
+          specs={product.specs}
+          warrantyPeriodMonths={product.warrantyPeriodMonths || undefined}
+          productName={product.name}
+          sku={product.sku}
+        />
 
         {/* Related Products Section */}
         {relatedProducts.length > 0 && (

@@ -151,8 +151,26 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ product, onClose, o
           </div>
 
           <div className="form-group">
-            <label className="form-label">Description</label>
-            <textarea className="form-input" rows={2} style={{ resize: 'vertical' }} {...field('description')} />
+            <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontWeight: 700 }}>Full Product Specifications &amp; Description</span>
+              <span style={{ fontSize: '0.72rem', color: 'var(--brand-primary)', fontWeight: 600 }}>Optional</span>
+            </label>
+            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
+              Paste complete product details, specifications (CPU, RAM, Storage, Display, Ports), features, and warranty terms. Line breaks and formatting are preserved.
+            </div>
+            <textarea
+              className="form-input"
+              rows={8}
+              style={{
+                resize: 'vertical',
+                minHeight: '180px',
+                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                fontSize: '0.82rem',
+                lineHeight: '1.5'
+              }}
+              placeholder={`Paste the entire product specifications and description here in one go...\n\nExample:\nProcessor: Intel Core i5 11th Gen\nRAM: 16GB DDR4\nStorage: 512GB NVMe SSD\nDisplay: 14.0" FHD IPS\nWarranty: 2 Years Showroom Warranty`}
+              {...field('description')}
+            />
           </div>
         </div>
         <div className="modal-footer">

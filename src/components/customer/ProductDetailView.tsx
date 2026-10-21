@@ -176,9 +176,24 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           </h1>
 
           {product.description && (
-            <p className="mt-3 text-sm text-slate-600 leading-relaxed">
-              {product.description}
-            </p>
+            <div className="mt-3 text-sm text-slate-600 leading-relaxed">
+              {product.description.length > 160 || product.description.includes('\n') ? (
+                <div>
+                  <p className="line-clamp-2">
+                    {product.description.split(/\r?\n/).filter(Boolean)[0] || product.description.substring(0, 160)}
+                  </p>
+                  <a
+                    href="#specifications"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[#008CFF] hover:underline mt-1.5"
+                  >
+                    <span>View Full Specifications &amp; Description</span>
+                    <span>&darr;</span>
+                  </a>
+                </div>
+              ) : (
+                <p>{product.description}</p>
+              )}
+            </div>
           )}
         </div>
 
