@@ -586,10 +586,10 @@ export const BannersManager: React.FC = () => {
 
                 {/* Preview Frame */}
                 <div
-                  className={`mx-auto rounded-2xl overflow-hidden border border-slate-300 shadow-sm relative transition-all ${
+                  className={`mx-auto rounded-xl sm:rounded-2xl overflow-hidden border border-slate-300 shadow-sm relative transition-all bg-white flex items-center justify-center ${
                     previewMode === 'desktop'
-                      ? 'w-full aspect-[16/6] min-h-[160px]'
-                      : 'w-72 aspect-[4/3] min-h-[220px]'
+                      ? 'w-full max-w-2xl h-[175px]'
+                      : 'w-72 h-[140px]'
                   }`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -601,29 +601,13 @@ export const BannersManager: React.FC = () => {
                       (e.target as HTMLImageElement).src = '/banners/lenovo-thinkpad-banner.jpg';
                     }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/70 to-transparent pointer-events-none" />
-
-                  <div className="absolute inset-0 p-4 sm:p-6 flex flex-col justify-center max-w-md">
-                    {badge && (
-                      <span className="text-[9px] font-bold text-[#008CFF] uppercase tracking-wider mb-1">
-                        {badge}
-                      </span>
-                    )}
-                    <h4 className="text-base sm:text-xl font-black text-[#002B5B] leading-tight line-clamp-2">
-                      {title || 'Campaign Title Headline'}
-                    </h4>
-                    {subtitle && (
-                      <p className="text-[11px] sm:text-xs text-slate-600 line-clamp-2 mt-1">
-                        {subtitle}
-                      </p>
-                    )}
-                    <div className="mt-3">
-                      <span className="inline-block px-3 py-1.5 rounded-lg bg-[#008CFF] text-white font-bold text-[11px] shadow-xs">
-                        {buttonText || 'Shop Now'} &rarr;
-                      </span>
-                    </div>
+                  <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-md border border-slate-200 text-[10px] font-bold text-[#002B5B] shadow-xs">
+                    Pure Image-Only Banner
                   </div>
                 </div>
+                <p className="text-[11px] text-slate-500 text-center mt-2">
+                  Storefront displays clean, minimal, image-only artwork without overlaid text or buttons. The campaign title is used as accessible alt text.
+                </p>
               </div>
 
               {/* Form Input Grid */}

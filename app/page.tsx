@@ -164,87 +164,48 @@ export default async function HomePage() {
 
       <CustomerHeader />
 
-      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-5 space-y-6 sm:space-y-8 flex-1">
+      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-3.5 space-y-3.5 sm:space-y-4 flex-1">
         <h1 className="sr-only">
           NEED ELECTRO — Authentic Laptops, CCTV, Computers &amp; Electrical Store in Bangladesh
         </h1>
 
-        {/* 1. Hero Section — Full-Width Futuristic Banner Carousel */}
+        {/* 1. Hero Section — Compact, Premium Image-Only Banner Carousel */}
         <section aria-label="Hero Promotions" className="w-full">
           <HeroCarousel banners={banners} />
         </section>
 
-        {/* 2. Showroom Hotline & Custom Engineering Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Card 1: Customer Care & Warranty */}
-          <div className="rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col justify-between relative overflow-hidden group min-h-[140px] bg-white">
+        {/* 2. Compact Sub-Hero Promotional Image Banners */}
+        <section aria-label="Featured Promotions" className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          {/* Promo Banner 1: Service & Warranty */}
+          <a
+            href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=Hello%20NEED%20ELECTRO%2C%20I%20have%20an%20inquiry%20about%20warranty%20and%20service.`}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="NEED ELECTRO Warranty Care and Customer Service"
+            className="rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md overflow-hidden relative group block h-[95px] sm:h-[115px] md:h-[125px] bg-white transition-all"
+          >
             <img
               src="/banners/need-electro-service-warranty.jpg"
-              alt="NEED ELECTRO Trusted Service & Warranty"
-              className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out opacity-90"
+              alt="NEED ELECTRO Official Service & Showroom Warranty"
+              loading="lazy"
+              className="w-full h-full object-cover object-center group-hover:scale-[1.015] transition-transform duration-500 ease-out"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-white/40 pointer-events-none" />
+          </a>
 
-            <div className="relative z-10 p-4 flex items-start justify-between">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-white text-emerald-700 border border-emerald-200 uppercase tracking-wider shadow-xs">
-                <ShieldCheck size={11} className="text-emerald-600" />
-                <span>Showroom Care &amp; Warranty Support</span>
-              </span>
-            </div>
-
-            <div className="relative z-10 p-4 pt-0 flex items-center justify-between">
-              <a
-                href={`tel:${BUSINESS_INFO.phoneClean}`}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200/90 text-xs font-bold text-[#002B5B] hover:text-[#008CFF] shadow-xs transition-colors"
-              >
-                <Phone size={12} className="text-[#008CFF]" />
-                <span>Hotline: {BUSINESS_INFO.phone}</span>
-              </a>
-              <a
-                href={`https://wa.me/${BUSINESS_INFO.whatsappClean}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 shadow-xs transition-all active:scale-95"
-              >
-                <MessageCircle size={12} />
-                <span>WhatsApp</span>
-              </a>
-            </div>
-          </div>
-
-          {/* Card 2: Custom PC & Electrical Servicing */}
-          <div className="rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col justify-between relative overflow-hidden group min-h-[140px] bg-white">
+          {/* Promo Banner 2: Custom PC & Engineering */}
+          <Link
+            href="/computers"
+            aria-label="NEED ELECTRO Custom PC Builds and Workstations"
+            className="rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md overflow-hidden relative group block h-[95px] sm:h-[115px] md:h-[125px] bg-white transition-all"
+          >
             <img
               src="/banners/need-electro-custom-pc.jpg"
-              alt="NEED ELECTRO Custom Gaming PC & Workstations"
-              className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out opacity-90"
+              alt="NEED ELECTRO Custom PCs and Engineering Workstations"
+              loading="lazy"
+              className="w-full h-full object-cover object-center group-hover:scale-[1.015] transition-transform duration-500 ease-out"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-white/40 pointer-events-none" />
-
-            <div className="relative z-10 p-4 flex items-start justify-between">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-white text-[#008CFF] border border-blue-200 uppercase tracking-wider shadow-xs">
-                <Zap size={11} className="text-[#008CFF]" />
-                <span>Custom PC Builds &amp; Technical Services</span>
-              </span>
-            </div>
-
-            <div className="relative z-10 p-4 pt-0 flex items-center justify-between">
-              <Link
-                href="/services/electrician"
-                className="px-3.5 py-1.5 rounded-xl bg-[#008CFF] hover:bg-[#0070cc] text-white font-bold text-xs flex items-center gap-1 shadow-xs transition-all active:scale-95"
-              >
-                <span>Book Technician</span>
-                <ArrowRight size={12} />
-              </Link>
-              <Link
-                href="/computers"
-                className="px-3 py-1.5 rounded-xl bg-white border border-slate-200/90 text-xs font-bold text-[#002B5B] hover:text-[#008CFF] shadow-xs transition-colors"
-              >
-                Browse PCs →
-              </Link>
-            </div>
-          </div>
-        </div>
+          </Link>
+        </section>
 
         {/* 2. Status / Operational Strip (Trust Computer MB Style: Rounded-full Pill) */}
         <section aria-label="Showroom Operational Notice">
