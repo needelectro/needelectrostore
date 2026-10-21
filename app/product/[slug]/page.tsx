@@ -17,33 +17,89 @@ import {
 export const revalidate = 60;
 
 // Helper to find product by slug or SKU
-async function getProductBySlug(slug: string) {
-  try {
-    // Try matching by exact SKU first (e.g. if slug is the SKU or ends with SKU)
-    const parts = slug.split('-');
-    const possibleSku = parts[parts.length - 1];
+async function getProductBySlug(rawSlug: string) {
+  if (!rawSlug) return null;
+  const slug = decodeURIComponent(rawSlug).trim();
 
+  try {
+    // 1. Direct match by exact ID or exact SKU (case-insensitive)
     let product = await prisma.product.findFirst({
       where: {
         OR: [
+          { id: slug },
           { sku: { equals: slug, mode: 'insensitive' } },
-          { id: { equals: slug } },
-          { sku: { equals: possibleSku, mode: 'insensitive' } },
         ],
       },
     });
-
     if (product) return product;
 
-    // Fallback search by clean name match
-    const cleanSlug = slug.replace(/-[a-z0-9]+$/, '').replace(/-/g, ' ');
-    product = await prisma.product.findFirst({
-      where: {
-        name: { contains: cleanSlug, mode: 'insensitive' },
-      },
+    // 2. Extract potential SKU candidates from the slug
+    const skuCandidates = new Set<string>();
+
+    // Standard pattern PROD-xxxx
+    const prodMatch = slug.match(/[-_](prod[-_]?\d+)$/i);
+    if (prodMatch) skuCandidates.add(prodMatch[1].replace('_', '-'));
+
+    // Standard pattern SKU-xxxx-xxxx
+    const skuMatch = slug.match(/[-_](sku[-_][a-z0-9]+([-_][a-z0-9]+)*)$/i);
+    if (skuMatch) skuCandidates.add(skuMatch[1].replace(/_/g, '-'));
+
+    // Suffix slices (last 1, 2, 3, 4 parts)
+    const parts = slug.split('-');
+    for (let i = 1; i <= Math.min(4, parts.length); i++) {
+      skuCandidates.add(parts.slice(parts.length - i).join('-'));
+    }
+
+    const lastPart = parts[parts.length - 1];
+
+    const orConditions: any[] = [];
+    for (const candidate of Array.from(skuCandidates)) {
+      orConditions.push({ sku: { equals: candidate, mode: 'insensitive' } });
+      orConditions.push({ id: { equals: candidate, mode: 'insensitive' } });
+    }
+    if (lastPart && /^\d+$/.test(lastPart)) {
+      orConditions.push({ sku: { endsWith: lastPart, mode: 'insensitive' } });
+    }
+
+    if (orConditions.length > 0) {
+      product = await prisma.product.findFirst({
+        where: { OR: orConditions },
+      });
+      if (product) return product;
+    }
+
+    // 3. Match against slugified database products
+    const allProducts = await prisma.product.findMany({
+      select: { id: true, name: true, sku: true },
     });
 
-    return product;
+    const targetSlugLower = slug.toLowerCase();
+    for (const p of allProducts) {
+      const fullSlug = `${slugify(p.name)}-${p.sku.toLowerCase()}`;
+      const nameSlug = slugify(p.name);
+      if (fullSlug === targetSlugLower || nameSlug === targetSlugLower) {
+        return await prisma.product.findUnique({ where: { id: p.id } });
+      }
+    }
+
+    // 4. Keyword fuzzy match (extract word tokens from slug)
+    const cleanTokens = slug
+      .replace(/(prod[-_]\d+|sku[-_][a-z0-9-]+|\d+)$/i, '')
+      .split(/[-_]+/)
+      .filter((t) => t.length > 2);
+
+    if (cleanTokens.length > 0) {
+      product = await prisma.product.findFirst({
+        where: {
+          AND: cleanTokens.slice(0, 3).map((token) => ({
+            name: { contains: token, mode: 'insensitive' },
+          })),
+        },
+      });
+      if (product) return product;
+    }
+
+    return null;
   } catch (err) {
     console.error('Failed to get product by slug:', err);
     return null;
