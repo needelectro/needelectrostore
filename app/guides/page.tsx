@@ -197,7 +197,7 @@ export default async function GuidesLandingPage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
               {featuredProducts.map((p) => (
                 <ProductCard
                   key={p.id}

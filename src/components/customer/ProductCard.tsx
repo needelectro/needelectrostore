@@ -89,81 +89,81 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-[#0084d6] dark:hover:border-blue-500 rounded-xl overflow-hidden shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col group relative aspect-square">
-      {/* Top Image Box: flexible height inside the square card */}
-      <div className="relative flex-1 min-h-0 bg-slate-50/80 dark:bg-slate-950 overflow-hidden border-b border-slate-100 dark:border-slate-800/80 p-2 flex items-center justify-center">
-        <Link href={`/product/${slug}`} className="block w-full h-full">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-[#0084d6] dark:hover:border-blue-500 rounded-2xl overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative h-full">
+      {/* Top Image Box: Generous 4:3 aspect ratio */}
+      <div className="relative aspect-[4/3] w-full bg-slate-50/90 dark:bg-slate-950/70 overflow-hidden border-b border-slate-100 dark:border-slate-800/80 p-3 sm:p-4 flex items-center justify-center">
+        <Link href={`/product/${slug}`} className="w-full h-full flex items-center justify-center">
           <img
             src={imgUrl}
             alt={`${product.name} at ${BUSINESS_INFO.name} Bangladesh`}
             loading="lazy"
-            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+            className="max-h-full max-w-full object-contain group-hover:scale-108 transition-transform duration-300 drop-shadow-xs"
           />
         </Link>
 
         {/* Badges on Top Left (Discount & In Stock) */}
-        <div className="absolute top-1.5 left-1.5 flex flex-col gap-0.5 items-start pointer-events-none z-10">
+        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start pointer-events-none z-10">
           {discountPercent > 0 && (
-            <span className="bg-rose-500 text-white text-[8px] sm:text-[8.5px] font-black px-1.5 py-0.2 rounded shadow-2xs tracking-wider">
+            <span className="bg-rose-500 text-white text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-md shadow-xs tracking-wider">
               -{discountPercent}% OFF
             </span>
           )}
           <span
-            className={`px-1.5 py-0.2 rounded text-[7.5px] sm:text-[8.5px] font-bold tracking-wide flex items-center gap-1 shadow-2xs ${
+            className={`px-2 py-0.5 rounded-md text-[9.5px] sm:text-[10.5px] font-bold tracking-wide flex items-center gap-1.5 shadow-xs ${
               isAvailable
                 ? 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700'
                 : 'bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-700'
             }`}
           >
             <span
-              className={`w-1 h-1 rounded-full ${
+              className={`w-1.5 h-1.5 rounded-full ${
                 isAvailable ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
               }`}
             />
-            <span>{isAvailable ? 'In Stock' : 'Out'}</span>
+            <span>{isAvailable ? 'In Stock' : 'Out of Stock'}</span>
           </span>
         </div>
 
         {/* Top Right: Wishlist & WhatsApp */}
-        <div className="absolute top-1.5 right-1.5 flex items-center gap-1 z-10">
+        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
           <a
             href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=Hello%20NEED%20ELECTRO%2C%20I%20am%20interested%20in%20${encodeURIComponent(product.name)}%20(SKU:%20${product.sku}).%20Is%20it%20available%20for%20delivery%3F`}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="WhatsApp Inquiry"
-            className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 shadow-2xs flex items-center justify-center transition-all opacity-80 hover:opacity-100"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 dark:bg-slate-800/90 hover:bg-emerald-50 dark:hover:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-slate-200/80 dark:border-slate-700 shadow-xs flex items-center justify-center transition-all opacity-90 hover:opacity-100 hover:scale-105"
             title="Chat on WhatsApp"
           >
-            <MessageCircle size={10} />
+            <MessageCircle size={14} />
           </a>
           <button
             type="button"
             onClick={handleToggleWishlist}
             aria-label="Add to wishlist"
-            className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white/90 dark:bg-slate-800/90 hover:bg-white text-slate-400 hover:text-rose-500 border border-slate-200 dark:border-slate-700 shadow-2xs flex items-center justify-center transition-all"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 dark:bg-slate-800/90 hover:bg-white text-slate-400 hover:text-rose-500 border border-slate-200/80 dark:border-slate-700 shadow-xs flex items-center justify-center transition-all opacity-90 hover:opacity-100 hover:scale-105"
           >
             <Heart
-              size={10}
+              size={14}
               className={isWishlisted ? 'fill-rose-500 text-rose-500' : ''}
             />
           </button>
         </div>
 
-        {/* Micro Warranty Badge at bottom of image */}
-        <div className="absolute bottom-1 left-1.5 px-1.5 py-0.2 rounded bg-black/60 backdrop-blur-xs text-[7px] sm:text-[8px] font-semibold text-sky-300 border border-white/10 flex items-center gap-0.5 pointer-events-none z-10">
-          <ShieldCheck size={8.5} className="text-sky-400" />
+        {/* Warranty Badge at bottom of image */}
+        <div className="absolute bottom-2 left-2.5 px-2 py-0.5 rounded-md bg-black/65 backdrop-blur-xs text-[9px] sm:text-[10px] font-semibold text-sky-300 border border-white/10 flex items-center gap-1 pointer-events-none z-10">
+          <ShieldCheck size={11} className="text-sky-400" />
           <span>{warrantyText}</span>
         </div>
       </div>
 
-      {/* Card Body: Compact and fixed-height for consistent square presentation */}
-      <div className="shrink-0 p-1.5 sm:p-2 bg-white dark:bg-slate-900 flex flex-col justify-between gap-1">
+      {/* Card Body: Spacious and well-proportioned */}
+      <div className="p-3.5 sm:p-4 bg-white dark:bg-slate-900 flex-1 flex flex-col justify-between gap-2.5">
         {/* Category & Brand row */}
-        <div className="flex items-center justify-between text-[8px] sm:text-[9px] text-slate-400 font-medium leading-none">
-          <span className="text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate max-w-[70%]">
+        <div className="flex items-center justify-between text-[10px] sm:text-xs text-slate-400 font-medium leading-none">
+          <span className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider truncate max-w-[65%]">
             {product.brand} • {product.category}
           </span>
-          <span className="font-mono text-[7.5px] sm:text-[8px] bg-slate-100 dark:bg-slate-800 px-1 py-0.2 rounded text-slate-500">
+          <span className="font-mono text-[9px] sm:text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-500 font-semibold">
             {product.sku}
           </span>
         </div>
@@ -171,7 +171,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Product Title */}
         <Link href={`/product/${slug}`} className="block">
           <h3
-            className="text-[10.5px] sm:text-[11.5px] font-bold text-slate-900 dark:text-slate-100 group-hover:text-[#0084d6] transition-colors line-clamp-1 leading-tight"
+            className="text-xs sm:text-sm md:text-[15px] font-bold text-slate-900 dark:text-slate-100 group-hover:text-[#0084d6] transition-colors line-clamp-2 leading-snug min-h-[2.25rem] sm:min-h-[2.6rem]"
             title={product.name}
           >
             {product.name}
@@ -179,19 +179,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </Link>
 
         {/* Pricing row */}
-        <div className="flex items-baseline justify-between gap-1 leading-none">
-          <div className="flex items-baseline gap-1">
-            <span className="text-xs sm:text-[13px] font-black text-[#0084d6] font-mono">
+        <div className="flex items-baseline justify-between gap-1.5 pt-0.5">
+          <div className="flex items-baseline gap-1.5 flex-wrap">
+            <span className="text-sm sm:text-base md:text-lg font-black text-[#0084d6] font-mono">
               ৳{product.retailPrice.toLocaleString()}
             </span>
             {savings > 0 && (
-              <span className="text-[8px] sm:text-[9px] text-slate-400 line-through font-mono">
+              <span className="text-[10px] sm:text-xs text-slate-400 line-through font-mono">
                 ৳{regularPrice.toLocaleString()}
               </span>
             )}
           </div>
           {savings > 0 && (
-            <span className="text-[7.5px] sm:text-[8px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
+            <span className="text-[9px] sm:text-[10.5px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-200/50 dark:border-emerald-800/50 shrink-0">
               Save ৳{savings.toLocaleString()}
             </span>
           )}
@@ -202,22 +202,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           type="button"
           onClick={handleAddToCart}
           disabled={!isAvailable}
-          className={`w-full py-1 px-2 rounded-md font-bold text-[9.5px] sm:text-[10.5px] flex items-center justify-center gap-1 transition-all shadow-2xs ${
+          className={`w-full py-2 sm:py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-xs ${
             !isAvailable
               ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'
               : added
-              ? 'bg-emerald-600 text-white shadow-emerald-500/20'
-              : 'bg-[#0084d6] hover:bg-[#0073bc] text-white shadow-blue-500/25 active:scale-[0.98]'
+              ? 'bg-emerald-600 text-white shadow-emerald-500/25 scale-[0.98]'
+              : 'bg-[#0084d6] hover:bg-[#0073bc] text-white shadow-blue-500/20 hover:shadow-blue-500/35 active:scale-[0.98]'
           }`}
         >
           {added ? (
             <>
-              <Check size={11} className="stroke-3" />
-              <span>Added!</span>
+              <Check size={14} className="stroke-3" />
+              <span>Added to Cart!</span>
             </>
           ) : isAvailable ? (
             <>
-              <ShoppingBag size={11} />
+              <ShoppingBag size={14} />
               <span>Add to Cart</span>
             </>
           ) : (
