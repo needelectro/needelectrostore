@@ -594,11 +594,11 @@ export const BannersManager: React.FC = () => {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={(previewMode === 'mobile' && mobileImageUrl) ? mobileImageUrl : imageUrl || '/banners/lenovo-thinkpad-banner.jpg'}
+                    src={(previewMode === 'mobile' && mobileImageUrl) ? mobileImageUrl : imageUrl || '/banners/need-electro-laptops-flagship.jpg'}
                     alt="Preview"
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/banners/lenovo-thinkpad-banner.jpg';
+                      (e.target as HTMLImageElement).src = '/banners/need-electro-laptops-flagship.jpg';
                     }}
                   />
                   <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-md border border-slate-200 text-[10px] font-bold text-[#002B5B] shadow-xs">

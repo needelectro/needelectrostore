@@ -28,39 +28,32 @@ interface HeroCarouselProps {
 // Clean, photographic showcase assets with verified product imagery
 const DEFAULT_SHOWCASE_BANNERS: BannerSlide[] = [
   {
-    id: 'default-lenovo',
-    title: 'Lenovo ThinkPad Series',
-    targetUrl: '/laptops/lenovo',
-    imageUrl: '/banners/lenovo-thinkpad-banner.jpg',
-    mobileImageUrl: '/banners/lenovo-thinkpad-banner.jpg',
+    id: 'default-need-electro-laptops',
+    title: 'NEED ELECTRO Flagship Laptops & Business Ultrabooks',
+    targetUrl: '/laptops',
+    imageUrl: '/banners/need-electro-laptops-flagship.jpg',
+    mobileImageUrl: '/banners/need-electro-laptops-flagship.jpg',
   },
   {
-    id: 'default-hp',
-    title: 'HP EliteBook Series',
-    targetUrl: '/laptops/hp',
-    imageUrl: '/banners/hp-elitebook-banner.jpg',
-    mobileImageUrl: '/banners/hp-elitebook-banner.jpg',
-  },
-  {
-    id: 'default-dell',
-    title: 'Dell Latitude Series',
-    targetUrl: '/laptops/dell',
-    imageUrl: '/banners/dell-latitude-banner.jpg',
-    mobileImageUrl: '/banners/dell-latitude-banner.jpg',
-  },
-  {
-    id: 'default-hikvision',
-    title: 'Hikvision CCTV Surveillance',
-    targetUrl: '/cctv',
-    imageUrl: '/banners/cctv-hikvision-banner.jpg',
-    mobileImageUrl: '/banners/cctv-hikvision-banner.jpg',
-  },
-  {
-    id: 'default-pc',
-    title: 'Custom Desktop PCs',
+    id: 'default-need-electro-custompc',
+    title: 'NEED ELECTRO Custom PCs & Gaming Workstations',
     targetUrl: '/computers',
-    imageUrl: '/banners/custom-pc-banner.jpg',
-    mobileImageUrl: '/banners/custom-pc-banner.jpg',
+    imageUrl: '/banners/need-electro-custompc-workstation.jpg',
+    mobileImageUrl: '/banners/need-electro-custompc-workstation.jpg',
+  },
+  {
+    id: 'default-need-electro-cctv',
+    title: 'NEED ELECTRO CCTV & Smart Security Systems',
+    targetUrl: '/cctv',
+    imageUrl: '/banners/need-electro-cctv-security.jpg',
+    mobileImageUrl: '/banners/need-electro-cctv-security.jpg',
+  },
+  {
+    id: 'default-need-electro-gadgets',
+    title: 'NEED ELECTRO Premium Tech Gadgets & Accessories',
+    targetUrl: '/computer-accessories',
+    imageUrl: '/banners/need-electro-smart-gadgets.jpg',
+    mobileImageUrl: '/banners/need-electro-smart-gadgets.jpg',
   },
 ];
 
@@ -198,8 +191,8 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({
       className="relative w-full rounded-xl sm:rounded-2xl overflow-hidden shadow-xs border border-slate-200/90 bg-white select-none group focus:outline-none focus:ring-2 focus:ring-[#008CFF]/40"
     >
       {/* Compact Responsive Viewport:
-          Mobile: ~130–160px; Tablet: ~170–200px; Desktop: ~210–235px */}
-      <div className="relative w-full h-[135px] sm:h-[175px] md:h-[210px] lg:h-[235px] overflow-hidden bg-slate-50">
+          Mobile: ~140px; Tablet: ~185–225px; Desktop: ~250px */}
+      <div className="relative w-full h-[140px] sm:h-[185px] md:h-[225px] lg:h-[250px] overflow-hidden bg-slate-50">
         <div
           className={`flex w-full h-full ${
             prefersReducedMotion ? 'transition-none' : 'transition-transform duration-500 ease-out'
@@ -207,7 +200,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({
           style={{ transform: `translateX(-${current * 100}%)` }}
         >
           {slides.map((slide, index) => {
-            const desktopSrc = slide.imageUrl || '/banners/lenovo-thinkpad-banner.jpg';
+            const desktopSrc = slide.imageUrl || '/banners/need-electro-laptops-flagship.jpg';
             const mobileSrc = slide.mobileImageUrl || desktopSrc;
             const chosenSrc = isMobile ? mobileSrc : desktopSrc;
             const isErrored = imageErrors[slide.id];

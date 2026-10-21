@@ -174,39 +174,6 @@ export default async function HomePage() {
           <HeroCarousel banners={banners} />
         </section>
 
-        {/* 2. Compact Sub-Hero Promotional Image Banners */}
-        <section aria-label="Featured Promotions" className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          {/* Promo Banner 1: Service & Warranty */}
-          <a
-            href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=Hello%20NEED%20ELECTRO%2C%20I%20have%20an%20inquiry%20about%20warranty%20and%20service.`}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="NEED ELECTRO Warranty Care and Customer Service"
-            className="rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md overflow-hidden relative group block h-[95px] sm:h-[115px] md:h-[125px] bg-white transition-all"
-          >
-            <img
-              src="/banners/need-electro-service-warranty.jpg"
-              alt="NEED ELECTRO Official Service & Showroom Warranty"
-              loading="lazy"
-              className="w-full h-full object-cover object-center group-hover:scale-[1.015] transition-transform duration-500 ease-out"
-            />
-          </a>
-
-          {/* Promo Banner 2: Custom PC & Engineering */}
-          <Link
-            href="/computers"
-            aria-label="NEED ELECTRO Custom PC Builds and Workstations"
-            className="rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md overflow-hidden relative group block h-[95px] sm:h-[115px] md:h-[125px] bg-white transition-all"
-          >
-            <img
-              src="/banners/need-electro-custom-pc.jpg"
-              alt="NEED ELECTRO Custom PCs and Engineering Workstations"
-              loading="lazy"
-              className="w-full h-full object-cover object-center group-hover:scale-[1.015] transition-transform duration-500 ease-out"
-            />
-          </Link>
-        </section>
-
         {/* 2. Status / Operational Strip (Trust Computer MB Style: Rounded-full Pill) */}
         <section aria-label="Showroom Operational Notice">
           <div className="bg-white rounded-full py-2.5 px-4 sm:px-6 shadow-xs border border-slate-200/90 flex flex-wrap items-center justify-between gap-3 text-xs">
