@@ -14,6 +14,11 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 }) => {
   const { language, setLanguage, toggleLanguage } = useLanguage();
 
+  // Guard: Never render language switcher in admin panel
+  if (typeof window !== 'undefined' && (window.location.pathname.startsWith('/admin') || window.location.pathname.includes('admin'))) {
+    return null;
+  }
+
   if (variant === 'segmented') {
     return (
       <div

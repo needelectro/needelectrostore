@@ -1,5 +1,5 @@
-// NEED ELECTRO — Production Progressive Web App Service Worker (v3.0)
-const CACHE_NAME = 'need-electro-pwa-v3.0';
+// NEED ELECTRO — Production Progressive Web App Service Worker (v3.2)
+const CACHE_NAME = 'need-electro-pwa-v3.2';
 
 const PRECACHE_ASSETS = [
   '/',
@@ -39,9 +39,10 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // 1. NEVER cache /api routes, checkout endpoints, or non-GET requests (Strict Live Network)
+  // 1. NEVER cache /api routes, /admin portal, checkout endpoints, or non-GET requests (Strict Live Network)
   if (
     url.pathname.startsWith('/api') ||
+    url.pathname.startsWith('/admin') ||
     url.pathname.startsWith('/checkout') ||
     url.pathname.startsWith('/cart') ||
     event.request.method !== 'GET'
