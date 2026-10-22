@@ -258,7 +258,7 @@ export const QuotationDetailsModal: React.FC<QuotationDetailsModalProps> = ({
                 <thead>
                   <tr style={{ background: 'var(--bg-card-muted)', borderBottom: '1px solid var(--border-color)' }}>
                     <th style={{ padding: '0.6rem 0.75rem', textAlign: 'center', width: '35px' }}>#</th>
-                    <th style={{ padding: '0.6rem 0.75rem', textAlign: 'left' }}>Item Description</th>
+                    <th style={{ padding: '0.6rem 0.75rem', textAlign: 'left' }}>Item & Specifications</th>
                     <th style={{ padding: '0.6rem 0.75rem', textAlign: 'center', width: '70px' }}>Qty</th>
                     <th style={{ padding: '0.6rem 0.75rem', textAlign: 'right', width: '120px' }}>Quoted Unit (৳)</th>
                     {Number(quotation.discountTotal || 0) > 0 && (
@@ -276,11 +276,6 @@ export const QuotationDetailsModal: React.FC<QuotationDetailsModalProps> = ({
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                           SKU: {it.sku} {it.brand ? `• ${it.brand}` : ''} {it.model ? `• ${it.model}` : ''}
                         </div>
-                        {it.description && (
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontStyle: 'italic', marginTop: '2px' }}>
-                            {it.description}
-                          </div>
-                        )}
                         {it.warrantyMonths ? (
                           <div style={{ fontSize: '0.75rem', color: '#0284c7', marginTop: '1px' }}>
                             Warranty: {it.warrantyMonths} Months

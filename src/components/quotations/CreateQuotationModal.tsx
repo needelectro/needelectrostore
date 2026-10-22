@@ -219,7 +219,7 @@ export const CreateQuotationModal: React.FC<CreateQuotationModalProps> = ({
         category: prod.category,
         brand: prod.brand,
         model: prod.model,
-        description: prod.description,
+        description: '',
         unitOfMeasure: 'Unit',
         catalogPrice: Number(prod.retailPrice),
         unitPrice: Number(prod.retailPrice),

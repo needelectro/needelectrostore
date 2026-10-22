@@ -173,7 +173,7 @@ export async function PUT(
         category: item.category || dbProd?.category || null,
         brand: item.brand || dbProd?.brand || null,
         model: item.model || dbProd?.model || null,
-        description: item.description || dbProd?.description || null,
+        description: item.description || null,
         unitOfMeasure: item.unitOfMeasure || 'Unit',
         catalogPriceSnapshot: new Prisma.Decimal(catalogPrice),
         unitPrice: new Prisma.Decimal(unitPrice),

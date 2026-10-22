@@ -335,7 +335,6 @@ export function generateQuotationHTML(data: QuotationData, settings?: any): stri
           ${item.model ? `<span style="margin-left: 10px;">Model: ${item.model}</span>` : ''}
           ${item.brand ? `<span style="margin-left: 10px;">Brand: ${item.brand}</span>` : ''}
         </div>
-        ${item.description ? `<div style="font-size: 11px; color: #475569; margin-top: 3px; font-style: italic;">${item.description}</div>` : ''}
         ${item.warrantyMonths ? `<div style="font-size: 11px; color: #0284c7; margin-top: 2px;">Warranty: ${item.warrantyMonths} Months</div>` : ''}
       </td>
       <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 600;">${item.quantity}</td>
@@ -518,7 +517,7 @@ export function generateQuotationHTML(data: QuotationData, settings?: any): stri
       <thead>
         <tr>
           <th style="width: 35px; text-align: center;">#</th>
-          <th>Product / Description</th>
+          <th>Item & Specifications</th>
           <th style="width: 55px; text-align: center;">Qty</th>
           <th style="width: 105px; text-align: right;">Unit Price</th>
           ${hasItemDiscount ? '<th style="width: 85px; text-align: right;">Discount</th>' : ''}

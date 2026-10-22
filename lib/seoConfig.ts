@@ -23,8 +23,8 @@ export const BUSINESS_INFO = {
   },
   socialProfiles: {
     facebook: 'https://facebook.com/needelectro',
+    instagram: 'https://instagram.com/needelectro',
     youtube: 'https://youtube.com/@needelectro',
-    linkedin: 'https://linkedin.com/company/needelectro',
     whatsapp: 'https://wa.me/8801733983752',
   },
   serviceAreas: [
@@ -195,8 +195,8 @@ export function buildOrganizationSchema() {
     email: BUSINESS_INFO.email,
     sameAs: [
       BUSINESS_INFO.socialProfiles.facebook,
+      BUSINESS_INFO.socialProfiles.instagram,
       BUSINESS_INFO.socialProfiles.youtube,
-      BUSINESS_INFO.socialProfiles.linkedin,
     ],
     contactPoint: [
       {

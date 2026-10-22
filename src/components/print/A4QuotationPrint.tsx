@@ -386,7 +386,7 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
                 <thead>
                   <tr style={{ background: '#002B5B', color: '#ffffff' }}>
                     <th style={{ padding: '8px 10px', textAlign: 'center', width: '35px', borderRadius: '4px 0 0 0' }}>#</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'left' }}>Item Description / SKU / Specs</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'left' }}>Item & Specifications</th>
                     <th style={{ padding: '8px 10px', textAlign: 'center', width: '55px' }}>Qty</th>
                     <th style={{ padding: '8px 10px', textAlign: 'right', width: '100px' }}>Unit Price</th>
                     {discountTotal > 0 && <th style={{ padding: '8px 10px', textAlign: 'right', width: '85px' }}>Disc.</th>}
@@ -404,11 +404,6 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
                           {it.model && <span style={{ marginLeft: '10px' }}>Model: {it.model}</span>}
                           {it.brand && <span style={{ marginLeft: '10px' }}>Brand: {it.brand}</span>}
                         </div>
-                        {it.description && (
-                          <div style={{ fontSize: '11px', color: '#475569', fontStyle: 'italic', marginTop: '2px' }}>
-                            {it.description}
-                          </div>
-                        )}
                         {it.warrantyMonths ? (
                           <div style={{ fontSize: '11px', color: '#0284c7', marginTop: '1px' }}>
                             Warranty: {it.warrantyMonths} Months
