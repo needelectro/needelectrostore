@@ -33,6 +33,7 @@ const CATEGORY_NAV_ITEMS = [
   { name: 'Laptop & Computer', href: '/laptops', icon: Laptop, badge: 'HP, Dell' },
   { name: 'Monitor & Display', href: '/computers', icon: Monitor },
   { name: 'CCTV & Security', href: '/cctv', icon: Camera, badge: 'Hikvision' },
+  { name: 'Nationwide Locations', href: '/locations', icon: MapPin, badge: '64 Dist' },
   { name: 'Guides & Advice', href: '/guides', icon: Sparkles, badge: 'Hub' },
   { name: 'Electrical & Switchgear', href: '/electrical-products', icon: Zap },
   { name: 'Computer Accessories', href: '/computer-accessories', icon: Smartphone },

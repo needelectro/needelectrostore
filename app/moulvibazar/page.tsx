@@ -13,8 +13,8 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Computer & Laptop Shop in Moulvibazar | CCTV & Electrical Services | NEED ELECTRO',
-    description: 'NEED ELECTRO is Moulvibazar’s premier technology hub located at Shop No: 5, MR Plaza, Kusumbag. Authentic HP, Dell & Lenovo laptops with replacement warranty, desktop computers, CCTV camera installation, certified electrician services, and computer repair.',
+    title: 'Moulvibazar Tech & Laptops | NEED ELECTRO',
+    description: 'Explore laptops, CCTV cameras and electrical solutions in Moulvibazar. Official warranty, verified technician support, and fast delivery at NEED ELECTRO.',
     path: '/moulvibazar',
     keywords: [
       'Computer shop in Moulvibazar',
@@ -89,7 +89,7 @@ export default async function MoulvibazarPage() {
         <div className="max-w-7xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-900/40 dark:border-blue-500/30 dark:text-cyan-300 px-3 py-1 rounded-full text-xs font-semibold">
             <MapPin size={14} />
-            <span>Moulvibazar Town Showroom & Service Center</span>
+            <span>Moulvibazar Operational Base &amp; Technical Center</span>
           </div>
 
           <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
@@ -97,7 +97,7 @@ export default async function MoulvibazarPage() {
           </h1>
 
           <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
-            Welcome to {BUSINESS_INFO.name}, situated at MR Plaza in Kusumbag, Moulvibazar. We are your dedicated neighborhood destination for tested enterprise laptops, custom gaming & office PCs, CCTV security setups, electrical components, licensed electrician services, and flexible laptop EMI installment plans.
+            Welcome to {BUSINESS_INFO.name}, headquartered in Moulvibazar, Bangladesh. We are your dedicated regional destination for tested enterprise laptops, custom gaming & office PCs, CCTV security setups, electrical components, licensed electrician services, and flexible laptop EMI installment plans.
           </p>
 
           <div className="pt-2 flex flex-wrap gap-3">
@@ -106,7 +106,7 @@ export default async function MoulvibazarPage() {
               className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md shadow-blue-500/20 transition-all inline-flex items-center gap-2"
             >
               <Phone size={14} />
-              <span>Call Showroom: {BUSINESS_INFO.phone}</span>
+              <span>Call Helpline: {BUSINESS_INFO.phone}</span>
             </a>
             <a
               href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=Hello%20NEED%20ELECTRO%2C%20I%20am%20in%20Moulvibazar%20and%20looking%20for...`}
@@ -206,7 +206,7 @@ export default async function MoulvibazarPage() {
               Technology & Electrical Services in Moulvibazar
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Certified technicians dispatched directly from our Kusumbag showroom
+              Certified technicians dispatched directly across Moulvibazar district
             </p>
           </div>
 
@@ -254,15 +254,15 @@ export default async function MoulvibazarPage() {
             মৌলভীবাজার জেলা ও শহরে নির্ভরযোগ্য প্রযুক্তি ও ইলেকট্রিক্যাল সেবাদাতা
           </h2>
           <p>
-            নিড ইলেক্ট্রো (NEED ELECTRO) মৌলভীবাজারের কেন্দ্রস্থল কুসুমবাগে অবস্থিত একটি বিশ্বস্ত কম্পিউটার, ল্যাপটপ, সিসিটিভি ক্যামেরা ও ইলেকট্রিক্যাল শপ। আমরা সরবরাহ করি প্রিমিয়াম গ্রেড এইচপি এলিটবুক, ডেল ল্যাটিচিউড এবং লেনোভো থিঙ্কপ্যাড ল্যাপটপ। প্রতিটি ডিভাইসে রয়েছে ৭ দিনের রিপ্লেসমেন্ট এবং ২ বছরের ফ্রি সার্ভিস ওয়ারেন্টি।
+            নিড ইলেক্ট্রো (NEED ELECTRO) মৌলভীবাজারের অপারেশনাল বেস থেকে পরিচালিত একটি নির্ভরযোগ্য প্রযুক্তি, অনলাইন মার্কেটপ্লেস ও ইলেকট্রিক্যাল সলিউশন প্ল্যাটফর্ম। আমরা সরবরাহ করি প্রিমিয়াম গ্রেড এইচপি এলিটবুক, ডেল ল্যাটিচিউড এবং লেনোভো থিঙ্কপ্যাড ল্যাপটপ। প্রতিটি ডিভাইসে রয়েছে ৭ দিনের রিপ্লেসমেন্ট এবং ২ বছরের ফ্রি সার্ভিস ওয়ারেন্টি।
           </p>
           <p>
-            আমাদের রয়েছে ইন-হাউস দক্ষ টেকনিশিয়ান টিম। মৌলভীবাজার শহর, শ্রীমঙ্গল, কুলাউড়া ও রাজনগরে সিসিটিভি ক্যামেরা ইনস্টলেশন এবং অভিজ্ঞ ইলেকট্রিশিয়ান সার্ভিস বুকিংয়ের জন্য আমাদের সরাসরি ফোন করুন অথবা শোরুমে আসুন।
+            আমাদের রয়েছে ইন-হাউস দক্ষ টেকনিশিয়ান টিম। মৌলভীবাজার সদর, শ্রীমঙ্গল, কুলাউড়া, রাজনগর ও আশেপাশের এলাকায় সিসিটিভি ক্যামেরা ইনস্টলেশন এবং অভিজ্ঞ ইলেকট্রিশিয়ান সার্ভিস বুকিংয়ের জন্য আমাদের সরাসরি ফোন করুন অথবা হোয়াটসঅ্যাপে যোগাযোগ করুন।
           </p>
           <div className="pt-2 flex items-center gap-3">
             <span className="font-semibold text-slate-900 dark:text-white">হটলাইন: {BUSINESS_INFO.phone}</span>
             <span>•</span>
-            <span className="text-slate-500 dark:text-slate-400">ঠিকানা: শপ নং ৫, এমআর প্লাজা, কুসুমবাগ, মৌলভীবাজার</span>
+            <span className="text-slate-500 dark:text-slate-400">অপারেশনাল বেস: মৌলভীবাজার, বাংলাদেশ</span>
           </div>
         </div>
       </section>

@@ -103,7 +103,7 @@ export default function ReturnRefundPolicyPage() {
             How to File a Claim
           </h2>
           <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-            Contact our dedicated customer support hotline at <a href={`tel:${BUSINESS_INFO.phoneClean}`} className="text-[#0084d6] font-bold">{BUSINESS_INFO.phone}</a> or send your invoice number and video of the hardware issue to WhatsApp at <a href={`https://wa.me/${BUSINESS_INFO.whatsappClean}`} className="text-emerald-600 font-bold">+{BUSINESS_INFO.whatsappClean}</a>. Alternatively, you may visit our showroom directly at MR Plaza, Kusumbag, Moulvibazar.
+            Contact our dedicated customer support hotline at <a href={`tel:${BUSINESS_INFO.phoneClean}`} className="text-[#0084d6] font-bold">{BUSINESS_INFO.phone}</a> or send your invoice number and video of the hardware issue to WhatsApp at <a href={`https://wa.me/${BUSINESS_INFO.whatsappClean}`} className="text-emerald-600 font-bold">+{BUSINESS_INFO.whatsappClean}</a>. For returns, items can be dispatched via courier or arranged for direct handover in Moulvibazar.
           </p>
         </div>
       </main>

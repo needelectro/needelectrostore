@@ -2,6 +2,7 @@
 import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 import { BUSINESS_INFO, BLOG_POSTS, slugify } from '@/lib/seoConfig';
+import { getAllDivisions, getAllDistricts } from '@/lib/bangladeshLocations';
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -16,6 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${domain}/laptops`, lastModified: now, changeFrequency: 'daily', priority: 0.95 },
     { url: `${domain}/moulvibazar`, lastModified: now, changeFrequency: 'weekly', priority: 0.95 },
     { url: `${domain}/sylhet`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${domain}/locations`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
     { url: `${domain}/services`, lastModified: now, changeFrequency: 'weekly', priority: 0.95 },
     { url: `${domain}/services/electrician`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${domain}/services/cctv-installation`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
@@ -53,6 +55,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${domain}/guides/buying-guides`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
     { url: `${domain}/guides/faqs`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
   ];
+
+  // 1.1 Bangladesh 8 Divisions & 64 Districts Location Landing Routes
+  const divisionRoutes: MetadataRoute.Sitemap = getAllDivisions().map((div) => ({
+    url: `${domain}/locations/${div.slug}`,
+    lastModified: now,
+    changeFrequency: 'weekly',
+    priority: 0.85,
+  }));
+
+  const districtRoutes: MetadataRoute.Sitemap = getAllDistricts()
+    // Moulvibazar and Sylhet already have specialized priority top-level routes (/moulvibazar, /sylhet)
+    .filter((d) => d.slug !== 'moulvibazar' && d.slug !== 'sylhet')
+    .map((dist) => ({
+      url: `${domain}/locations/${dist.slug}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    }));
 
   // 2. Knowledge Center Blog Articles
   const blogRoutes: MetadataRoute.Sitemap = BLOG_POSTS.map(post => ({
@@ -108,5 +128,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Sitemap dynamic product fetch warning:', error);
   }
 
-  return [...staticRoutes, ...blogRoutes, ...guideRoutes, ...productRoutes];
+  return [
+    ...staticRoutes,
+    ...divisionRoutes,
+    ...districtRoutes,
+    ...blogRoutes,
+    ...guideRoutes,
+    ...productRoutes,
+  ];
 }

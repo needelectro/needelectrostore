@@ -15,22 +15,7 @@ import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
 import { NeedElectroLogo } from '@/src/components/NeedElectroLogo';
 import { useCustomerAuth } from '@/src/services/customerAuthContext';
 import { useLanguage } from '@/src/services/languageContext';
-
-const BANGLADESH_DISTRICTS = [
-  'Moulvibazar', 'Sylhet', 'Habiganj', 'Sunamganj',
-  'Dhaka', 'Chittagong', 'Gazipur', 'Narayanganj', 'Comilla', 'Brahmanbaria',
-  'Bagerhat', 'Bandarban', 'Barguna', 'Barisal', 'Bhola', 'Bogra',
-  'Chandpur', 'Chapadawabganj', 'Chuadanga', 'Cox\'s Bazar',
-  'Dinajpur', 'Faridpur', 'Feni', 'Gaibandha', 'Gopalganj',
-  'Jamalpur', 'Jessore', 'Jhalokati', 'Jhenaidah', 'Joypurhat',
-  'Khagrachhari', 'Khulna', 'Kishoreganj', 'Kurigram', 'Kushtia',
-  'Lakshmipur', 'Lalmonirhat', 'Madaripur', 'Magura', 'Manikganj',
-  'Meherpur', 'Munshiganj', 'Mymensingh', 'Naogaon', 'Narail',
-  'Narsingdi', 'Natore', 'Netrokona', 'Nilphamari', 'Noakhali',
-  'Pabna', 'Panchagarh', 'Patuakhali', 'Pirojpur', 'Rajbari',
-  'Rajshahi', 'Rangamati', 'Rangpur', 'Satkhira', 'Shariatpur',
-  'Sherpur', 'Sirajganj', 'Tangail', 'Thakurgaon'
-];
+import { BANGLADESH_DISTRICTS } from '@/lib/bangladeshLocations';
 
 function calculatePasswordStrength(pwd: string) {
   if (!pwd) return { score: 0, labelEn: '', labelBn: '', color: '', text: '' };
@@ -407,8 +392,8 @@ function FuturisticRegisterForm() {
                       className="w-full bg-[#F4F6F8] border border-slate-200 hover:border-slate-300 focus:bg-white focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/20 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-900 transition-all outline-none"
                     >
                       {BANGLADESH_DISTRICTS.map((d) => (
-                        <option key={d} value={d} className="bg-white text-slate-900">
-                          {d}
+                        <option key={d.id} value={d.nameEn} className="bg-white text-slate-900">
+                          {d.nameEn} — {d.nameBn}
                         </option>
                       ))}
                     </select>
@@ -427,7 +412,7 @@ function FuturisticRegisterForm() {
                       type="text"
                       value={deliveryArea}
                       onChange={(e) => setDeliveryArea(e.target.value)}
-                      placeholder={isBangla ? 'যেমনঃ কুসুমবাগ, শ্রীমঙ্গল রোড' : 'e.g. Kusumbag, Sreemangal Rd'}
+                      placeholder={isBangla ? 'যেমনঃ সদর, কলেজ রোড' : 'e.g. Sadar, College Road'}
                       className="w-full bg-[#F4F6F8] border border-slate-200 hover:border-slate-300 focus:bg-white focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/20 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-900 placeholder-slate-400 transition-all outline-none"
                     />
                   </div>

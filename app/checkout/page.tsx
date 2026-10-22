@@ -13,22 +13,11 @@ import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
 import { useCart } from '@/src/services/cartContext';
 import { useCustomerAuth } from '@/src/services/customerAuthContext';
 import { useLanguage } from '@/src/services/languageContext';
-
-const BANGLADESH_DISTRICTS = [
-  'Moulvibazar', 'Sylhet', 'Habiganj', 'Sunamganj',
-  'Dhaka', 'Chittagong', 'Gazipur', 'Narayanganj', 'Comilla', 'Brahmanbaria',
-  'Bagerhat', 'Bandarban', 'Barguna', 'Barisal', 'Bhola', 'Bogra',
-  'Chandpur', 'Chapadawabganj', 'Chuadanga', 'Cox\'s Bazar',
-  'Dinajpur', 'Faridpur', 'Feni', 'Gaibandha', 'Gopalganj',
-  'Jamalpur', 'Jessore', 'Jhalokati', 'Jhenaidah', 'Joypurhat',
-  'Khagrachhari', 'Khulna', 'Kishoreganj', 'Kurigram', 'Kushtia',
-  'Lakshmipur', 'Lalmonirhat', 'Madaripur', 'Magura', 'Manikganj',
-  'Meherpur', 'Munshiganj', 'Mymensingh', 'Naogaon', 'Narail',
-  'Narsingdi', 'Natore', 'Netrokona', 'Nilphamari', 'Noakhali',
-  'Pabna', 'Panchagarh', 'Patuakhali', 'Pirojpur', 'Rajbari',
-  'Rajshahi', 'Rangamati', 'Rangpur', 'Satkhira', 'Shariatpur',
-  'Sherpur', 'Sirajganj', 'Tangail', 'Thakurgaon'
-];
+import {
+  BANGLADESH_DIVISIONS,
+  BANGLADESH_DISTRICTS,
+  calculateDeliveryCharge,
+} from '@/lib/bangladeshLocations';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -448,8 +437,8 @@ export default function CheckoutPage() {
                     className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--glass-border)] bg-white/60 dark:bg-slate-900/60 text-sm focus:outline-none focus:ring-2 focus:ring-[#008CFF]/30 focus:border-[#008CFF] transition-all"
                   >
                     {BANGLADESH_DISTRICTS.map((d) => (
-                      <option key={d} value={d} className="bg-[var(--bg-app)] text-[var(--text-primary)]">
-                        {d} {['Moulvibazar', 'Sylhet', 'Habiganj', 'Sunamganj'].includes(d) ? `(${isBangla ? 'সিলেট বিভাগ - ৳৬০' : 'Sylhet Div - ৳60'})` : `(${isBangla ? '৳১২০' : '৳120'})`}
+                      <option key={d.id} value={d.nameEn} className="bg-[var(--bg-app)] text-[var(--text-primary)]">
+                        {d.nameEn} — {d.nameBn} ({d.deliveryChargeBdt === 60 ? (isBangla ? 'সিলেট বিভাগ - ৳৬০' : 'Sylhet Div - ৳60') : (isBangla ? '৳১২০' : '৳120')})
                       </option>
                     ))}
                   </select>
@@ -464,7 +453,7 @@ export default function CheckoutPage() {
                       {isSylhetDivision ? (isBangla ? '⚡ সেইম-ডে / নেক্সট-ডে এক্সপ্রেস' : '⚡ Same-Day / Next-Day Express') : (isBangla ? '🚚 স্ট্যান্ডার্ড কুরিয়ার (২-৩ দিন)' : '🚚 Standard Nationwide Courier (2-3 Days)')}
                     </span>
                     <span className="text-[var(--text-secondary)] text-[11px]">
-                      {isSylhetDivision ? (isBangla ? 'মৌলভীবাজার শোরুম থেকে সরাসরি প্রেরণ' : 'Local dispatch from Moulvibazar showroom') : (isBangla ? 'স্টেডফাস্ট / রেডএক্স ইন্সুরেন্সড কুরিয়ার' : 'Steadfast / RedX insured courier')}
+                      {isSylhetDivision ? (isBangla ? 'মৌলভীবাজার অপারেশনাল বেস থেকে সরাসরি প্রেরণ' : 'Direct dispatch from Moulvibazar operations base') : (isBangla ? 'স্টেডফাস্ট / রেডএক্স ইন্সুরেন্সড কুরিয়ার' : 'Steadfast / RedX insured courier')}
                     </span>
                   </div>
                 </div>

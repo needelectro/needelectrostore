@@ -12,22 +12,7 @@ import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
 import { useCustomerAuth, CustomerAddress } from '@/src/services/customerAuthContext';
 import { useLanguage } from '@/src/services/languageContext';
-
-const BANGLADESH_DISTRICTS = [
-  'Moulvibazar', 'Sylhet', 'Habiganj', 'Sunamganj',
-  'Dhaka', 'Chittagong', 'Gazipur', 'Narayanganj', 'Comilla', 'Brahmanbaria',
-  'Bagerhat', 'Bandarban', 'Barguna', 'Barisal', 'Bhola', 'Bogra',
-  'Chandpur', 'Chapadawabganj', 'Chuadanga', 'Cox\'s Bazar',
-  'Dinajpur', 'Faridpur', 'Feni', 'Gaibandha', 'Gopalganj',
-  'Jamalpur', 'Jessore', 'Jhalokati', 'Jhenaidah', 'Joypurhat',
-  'Khagrachhari', 'Khulna', 'Kishoreganj', 'Kurigram', 'Kushtia',
-  'Lakshmipur', 'Lalmonirhat', 'Madaripur', 'Magura', 'Manikganj',
-  'Meherpur', 'Munshiganj', 'Mymensingh', 'Naogaon', 'Narail',
-  'Narsingdi', 'Natore', 'Netrokona', 'Nilphamari', 'Noakhali',
-  'Pabna', 'Panchagarh', 'Patuakhali', 'Pirojpur', 'Rajbari',
-  'Rajshahi', 'Rangamati', 'Rangpur', 'Satkhira', 'Shariatpur',
-  'Sherpur', 'Sirajganj', 'Tangail', 'Thakurgaon'
-];
+import { BANGLADESH_DISTRICTS } from '@/lib/bangladeshLocations';
 
 export default function CustomerAddressesPage() {
   const router = useRouter();
@@ -268,8 +253,8 @@ export default function CustomerAddressesPage() {
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#008CFF]"
                   >
                     {BANGLADESH_DISTRICTS.map((d) => (
-                      <option key={d} value={d}>
-                        {d}
+                      <option key={d.id} value={d.nameEn}>
+                        {d.nameEn} — {d.nameBn}
                       </option>
                     ))}
                   </select>

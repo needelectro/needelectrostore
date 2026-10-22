@@ -19,9 +19,9 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Laptop & Computer Repair in Moulvibazar | Hardware Servicing | NEED ELECTRO',
+    title: 'Laptop & Computer Repair in Moulvibazar | NEED ELECTRO',
     description:
-      'Professional laptop chip-level repair, motherboard diagnostics, screen & keyboard replacement, NVMe SSD & RAM upgrades, and desktop computer servicing in Moulvibazar at MR Plaza, Kusumbag.',
+      'Professional chip-level laptop repair, motherboard diagnostics, screen & keyboard replacement, NVMe SSD & RAM upgrades in Moulvibazar, Bangladesh.',
     path: '/services/laptop-computer-repair',
     keywords: [
       'Laptop and computer servicing',
@@ -61,7 +61,7 @@ export default function LaptopRepairPage() {
     name: 'Laptop and Computer Repair Service',
     serviceType: 'ComputerRepairAndMaintenance',
     description:
-      'Professional chip-level laptop repair, component upgrades, and desktop PC maintenance at NEED ELECTRO showroom, MR Plaza, Kusumbag, Moulvibazar.',
+      'Professional chip-level laptop repair, component upgrades, and desktop PC maintenance at NEED ELECTRO technical hub in Moulvibazar, Bangladesh.',
     path: '/services/laptop-computer-repair',
   });
 
@@ -91,7 +91,7 @@ export default function LaptopRepairPage() {
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
-            Fast, transparent, and chip-level hardware repair for HP, Dell, Lenovo, Acer, Asus, and custom desktops. Bring your device to our MR Plaza Kusumbag service center or schedule technician diagnosis today.
+            Fast, transparent, and chip-level hardware repair for HP, Dell, Lenovo, Acer, Asus, and custom desktops. Connect with our Moulvibazar technical lab or schedule technician diagnosis today.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">

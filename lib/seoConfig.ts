@@ -750,7 +750,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: '4. Buying Safely in Moulvibazar & Nationwide Delivery',
-        content: 'Customers in Moulvibazar can visit our MR Plaza Kusumbag store for hands-on testing. We also ship across Bangladesh via courier with open-box verification before payment.',
+        content: 'Customers in Moulvibazar can reach our operations base for direct pickup and testing. We also ship across all 64 districts of Bangladesh via courier with open-box verification before payment.',
       },
     ],
     faqs: [

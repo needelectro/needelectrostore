@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   MapPin, Phone, Mail, Clock, ShieldCheck, CreditCard,
   Laptop, Monitor, Camera, Zap, Cpu, Wifi, ExternalLink,
-  ChevronRight, Heart, PackageSearch, MessageCircle, User
+  ChevronRight, Heart, PackageSearch, MessageCircle, User, Truck
 } from 'lucide-react';
 import { BUSINESS_INFO } from '@/lib/seoConfig';
 import { useLanguage } from '@/src/services/languageContext';
@@ -218,13 +218,13 @@ export const CustomerFooter: React.FC = () => {
               Service Areas
             </h3>
             <p className="text-[11px] text-[#64748B] leading-normal">
-              Direct showroom pickup, emergency technician dispatch, and express courier delivery across:
+              Direct operations base pickup, emergency technician dispatch, and express courier delivery across:
             </p>
             <ul className="space-y-2 text-xs">
               <li>
                 <Link href="/moulvibazar" className="hover:text-[#008CFF] font-semibold text-[#334155] flex items-center gap-1.5">
                   <MapPin size={12} className="text-[#008CFF]" />
-                  <span>Moulvibazar Town (Kusumbag)</span>
+                  <span>Moulvibazar Operations Base</span>
                 </Link>
               </li>
               <li>
@@ -234,21 +234,9 @@ export const CustomerFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/sreemangal" className="hover:text-[#008CFF] text-[#475569] transition-colors flex items-center gap-1.5">
-                  <MapPin size={12} className="text-slate-400" />
-                  <span>Sreemangal Upazila</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/kulaura" className="hover:text-[#008CFF] text-[#475569] transition-colors flex items-center gap-1.5">
-                  <MapPin size={12} className="text-slate-400" />
-                  <span>Kulaura Upazila</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/rajnagar" className="hover:text-[#008CFF] text-[#475569] transition-colors flex items-center gap-1.5">
-                  <MapPin size={12} className="text-slate-400" />
-                  <span>Rajnagar Upazila</span>
+                <Link href="/locations" className="hover:text-[#008CFF] font-bold text-[#002B5B] flex items-center gap-1.5 pt-1 text-xs">
+                  <Truck size={12} className="text-[#008CFF]" />
+                  <span>All 8 Divisions &amp; 64 Districts Coverage →</span>
                 </Link>
               </li>
               <li className="pt-2 text-[11px] text-[#64748B]">
