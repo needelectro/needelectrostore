@@ -9,7 +9,7 @@ export const BUSINESS_INFO = {
   phone: '+880 1733-983752',
   phoneClean: '+8801733983752',
   whatsappClean: '8801733983752',
-  email: 'info.needelectro@gmail.com',
+  email: 'needelectro23@gmail.com',
   supportEmail: 'contact.amdadur@gmail.com',
   domain: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.needelectro.store',
   currency: 'BDT',
