@@ -13,8 +13,9 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Electrical Shop Online Bangladesh | Electrical Products in Moulvibazar | NEED ELECTRO',
-    description: 'Buy genuine electrical products online in Bangladesh from NEED ELECTRO. Copper wiring cables, MCB circuit breakers, distribution boards, switches, and industrial electrical supplies. Nationwide delivery and certified electrical services in Moulvibazar.',
+    title: 'Electrical Products & Wiring | NEED ELECTRO',
+    description:
+      'Shop genuine circuit breakers, industrial copper wiring, DB boxes, and electrical accessories at NEED ELECTRO Bangladesh. Verified quality.',
     path: '/electrical-products',
     keywords: [
       'Electrical shop online Bangladesh',

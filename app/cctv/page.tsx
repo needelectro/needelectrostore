@@ -13,8 +13,9 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'CCTV Camera Shop in Moulvibazar | CCTV Camera Price in Bangladesh | NEED ELECTRO',
-    description: 'Looking for CCTV cameras in Moulvibazar? NEED ELECTRO provides HD & IP CCTV cameras, DVR/NVR surveillance setups, night vision, mobile remote viewing, and certified CCTV installation service across Moulvibazar, Sylhet & nationwide Bangladesh.',
+    title: 'CCTV Cameras & Security Systems | NEED ELECTRO',
+    description:
+      'Explore HD and IP CCTV cameras, DVRs, NVRs, and security systems at NEED ELECTRO Bangladesh. Professional installation and technical support.',
     path: '/cctv',
     keywords: [
       'CCTV camera shop in Moulvibazar',

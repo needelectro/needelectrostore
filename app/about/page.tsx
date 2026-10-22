@@ -15,8 +15,9 @@ import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'About NEED ELECTRO | Founder, Products & Services Bangladesh',
-    description: 'Discover NEED ELECTRO, founded by Amdadur Rahman. Explore electrical products, laptops, computers, CCTV solutions, technical services, and software development in Bangladesh.',
+    title: 'About NEED ELECTRO | Tech Solutions Bangladesh',
+    description:
+      'Discover NEED ELECTRO in Bangladesh, founded by Amdadur Rahman, offering electrical products, laptops, CCTV solutions, technical services and software.',
     path: '/about',
     keywords: [
       'About NEED ELECTRO',
@@ -46,8 +47,9 @@ export default function AboutPage() {
     '@type': 'AboutPage',
     '@id': `${BUSINESS_INFO.domain}/about#webpage`,
     url: `${BUSINESS_INFO.domain}/about`,
-    name: 'About NEED ELECTRO | Founder, Products & Services Bangladesh',
-    description: 'Discover NEED ELECTRO, founded by Amdadur Rahman. Explore electrical products, laptops, computers, CCTV solutions, technical services, and software development in Bangladesh.',
+    name: 'About NEED ELECTRO | Tech Solutions Bangladesh',
+    description:
+      'Discover NEED ELECTRO in Bangladesh, founded by Amdadur Rahman, offering electrical products, laptops, CCTV solutions, technical services and software.',
     mainEntity: {
       '@type': 'Organization',
       '@id': `${BUSINESS_INFO.domain}/#organization`,
@@ -70,7 +72,6 @@ export default function AboutPage() {
       telephone: '+8801733983752',
       address: {
         '@type': 'PostalAddress',
-        streetAddress: BUSINESS_INFO.address.streetAddress,
         addressLocality: BUSINESS_INFO.address.addressLocality,
         addressRegion: BUSINESS_INFO.address.addressRegion,
         postalCode: BUSINESS_INFO.address.postalCode,
@@ -783,7 +784,7 @@ export default function AboutPage() {
             <div className="p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-1">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Operational Base</span>
               <span className="font-semibold text-slate-800 dark:text-slate-200">
-                {BUSINESS_INFO.address.streetAddress}, {BUSINESS_INFO.address.addressLocality}, {BUSINESS_INFO.address.addressRegion} - {BUSINESS_INFO.address.postalCode}, Bangladesh.
+                {BUSINESS_INFO.address.addressLocality}, {BUSINESS_INFO.address.addressRegion} - {BUSINESS_INFO.address.postalCode}, Bangladesh.
               </span>
             </div>
 

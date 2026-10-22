@@ -32,15 +32,15 @@ export default function ContactPage() {
         <div className="max-w-7xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 dark:bg-blue-900/40 dark:border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold text-blue-700 dark:text-cyan-300">
             <MapPin size={14} />
-            <span>Moulvibazar Showroom & Support</span>
+            <span>Operational Base &amp; Customer Support</span>
           </div>
 
           <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
-            Contact NEED ELECTRO Moulvibazar
+            Contact NEED ELECTRO Bangladesh
           </h1>
 
           <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
-            Have a question about laptop stock, EMI eligibility, CCTV camera installation, or need an electrician dispatched to your home? We are ready to help.
+            Have a question about laptop stock, EMI eligibility, CCTV camera installation, or need technical services in Bangladesh? Our team is ready to assist.
           </p>
         </div>
       </section>
@@ -49,17 +49,17 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Contact Details */}
           <div className="lg:col-span-6 space-y-6">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Showroom & Contact Details</h2>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Customer Support &amp; Operational Base</h2>
 
             <div className="space-y-4 text-xs">
               <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex items-start gap-4">
                 <MapPin size={22} className="text-blue-600 dark:text-cyan-400 shrink-0 mt-1" />
                 <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">Physical Address</h3>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">Headquarters &amp; Operations</h3>
                   <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-                    {BUSINESS_INFO.address.streetAddress}, {BUSINESS_INFO.address.addressLocality}, {BUSINESS_INFO.address.addressRegion} - {BUSINESS_INFO.address.postalCode}, Bangladesh.
+                    {BUSINESS_INFO.address.addressLocality}, {BUSINESS_INFO.address.addressRegion} - {BUSINESS_INFO.address.postalCode}, Bangladesh.
                   </p>
-                  <span className="text-slate-500 dark:text-slate-500 block">MR Plaza, Kusumbag (Near Moulvibazar Central Circle).</span>
+                  <span className="text-slate-500 dark:text-slate-500 block">Nationwide Online Delivery &amp; On-Site Technical Services.</span>
                 </div>
               </div>
 

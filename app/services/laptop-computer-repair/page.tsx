@@ -174,17 +174,17 @@ export default function LaptopRepairPage() {
           </div>
         </section>
 
-        {/* Showroom Lab Location */}
+        {/* Technical Service & Repair Hub */}
         <section className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 space-y-4">
           <div className="flex items-center gap-2 text-slate-500 text-xs font-semibold">
-            <MapPin size={14} className="text-[#0084d6]" />
-            <span>Showroom Lab &amp; Diagnosis Center</span>
+            <Wrench size={14} className="text-[#0084d6]" />
+            <span>Technical Service &amp; Diagnosis Operations</span>
           </div>
           <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-            Drop Off Your Laptop at Kusumbag, Moulvibazar
+            Professional Laptop &amp; Computer Servicing Based in Moulvibazar
           </h3>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl">
-            {BUSINESS_INFO.address.streetAddress}, {BUSINESS_INFO.address.addressLocality}, {BUSINESS_INFO.address.addressRegion}. Open Saturday to Thursday from 9:30 AM to 9:30 PM. Instant on-the-spot physical inspection with digital job card receipt.
+            {BUSINESS_INFO.address.addressLocality}, {BUSINESS_INFO.address.addressRegion}, Bangladesh. Call our hotline at {BUSINESS_INFO.phone} for technician consultation, pickup arrangement, or on-site diagnosis.
           </p>
         </section>
       </main>

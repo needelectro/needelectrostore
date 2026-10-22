@@ -2,8 +2,8 @@
 import type { Metadata } from 'next';
 
 export const BUSINESS_INFO = {
-  name: 'NEED ELECTRO Store',
-  parentOrganization: 'Amdads Group',
+  name: 'NEED ELECTRO',
+  parentOrganization: 'AMDADS GROUP',
   tagline: 'Trusted Electrical and Technological Solutions',
   legalName: 'NEED ELECTRO',
   founder: 'Amdadur Rahman',
@@ -16,42 +16,21 @@ export const BUSINESS_INFO = {
   currency: 'BDT',
   currencySymbol: '৳',
   address: {
-    streetAddress: 'Shop No: 5, MR Plaza, Kusumbag',
     addressLocality: 'Moulvibazar',
     addressRegion: 'Sylhet',
     postalCode: '3200',
     addressCountry: 'BD',
   },
-  geo: {
-    latitude: 24.4826,
-    longitude: 91.7675,
-  },
-  openingHours: [
-    'Saturday 09:30-21:30',
-    'Sunday 09:30-21:30',
-    'Monday 09:30-21:30',
-    'Tuesday 09:30-21:30',
-    'Wednesday 09:30-21:30',
-    'Thursday 09:30-21:30',
-  ],
   socialProfiles: {
     facebook: 'https://facebook.com/needelectro',
     youtube: 'https://youtube.com/@needelectro',
     linkedin: 'https://linkedin.com/company/needelectro',
     whatsapp: 'https://wa.me/8801733983752',
   },
-  googleMapsUrl: 'https://maps.google.com/?q=NEED+ELECTRO+MR+Plaza+Kusumbag+Moulvibazar',
   serviceAreas: [
-    'Moulvibazar Town',
-    'Kusumbag, Moulvibazar',
-    'Chowmuhana, Moulvibazar',
-    'Shamshernagar Road, Moulvibazar',
-    'Sreemangal, Moulvibazar',
-    'Kulaura, Moulvibazar',
-    'Rajnagar, Moulvibazar',
-    'Kamalganj, Moulvibazar',
+    'Moulvibazar',
     'Sylhet Division',
-    'Bangladesh (Nationwide Courier Delivery)',
+    'Bangladesh (Nationwide Online Delivery)',
   ],
   categories: [
     { title: 'Laptops', slug: 'laptops', icon: 'Laptop', description: 'Business, student & gaming laptops from HP, Dell, Lenovo with warranty & EMI in Moulvibazar.' },
@@ -98,18 +77,31 @@ export function generateSeoMetadata({
   noIndex?: boolean;
 }): Metadata {
   const canonical = getCanonicalUrl(path);
-  const cleanBase = title
-    .replace(/\s*\|\s*NEED ELECTRO Store/gi, '')
-    .replace(/\s*\|\s*NEED ELECTRO/gi, '')
-    .trim();
-  const fullTitle = `${cleanBase} | ${BUSINESS_INFO.name}`;
+
+  // Format concise title without duplicate branding (ideal <= 60 chars)
+  const trimmedTitle = title.trim();
+  let fullTitle: string;
+  if (trimmedTitle.includes('NEED ELECTRO')) {
+    fullTitle = trimmedTitle;
+  } else {
+    fullTitle = `${trimmedTitle} | ${BUSINESS_INFO.name}`;
+  }
+
+  // Enforce Bing & Google ideal meta description length (50 to 160 characters)
+  let cleanDesc = description.replace(/\s+/g, ' ').trim();
+  if (cleanDesc.length > 158) {
+    cleanDesc = cleanDesc.slice(0, 155).trim() + '...';
+  } else if (cleanDesc.length < 50) {
+    cleanDesc = `${cleanDesc} Trusted electrical & tech solutions at NEED ELECTRO Bangladesh.`.slice(0, 158);
+  }
+
   const imageUrl = ogImage.startsWith('http') ? ogImage : `${BUSINESS_INFO.domain.replace(/\/+$/, '')}${ogImage.startsWith('/') ? ogImage : `/${ogImage}`}`;
 
   return {
     title: {
       absolute: fullTitle,
     },
-    description,
+    description: cleanDesc,
     keywords: [
       ...keywords,
       'NEED ELECTRO',
@@ -221,8 +213,8 @@ export function buildOrganizationSchema() {
 export function buildLocalBusinessSchema() {
   return {
     '@context': 'https://schema.org',
-    '@type': 'ElectronicsStore',
-    '@id': `${BUSINESS_INFO.domain}/#localbusiness`,
+    '@type': 'OnlineStore',
+    '@id': `${BUSINESS_INFO.domain}/#onlinestore`,
     name: BUSINESS_INFO.name,
     parentOrganization: {
       '@type': 'Organization',
@@ -232,34 +224,22 @@ export function buildLocalBusinessSchema() {
     url: BUSINESS_INFO.domain,
     telephone: BUSINESS_INFO.phoneClean,
     priceRange: '৳৳',
-    description: `${BUSINESS_INFO.name} is the premier laptop, computer, CCTV security, and electrical solutions provider in Moulvibazar, Sylhet, Bangladesh. Sister concern of ${BUSINESS_INFO.parentOrganization}. Offering authentic HP, Dell, and Lenovo laptops, certified electrician services, and flexible laptop EMI installment plans.`,
+    description: `${BUSINESS_INFO.name} is a trusted electrical, technology and software solutions platform in Bangladesh. A Sister Concern of ${BUSINESS_INFO.parentOrganization}. Offering authentic laptops, desktop computers, CCTV security systems, electrical components, and certified technical services.`,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: BUSINESS_INFO.address.streetAddress,
       addressLocality: BUSINESS_INFO.address.addressLocality,
       addressRegion: BUSINESS_INFO.address.addressRegion,
       postalCode: BUSINESS_INFO.address.postalCode,
       addressCountry: BUSINESS_INFO.address.addressCountry,
     },
-    geo: {
-      '@type': 'GeoCoordinates',
-      latitude: BUSINESS_INFO.geo.latitude,
-      longitude: BUSINESS_INFO.geo.longitude,
-    },
-    openingHoursSpecification: [
+    areaServed: [
       {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'],
-        opens: '09:30',
-        closes: '21:30',
+        '@type': 'Country',
+        name: 'Bangladesh',
       },
     ],
-    areaServed: BUSINESS_INFO.serviceAreas.map(area => ({
-      '@type': 'AdministrativeArea',
-      name: area,
-    })),
     currenciesAccepted: 'BDT',
-    paymentAccepted: 'Cash, Credit Card, bKash, Nagad, Bank Transfer, EMI Installment',
+    paymentAccepted: 'Cash on Delivery, bKash, Nagad, Bank Transfer, EMI Installment',
   };
 }
 
@@ -510,11 +490,10 @@ export function buildServiceSchema({
     description,
     url: getCanonicalUrl(path),
     provider: {
-      '@type': 'LocalBusiness',
+      '@type': 'Organization',
       name: BUSINESS_INFO.name,
       address: {
         '@type': 'PostalAddress',
-        streetAddress: BUSINESS_INFO.address.streetAddress,
         addressLocality: BUSINESS_INFO.address.addressLocality,
         addressRegion: BUSINESS_INFO.address.addressRegion,
         postalCode: BUSINESS_INFO.address.postalCode,

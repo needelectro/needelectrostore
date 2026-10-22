@@ -26,9 +26,9 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'NEED ELECTRO | Trusted Electrical & Technological Solutions Bangladesh',
+    title: 'NEED ELECTRO Bangladesh | Electrical & Tech Solutions',
     description:
-      'Premier store for laptops (HP, Dell, Lenovo), desktop computers, CCTV surveillance cameras, electrical equipment, and certified electrician services in Moulvibazar & across Bangladesh with doorstep cash on delivery.',
+      'Shop laptops, computers, CCTV cameras and electrical products at NEED ELECTRO. Explore technical services and digital solutions in Bangladesh.',
     path: '/',
     keywords: [
       'Computer shop in Moulvibazar',
@@ -740,41 +740,39 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* 10. Showroom & Physical Presence Hub (Moulvibazar) */}
-        <section aria-label="Showroom Information" className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">
+        {/* 10. Operational Base & Nationwide Marketplace */}
+        <section aria-label="Operational Base & Delivery" className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
             <div className="space-y-2 md:col-span-2">
               <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#008CFF] bg-[#EAF4FF] border border-blue-200/70 px-2.5 py-0.5 rounded-full">
                 <MapPin size={13} />
-                <span>Physical Showroom in Moulvibazar</span>
+                <span>Operational Base in Moulvibazar, Bangladesh</span>
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-[#002B5B]">
-                Visit Us at Kusumbag, Moulvibazar
+                Trusted Online Marketplace with Certified Support
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl">
-                Experience products before purchasing. Our showroom features live demo units for HP, Dell, and Lenovo laptops, as well as an active CCTV surveillance display wall.
+                Order authentic HP, Dell, and Lenovo laptops, custom desktop PCs, CCTV cameras, and electrical equipment online with verified warranty, open-box courier delivery, and technical assistance across all 64 districts in Bangladesh.
               </p>
               <p className="text-xs font-semibold text-[#002B5B] flex items-center gap-2 pt-1">
-                <Clock size={14} className="text-[#008CFF]" />
-                <span>Open Saturday to Thursday: 9:30 AM – 9:30 PM (Friday Closed)</span>
+                <Truck size={14} className="text-[#008CFF]" />
+                <span>Nationwide Courier Delivery • Express Local Technician Dispatch</span>
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row md:flex-col gap-3 justify-center">
               <a
-                href={BUSINESS_INFO.googleMapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={`tel:${BUSINESS_INFO.phoneClean}`}
                 className="w-full py-3 px-4 rounded-xl bg-[#008CFF] hover:bg-[#0070cc] text-white font-bold text-xs text-center shadow-md shadow-blue-500/20 transition-colors flex items-center justify-center gap-2"
               >
-                <MapPin size={14} />
-                <span>Get Google Maps Directions</span>
+                <Phone size={14} />
+                <span>Call Hotline: {BUSINESS_INFO.phone}</span>
               </a>
               <Link
                 href="/contact"
                 className="w-full py-3 px-4 rounded-xl border border-slate-300 hover:bg-slate-50 text-[#002B5B] font-bold text-xs text-center transition-colors"
               >
-                Showroom Contact Details
+                Customer Support Details
               </Link>
             </div>
           </div>

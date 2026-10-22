@@ -19,9 +19,9 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Technical & Engineering Services in Moulvibazar | NEED ELECTRO',
+    title: 'Technical Services & Repairs | NEED ELECTRO',
     description:
-      'Certified electrician booking, CCTV surveillance installation, laptop chip-level repair, desktop PC maintenance, and commercial Wi-Fi networking in Moulvibazar, Sylhet Division, Bangladesh.',
+      'Certified electrician services, CCTV installation, and computer repairs in Bangladesh from NEED ELECTRO. Reliable on-site support.',
     path: '/services',
     keywords: [
       'Electrical services in Moulvibazar',
@@ -237,7 +237,7 @@ export default function ServicesHubPage() {
             Why Moulvibazar Residents Rely on NEED ELECTRO
           </h3>
           <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
-            Unlike informal freelancers, our technicians operate from a physical, registered showroom at MR Plaza in Kusumbag. Every replacement component, cable, breaker, and camera comes with official warranty protection and direct showroom support.
+            Unlike informal freelancers, our technicians operate with professional engineering standards based in Moulvibazar. Every replacement component, cable, breaker, and camera comes with official warranty protection and direct technical support.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs">
             <div className="bg-white border border-slate-200/80 rounded-xl p-3 flex items-center gap-2.5 shadow-2xs">
@@ -249,8 +249,8 @@ export default function ServicesHubPage() {
               <span className="font-medium text-slate-700">Transparent Pricing &amp; No Hidden Fees</span>
             </div>
             <div className="bg-white border border-slate-200/80 rounded-xl p-3 flex items-center gap-2.5 shadow-2xs">
-              <MapPin size={16} className="text-[#008CFF] shrink-0" />
-              <span className="font-medium text-slate-700">Kusumbag Showroom Verification</span>
+              <ShieldCheck size={16} className="text-[#008CFF] shrink-0" />
+              <span className="font-medium text-slate-700">Verified Technical Quality &amp; Warranty</span>
             </div>
           </div>
         </section>

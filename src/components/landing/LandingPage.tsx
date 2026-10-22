@@ -116,7 +116,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
     "email": "info.needelectro@gmail.com",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Shop No: 5, MR Plaza, Kusumbag",
       "addressLocality": "Moulvibazar",
       "addressRegion": "Sylhet",
       "addressCountry": "BD"

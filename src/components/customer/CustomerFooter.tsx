@@ -45,7 +45,7 @@ export const CustomerFooter: React.FC = () => {
               <div className="flex items-start gap-2.5">
                 <MapPin size={15} className="text-[#008CFF] shrink-0 mt-0.5" />
                 <span>
-                  <strong>Showroom:</strong> {BUSINESS_INFO.address.streetAddress}, {BUSINESS_INFO.address.addressLocality}, {BUSINESS_INFO.address.addressRegion} - {BUSINESS_INFO.address.postalCode}, Bangladesh
+                  <strong>Operations Base:</strong> {BUSINESS_INFO.address.addressLocality}, {BUSINESS_INFO.address.addressRegion} - {BUSINESS_INFO.address.postalCode}, Bangladesh
                 </span>
               </div>
               <div className="flex items-center gap-2.5">

@@ -121,26 +121,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const priceFormatted = Number(product.retailPrice).toLocaleString();
   const brandPart = product.brand ? `${product.brand} ` : '';
   const isLaptop = product.category.toLowerCase().includes('laptop') || product.name.toLowerCase().includes('laptop');
-  const title = `${product.name} Price in Bangladesh`;
+  const baseName = product.name.trim();
+  const title = baseName.length > 35
+    ? `${baseName.slice(0, 32)}... Price in BD | NEED ELECTRO`
+    : `${baseName} Price in BD | NEED ELECTRO`;
 
-  // Generate descriptive meta description from actual product content
-  let realDescriptionExcerpt = '';
-  if (product.description) {
-    const cleanDesc = product.description
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/[*#_`|~-]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-    if (cleanDesc.length > 20) {
-      realDescriptionExcerpt = cleanDesc.length > 130 ? cleanDesc.slice(0, 127).trim() + '...' : cleanDesc;
-    }
-  }
-
-  const description = realDescriptionExcerpt
-    ? `${realDescriptionExcerpt} Buy authentic ${product.name} at ৳${priceFormatted} BDT with warranty from NEED ELECTRO.`
-    : `Buy 100% authentic ${product.name} at ৳${priceFormatted} BDT in Bangladesh. ${
-        product.warrantyPeriodMonths ? `${product.warrantyPeriodMonths} Months Warranty. ` : 'Official warranty. '
-      }Genuine hardware, cash on delivery nationwide & express delivery in Moulvibazar, Sylhet.`;
+  const warrantyPart = product.warrantyPeriodMonths ? `${product.warrantyPeriodMonths}M warranty, ` : '';
+  const stockPart = product.currentStock > 0 ? 'in stock' : 'order today';
+  const description = `Explore ${product.name} at NEED ELECTRO. View specs, price (৳${priceFormatted} BDT), ${warrantyPart}${stockPart} and nationwide delivery in Bangladesh.`;
 
   const brandKeywords = product.brand ? [`${product.brand} price in Bangladesh`, `${product.brand} Moulvibazar`] : [];
   const laptopKeywords = isLaptop

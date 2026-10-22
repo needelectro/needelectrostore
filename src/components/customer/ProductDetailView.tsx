@@ -315,14 +315,14 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           </a>
         </div>
 
-        {/* Showroom Pickup Notice */}
+        {/* Nationwide Delivery & Warranty Notice */}
         <div className="p-4 rounded-xl bg-[#EAF4FF] border border-[#008CFF]/20 text-xs text-slate-700 space-y-1">
           <div className="flex items-center gap-2 text-[#002B5B] font-bold">
-            <MapPin size={14} className="text-[#008CFF]" />
-            <span>Moulvibazar Showroom Pickup &amp; Testing</span>
+            <Truck size={14} className="text-[#008CFF]" />
+            <span>Fast Nationwide Delivery &amp; Open-Box Verification</span>
           </div>
           <p className="text-slate-600 text-[11px] leading-relaxed">
-            MR Plaza, Kusumbag, Moulvibazar. Open 9:30 AM – 9:30 PM. Inspect your device personally before purchasing or receiving doorstep delivery.
+            Direct doorstep courier delivery across all 64 districts in Bangladesh with open-box verification and dedicated warranty support from our Moulvibazar operations base.
           </p>
         </div>
       </div>

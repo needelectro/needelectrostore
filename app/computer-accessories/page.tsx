@@ -12,8 +12,9 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Computer Accessories in Bangladesh | Tech Gadgets & PC Parts | NEED ELECTRO',
-    description: 'Shop authentic computer accessories and tech gadgets in Bangladesh at NEED ELECTRO. High-speed NVMe M.2 SSDs, laptop & desktop RAM upgrades, mechanical keyboards, precision mice, and converters with official warranty.',
+    title: 'Computer Accessories | NEED ELECTRO',
+    description:
+      'Shop SSDs, RAM upgrades, mechanical keyboards, mice, and computer components at NEED ELECTRO Bangladesh. Genuine quality with warranty.',
     path: '/computer-accessories',
     keywords: [
       'Computer accessories in Bangladesh',

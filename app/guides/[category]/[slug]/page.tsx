@@ -329,16 +329,16 @@ export default async function GuideArticlePage({
               </div>
             )}
 
-            {/* Quick Contact & Showroom Visit Widget */}
+            {/* Quick Contact & Consultation Widget */}
             <div className="rounded-2xl p-5 bg-slate-900 text-white space-y-3 shadow-md">
               <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400">
-                Moulvibazar Showroom
+                Customer Consultation
               </span>
               <h4 className="text-sm font-bold leading-snug">
                 Have questions about this hardware?
               </h4>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Visit {BUSINESS_INFO.address.streetAddress}, Kusumbag or speak directly with our engineers.
+                Connect with our technical specialists for expert product advice and nationwide delivery in Bangladesh.
               </p>
               <div className="pt-2 space-y-2 text-xs">
                 <a

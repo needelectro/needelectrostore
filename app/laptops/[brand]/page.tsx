@@ -24,28 +24,34 @@ const BRAND_DATA: Record<string, BrandInfo> = {
   hp: {
     name: 'HP',
     slug: 'hp',
-    metaTitle: 'HP Laptops in Moulvibazar | EliteBook & ProBook Prices & EMI',
-    metaDescription: 'Buy authentic HP EliteBook and ProBook business laptops in Moulvibazar at NEED ELECTRO. 100% tested hardware, fresh condition, 7-day replacement warranty, and flexible EMI installments.',
-    h1: 'HP Laptops in Moulvibazar — EliteBook & ProBook Series',
-    intro: 'HP EliteBook and ProBook laptops are renowned for their aerospace-grade aluminum chassis, high-definition IPS anti-glare displays, and exceptional battery life. At NEED ELECTRO Moulvibazar, we carry tested, high-grade HP laptops ideal for programming, freelancing, office administration, and university studies.',
+    metaTitle: 'HP Laptops in Bangladesh | NEED ELECTRO',
+    metaDescription:
+      'Buy authentic HP EliteBook and ProBook laptops in Bangladesh from NEED ELECTRO. Verified condition, official warranty, and EMI options.',
+    h1: 'HP Laptops in Bangladesh — EliteBook & ProBook Series',
+    intro:
+      'HP EliteBook and ProBook laptops are renowned for aerospace-grade aluminum chassis, anti-glare displays, and exceptional battery life. Tested high-grade HP laptops available at NEED ELECTRO.',
     series: ['HP EliteBook 840 Series', 'HP ProBook 440/450 Series', 'HP Pavilion', 'HP Envy'],
   },
   dell: {
     name: 'Dell',
     slug: 'dell',
-    metaTitle: 'Dell Laptops in Moulvibazar | Latitude & Inspiron Prices & EMI',
-    metaDescription: 'Explore genuine Dell Latitude business laptops and Inspiron models in Moulvibazar. Rigorous 24-point hardware testing, authentic Dell chargers, 7-day replacement guarantee, and laptop EMI.',
-    h1: 'Dell Laptops in Moulvibazar — Latitude & Inspiron Series',
-    intro: 'Dell Latitude business laptops deliver class-leading durability, robust cooling architecture, and seamless Linux/Windows compatibility. Visit our Kusumbag showroom in Moulvibazar to inspect clean, tested Dell Latitude models with warranty coverage.',
+    metaTitle: 'Dell Laptops in Bangladesh | NEED ELECTRO',
+    metaDescription:
+      'Explore genuine Dell Latitude and Inspiron laptops in Bangladesh. Tested hardware, original chargers, warranty coverage, and laptop EMI.',
+    h1: 'Dell Laptops in Bangladesh — Latitude & Inspiron Series',
+    intro:
+      'Dell Latitude business laptops deliver class-leading durability, robust cooling architecture, and long-term reliability. Order tested Dell models with warranty from NEED ELECTRO.',
     series: ['Dell Latitude 7400 / 7490 Series', 'Dell Latitude 5400 Series', 'Dell Inspiron Series', 'Dell XPS'],
   },
   lenovo: {
     name: 'Lenovo',
     slug: 'lenovo',
-    metaTitle: 'Lenovo Laptops in Moulvibazar | ThinkPad & IdeaPad Prices & EMI',
-    metaDescription: 'Find authentic Lenovo ThinkPad and IdeaPad laptops in Moulvibazar. Legendary military-grade keyboards, high durability, long battery life, and affordable installment options at NEED ELECTRO.',
-    h1: 'Lenovo Laptops in Moulvibazar — ThinkPad & IdeaPad Series',
-    intro: 'Lenovo ThinkPad laptops are the global standard for software engineers, content writers, and professionals who demand the world’s best typing keyboards and military-grade durability. Every Lenovo machine at NEED ELECTRO is thoroughly inspected and tested.',
+    metaTitle: 'Lenovo Laptops in Bangladesh | NEED ELECTRO',
+    metaDescription:
+      'Find authentic Lenovo ThinkPad and IdeaPad laptops in Bangladesh with warranty, tested keyboards, long battery life, and laptop EMI at NEED ELECTRO.',
+    h1: 'Lenovo Laptops in Bangladesh — ThinkPad & IdeaPad Series',
+    intro:
+      'Lenovo ThinkPad laptops are the global standard for typing keyboards and military-grade durability. Every Lenovo machine at NEED ELECTRO is thoroughly inspected and tested.',
     series: ['Lenovo ThinkPad T-Series (T480, T490, T14)', 'Lenovo ThinkPad X-Series (X1 Carbon, X280)', 'Lenovo IdeaPad'],
   },
 };

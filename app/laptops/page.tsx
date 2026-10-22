@@ -13,8 +13,9 @@ export const revalidate = 60; // Revalidate every minute
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Laptop Shop in Moulvibazar | Laptop Price in Bangladesh | NEED ELECTRO',
-    description: 'Looking for authentic laptops in Moulvibazar or nationwide in Bangladesh? Explore HP EliteBook, Dell Latitude, and Lenovo ThinkPad laptops at NEED ELECTRO. 7-day replacement, 2-year warranty, and flexible laptop EMI installment options.',
+    title: 'Laptops in Bangladesh | NEED ELECTRO',
+    description:
+      'Buy authentic HP, Dell, and Lenovo laptops in Bangladesh. Explore business, student, and gaming laptops with warranty and EMI from NEED ELECTRO.',
     path: '/laptops',
     keywords: [
       'Laptop shop in Moulvibazar',

@@ -12,8 +12,9 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Smart Devices & Modern Gadgets in Moulvibazar | NEED ELECTRO',
-    description: 'Explore smart devices, smart plugs, USB converter hubs, and smart home automation gadgets at NEED ELECTRO Moulvibazar. Verified quality and warranty support.',
+    title: 'Smart Devices & Gadgets | NEED ELECTRO',
+    description:
+      'Explore smart home devices, plugs, USB converter hubs, and modern electronics at NEED ELECTRO Bangladesh. Verified warranty and support.',
     path: '/smart-devices',
     keywords: [
       'Smart devices in Moulvibazar',
@@ -143,9 +144,9 @@ export default async function SmartDevicesPage() {
         ) : (
           <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center space-y-4 shadow-xs">
             <Smartphone size={48} className="mx-auto text-slate-400 dark:text-slate-600" />
-            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">Smart Gadgets Ready for Showroom Pickup</h3>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">Smart Gadgets Ready for Fast Delivery</h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-              Visit our Kusumbag showroom in Moulvibazar to test and experience the latest electronics.
+              Order authentic smart electronics and converter hubs with nationwide courier delivery and official warranty support from NEED ELECTRO.
             </p>
           </div>
         )}

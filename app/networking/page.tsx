@@ -12,8 +12,9 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Networking Products & Wi-Fi Routers in Bangladesh | NEED ELECTRO',
-    description: 'Looking for Wi-Fi routers, Gigabit switches, ONU fiber optic devices, and structured cabling? Shop authentic Tenda, TP-Link, and networking gear at NEED ELECTRO. Certified networking and Wi-Fi installation services.',
+    title: 'Networking Products & Routers | NEED ELECTRO',
+    description:
+      'Shop Wi-Fi routers, Gigabit switches, ONU fiber modems, and networking gear at NEED ELECTRO Bangladesh. Reliable connectivity equipment.',
     path: '/networking',
     keywords: [
       'Networking and Wi-Fi installation',

@@ -132,12 +132,12 @@ export default async function MoulvibazarPage() {
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
           <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-2">
             <span className="text-blue-600 dark:text-cyan-400 font-bold block text-sm flex items-center gap-1.5">
-              <MapPin size={16} /> Showroom Address
+              <MapPin size={16} /> Operational Base
             </span>
             <p className="text-slate-700 dark:text-slate-300">
-              {BUSINESS_INFO.address.streetAddress}, {BUSINESS_INFO.address.addressLocality}, {BUSINESS_INFO.address.addressRegion} - {BUSINESS_INFO.address.postalCode}, Bangladesh.
+              {BUSINESS_INFO.address.addressLocality}, {BUSINESS_INFO.address.addressRegion} - {BUSINESS_INFO.address.postalCode}, Bangladesh.
             </p>
-            <span className="text-slate-500 text-[11px] block">Conveniently located near Kusumbag circle and shopping hub.</span>
+            <span className="text-slate-500 text-[11px] block">Serving Moulvibazar town, upazilas &amp; nationwide with doorstep delivery.</span>
           </div>
 
           <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-2">

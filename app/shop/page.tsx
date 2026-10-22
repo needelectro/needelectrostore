@@ -16,9 +16,9 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Online Shop Bangladesh — Laptops, Computers, CCTV & Electricals | NEED ELECTRO',
+    title: 'Shop Laptops, Computers & CCTV | NEED ELECTRO',
     description:
-      'Browse authentic laptops (HP, Dell, Lenovo), custom desktop PCs, CCTV surveillance systems, electrical switchgear, computer accessories, and gadgets. Cash on delivery across all 64 districts with verified warranty.',
+      'Browse laptops, desktop computers, CCTV systems and electrical products with warranty at NEED ELECTRO Bangladesh. Order online with doorstep delivery.',
     path: '/shop',
     keywords: [
       'Online shop Bangladesh',
