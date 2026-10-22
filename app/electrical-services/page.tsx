@@ -44,32 +44,32 @@ export default function ElectricalServicesPage() {
       <Breadcrumb items={breadcrumbs} />
 
       {/* Hero */}
-      <section className="py-12 px-4 border-b border-slate-200 dark:border-slate-800/80 bg-gradient-to-b from-amber-50/70 via-transparent to-transparent dark:from-amber-950/20">
-        <div className="max-w-7xl mx-auto space-y-4">
+      <section className="py-8 sm:py-12 px-3 sm:px-6 lg:px-8 3xl:px-12 border-b border-slate-200 dark:border-slate-800/80 bg-gradient-to-b from-amber-50/70 via-transparent to-transparent dark:from-amber-950/20">
+        <div className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 dark:bg-amber-900/40 dark:border-amber-500/30 dark:text-amber-300 px-3 py-1 rounded-full text-xs font-semibold">
             <Zap size={14} />
             <span>Certified Electrician & Engineering Services</span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
             Electrical Service in Moulvibazar — Wiring, DB Panel & Electrician Solutions
           </h1>
 
-          <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
+          <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-xs sm:text-sm md:text-base leading-relaxed">
             Protect your property with safe, certified electrical installations from {BUSINESS_INFO.name}. Our background-checked licensed electricians provide complete home and industrial wiring, distribution board (DB) load balancing, earthing resistance testing, and emergency electrical troubleshooting across Moulvibazar.
           </p>
 
           <div className="pt-2 flex flex-wrap gap-3">
             <Link
               href="/services/electrician"
-              className="bg-amber-500 hover:bg-amber-600 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md shadow-amber-500/20 transition-all inline-flex items-center gap-2"
+              className="bg-amber-500 hover:bg-amber-600 text-white font-bold px-5 py-2.5 min-h-[42px] rounded-xl text-xs shadow-md shadow-amber-500/20 transition-all inline-flex items-center gap-2"
             >
               <Wrench size={15} />
               <span>Book an Electrician Now →</span>
             </Link>
             <a
               href={`tel:${BUSINESS_INFO.phoneClean}`}
-              className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 px-4 py-2.5 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors inline-flex items-center gap-1.5 shadow-xs"
+              className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 px-4 py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors inline-flex items-center gap-1.5 shadow-xs"
             >
               <Phone size={14} className="text-amber-500 dark:text-amber-400" />
               <span>Immediate Support: {BUSINESS_INFO.phone}</span>
@@ -79,7 +79,7 @@ export default function ElectricalServicesPage() {
       </section>
 
       {/* Service Grid */}
-      <section className="py-14 px-4 max-w-7xl mx-auto w-full">
+      <section className="py-10 sm:py-14 px-3 sm:px-6 lg:px-8 3xl:px-12 max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto w-full">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
             Professional Electrical Solutions

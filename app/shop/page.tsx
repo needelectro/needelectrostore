@@ -95,7 +95,7 @@ export default async function ShopMasterPage() {
 
       {/* Hero Section */}
       <section className="py-12 px-4 bg-gradient-to-br from-white via-[#F4F6F8] to-[#EAF4FF] border-b border-slate-200/80">
-        <div className="max-w-7xl mx-auto space-y-3">
+        <div className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto space-y-3">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#EAF4FF] border border-[#008CFF]/20 text-[#008CFF]">
             <Layers size={13} />
             <span>Official NEED ELECTRO E-Commerce Catalog</span>
@@ -125,7 +125,7 @@ export default async function ShopMasterPage() {
       </section>
 
       {/* Categories Showcase */}
-      <section className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <section className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8 py-8 space-y-6">
         <div>
           <h2 className="text-lg sm:text-xl font-bold text-[#002B5B]">
             Browse By Category
@@ -158,7 +158,7 @@ export default async function ShopMasterPage() {
       </section>
 
       {/* Products Grid */}
-      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-12 flex-1 space-y-6">
+      <main className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8 pb-12 flex-1 space-y-6">
         <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           <div>
             <h2 className="text-xl sm:text-2xl font-black text-[#002B5B]">
@@ -176,7 +176,7 @@ export default async function ShopMasterPage() {
         </div>
 
         {products.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-7 gap-3 sm:gap-4 lg:gap-6">
             {products.map((p) => (
               <ProductCard
                 key={p.id}

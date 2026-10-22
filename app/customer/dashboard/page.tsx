@@ -86,7 +86,7 @@ export default function CustomerDashboardPage() {
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 
-      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10 flex-1 space-y-6 sm:space-y-8">
+      <main className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto w-full px-3 sm:px-6 lg:px-8 3xl:px-12 py-6 sm:py-10 flex-1 space-y-6 sm:space-y-8">
         {/* 1. Account Hero Greeting Banner */}
         <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-gradient-to-r from-[#002B5B] via-[#003d7a] to-[#081621] text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex items-center gap-4 sm:gap-5">

@@ -215,9 +215,9 @@ export const CustomerHeader: React.FC = () => {
 
       {/* 1. Main Futuristic Light Top Navbar */}
       <div className="bg-white/95 backdrop-blur-md text-[#002B5B] border-b border-slate-200/80 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3 sm:gap-6">
+        <div className="w-full max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-2.5 sm:gap-4 lg:gap-6">
           {/* Logo with light theme */}
-          <div className="flex items-center shrink-0">
+          <div className="flex items-center shrink-0 max-w-[140px] xs:max-w-[170px] sm:max-w-none">
             <Link href="/" className="flex items-center gap-2 group">
               <NeedElectroLogo size="sm" theme="light" showTagline={false} showSisterConcern={false} />
             </Link>

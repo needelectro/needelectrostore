@@ -164,7 +164,7 @@ export default async function HomePage() {
 
       <CustomerHeader />
 
-      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-3.5 space-y-3.5 sm:space-y-4 flex-1">
+      <main className="w-full max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 xl:px-10 py-3.5 sm:py-5 space-y-4 sm:space-y-6 flex-1">
         <h1 className="sr-only">
           NEED ELECTRO — Authentic Laptops, CCTV, Computers &amp; Electrical Store in Bangladesh
         </h1>

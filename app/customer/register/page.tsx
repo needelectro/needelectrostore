@@ -176,7 +176,7 @@ function FuturisticRegisterForm() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
+    <div className="max-w-6xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto w-full px-3 sm:px-6 lg:px-8 3xl:px-12 py-8 sm:py-16">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
         
         {/* ================= LEFT PANEL: Brand Experience & Holographic Telemetry ================= */}

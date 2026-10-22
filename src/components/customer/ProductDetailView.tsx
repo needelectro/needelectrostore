@@ -93,11 +93,11 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 3xl:gap-12">
       {/* Left Column: Image Gallery */}
       <div className="lg:col-span-5 space-y-4">
         {/* Main Display Image */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-8 aspect-[4/3] flex items-center justify-center relative overflow-hidden shadow-xs group">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 md:p-8 aspect-[4/3] flex items-center justify-center relative overflow-hidden shadow-xs group">
           <img
             src={activeImage}
             alt={`${product.name} at NEED ELECTRO`}
@@ -263,7 +263,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             <button
               type="button"
               onClick={handleAddToCart}
-              className={`py-3.5 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border transition-all shadow-xs ${
+              className={`py-3 px-6 rounded-xl font-bold text-sm min-h-[46px] flex items-center justify-center gap-2 border transition-all shadow-xs ${
                 added
                   ? 'bg-emerald-600 text-white border-emerald-600'
                   : 'bg-white hover:bg-slate-50 text-[#008CFF] border-[#008CFF]/40 hover:border-[#008CFF]'
@@ -286,7 +286,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             <button
               type="button"
               onClick={handleBuyNow}
-              className="py-3.5 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-all bg-[#008CFF] hover:bg-[#0070cc] text-white shadow-blue-500/20 active:scale-[0.99]"
+              className="py-3 px-6 rounded-xl font-bold text-sm min-h-[46px] flex items-center justify-center gap-2 shadow-xs transition-all bg-[#008CFF] hover:bg-[#0070cc] text-white shadow-blue-500/20 active:scale-[0.99]"
             >
               <Truck size={16} />
               <span>{isInStock ? 'Buy Now (Cash on Delivery)' : 'Order Now (Cash on Delivery)'}</span>
@@ -300,7 +300,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=${whatsappMessage}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 py-2.5 px-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
+            className="flex-1 min-h-[44px] py-2.5 px-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
           >
             <MessageCircle size={15} />
             <span>Inquire on WhatsApp</span>
@@ -308,7 +308,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
 
           <a
             href={`tel:${BUSINESS_INFO.phoneClean}`}
-            className="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs flex items-center justify-center gap-2 transition-colors"
+            className="min-h-[44px] py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs flex items-center justify-center gap-2 transition-colors"
           >
             <Phone size={14} />
             <span>Call Showroom</span>

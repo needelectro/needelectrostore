@@ -156,7 +156,7 @@ export default async function LaptopsPage() {
       </div>
 
       {/* Products Grid */}
-      <section className="py-12 px-4 max-w-7xl mx-auto w-full flex-1">
+      <section className="py-8 sm:py-12 px-3 sm:px-4 md:px-6 lg:px-8 max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto w-full flex-1">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
@@ -172,7 +172,7 @@ export default async function LaptopsPage() {
         </div>
 
         {laptops.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-7 gap-3 sm:gap-4 lg:gap-6">
             {laptops.map(item => (
               <ProductCard
                 key={item.id}

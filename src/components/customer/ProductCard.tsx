@@ -91,7 +91,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <div className="bg-white border border-slate-200/90 hover:border-[#008CFF] rounded-2xl overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative h-full">
       {/* Top Image Box: Generous 4:3 aspect ratio */}
-      <div className="relative aspect-[4/3] w-full bg-[#F4F6F8]/60 overflow-hidden border-b border-slate-100 p-3 sm:p-4 flex items-center justify-center">
+      <div className="relative aspect-[4/3] w-full bg-[#F4F6F8]/60 overflow-hidden border-b border-slate-100 p-2 sm:p-3 md:p-4 flex items-center justify-center">
         <Link href={`/product/${slug}`} className="w-full h-full flex items-center justify-center">
           <img
             src={imgUrl}
@@ -157,7 +157,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
 
       {/* Card Body: Spacious and well-proportioned */}
-      <div className="p-3.5 sm:p-4 bg-white flex-1 flex flex-col justify-between gap-2.5">
+      <div className="p-2.5 sm:p-3.5 md:p-4 bg-white flex-1 flex flex-col justify-between gap-2 sm:gap-2.5">
         {/* Category & Brand row */}
         <div className="flex items-center justify-between text-[10px] sm:text-xs text-slate-400 font-medium leading-none">
           <span className="text-slate-500 font-bold uppercase tracking-wider truncate max-w-[65%]">
@@ -201,7 +201,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <button
           type="button"
           onClick={handleAddToCart}
-          className={`w-full py-2 sm:py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-xs ${
+          className={`w-full py-2 sm:py-2.5 px-2 sm:px-3 rounded-xl font-bold text-xs sm:text-sm min-h-[38px] sm:min-h-[42px] flex items-center justify-center gap-1.5 transition-all shadow-xs ${
             added
               ? 'bg-emerald-600 text-white shadow-emerald-500/25 scale-[0.98]'
               : 'bg-[#008CFF] hover:bg-[#0070cc] text-white shadow-blue-500/20 hover:shadow-blue-500/35 active:scale-[0.98]'

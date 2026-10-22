@@ -100,7 +100,7 @@ export const CartDrawer: React.FC = () => {
                       <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-[#F4F6F8]">
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="px-2 py-1 text-slate-600 hover:bg-slate-200 transition-colors"
+                          className="px-2.5 py-1.5 min-h-[34px] min-w-[34px] flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
                           aria-label="Decrease quantity"
                         >
                           <Minus size={12} />
@@ -110,7 +110,7 @@ export const CartDrawer: React.FC = () => {
                         </span>
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="px-2 py-1 text-slate-600 hover:bg-slate-200 transition-colors"
+                          className="px-2.5 py-1.5 min-h-[34px] min-w-[34px] flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
                           aria-label="Increase quantity"
                         >
                           <Plus size={12} />
@@ -125,7 +125,7 @@ export const CartDrawer: React.FC = () => {
                   </div>
                   <button
                     onClick={() => removeItem(item.id)}
-                    className="text-slate-400 hover:text-rose-500 transition-colors p-1 self-start"
+                    className="text-slate-400 hover:text-rose-500 transition-colors p-2 min-h-[36px] min-w-[36px] flex items-center justify-center self-start cursor-pointer"
                     title={t('cart.remove', 'Remove item')}
                   >
                     <Trash2 size={15} />

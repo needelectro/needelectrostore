@@ -23,8 +23,8 @@ export default function CartPage() {
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 
-      <main className="max-w-7xl mx-auto w-full px-4 py-8 flex-1">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+      <main className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto w-full px-3 sm:px-6 lg:px-8 3xl:px-12 py-6 sm:py-8 flex-1">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6 sm:mb-8">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
               {t('cart.title', 'Shopping Cart')}
@@ -38,7 +38,7 @@ export default function CartPage() {
           {items.length > 0 && (
             <button
               onClick={clearCart}
-              className="text-xs font-semibold text-rose-600 hover:text-rose-700 dark:text-rose-400 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-200 dark:border-rose-900/40 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+              className="text-xs font-semibold text-rose-600 hover:text-rose-700 dark:text-rose-400 flex items-center gap-1.5 px-3 py-2 min-h-[38px] rounded-xl border border-rose-200 dark:border-rose-900/40 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
             >
               <Trash2 size={13} />
               <span>{isBangla ? 'সম্পূর্ণ কার্ট খালি করুন' : 'Clear Entire Cart'}</span>
@@ -101,12 +101,12 @@ export default function CartPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between w-full sm:w-auto sm:justify-end gap-5 pt-2 sm:pt-0 border-t sm:border-0 border-[var(--glass-border)]">
+                    <div className="flex items-center justify-between w-full sm:w-auto sm:justify-end gap-4 sm:gap-5 pt-3 sm:pt-0 border-t sm:border-0 border-[var(--glass-border)]">
                       {/* Quantity adjuster */}
                       <div className="flex items-center border border-[var(--glass-border)] rounded-xl overflow-hidden bg-white/50 dark:bg-black/20">
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="px-2.5 py-1.5 text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                          className="px-3 py-2 min-h-[38px] min-w-[38px] flex items-center justify-center text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
                           aria-label="Decrease quantity"
                         >
                           <Minus size={13} />
@@ -116,7 +116,7 @@ export default function CartPage() {
                         </span>
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="px-2.5 py-1.5 text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                          className="px-3 py-2 min-h-[38px] min-w-[38px] flex items-center justify-center text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
                           aria-label="Increase quantity"
                         >
                           <Plus size={13} />
@@ -133,7 +133,7 @@ export default function CartPage() {
                       {/* Remove */}
                       <button
                         onClick={() => removeItem(item.id)}
-                        className="text-[var(--text-secondary)] hover:text-rose-600 transition-colors p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/20"
+                        className="text-[var(--text-secondary)] hover:text-rose-600 transition-colors p-2 min-h-[38px] min-w-[38px] flex items-center justify-center rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/20 cursor-pointer"
                         title={t('cart.remove', 'Remove product')}
                       >
                         <Trash2 size={16} />

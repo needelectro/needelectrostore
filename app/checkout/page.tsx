@@ -297,7 +297,7 @@ export default function CheckoutPage() {
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 
-      <main className="max-w-7xl mx-auto w-full px-4 py-8 flex-1">
+      <main className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto w-full px-3 sm:px-6 lg:px-8 3xl:px-12 py-6 sm:py-8 flex-1">
         <div className="mb-6">
           <div className="inline-flex items-center gap-2 text-xs font-bold text-[#008CFF] bg-[#008CFF]/10 px-3 py-1 rounded-full border border-[#008CFF]/20 mb-2">
             <Lock size={12} />
@@ -593,13 +593,13 @@ export default function CheckoutPage() {
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                       placeholder={t('cart.couponPlaceholder', 'Promo / Coupon Code')}
-                      className="flex-1 px-3 py-1.5 rounded-xl border border-[var(--glass-border)] bg-white/50 dark:bg-black/20 text-xs uppercase font-mono font-bold focus:outline-hidden focus:ring-1 focus:ring-[#008CFF]"
+                      className="flex-1 px-3 py-2 min-h-[42px] rounded-xl border border-[var(--glass-border)] bg-white/50 dark:bg-black/20 text-xs uppercase font-mono font-bold focus:outline-hidden focus:ring-1 focus:ring-[#008CFF]"
                     />
                     <button
                       type="button"
                       onClick={handleApplyCoupon}
                       disabled={couponLoading || !couponCode.trim()}
-                      className="px-3.5 py-1.5 rounded-xl bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 text-white text-xs font-bold shrink-0 transition-all cursor-pointer disabled:opacity-50 active:scale-95"
+                      className="px-4 py-2 min-h-[42px] rounded-xl bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 text-white text-xs font-bold shrink-0 transition-all cursor-pointer disabled:opacity-50 active:scale-95"
                     >
                       {couponLoading ? '...' : t('cart.applyCoupon', 'Apply')}
                     </button>

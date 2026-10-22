@@ -132,8 +132,8 @@ export default function ServicesHubPage() {
       <Breadcrumb items={breadcrumbs} />
 
       {/* Hero */}
-      <section className="py-12 px-4 bg-gradient-to-br from-white via-[#F4F6F8] to-[#EAF4FF] border-b border-slate-200/80">
-        <div className="max-w-7xl mx-auto space-y-4">
+      <section className="py-8 sm:py-12 px-3 sm:px-6 lg:px-8 3xl:px-12 bg-gradient-to-br from-white via-[#F4F6F8] to-[#EAF4FF] border-b border-slate-200/80">
+        <div className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto space-y-4">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#EAF4FF] border border-[#008CFF]/20 text-[#008CFF]">
             <Wrench size={13} />
             <span>On-Site Technical &amp; Engineering Services</span>
@@ -150,7 +150,7 @@ export default function ServicesHubPage() {
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <a
               href={`tel:${BUSINESS_INFO.phoneClean}`}
-              className="px-5 py-2.5 rounded-xl bg-[#008CFF] hover:bg-[#0070cc] text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all active:scale-95"
+              className="px-5 py-2.5 min-h-[42px] rounded-xl bg-[#008CFF] hover:bg-[#0070cc] text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all active:scale-95"
             >
               <Phone size={14} />
               <span>Call Hotline: {BUSINESS_INFO.phone}</span>
@@ -159,7 +159,7 @@ export default function ServicesHubPage() {
               href={`https://wa.me/${BUSINESS_INFO.whatsappClean}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-colors"
+              className="px-4 py-2.5 min-h-[42px] rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-colors"
             >
               <MessageCircle size={14} />
               <span>WhatsApp Booking</span>
@@ -169,7 +169,7 @@ export default function ServicesHubPage() {
       </section>
 
       {/* Services Grid */}
-      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 flex-1 space-y-8">
+      <main className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto w-full px-3 sm:px-6 lg:px-8 3xl:px-12 py-8 sm:py-10 flex-1 space-y-8">
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-[#002B5B]">
             Our Core Technical Services

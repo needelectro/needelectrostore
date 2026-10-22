@@ -76,32 +76,32 @@ export default async function ElectricalProductsPage() {
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 
-      <section className="py-12 px-4 border-b border-slate-200 dark:border-slate-800/80 bg-gradient-to-b from-amber-50/70 via-transparent to-transparent dark:from-amber-950/15">
-        <div className="max-w-7xl mx-auto space-y-4">
+      <section className="py-8 sm:py-12 px-3 sm:px-6 lg:px-8 3xl:px-12 border-b border-slate-200 dark:border-slate-800/80 bg-gradient-to-b from-amber-50/70 via-transparent to-transparent dark:from-amber-950/15">
+        <div className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 dark:bg-amber-900/40 dark:border-amber-500/30 dark:text-amber-300 px-3 py-1 rounded-full text-xs font-semibold">
             <Zap size={14} />
             <span>Certified Electrical Hardware</span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
             Electrical Products in Moulvibazar — Cables, Breakers & Switchgear
           </h1>
 
-          <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
+          <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-xs sm:text-sm md:text-base leading-relaxed">
             Reliable electrical installations start with certified, high-grade components. {BUSINESS_INFO.name} provides certified copper wiring, miniature circuit breakers (MCB), residual current devices (RCCB), main distribution boards, heavy-duty switches, and industrial electrical supplies in Moulvibazar.
           </p>
 
           <div className="pt-2 flex flex-wrap gap-3">
             <Link
               href="/electrical-services"
-              className="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md shadow-amber-500/20 transition-all inline-flex items-center gap-2"
+              className="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2.5 min-h-[42px] rounded-xl text-xs shadow-md shadow-amber-500/20 transition-all inline-flex items-center gap-2"
             >
               <Wrench size={14} />
               <span>Electrical Services & Wiring →</span>
             </Link>
             <Link
               href="/services/electrician"
-              className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 px-4 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors shadow-xs"
+              className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 px-4 py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors shadow-xs inline-flex items-center"
             >
               Book an Electrician in Moulvibazar →
             </Link>
@@ -110,10 +110,10 @@ export default async function ElectricalProductsPage() {
       </section>
 
       {/* Products Grid */}
-      <section className="py-12 px-4 max-w-7xl mx-auto w-full flex-1">
-        <div className="flex items-center justify-between gap-4 mb-8">
+      <section className="py-8 sm:py-12 px-3 sm:px-6 lg:px-8 3xl:px-12 max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto w-full flex-1">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Electrical Supplies & Safety Components</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Electrical Supplies & Safety Components</h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Genuine certified electrical hardware meeting Bangladesh national safety standards</p>
           </div>
           <span className="text-xs font-mono bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 shadow-xs">
@@ -122,7 +122,7 @@ export default async function ElectricalProductsPage() {
         </div>
 
         {products.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-7 gap-3 sm:gap-4 lg:gap-6">
             {products.map(item => (
               <ProductCard
                 key={item.id}

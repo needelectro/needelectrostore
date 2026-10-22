@@ -1225,3 +1225,202 @@ img, video, canvas, svg {
     overflow-y: auto !important;
   }
 }
+
+/* =========================================================================
+   NEED ELECTRO — UNIVERSAL CROSS-DEVICE ADAPTIVE & AUTO-SIZING SYSTEM
+   Supports: 320px, 375px, 430px, 768px, 1024px, 1280px, 1440px, 1920px, 2560px, 3440px, 3840px
+   ========================================================================= */
+
+/* 1. Global Viewport Overflow & Scroll Resilience */
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: clip;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* 2. Fluid Adaptive Container */
+.ne-adaptive-container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(0.75rem, 2.5vw, 2.5rem);
+  padding-right: clamp(0.75rem, 2.5vw, 2.5rem);
+  max-width: 100%;
+}
+
+@media (min-width: 1280px) {
+  .ne-adaptive-container {
+    max-width: 1360px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .ne-adaptive-container {
+    max-width: 1580px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .ne-adaptive-container {
+    max-width: 1920px;
+  }
+}
+
+@media (min-width: 2560px) {
+  .ne-adaptive-container {
+    max-width: 2360px;
+  }
+}
+
+@media (min-width: 3440px) {
+  .ne-adaptive-container {
+    max-width: 2800px;
+  }
+}
+
+/* 3. Universal Auto-Sizing Product Grid */
+.ne-adaptive-product-grid {
+  display: grid;
+  width: 100%;
+  gap: clamp(0.625rem, 1.5vw, 1.5rem);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 768px) {
+  .ne-adaptive-product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .ne-adaptive-product-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1536px) {
+  .ne-adaptive-product-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1920px) {
+  .ne-adaptive-product-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 2560px) {
+  .ne-adaptive-product-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 3440px) {
+  .ne-adaptive-product-grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+}
+
+/* 4. Touch Targets & Finger-Friendly Controls (>= 44px) */
+@media (pointer: coarse) {
+  button, 
+  a.btn, 
+  .form-input, 
+  .form-select, 
+  .mobile-bottom-nav-item {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  .touch-target-44 {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* 5. Safe iOS Input Zoom Prevention */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* 6. Universal Controlled Horizontal Scrolling for Wide Data Tables */
+.table-responsive,
+.table-container,
+.table-wrapper,
+.ne-table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.table-responsive::-webkit-scrollbar,
+.table-container::-webkit-scrollbar,
+.table-wrapper::-webkit-scrollbar,
+.ne-table-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb,
+.table-container::-webkit-scrollbar-thumb,
+.table-wrapper::-webkit-scrollbar-thumb,
+.ne-table-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 140, 255, 0.25);
+  border-radius: 999px;
+}
+
+/* 7. Ultrawide Displays (1920px, 2560px, 3440px, 3840px) Dashboard Enhancements */
+@media (min-width: 1920px) {
+  .kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .content-scrollable {
+    padding: 2rem 2.5rem;
+  }
+
+  .erp-card {
+    padding: 1.5rem;
+  }
+
+  .pos-main-grid {
+    grid-template-columns: 1.5fr 1fr !important;
+  }
+}
+
+@media (min-width: 2560px) {
+  .kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+  }
+
+  .content-scrollable {
+    padding: 2.5rem 3.5rem;
+  }
+
+  .pos-main-grid {
+    grid-template-columns: 1.8fr 1fr !important;
+  }
+}
+
+/* 8. Text Readability & High Zoom Protection */
+@media (min-resolution: 2dppx) {
+  body {
+    -webkit-font-smoothing: subpixel-antialiased;
+  }
+}
+

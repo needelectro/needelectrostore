@@ -8,20 +8,31 @@ export default {
     './src/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    screens: {
+      'xs': '480px',     // Mobile and large phones
+      'sm': '640px',     // Standard tablet portrait / large phone
+      'md': '768px',     // Tablet landscape / iPad
+      'lg': '1024px',    // Small laptops
+      'xl': '1280px',    // Standard laptops & desktops
+      '2xl': '1536px',   // Large desktop monitors
+      '3xl': '1920px',   // Full HD 1080p desktop monitors
+      '4xl': '2560px',   // 2K / QHD monitors
+      '5xl': '3440px',   // Ultrawide and 4K displays
+    },
     extend: {
       colors: {
         brand: {
           primary: '#008CFF',
-          hover: '#0075d6',
+          hover: '#0070cc',
           navy: '#002B5B',
           accent: '#f59e0b',
           success: '#10b981',
           warning: '#f59e0b',
           danger: '#ef4444',
           info: '#06b6d4',
-          dark: '#090d16',
-          card: '#0f172a',
-          'card-hover': '#162038',
+          dark: '#081621',
+          card: '#0d1e2e',
+          'card-hover': '#122438',
           border: 'rgba(255, 255, 255, 0.08)',
         },
       },
@@ -30,6 +41,7 @@ export default {
         bangla: ['"Hind Siliguri"', '"Plus Jakarta Sans"', 'sans-serif'],
       },
       borderRadius: {
+        xl: '18px',
         lg: '14px',
         md: '10px',
         sm: '6px',

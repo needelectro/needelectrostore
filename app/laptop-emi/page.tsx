@@ -115,25 +115,25 @@ export default async function LaptopEmiPage() {
             <span>In-House Laptop Installment Financing</span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
             Laptop EMI in Moulvibazar — Buy Genuine Laptops with Easy Installments
           </h1>
 
-          <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
+          <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-xs sm:text-sm md:text-base leading-relaxed">
             Own the laptop you need for work, university, or freelancing without financial strain. At {BUSINESS_INFO.name}, we provide transparent in-house installment plans (3 to 12 months) with minimal down payments and zero hidden charges.
           </p>
 
           <div className="pt-2 flex flex-wrap gap-3">
             <a
               href="#calculator"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md shadow-blue-500/20 transition-all inline-flex items-center gap-2"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 min-h-[42px] rounded-xl text-xs shadow-md shadow-blue-500/20 transition-all inline-flex items-center gap-2"
             >
               <Calculator size={15} />
               <span>Calculate Monthly Payment ↓</span>
             </a>
             <Link
               href="/laptops"
-              className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 px-5 py-2.5 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors inline-flex items-center gap-1.5 shadow-xs"
+              className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 px-5 py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors inline-flex items-center gap-1.5 shadow-xs"
             >
               <span>Browse Available Laptops →</span>
             </Link>
@@ -142,15 +142,15 @@ export default async function LaptopEmiPage() {
       </section>
 
       {/* Active Plans from ERP */}
-      <section className="py-14 px-4 max-w-7xl mx-auto w-full">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Available Installment Plans</h2>
+      <section className="py-10 sm:py-14 px-3 sm:px-6 lg:px-8 3xl:px-12 max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto w-full">
+        <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-2">Available Installment Plans</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Current live financing options managed directly through the NEED ELECTRO ERP system
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {emiPlans.map(plan => (
             <div
               key={plan.id}

@@ -233,7 +233,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
       <Breadcrumb items={breadcrumbs} />
 
       {/* Main Product Hero */}
-      <section className="py-10 px-4 max-w-7xl mx-auto w-full">
+      <section className="py-8 sm:py-10 px-3 sm:px-4 md:px-6 lg:px-8 max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto w-full">
         <ProductDetailView
           product={{
             id: product.id,
@@ -271,7 +271,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
                 View More in {product.category} →
               </Link>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-7 gap-3 sm:gap-4 lg:gap-6">
               {relatedProducts.map(item => (
                 <ProductCard
                   key={item.id}
