@@ -684,6 +684,29 @@ export const CustomerHeader: React.FC = () => {
               <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
                 {t('nav.categories', 'Shop Categories')}
               </p>
+
+              {/* Prominent All Products Link */}
+              <Link
+                href="/shop"
+                onClick={() => setMobileMenuOpen(false)}
+                className="mb-2.5 p-3 rounded-2xl bg-gradient-to-r from-[#002B5B] via-[#008CFF] to-[#0070cc] text-white flex items-center justify-between shadow-md shadow-blue-500/20 active:scale-98 transition-transform"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                    <Layers size={18} className="text-white" />
+                  </div>
+                  <div>
+                    <span className="font-bold text-xs block leading-tight">
+                      {isBangla ? 'সকল পণ্য দেখুন' : 'All Products Catalog'}
+                    </span>
+                    <span className="text-[10px] text-blue-100 font-normal">
+                      {isBangla ? 'সম্পূর্ণ স্টোর ক্যাটালগ (৮৭+ পণ্য)' : 'Browse Full Store Inventory (87+ Items)'}
+                    </span>
+                  </div>
+                </div>
+                <ArrowRight size={15} className="text-white/90 shrink-0" />
+              </Link>
+
               <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
                 <Link
                   href="/laptops"

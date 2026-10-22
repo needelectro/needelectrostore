@@ -187,6 +187,18 @@ export const ProductTabsShowcase: React.FC<ProductTabsShowcaseProps> = ({ produc
           ))}
         </div>
       )}
+
+      {/* View All Products Action Footer */}
+      <div className="pt-2 text-center">
+        <Link
+          href="/shop"
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-white hover:bg-slate-50 text-[#002B5B] hover:text-[#008CFF] font-bold text-xs sm:text-sm border border-slate-200 shadow-xs hover:shadow-md transition-all active:scale-95 group"
+        >
+          <Layers size={15} className="text-[#008CFF]" />
+          <span>Explore All Store Products ({products.length}+)</span>
+          <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform text-[#008CFF]" />
+        </Link>
+      </div>
     </div>
   );
 };

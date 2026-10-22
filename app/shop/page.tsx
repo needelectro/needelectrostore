@@ -51,9 +51,13 @@ const CATEGORY_LINKS = [
   { name: 'Smart Gadgets', href: '/smart-devices', icon: Sparkles, count: 'Smart Plugs & Audio', color: 'from-rose-500 to-pink-500' },
 ];
 
+import { ShopCatalogClient } from '@/src/components/customer/ShopCatalogClient';
+import type { ProductCardData } from '@/src/components/customer/ProductCard';
+
 export default async function ShopMasterPage() {
   let products: any[] = [];
   try {
+    // Fetch ALL active & published products so customers on mobile and desktop can view every single product
     products = await prisma.product.findMany({
       where: {
         status: { in: ['ACTIVE', 'OUT_OF_STOCK'] },
@@ -75,11 +79,26 @@ export default async function ShopMasterPage() {
         specs: true,
       },
       orderBy: [{ isFeatured: 'desc' }, { updatedAt: 'desc' }],
-      take: 40,
     });
   } catch (err) {
     console.error('Shop master query error:', err);
   }
+
+  const mappedProducts: ProductCardData[] = products.map((p) => ({
+    id: p.id,
+    name: p.name,
+    sku: p.sku,
+    category: p.category,
+    brand: p.brand,
+    model: p.model,
+    description: p.description,
+    imageUrl: p.imageUrl,
+    retailPrice: Number(p.retailPrice),
+    emiPrice: p.emiPrice ? Number(p.emiPrice) : undefined,
+    currentStock: p.currentStock,
+    warrantyPeriodMonths: p.warrantyPeriodMonths || undefined,
+    specs: p.specs,
+  }));
 
   const breadcrumbs = [{ name: 'Shop All Products', path: '/shop' }];
   const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
@@ -93,118 +112,40 @@ export default async function ShopMasterPage() {
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 
-      {/* Hero Section */}
-      <section className="py-12 px-4 bg-gradient-to-br from-white via-[#F4F6F8] to-[#EAF4FF] border-b border-slate-200/80">
-        <div className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#EAF4FF] border border-[#008CFF]/20 text-[#008CFF]">
+      {/* Hero Section — Clean & Mobile-Optimized */}
+      <section className="py-6 sm:py-10 px-3 sm:px-4 md:px-6 bg-gradient-to-br from-white via-[#F4F6F8] to-[#EAF4FF] border-b border-slate-200/80">
+        <div className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto space-y-2.5 sm:space-y-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-[#EAF4FF] border border-[#008CFF]/20 text-[#008CFF]">
             <Layers size={13} />
-            <span>Official NEED ELECTRO E-Commerce Catalog</span>
+            <span>Official NEED ELECTRO Storefront — {mappedProducts.length} Products Available</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-[#002B5B] tracking-tight leading-tight">
-            Shop Authentic Laptops, Computers, CCTV &amp; Electricals
+          <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-[#002B5B] tracking-tight leading-tight">
+            Shop All Products in Moulvibazar &amp; Bangladesh
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 max-w-3xl leading-relaxed">
-            Welcome to the complete NEED ELECTRO catalog. Order genuine hardware with official manufacturer warranty, 7-day replacement guarantee, and nationwide Cash on Delivery to all 64 districts in Bangladesh.
+            Explore our complete live catalog of laptops, computers, CCTV surveillance cameras, electrical equipment, and computer accessories. 100% genuine products with official warranty and doorstep cash on delivery across Bangladesh.
           </p>
 
-          <div className="flex flex-wrap items-center gap-3 pt-2 text-xs text-slate-600">
-            <span className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-2xs">
-              <Truck size={14} className="text-[#008CFF]" />
-              <span>Doorstep COD: ৳60 (Sylhet Div) / ৳120 (Nationwide)</span>
+          <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] sm:text-xs text-slate-600">
+            <span className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
+              <Truck size={13} className="text-[#008CFF]" />
+              <span>Doorstep COD (All 64 Districts)</span>
             </span>
-            <span className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-2xs">
-              <ShieldCheck size={14} className="text-emerald-600" />
-              <span>100% Tested Genuine Hardware</span>
+            <span className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
+              <ShieldCheck size={13} className="text-emerald-600" />
+              <span>Tested Genuine Hardware</span>
             </span>
-            <span className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-2xs">
-              <CreditCard size={14} className="text-amber-500" />
+            <span className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
+              <CreditCard size={13} className="text-amber-500" />
               <span>Flexible EMI Available</span>
             </span>
           </div>
         </div>
       </section>
 
-      {/* Categories Showcase */}
-      <section className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8 py-8 space-y-6">
-        <div>
-          <h2 className="text-lg sm:text-xl font-bold text-[#002B5B]">
-            Browse By Category
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">Explore our dedicated department catalogs</p>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
-          {CATEGORY_LINKS.map((c) => {
-            const Icon = c.icon;
-            return (
-              <Link
-                key={c.name}
-                href={c.href}
-                className="group bg-white border border-slate-200/90 hover:border-[#008CFF] rounded-2xl p-4 text-center flex flex-col items-center justify-center space-y-2 transition-all hover:shadow-md hover:-translate-y-1"
-              >
-                <div className={`w-11 h-11 rounded-2xl bg-gradient-to-tr ${c.color} text-white flex items-center justify-center shadow-xs group-hover:scale-110 transition-transform`}>
-                  <Icon size={20} />
-                </div>
-                <h3 className="font-bold text-xs sm:text-sm text-[#002B5B] group-hover:text-[#008CFF] transition-colors leading-tight">
-                  {c.name}
-                </h3>
-                <span className="text-[10px] text-slate-400 font-medium truncate max-w-full block">
-                  {c.count}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Products Grid */}
-      <main className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8 pb-12 flex-1 space-y-6">
-        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-black text-[#002B5B]">
-              All Available Products ({products.length})
-            </h2>
-            <p className="text-xs text-slate-500">Live synchronized inventory from NEED ELECTRO database</p>
-          </div>
-          <Link
-            href="/track-order"
-            className="text-xs font-bold text-emerald-600 hover:underline flex items-center gap-1"
-          >
-            <span>Track Existing Order</span>
-            <ChevronRight size={14} />
-          </Link>
-        </div>
-
-        {products.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-7 gap-3 sm:gap-4 lg:gap-6">
-            {products.map((p) => (
-              <ProductCard
-                key={p.id}
-                product={{
-                  id: p.id,
-                  name: p.name,
-                  sku: p.sku,
-                  category: p.category,
-                  brand: p.brand,
-                  model: p.model,
-                  description: p.description,
-                  imageUrl: p.imageUrl,
-                  retailPrice: Number(p.retailPrice),
-                  regularPrice: p.regularPrice ? Number(p.regularPrice) : undefined,
-                  emiPrice: p.emiPrice ? Number(p.emiPrice) : undefined,
-                  currentStock: p.currentStock,
-                  warrantyPeriodMonths: p.warrantyPeriodMonths || undefined,
-                  specs: p.specs,
-                }}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="p-12 text-center bg-white rounded-2xl border border-slate-200">
-            <p className="font-bold text-[#002B5B]">Loading catalog items...</p>
-            <p className="text-xs text-slate-500 mt-1">Please call {BUSINESS_INFO.phone} for immediate order placement.</p>
-          </div>
-        )}
+      {/* Main Catalog with Interactive Client Filtering */}
+      <main className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 pb-16 flex-1">
+        <ShopCatalogClient initialProducts={mappedProducts} />
       </main>
 
       <CustomerFooter />
