@@ -177,7 +177,13 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
   const isAvailable = product.currentStock > 0;
   const retailPriceNum = Number(product.retailPrice);
   const emiMonthly = retailPriceNum > 0 ? Math.round((retailPriceNum * 0.75) / 6) : null;
-  const isLaptop = product.category.toLowerCase().includes('laptop') || product.name.toLowerCase().includes('laptop');
+  const isLaptop =
+    (product.category.toLowerCase().includes('laptop') || product.name.toLowerCase().includes('laptop')) &&
+    !product.category.toLowerCase().includes('accessori') &&
+    !product.category.toLowerCase().includes('accessory') &&
+    !product.name.toLowerCase().includes('mouse') &&
+    !product.name.toLowerCase().includes('keyboard') &&
+    !product.sku?.startsWith('SKU-ACC-');
 
   // Structured Data
   const productSchema = buildProductSchema({

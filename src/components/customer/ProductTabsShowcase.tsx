@@ -9,13 +9,55 @@ interface ProductTabsShowcaseProps {
   products: ProductCardData[];
 }
 
+const isAccessory = (p: ProductCardData) => {
+  const cat = (p.category || '').toLowerCase();
+  const name = (p.name || '').toLowerCase();
+  const sku = (p.sku || '').toUpperCase();
+  return (
+    cat.includes('accessori') ||
+    cat.includes('accessory') ||
+    cat.includes('mouse') ||
+    cat.includes('keyboard') ||
+    cat.includes('cable') ||
+    cat.includes('charger') ||
+    cat.includes('cctv') ||
+    name.includes('mouse') ||
+    name.includes('keyboard') ||
+    name.includes('headset') ||
+    name.includes('headphone') ||
+    name.includes('charger') ||
+    name.includes('adapter') ||
+    name.includes('power bank') ||
+    name.includes('pc setup') ||
+    sku.startsWith('SKU-ACC-')
+  );
+};
+
+const isLaptopProduct = (p: ProductCardData) => {
+  const cat = (p.category || '').toLowerCase();
+  const name = (p.name || '').toLowerCase();
+  const isMatch =
+    cat.includes('laptop') ||
+    cat.includes('notebook') ||
+    cat.includes('macbook') ||
+    cat.includes('chromebook') ||
+    name.includes('laptop') ||
+    name.includes('elitebook') ||
+    name.includes('thinkpad') ||
+    name.includes('latitude') ||
+    name.includes('chromebook') ||
+    name.includes('macbook') ||
+    name.includes('probook');
+  return isMatch && !isAccessory(p);
+};
+
 export const ProductTabsShowcase: React.FC<ProductTabsShowcaseProps> = ({ products }) => {
   const [activeTab, setActiveTab] = useState<'all' | 'laptop' | 'cctv' | 'electrical' | 'computer'>('all');
 
   const filteredProducts = products.filter((p) => {
     if (activeTab === 'all') return true;
     if (activeTab === 'laptop') {
-      return p.category.toLowerCase().includes('laptop') || p.name.toLowerCase().includes('laptop');
+      return isLaptopProduct(p);
     }
     if (activeTab === 'cctv') {
       return (
@@ -34,9 +76,10 @@ export const ProductTabsShowcase: React.FC<ProductTabsShowcaseProps> = ({ produc
     }
     if (activeTab === 'computer') {
       return (
-        p.category.toLowerCase().includes('computer') ||
+        (p.category.toLowerCase().includes('computer') ||
         p.category.toLowerCase().includes('monitor') ||
-        p.category.toLowerCase().includes('desktop')
+        p.category.toLowerCase().includes('desktop')) &&
+        !isLaptopProduct(p)
       );
     }
     return true;
@@ -48,9 +91,7 @@ export const ProductTabsShowcase: React.FC<ProductTabsShowcaseProps> = ({ produc
       id: 'laptop',
       label: 'Laptops',
       icon: Laptop,
-      count: products.filter(
-        (p) => p.category.toLowerCase().includes('laptop') || p.name.toLowerCase().includes('laptop')
-      ).length,
+      count: products.filter(isLaptopProduct).length,
     },
     {
       id: 'cctv',
