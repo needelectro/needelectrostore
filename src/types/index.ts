@@ -391,9 +391,97 @@ export interface Sale {
   status?: 'COMPLETED' | 'PAID' | 'PARTIALLY_PAID' | 'DUE' | 'EMI' | 'RETURNED' | 'VOID' | 'CANCELLED' | 'REFUNDED' | 'DRAFT' | 'PENDING';
   salespersonId?: string;
   salespersonName?: string;
+  quotationId?: string;
   notes?: string;
   metadata?: any;
   createdAt?: string;
+}
+
+// =========================================================
+// SALES QUOTATION SUBSYSTEM TYPES
+// =========================================================
+export type QuotationStatus = 'DRAFT' | 'SENT' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED' | 'CONVERTED';
+
+export interface QuotationStatusHistoryItem {
+  status: QuotationStatus;
+  timestamp: string;
+  updatedBy: string;
+  notes?: string;
+}
+
+export interface QuotationItem {
+  id?: string;
+  quotationId?: string;
+  productId?: string;
+  productName: string;
+  sku: string;
+  category?: string;
+  brand?: string;
+  model?: string;
+  description?: string;
+  unitOfMeasure?: string;
+  catalogPriceSnapshot: number;
+  unitPrice: number;
+  quantity: number;
+  discount: number;
+  taxPercent?: number;
+  taxAmount?: number;
+  lineTotal: number;
+  warrantyMonths?: number;
+  specsSnapshot?: any;
+  productSnapshot?: any;
+  sortOrder?: number;
+  createdAt?: string;
+  product?: Product;
+}
+
+export interface Quotation {
+  id: string;
+  quotationNumber: string;
+  referenceNumber?: string;
+  customerId?: string;
+  customerName: string;
+  companyName?: string;
+  customerPhone: string;
+  customerEmail?: string;
+  billingAddress?: string;
+  deliveryAddress?: string;
+  customerSnapshot?: any;
+  branchId?: string;
+  branchName?: string;
+  quotationDate: string;
+  validUntil: string;
+  status: QuotationStatus;
+  subtotal: number;
+  discountTotal: number;
+  vatPercent: number;
+  vatAmount: number;
+  deliveryCharge: number;
+  serviceCharge: number;
+  otherCharges: number;
+  grandTotal: number;
+  currency: string;
+  currencySymbol: string;
+  paymentTerms?: string;
+  deliveryTerms?: string;
+  warrantyTerms?: string;
+  customerNotes?: string;
+  internalNotes?: string;
+  preparedById?: string;
+  preparedByName?: string;
+  salespersonId?: string;
+  salespersonName?: string;
+  sentAt?: string;
+  acceptedAt?: string;
+  rejectedAt?: string;
+  convertedAt?: string;
+  convertedSalesOrderId?: string;
+  convertedInvoiceNumber?: string;
+  statusHistory?: QuotationStatusHistoryItem[];
+  items?: QuotationItem[];
+  metadata?: any;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // EMI Subsystem Types

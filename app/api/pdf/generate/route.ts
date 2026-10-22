@@ -107,5 +107,83 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  if (type === 'quotation') {
+    const quotation = await prisma.quotation.findFirst({
+      where: {
+        OR: [
+          { id },
+          { quotationNumber: id },
+        ],
+      },
+      include: {
+        items: true,
+        customer: true,
+      },
+    });
+
+    if (!quotation) {
+      return NextResponse.json({ success: false, error: 'Quotation not found' }, { status: 404 });
+    }
+
+    const settings = await prisma.systemSettings.findUnique({ where: { id: 'main' } });
+    const branch = quotation.branchId ? await prisma.branch.findUnique({ where: { id: quotation.branchId } }) : null;
+
+    const quotationData = {
+      quotationNumber: quotation.quotationNumber,
+      referenceNumber: quotation.referenceNumber || undefined,
+      quotationDate: quotation.quotationDate ? quotation.quotationDate.toISOString().split('T')[0] : '',
+      validUntil: quotation.validUntil ? quotation.validUntil.toISOString().split('T')[0] : '',
+      status: quotation.status,
+      customerName: quotation.customerName,
+      companyName: quotation.companyName || undefined,
+      customerPhone: quotation.customerPhone,
+      customerEmail: quotation.customerEmail || quotation.customer?.email || undefined,
+      billingAddress: quotation.billingAddress || quotation.customer?.address || undefined,
+      deliveryAddress: quotation.deliveryAddress || undefined,
+      branchName: branch?.name || 'NEED ELECTRO Main Showroom',
+      branchPhone: branch?.phone || undefined,
+      branchAddress: branch?.address || undefined,
+      preparedByName: quotation.preparedByName || 'Showroom Sales Team',
+      salespersonName: quotation.salespersonName || undefined,
+      items: quotation.items.map((it) => ({
+        name: it.productName,
+        sku: it.sku,
+        category: it.category || undefined,
+        brand: it.brand || undefined,
+        model: it.model || undefined,
+        description: it.description || undefined,
+        quantity: it.quantity,
+        unitPrice: Number(it.unitPrice),
+        discount: Number(it.discount),
+        taxAmount: Number(it.taxAmount),
+        total: Number(it.lineTotal),
+        warrantyMonths: it.warrantyMonths || undefined,
+      })),
+      subtotal: Number(quotation.subtotal),
+      discountTotal: Number(quotation.discountTotal),
+      vatAmount: Number(quotation.vatAmount),
+      vatPercent: Number(quotation.vatPercent),
+      deliveryCharge: Number(quotation.deliveryCharge),
+      serviceCharge: Number(quotation.serviceCharge),
+      otherCharges: Number(quotation.otherCharges),
+      grandTotal: Number(quotation.grandTotal),
+      paymentTerms: quotation.paymentTerms || undefined,
+      deliveryTerms: quotation.deliveryTerms || undefined,
+      warrantyTerms: quotation.warrantyTerms || undefined,
+      customerNotes: quotation.customerNotes || undefined,
+    };
+
+    const { generateQuotationHTML } = await import('@/lib/pdf');
+    const html = generateQuotationHTML(quotationData, settings);
+
+    return new NextResponse(html, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Disposition': `inline; filename="${quotation.quotationNumber}.html"`,
+      },
+    });
+  }
+
   return NextResponse.json({ success: false, error: 'Unsupported PDF document type' }, { status: 400 });
 }

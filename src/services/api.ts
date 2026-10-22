@@ -200,6 +200,39 @@ export const api = {
       })
   },
 
+  // 3.1 Sales Quotations Management
+  quotations: {
+    getQuotations: (params?: Record<string, string>) => {
+      const q = params ? '?' + new URLSearchParams(params).toString() : '';
+      return request<{ success: boolean; data: any[]; total?: number; stats?: any }>(`/api/quotations${q}`);
+    },
+    getQuotation: (id: string) => request<{ success: boolean; data: any }>(`/api/quotations/${id}`),
+    createQuotation: (quotationData: any) =>
+      request<{ success: boolean; message: string; data: any }>('/api/quotations', {
+        method: 'POST',
+        body: JSON.stringify(quotationData),
+      }),
+    updateQuotation: (id: string, updates: any) =>
+      request<{ success: boolean; message: string; data: any }>(`/api/quotations/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates),
+      }),
+    updateStatus: (id: string, status: string, notes?: string) =>
+      request<{ success: boolean; message: string; data: any }>(`/api/quotations/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status, notes }),
+      }),
+    convertToOrder: (id: string, options?: any) =>
+      request<{ success: boolean; message: string; sale: any; quotation: any }>(`/api/quotations/${id}/convert`, {
+        method: 'POST',
+        body: JSON.stringify(options || {}),
+      }),
+    deleteQuotation: (id: string) =>
+      request<{ success: boolean; message: string }>(`/api/quotations/${id}`, {
+        method: 'DELETE',
+      }),
+  },
+
   // 4. Laptop EMI Subsystem
   emi: {
     getAccounts: (params?: Record<string, string>) => {

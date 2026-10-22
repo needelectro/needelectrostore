@@ -288,6 +288,7 @@ model Product {
   serials       ProductSerial[]
   saleItems     SaleItem[]
   purchaseItems PurchaseItem[]
+  quotationItems QuotationItem[]
 
   @@index([sku])
   @@index([category])
@@ -360,6 +361,7 @@ model Customer {
   customerPayments CustomerPayment[]
   websiteOrders    WebsiteOrder[]
   sessions         CustomerSession[]
+  quotations       Quotation[]
 
   @@index([customerId])
   @@index([phone])
@@ -491,6 +493,7 @@ model Sale {
   customer   Customer    @relation(fields: [customerId], references: [id])
   items      SaleItem[]
   emiAccount EMIAccount?
+  quotationId String?    @map("quotation_id")
 
   @@index([invoiceNumber])
   @@index([customerId])
@@ -1423,5 +1426,99 @@ model Coupon {
   @@index([code])
   @@index([isActive])
   @@map("coupons")
+}
+
+// ---------------------------------------------------------
+// 30. SALES QUOTATION MANAGEMENT SYSTEM
+// ---------------------------------------------------------
+
+model Quotation {
+  id                     String    @id
+  quotationNumber        String    @unique @map("quotation_number")
+  referenceNumber        String?   @map("reference_number")
+  customerId             String?   @map("customer_id")
+  customerName           String    @map("customer_name")
+  companyName            String?   @map("company_name")
+  customerPhone          String    @map("customer_phone")
+  customerEmail          String?   @map("customer_email")
+  billingAddress         String?   @map("billing_address")
+  deliveryAddress        String?   @map("delivery_address")
+  customerSnapshot       Json?     @map("customer_snapshot")
+  branchId               String?   @map("branch_id")
+  quotationDate          DateTime  @default(now()) @map("quotation_date")
+  validUntil             DateTime  @map("valid_until")
+  status                 String    @default("DRAFT") // DRAFT, SENT, ACCEPTED, REJECTED, EXPIRED, CONVERTED
+  subtotal               Decimal   @default(0) @map("subtotal") @db.Decimal(12, 2)
+  discountTotal          Decimal   @default(0) @map("discount_total") @db.Decimal(12, 2)
+  vatPercent             Decimal   @default(0) @map("vat_percent") @db.Decimal(5, 2)
+  vatAmount              Decimal   @default(0) @map("vat_amount") @db.Decimal(12, 2)
+  deliveryCharge         Decimal   @default(0) @map("delivery_charge") @db.Decimal(12, 2)
+  serviceCharge          Decimal   @default(0) @map("service_charge") @db.Decimal(12, 2)
+  otherCharges           Decimal   @default(0) @map("other_charges") @db.Decimal(12, 2)
+  grandTotal             Decimal   @default(0) @map("grand_total") @db.Decimal(12, 2)
+  currency               String    @default("BDT")
+  currencySymbol         String    @default("৳") @map("currency_symbol")
+  paymentTerms           String?   @map("payment_terms")
+  deliveryTerms          String?   @map("delivery_terms")
+  warrantyTerms          String?   @map("warranty_terms")
+  customerNotes          String?   @map("customer_notes")
+  internalNotes          String?   @map("internal_notes")
+  preparedById           String?   @map("prepared_by_id")
+  preparedByName         String?   @map("prepared_by_name")
+  salespersonId          String?   @map("salesperson_id")
+  salespersonName        String?   @map("salesperson_name")
+  sentAt                 DateTime? @map("sent_at")
+  acceptedAt             DateTime? @map("accepted_at")
+  rejectedAt             DateTime? @map("rejected_at")
+  convertedAt            DateTime? @map("converted_at")
+  convertedSalesOrderId  String?   @map("converted_sales_order_id")
+  convertedInvoiceNumber String?   @map("converted_invoice_number")
+  statusHistory          Json?     @map("status_history")
+  metadata               Json?
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  items                  QuotationItem[]
+  customer               Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([quotationNumber])
+  @@index([customerId])
+  @@index([status])
+  @@index([quotationDate])
+  @@index([validUntil])
+  @@index([convertedSalesOrderId])
+  @@map("quotations")
+}
+
+model QuotationItem {
+  id                   String   @id
+  quotationId          String   @map("quotation_id")
+  productId            String?  @map("product_id")
+  productName          String   @map("product_name")
+  sku                  String
+  category             String?
+  brand                String?
+  model                String?
+  description          String?
+  unitOfMeasure        String?  @default("Unit") @map("unit_of_measure")
+  catalogPriceSnapshot Decimal  @default(0) @map("catalog_price_snapshot") @db.Decimal(12, 2)
+  unitPrice            Decimal  @default(0) @map("unit_price") @db.Decimal(12, 2)
+  quantity             Int      @default(1)
+  discount             Decimal  @default(0) @db.Decimal(12, 2)
+  taxPercent           Decimal  @default(0) @map("tax_percent") @db.Decimal(5, 2)
+  taxAmount            Decimal  @default(0) @map("tax_amount") @db.Decimal(12, 2)
+  lineTotal            Decimal  @default(0) @map("line_total") @db.Decimal(12, 2)
+  warrantyMonths       Int      @default(0) @map("warranty_months")
+  specsSnapshot        Json?    @map("specs_snapshot")
+  productSnapshot      Json?    @map("product_snapshot")
+  sortOrder            Int      @default(0) @map("sort_order")
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  quotation            Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  product              Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([quotationId])
+  @@index([productId])
+  @@map("quotation_items")
 }
 

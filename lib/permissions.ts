@@ -20,6 +20,16 @@ export const SYSTEM_PERMISSIONS: SystemPermissionDef[] = [
   { id: 'perm_sales_void', module: 'sales', action: 'void', label: 'Void/Cancel Sale', description: 'Revoke or cancel existing sales invoices', isSensitive: true },
   { id: 'perm_sales_return', module: 'sales', action: 'return', label: 'Process Sales Returns', description: 'Accept returned merchandise & refund', isSensitive: true },
   
+  // Quotations & Price Proposals
+  { id: 'perm_quot_view', module: 'quotations', action: 'view', label: 'View Quotations', description: 'Access quotation records and history', isSensitive: false },
+  { id: 'perm_quot_create', module: 'quotations', action: 'create', label: 'Create Quotations', description: 'Prepare price proposals for customers', isSensitive: false },
+  { id: 'perm_quot_edit', module: 'quotations', action: 'edit_draft', label: 'Edit Draft Quotations', description: 'Modify draft line items and quoted prices', isSensitive: false },
+  { id: 'perm_quot_issue', module: 'quotations', action: 'issue', label: 'Issue & Send Quotations', description: 'Officially issue quotations to clients', isSensitive: false },
+  { id: 'perm_quot_share', module: 'quotations', action: 'share', label: 'Share Quotations', description: 'Share quotations via WhatsApp, PDF and email', isSensitive: false },
+  { id: 'perm_quot_convert', module: 'quotations', action: 'convert_to_order', label: 'Convert to Sales Order', description: 'Transform accepted quotations into real sales invoices', isSensitive: false },
+  { id: 'perm_quot_cancel', module: 'quotations', action: 'cancel', label: 'Cancel/Reject Quotations', description: 'Reject or archive non-accepted quotations', isSensitive: false },
+  { id: 'perm_quot_reports', module: 'quotations', action: 'view_reports', label: 'Quotation Analytics & Reports', description: 'View quotation volume and conversion metrics', isSensitive: false },
+  
   // EMI Financing
   { id: 'perm_emi_view', module: 'emi', action: 'view', label: 'View EMI Accounts', description: 'Access customer installment ledgers', isSensitive: false },
   { id: 'perm_emi_create', module: 'emi', action: 'create', label: 'Approve EMI Sale', description: 'Authorize laptop financing agreements', isSensitive: true },
