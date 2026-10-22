@@ -235,13 +235,13 @@ export default async function LaptopsPage() {
             </div>
           </div>
 
-          {/* Bilingual Section */}
+          {/* Showroom & Purchase Consultation Section */}
           <div className="p-6 rounded-2xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/40 space-y-3">
             <h3 className="text-lg font-bold text-blue-900 dark:text-cyan-300">
-              মৌলভীবাজারে আসল ল্যাপটপের দোকান — নিড ইলেক্ট্রো
+              Authentic Laptop Showroom in Moulvibazar — NEED ELECTRO
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              আপনি কি মৌলভীবাজারে সুলভ মূল্যে ভালো মানের ফ্রেশ কন্ডিশন ল্যাপটপ খুঁজছেন? নিড ইলেক্ট্রো (কুসুমবাগ, মৌলভীবাজার) নিয়ে এলো এইচপি (HP), ডেল (Dell) এবং লেনোভো (Lenovo) ব্যান্ডের অরিজিনাল ল্যাপটপের বিশাল সমাহার। ছাত্র-ছাত্রী, ফ্রিল্যান্সার এবং অফিস ব্যবহারের উপযোগী প্রতিটি ল্যাপটপে পাবেন ৭ দিনের রিপ্লেসমেন্ট এবং ২ বছরের ফ্রি সার্ভিস ওয়ারেন্টি। এছাড়াও সহজ কিস্তি সুবিধা (Laptop EMI) রয়েছে।
+              Looking for premium quality, authentic laptops in pristine condition at affordable prices in Moulvibazar? NEED ELECTRO (Kusumbag, Moulvibazar) brings you a comprehensive collection of original laptops from trusted global brands including HP, Dell, and Lenovo. Ideal for students, freelancers, and enterprise professionals, every laptop includes a 7-day replacement guarantee and 2 years of free service warranty. Flexible 0% Laptop EMI installment facilities are also available.
             </p>
             <div className="pt-2 flex items-center gap-4">
               <a
@@ -249,16 +249,16 @@ export default async function LaptopsPage() {
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors shadow-xs"
               >
                 <Phone size={13} />
-                <span>সরাসরি কল করুন: {BUSINESS_INFO.phone}</span>
+                <span>Call Showroom: {BUSINESS_INFO.phone}</span>
               </a>
               <a
-                href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=আমি%20মৌলভীবাজার%20থেকে%20ল্যাপটপ%20কিনতে%20আগ্রহী।`}
+                href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=Hello,%20I%20am%20interested%20in%20purchasing%20a%20laptop%20from%20NEED%20ELECTRO%20Moulvibazar.`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
               >
                 <MessageCircle size={14} />
-                <span>হোয়াটসঅ্যাপে যোগাযোগ</span>
+                <span>Chat on WhatsApp</span>
               </a>
             </div>
           </div>
