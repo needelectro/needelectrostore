@@ -21,6 +21,23 @@ const PERMANENT_REDIRECTS: Record<string, string> = {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const host = request.headers.get('host') || '';
+
+  // 0. Canonical Hostname: enforce www.needelectro.store for apex needelectro.store
+  if (host === 'needelectro.store') {
+    const url = new URL(request.url);
+    url.host = 'www.needelectro.store';
+    url.protocol = 'https:';
+    return NextResponse.redirect(url, { status: 301 });
+  }
+
+  // 0.1 Enforce HTTPS in production environments
+  const proto = request.headers.get('x-forwarded-proto');
+  if (proto === 'http' && !host.includes('localhost') && !host.includes('127.0.0.1')) {
+    const url = new URL(request.url);
+    url.protocol = 'https:';
+    return NextResponse.redirect(url, { status: 301 });
+  }
 
   // 1. Check Permanent 301 Redirects
   const redirectTarget = PERMANENT_REDIRECTS[pathname.toLowerCase()];

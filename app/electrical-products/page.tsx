@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata } from '@/lib/seoConfig';
+import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema, buildItemListSchema } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -70,9 +70,32 @@ export default async function ElectricalProductsPage() {
   }
 
   const breadcrumbs = [{ name: 'Electrical Products', path: '/electrical-products' }];
+  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
+
+  const electricalItemListSchema = buildItemListSchema({
+    name: 'Electrical Products & Switchgear in Bangladesh — NEED ELECTRO Store',
+    description: 'Industrial and home circuit breakers, switches, DB boards, and certified wiring supplies in Moulvibazar.',
+    url: '/electrical-products',
+    items: products.map((item) => ({
+      name: item.name,
+      url: `/product/${item.name ? item.name.toLowerCase().replace(/[\s\W-]+/g, '-') : 'electrical'}-${item.sku.toLowerCase()}`,
+      image: item.imageUrl,
+      price: Number(item.retailPrice),
+      brand: item.brand,
+      category: item.category,
+    })),
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(electricalItemListSchema) }}
+      />
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 

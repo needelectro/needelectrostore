@@ -92,7 +92,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         sku: true,
         updatedAt: true,
       },
-      take: 500,
+      orderBy: { updatedAt: 'desc' },
     });
 
     productRoutes = products.map(p => {
@@ -108,5 +108,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Sitemap dynamic product fetch warning:', error);
   }
 
-  return [...staticRoutes, ...blogRoutes, ...productRoutes];
+  return [...staticRoutes, ...blogRoutes, ...guideRoutes, ...productRoutes];
 }

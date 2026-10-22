@@ -120,10 +120,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   const priceFormatted = Number(product.retailPrice).toLocaleString();
   const brandPart = product.brand ? `${product.brand} ` : '';
-  const modelPart = product.model ? ` ${product.model}` : '';
   const isLaptop = product.category.toLowerCase().includes('laptop') || product.name.toLowerCase().includes('laptop');
-
-  const title = `${product.name} Price in Bangladesh | ${brandPart}${modelPart} | NEED ELECTRO`;
+  const title = `${product.name} Price in Bangladesh`;
 
   // Generate descriptive meta description from actual product content
   let realDescriptionExcerpt = '';
@@ -194,6 +192,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
     model: product.model,
     description: product.description,
     imageUrl: product.imageUrl,
+    images: Array.isArray(product.images) ? (product.images as string[]) : [],
     retailPrice: retailPriceNum,
     currentStock: product.currentStock,
     warrantyPeriodMonths: product.warrantyPeriodMonths,

@@ -2,7 +2,8 @@
 import type { Metadata } from 'next';
 
 export const BUSINESS_INFO = {
-  name: 'NEED ELECTRO',
+  name: 'NEED ELECTRO Store',
+  parentOrganization: 'Amdads Group',
   tagline: 'Trusted Electrical and Technological Solutions',
   legalName: 'NEED ELECTRO',
   founder: 'Amdadur Rahman',
@@ -97,11 +98,17 @@ export function generateSeoMetadata({
   noIndex?: boolean;
 }): Metadata {
   const canonical = getCanonicalUrl(path);
-  const fullTitle = title.includes(BUSINESS_INFO.name) ? title : `${title} | ${BUSINESS_INFO.name}`;
+  const cleanBase = title
+    .replace(/\s*\|\s*NEED ELECTRO Store/gi, '')
+    .replace(/\s*\|\s*NEED ELECTRO/gi, '')
+    .trim();
+  const fullTitle = `${cleanBase} | ${BUSINESS_INFO.name}`;
   const imageUrl = ogImage.startsWith('http') ? ogImage : `${BUSINESS_INFO.domain.replace(/\/+$/, '')}${ogImage.startsWith('/') ? ogImage : `/${ogImage}`}`;
 
   return {
-    title: fullTitle,
+    title: {
+      absolute: fullTitle,
+    },
     description,
     keywords: [
       ...keywords,
@@ -186,6 +193,10 @@ export function buildOrganizationSchema() {
     name: BUSINESS_INFO.name,
     legalName: BUSINESS_INFO.legalName,
     url: BUSINESS_INFO.domain,
+    parentOrganization: {
+      '@type': 'Organization',
+      name: BUSINESS_INFO.parentOrganization,
+    },
     logo: `${BUSINESS_INFO.domain}/logo-icon.png`,
     description: BUSINESS_INFO.tagline,
     telephone: BUSINESS_INFO.phoneClean,
@@ -213,11 +224,15 @@ export function buildLocalBusinessSchema() {
     '@type': 'ElectronicsStore',
     '@id': `${BUSINESS_INFO.domain}/#localbusiness`,
     name: BUSINESS_INFO.name,
+    parentOrganization: {
+      '@type': 'Organization',
+      name: BUSINESS_INFO.parentOrganization,
+    },
     image: `${BUSINESS_INFO.domain}/main-logo.jpg`,
     url: BUSINESS_INFO.domain,
     telephone: BUSINESS_INFO.phoneClean,
     priceRange: '৳৳',
-    description: `${BUSINESS_INFO.name} is the premier laptop, computer, CCTV security, and electrical solutions provider in Moulvibazar, Sylhet, Bangladesh. Offering authentic HP, Dell, and Lenovo laptops, certified electrician services, and flexible laptop EMI installment plans.`,
+    description: `${BUSINESS_INFO.name} is the premier laptop, computer, CCTV security, and electrical solutions provider in Moulvibazar, Sylhet, Bangladesh. Sister concern of ${BUSINESS_INFO.parentOrganization}. Offering authentic HP, Dell, and Lenovo laptops, certified electrician services, and flexible laptop EMI installment plans.`,
     address: {
       '@type': 'PostalAddress',
       streetAddress: BUSINESS_INFO.address.streetAddress,
@@ -261,6 +276,58 @@ export function buildBreadcrumbSchema(items: Array<{ name: string; path: string 
   };
 }
 
+export function buildItemListSchema({
+  name,
+  description,
+  url,
+  path,
+  items,
+}: {
+  name: string;
+  description?: string;
+  url?: string;
+  path?: string;
+  items: Array<{
+    name: string;
+    url?: string;
+    path?: string;
+    image?: string | null;
+    price?: number;
+    brand?: string;
+    category?: string;
+  }>;
+}) {
+  const targetUrl = url || path || '';
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name,
+    ...(description ? { description } : {}),
+    url: getCanonicalUrl(targetUrl),
+    numberOfItems: items.length,
+    itemListElement: items.map((item, index) => {
+      const itemUrl = item.url || item.path || '';
+      return {
+        '@type': 'ListItem',
+        position: index + 1,
+        name: item.name,
+        url: itemUrl.startsWith('http') ? itemUrl : getCanonicalUrl(itemUrl),
+        ...(item.image ? { image: item.image.startsWith('http') ? item.image : `${BUSINESS_INFO.domain}${item.image}` } : {}),
+        ...(item.price !== undefined
+          ? {
+              offers: {
+                '@type': 'Offer',
+                priceCurrency: BUSINESS_INFO.currency,
+                price: item.price.toFixed(2),
+                availability: 'https://schema.org/InStock',
+              },
+            }
+          : {}),
+      };
+    }),
+  };
+}
+
 export function buildProductSchema(product: {
   name: string;
   sku: string;
@@ -269,13 +336,21 @@ export function buildProductSchema(product: {
   model?: string | null;
   description?: string | null;
   imageUrl?: string | null;
+  images?: string[];
   retailPrice: number;
   currentStock: number;
   warrantyPeriodMonths?: number;
   specs?: any;
 }) {
   const canonical = getCanonicalUrl(`/product/${slugify(product.name)}-${product.sku.toLowerCase()}`);
-  const img = product.imageUrl || `${BUSINESS_INFO.domain}/logo-dark-transparent.png`;
+  const fallbackImg = `${BUSINESS_INFO.domain}/logo-dark-transparent.png`;
+  const primaryImg = product.imageUrl 
+    ? (product.imageUrl.startsWith('http') ? product.imageUrl : `${BUSINESS_INFO.domain}${product.imageUrl}`)
+    : fallbackImg;
+  const imageList = product.images && product.images.length > 0
+    ? product.images.map(img => img.startsWith('http') ? img : `${BUSINESS_INFO.domain}${img}`)
+    : [primaryImg];
+
   const isRefurbished = product.name.toLowerCase().includes('refurbished') || 
                         product.name.toLowerCase().includes('used') ||
                         (product.description && (product.description.toLowerCase().includes('used') || product.description.toLowerCase().includes('refurbished')));
@@ -294,7 +369,7 @@ export function buildProductSchema(product: {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
-    image: img.startsWith('http') ? img : `${BUSINESS_INFO.domain}${img}`,
+    image: imageList.length > 1 ? imageList : primaryImg,
     description: finalDesc,
     sku: product.sku,
     mpn: product.model || product.sku,

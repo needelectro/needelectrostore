@@ -11,12 +11,13 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.needelectro.store'),
   title: {
-    default: 'NEED ELECTRO | Laptop, Computer, CCTV & Electrical Store in Bangladesh',
-    template: '%s | NEED ELECTRO',
+    default: 'NEED ELECTRO Store | Laptop, Computer, CCTV & Electrical Solutions in Bangladesh',
+    template: '%s | NEED ELECTRO Store',
   },
   description:
-    'Premier destination for authentic laptops (HP, Dell, Lenovo), custom computers, CCTV security camera systems, electrical products, certified electrician services, and laptop EMI in Moulvibazar, Sylhet & nationwide across Bangladesh.',
+    'Premier destination for authentic laptops (HP, Dell, Lenovo), custom computers, CCTV security camera systems, electrical products, certified electrician services, and laptop EMI in Moulvibazar, Sylhet & nationwide across Bangladesh. A sister concern of Amdads Group.',
   keywords: [
+    'NEED ELECTRO Store',
     'NEED ELECTRO',
     'NEED ELECTRO SHOP',
     'Computer shop in Moulvibazar',
@@ -39,6 +40,7 @@ export const metadata: Metadata = {
     'Networking and Wi-Fi installation',
     'Electrical products online Bangladesh',
     'Genuine laptop with warranty in Bangladesh',
+    'Amdads Group',
     'Moulvibazar',
     'Sylhet',
     'Bangladesh',
@@ -47,20 +49,23 @@ export const metadata: Metadata = {
     'মৌলভীবাজার সিসিটিভি',
   ],
   authors: [{ name: 'Amdadur Rahman' }],
-  creator: 'NEED ELECTRO',
-  publisher: 'NEED ELECTRO',
+  creator: 'NEED ELECTRO Store',
+  publisher: 'NEED ELECTRO Store',
   category: 'technology',
   alternates: {
     canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.needelectro.store',
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
   },
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.needelectro.store',
-    siteName: 'NEED ELECTRO',
-    title: 'NEED ELECTRO | Laptop, Computer, CCTV & Electrical Store in Bangladesh',
+    siteName: 'NEED ELECTRO Store',
+    title: 'NEED ELECTRO Store | Laptop, Computer, CCTV & Electrical Solutions in Bangladesh',
     description:
-      'Premier destination for authentic laptops (HP, Dell, Lenovo), custom computers, CCTV security camera systems, electrical products, certified electrician services, and laptop EMI in Moulvibazar, Sylhet & nationwide across Bangladesh.',
+      'Premier destination for authentic laptops (HP, Dell, Lenovo), custom computers, CCTV security camera systems, electrical products, certified electrician services, and laptop EMI in Moulvibazar, Sylhet & nationwide across Bangladesh. A sister concern of Amdads Group.',
     images: [
       {
         url: '/banners/need-electro-laptops-flagship.jpg',
@@ -78,7 +83,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'NEED ELECTRO | Laptop, Computer, CCTV & Electrical Store in Bangladesh',
+    title: 'NEED ELECTRO Store | Laptop, Computer, CCTV & Electrical Solutions in Bangladesh',
     description:
       'Premier destination for authentic laptops, computers, CCTV security cameras & electrician services in Moulvibazar, Sylhet.',
     images: ['/banners/need-electro-laptops-flagship.jpg'],
@@ -99,7 +104,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'NEED ELECTRO',
+    title: 'NEED ELECTRO Store',
   },
   icons: {
     icon: [

@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata } from '@/lib/seoConfig';
+import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema, buildItemListSchema } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -71,9 +71,32 @@ export default async function CctvPage() {
   }
 
   const breadcrumbs = [{ name: 'CCTV & Security', path: '/cctv' }];
+  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
+
+  const cctvItemListSchema = buildItemListSchema({
+    name: 'CCTV Cameras & Security Systems in Moulvibazar — NEED ELECTRO Store',
+    description: 'HD & IP CCTV cameras, DVR/NVR surveillance equipment, and professional security solutions in Bangladesh.',
+    url: '/cctv',
+    items: products.map((item) => ({
+      name: item.name,
+      url: `/product/${item.name ? item.name.toLowerCase().replace(/[\s\W-]+/g, '-') : 'cctv'}-${item.sku.toLowerCase()}`,
+      image: item.imageUrl,
+      price: Number(item.retailPrice),
+      brand: item.brand,
+      category: item.category,
+    })),
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(cctvItemListSchema) }}
+      />
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 

@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema } from '@/lib/seoConfig';
+import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema, buildItemListSchema } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -103,11 +103,29 @@ export default async function ShopMasterPage() {
   const breadcrumbs = [{ name: 'Shop All Products', path: '/shop' }];
   const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
 
+  const catalogItemListSchema = buildItemListSchema({
+    name: 'All Products Catalog — NEED ELECTRO Store',
+    description: 'Complete catalog of laptops, computers, CCTV security systems, electrical equipment, and computer accessories in Bangladesh.',
+    url: '/shop',
+    items: mappedProducts.map((p) => ({
+      name: p.name,
+      url: `/product/${p.name ? p.name.toLowerCase().replace(/[\s\W-]+/g, '-') : 'product'}-${p.sku.toLowerCase()}`,
+      image: p.imageUrl,
+      price: p.retailPrice,
+      brand: p.brand,
+      category: p.category,
+    })),
+  });
+
   return (
     <div className="min-h-screen bg-[#F4F6F8] text-[#002B5B] flex flex-col">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(catalogItemListSchema) }}
       />
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />

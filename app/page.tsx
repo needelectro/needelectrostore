@@ -6,6 +6,7 @@ import {
   generateSeoMetadata,
   buildLocalBusinessSchema,
   buildOrganizationSchema,
+  buildItemListSchema,
 } from '@/lib/seoConfig';
 import { prisma } from '@/lib/prisma';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
@@ -142,10 +143,24 @@ export default async function HomePage() {
     url: BUSINESS_INFO.domain,
     potentialAction: {
       '@type': 'SearchAction',
-      target: `${BUSINESS_INFO.domain}/api/catalog/search?q={search_term_string}`,
+      target: `${BUSINESS_INFO.domain}/shop?q={search_term_string}`,
       'query-input': 'required name=search_term_string',
     },
   };
+
+  const featuredItemListSchema = buildItemListSchema({
+    name: 'Featured Products in Moulvibazar',
+    description: 'Premier authentic laptops, CCTV cameras, computers, and electrical equipment available at NEED ELECTRO Store.',
+    url: '/',
+    items: mappedProducts.slice(0, 16).map(p => ({
+      name: p.name,
+      url: `/product/${p.name ? p.name.toLowerCase().replace(/[\s\W-]+/g, '-') : 'product'}-${p.sku.toLowerCase()}`,
+      image: p.imageUrl,
+      price: p.retailPrice,
+      brand: p.brand,
+      category: p.category,
+    })),
+  });
 
   return (
     <div className="min-h-screen bg-[#F4F6F8] text-[#002B5B] flex flex-col font-sans selection:bg-[#EAF4FF] selection:text-[#008CFF]">
@@ -160,6 +175,10 @@ export default async function HomePage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(featuredItemListSchema) }}
       />
 
       <CustomerHeader />

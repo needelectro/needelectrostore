@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata } from '@/lib/seoConfig';
+import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema, buildItemListSchema } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -68,9 +68,32 @@ export default async function ComputersPage() {
   }
 
   const breadcrumbs = [{ name: 'Computers', path: '/computers' }];
+  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
+
+  const computersItemListSchema = buildItemListSchema({
+    name: 'Desktop Computers & Workstations in Moulvibazar — NEED ELECTRO Store',
+    description: 'Custom desktop PCs, office workstations, monitors and computer parts available at NEED ELECTRO Moulvibazar.',
+    url: '/computers',
+    items: products.map((item) => ({
+      name: item.name,
+      url: `/product/${item.name ? item.name.toLowerCase().replace(/[\s\W-]+/g, '-') : 'computer'}-${item.sku.toLowerCase()}`,
+      image: item.imageUrl,
+      price: Number(item.retailPrice),
+      brand: item.brand,
+      category: item.category,
+    })),
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(computersItemListSchema) }}
+      />
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 

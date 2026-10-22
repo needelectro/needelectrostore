@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata } from '@/lib/seoConfig';
+import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema, buildItemListSchema } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -61,9 +61,31 @@ export default async function SmartDevicesPage() {
   }
 
   const breadcrumbs = [{ name: 'Smart Devices', path: '/smart-devices' }];
+  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
+  const smartDevicesItemListSchema = buildItemListSchema({
+    name: 'Smart Devices & Modern Gadgets in Moulvibazar',
+    description: 'Explore smart devices, smart plugs, USB converter hubs, and smart home automation gadgets at NEED ELECTRO Store.',
+    path: '/smart-devices',
+    items: products.slice(0, 30).map(p => ({
+      name: p.name,
+      path: `/product/${p.sku || p.id}`,
+      image: p.imageUrl || undefined,
+      price: Number(p.retailPrice) || undefined,
+    })),
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      {smartDevicesItemListSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(smartDevicesItemListSchema) }}
+        />
+      )}
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 

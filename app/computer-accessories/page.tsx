@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata } from '@/lib/seoConfig';
+import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema, buildItemListSchema } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -72,9 +72,32 @@ export default async function ComputerAccessoriesPage() {
   }
 
   const breadcrumbs = [{ name: 'Computer Accessories', path: '/computer-accessories' }];
+  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
+
+  const accessoriesItemListSchema = buildItemListSchema({
+    name: 'Computer Accessories & PC Peripherals in Bangladesh — NEED ELECTRO Store',
+    description: 'High-speed NVMe SSDs, DDR4/DDR5 RAM, precision mice, mechanical keyboards, hubs and adapters in Moulvibazar.',
+    url: '/computer-accessories',
+    items: products.map((item) => ({
+      name: item.name,
+      url: `/product/${item.name ? item.name.toLowerCase().replace(/[\s\W-]+/g, '-') : 'accessory'}-${item.sku.toLowerCase()}`,
+      image: item.imageUrl,
+      price: Number(item.retailPrice),
+      brand: item.brand,
+      category: item.category,
+    })),
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(accessoriesItemListSchema) }}
+      />
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 
