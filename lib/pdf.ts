@@ -583,7 +583,7 @@ export function generateQuotationHTML(data: QuotationData, settings?: any): stri
     <div style="clear: both;"></div>
 
     <div class="disclaimer-box">
-      <strong>Important Commercial Disclaimer:</strong> This quotation is a commercial price proposal only and does not constitute a sales invoice, payment receipt, stock reservation, or confirmation of product availability. Prices and availability are subject to the terms and validity period stated in this quotation.
+      <strong>Important Commercial Notice:</strong> This document is a quotation only. It is not a sales invoice, payment receipt, or confirmation of stock reservation. Product availability and final order processing are subject to confirmation under NEED ELECTRO's applicable sales terms.
     </div>
 
     ${data.customerNotes ? `<div style="margin-top: 15px; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 11px; color: #334155;"><strong>Notes:</strong> ${data.customerNotes}</div>` : ''}

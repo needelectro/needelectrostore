@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { Quotation, SystemSettings } from '../../types';
 import { Printer, X, Download, Loader2, Share2, Copy, Check, Edit2 } from 'lucide-react';
 import { NeedElectroLogo } from '../NeedElectroLogo';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 import { amountToBangladeshiTakaWords } from '../../utils/numberToWords';
+import { downloadQuotationPdf } from '../../utils/generateQuotationPdf';
 
 interface A4QuotationPrintProps {
   quotation: Quotation;
@@ -57,66 +56,13 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
 
   const amountInWords = amountToBangladeshiTakaWords(grandTotal);
 
-  const handleDownloadPDF = async () => {
-    const element = document.getElementById('printable-a4-quotation');
-    if (!element) return;
-
+  const handleDownloadPDF = () => {
     setIsGeneratingPDF(true);
     try {
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-        scrollX: 0,
-        scrollY: 0,
-        onclone: (clonedDoc) => {
-          const clonedElement = clonedDoc.getElementById('printable-a4-quotation');
-          if (clonedElement) {
-            clonedElement.style.boxShadow = 'none';
-            clonedElement.style.borderRadius = '0';
-            clonedElement.style.margin = '0 auto';
-            clonedElement.style.width = '210mm';
-            clonedElement.style.maxWidth = '210mm';
-          }
-        },
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-        compress: true,
-      });
-
-      const pdfWidth = 210;
-      const pdfHeight = 297;
-      const imgProps = pdf.getImageProperties(imgData);
-      const calculatedHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-      if (calculatedHeight <= pdfHeight) {
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, calculatedHeight, undefined, 'FAST');
-      } else {
-        let heightLeft = calculatedHeight;
-        let position = 0;
-
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, calculatedHeight, undefined, 'FAST');
-        heightLeft -= pdfHeight;
-
-        while (heightLeft > 1) {
-          position -= pdfHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, calculatedHeight, undefined, 'FAST');
-          heightLeft -= pdfHeight;
-        }
-      }
-
-      const safeQtn = (quotation.quotationNumber || 'QTN-DRAFT').replace(/[^a-zA-Z0-9-_]/g, '_');
-      pdf.save(`NEED-ELECTRO-Quotation-${safeQtn}.pdf`);
+      downloadQuotationPdf(quotation, settings, { currencyLabel: 'BDT' });
     } catch (error) {
       console.error('Failed to generate PDF:', error);
-      alert('Failed to generate PDF directly. Please use the Print / Save PDF option.');
+      alert('Failed to generate PDF. Please use the Print / Save PDF option.');
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -499,6 +445,40 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
               </div>
             </div>
 
+            {/* Commercial Terms & Notes */}
+            {(quotation.paymentTerms || quotation.deliveryTerms || quotation.warrantyTerms || quotation.customerNotes) && (
+              <div
+                style={{
+                  position: 'relative',
+                  zIndex: 1,
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '6px',
+                  padding: '10px 14px',
+                  fontSize: '11px',
+                  color: '#334155',
+                  lineHeight: '1.45',
+                  marginBottom: '16px',
+                }}
+              >
+                <div style={{ fontWeight: 800, color: '#002B5B', fontSize: '11px', marginBottom: '4px', textTransform: 'uppercase' }}>
+                  Commercial Terms & Instructions:
+                </div>
+                {quotation.paymentTerms && (
+                  <div style={{ marginTop: '2px' }}><strong>• Payment Terms:</strong> {quotation.paymentTerms}</div>
+                )}
+                {quotation.deliveryTerms && (
+                  <div style={{ marginTop: '2px' }}><strong>• Delivery Terms:</strong> {quotation.deliveryTerms}</div>
+                )}
+                {quotation.warrantyTerms && (
+                  <div style={{ marginTop: '2px' }}><strong>• Warranty Terms:</strong> {quotation.warrantyTerms}</div>
+                )}
+                {quotation.customerNotes && (
+                  <div style={{ marginTop: '2px' }}><strong>• Customer Notes:</strong> {quotation.customerNotes}</div>
+                )}
+              </div>
+            )}
+
             {/* Disclaimer Box */}
             <div
               style={{
@@ -515,28 +495,8 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
                 marginBottom: '16px',
               }}
             >
-              <strong>Important Commercial Notice:</strong> This quotation is a commercial price proposal only and does not constitute a sales invoice, payment receipt, stock reservation, or confirmation of product availability. Prices and availability are subject to the terms and validity period stated in this quotation.
+              <strong>Important Commercial Notice:</strong> This document is a quotation only. It is not a sales invoice, payment receipt, or confirmation of stock reservation. Product availability and final order processing are subject to confirmation under NEED ELECTRO's applicable sales terms.
             </div>
-
-            {/* Optional Customer Notes Only */}
-            {quotation.customerNotes && (
-              <div
-                style={{
-                  position: 'relative',
-                  zIndex: 1,
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '6px',
-                  padding: '10px 14px',
-                  fontSize: '11px',
-                  color: '#334155',
-                  lineHeight: '1.4',
-                  marginBottom: '20px',
-                }}
-              >
-                <strong>Customer Notes:</strong> {quotation.customerNotes}
-              </div>
-            )}
 
             {/* Signature Block */}
             <div

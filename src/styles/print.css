@@ -538,6 +538,26 @@ body:has(.print-active-modal) .mobile-bottom-nav {
     background: transparent !important;
   }
 
+  /* Multi-page table repeating headers and row break avoidance */
+  .a4-print-document table {
+    page-break-inside: auto !important;
+  }
+
+  .a4-print-document thead {
+    display: table-header-group !important;
+  }
+
+  .a4-print-document tfoot {
+    display: table-footer-group !important;
+  }
+
+  .a4-print-document tr,
+  .a4-print-document tbody tr,
+  .a4-items-table tbody tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
   .a4-totals-section {
     display: flex !important;
     justify-content: space-between !important;

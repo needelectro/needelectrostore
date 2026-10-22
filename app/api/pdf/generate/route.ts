@@ -173,14 +173,30 @@ export async function POST(req: NextRequest) {
       customerNotes: quotation.customerNotes || undefined,
     };
 
-    const { generateQuotationHTML } = await import('@/lib/pdf');
-    const html = generateQuotationHTML(quotationData, settings);
+    const { searchParams } = new URL(req.url);
+    const format = searchParams.get('format');
 
-    return new NextResponse(html, {
+    if (format === 'html') {
+      const { generateQuotationHTML } = await import('@/lib/pdf');
+      const html = generateQuotationHTML(quotationData, settings);
+      return new NextResponse(html, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Content-Disposition': `inline; filename="${quotation.quotationNumber}.html"`,
+        },
+      });
+    }
+
+    const { buildQuotationPdf } = await import('@/src/utils/generateQuotationPdf');
+    const pdfDoc = buildQuotationPdf(quotation as any, settings as any);
+    const pdfBuffer = Buffer.from(pdfDoc.output('arraybuffer'));
+
+    return new NextResponse(pdfBuffer, {
       status: 200,
       headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Content-Disposition': `inline; filename="${quotation.quotationNumber}.html"`,
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${quotation.quotationNumber}.pdf"`,
       },
     });
   }
