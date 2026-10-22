@@ -311,20 +311,15 @@ export const QuotationDetailsModal: React.FC<QuotationDetailsModalProps> = ({
                 </div>
               </div>
 
-              {/* Commercial Terms */}
-              <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '0.75rem 1rem', fontSize: '0.8rem', lineHeight: '1.5' }}>
-                <div style={{ fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
-                  TERMS & CONDITIONS:
-                </div>
-                <div><strong>Payment:</strong> {quotation.paymentTerms || 'Full payment upon confirmed order placement.'}</div>
-                <div><strong>Delivery:</strong> {quotation.deliveryTerms || 'Showroom collection or scheduled courier delivery.'}</div>
-                <div><strong>Warranty:</strong> {quotation.warrantyTerms || 'Official NEED ELECTRO product warranty terms apply.'}</div>
-                {quotation.customerNotes && (
-                  <div style={{ marginTop: '0.3rem', color: '#0284c7' }}>
-                    <strong>Customer Notes:</strong> {quotation.customerNotes}
+              {/* Optional Customer Notes */}
+              {quotation.customerNotes && (
+                <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '0.75rem 1rem', fontSize: '0.8rem', lineHeight: '1.5' }}>
+                  <div style={{ fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
+                    CUSTOMER NOTES:
                   </div>
-                )}
-              </div>
+                  <div style={{ color: '#0284c7' }}>{quotation.customerNotes}</div>
+                </div>
+              )}
 
               {quotation.internalNotes && (
                 <div style={{ marginTop: '0.75rem', background: 'rgba(239, 68, 68, 0.05)', border: '1px dashed rgba(239, 68, 68, 0.3)', borderRadius: 'var(--radius-md)', padding: '0.6rem 0.75rem', fontSize: '0.8rem' }}>

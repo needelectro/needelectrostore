@@ -142,7 +142,7 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
   };
 
   return (
-    <div className="modal-overlay print-active-modal" style={{ zIndex: 9999 }}>
+    <div className="modal-overlay print-active-modal" style={{ zIndex: 999999 }}>
       <div className="modal-content modal-content-xl">
         <div className="modal-header no-print">
           <div className="modal-title" style={{ fontWeight: 700, fontSize: '1.1rem' }}>
@@ -506,33 +506,25 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
               <strong>Important Commercial Notice:</strong> This quotation is a commercial price proposal only and does not constitute a sales invoice, payment receipt, stock reservation, or confirmation of product availability. Prices and availability are subject to the terms and validity period stated in this quotation.
             </div>
 
-            {/* Commercial Terms & Notes */}
-            <div
-              style={{
-                position: 'relative',
-                zIndex: 1,
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '6px',
-                padding: '12px 14px',
-                fontSize: '11px',
-                color: '#334155',
-                lineHeight: '1.5',
-                marginBottom: '35px',
-              }}
-            >
-              <div style={{ fontWeight: 800, fontSize: '10px', textTransform: 'uppercase', color: '#002B5B', marginBottom: '4px' }}>
-                COMMERCIAL TERMS & INSTRUCTIONS:
+            {/* Optional Customer Notes Only */}
+            {quotation.customerNotes && (
+              <div
+                style={{
+                  position: 'relative',
+                  zIndex: 1,
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '6px',
+                  padding: '10px 14px',
+                  fontSize: '11px',
+                  color: '#334155',
+                  lineHeight: '1.4',
+                  marginBottom: '20px',
+                }}
+              >
+                <strong>Customer Notes:</strong> {quotation.customerNotes}
               </div>
-              <div><strong>Payment Terms:</strong> {quotation.paymentTerms || 'Full payment upon confirmed order placement.'}</div>
-              <div><strong>Delivery Terms:</strong> {quotation.deliveryTerms || 'Showroom collection or scheduled courier delivery.'}</div>
-              <div><strong>Warranty Terms:</strong> {quotation.warrantyTerms || 'Official NEED ELECTRO product warranty terms apply.'}</div>
-              {quotation.customerNotes && (
-                <div style={{ marginTop: '4px', color: '#0284c7' }}>
-                  <strong>Customer Notes:</strong> {quotation.customerNotes}
-                </div>
-              )}
-            </div>
+            )}
 
             {/* Signature Block */}
             <div

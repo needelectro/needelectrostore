@@ -14,8 +14,11 @@ export const MobileBottomNav: React.FC = () => {
   const { customer } = useCustomerAuth();
   const { t, formatNumber, isBangla } = useLanguage();
 
-  // Do not render on staff ERP routes
-  if (pathname?.startsWith('/admin')) {
+  // Do not render on staff ERP routes or when print modal is active
+  if (
+    pathname?.startsWith('/admin') ||
+    (typeof document !== 'undefined' && document.body.classList.contains('has-active-print-modal'))
+  ) {
     return null;
   }
 
@@ -37,7 +40,7 @@ export const MobileBottomNav: React.FC = () => {
   return (
     <nav
       aria-label="Mobile Navigation"
-      className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-[0_-6px_25px_rgba(0,43,91,0.06)] pb-[max(0.6rem,env(safe-area-inset-bottom))] pt-1.5 transition-all duration-300"
+      className="fixed bottom-0 left-0 right-0 z-40 md:hidden no-print print:hidden bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-[0_-6px_25px_rgba(0,43,91,0.06)] pb-[max(0.6rem,env(safe-area-inset-bottom))] pt-1.5 transition-all duration-300"
     >
       {/* Top Futuristic Brand Beam Edge */}
       <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#008CFF]/40 to-transparent pointer-events-none" />

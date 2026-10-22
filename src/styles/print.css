@@ -22,6 +22,14 @@
   }
 }
 
+/* Hide all mobile navigation docks when any print modal or preview is open */
+body.has-active-print-modal nav[aria-label="Mobile Navigation"],
+body.has-active-print-modal .mobile-bottom-nav,
+body:has(.print-active-modal) nav[aria-label="Mobile Navigation"],
+body:has(.print-active-modal) .mobile-bottom-nav {
+  display: none !important;
+}
+
 .a4-print-document {
   position: relative;
   width: 100%;

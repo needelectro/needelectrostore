@@ -586,15 +586,7 @@ export function generateQuotationHTML(data: QuotationData, settings?: any): stri
       <strong>Important Commercial Disclaimer:</strong> This quotation is a commercial price proposal only and does not constitute a sales invoice, payment receipt, stock reservation, or confirmation of product availability. Prices and availability are subject to the terms and validity period stated in this quotation.
     </div>
 
-    <div class="terms-box">
-      <div style="font-weight: 700; font-size: 11px; text-transform: uppercase; color: #002B5B; margin-bottom: 6px;">
-        COMMERCIAL TERMS & NOTES
-      </div>
-      <div><strong>Payment Terms:</strong> ${data.paymentTerms || 'Full payment upon confirmed order placement.'}</div>
-      <div style="margin-top: 3px;"><strong>Delivery Terms:</strong> ${data.deliveryTerms || 'Showroom collection or scheduled courier delivery.'}</div>
-      <div style="margin-top: 3px;"><strong>Warranty Terms:</strong> ${data.warrantyTerms || 'Official NEED ELECTRO product warranty terms apply.'}</div>
-      ${data.customerNotes ? `<div style="margin-top: 4px; color: #0284c7;"><strong>Notes for Customer:</strong> ${data.customerNotes}</div>` : ''}
-    </div>
+    ${data.customerNotes ? `<div style="margin-top: 15px; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 11px; color: #334155;"><strong>Notes:</strong> ${data.customerNotes}</div>` : ''}
 
     <table class="signature-table">
       <tr>
