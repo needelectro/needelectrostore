@@ -124,9 +124,25 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const isLaptop = product.category.toLowerCase().includes('laptop') || product.name.toLowerCase().includes('laptop');
 
   const title = `${product.name} Price in Bangladesh | ${brandPart}${modelPart} | NEED ELECTRO`;
-  const description = `Buy 100% authentic ${product.name} at ৳${priceFormatted} BDT in Bangladesh. ${
-    product.warrantyPeriodMonths ? `${product.warrantyPeriodMonths} Months Warranty. ` : 'Official warranty. '
-  }Genuine hardware, cash on delivery nationwide & express delivery in Moulvibazar, Sylhet.`;
+
+  // Generate descriptive meta description from actual product content
+  let realDescriptionExcerpt = '';
+  if (product.description) {
+    const cleanDesc = product.description
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/[*#_`|~-]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (cleanDesc.length > 20) {
+      realDescriptionExcerpt = cleanDesc.length > 130 ? cleanDesc.slice(0, 127).trim() + '...' : cleanDesc;
+    }
+  }
+
+  const description = realDescriptionExcerpt
+    ? `${realDescriptionExcerpt} Buy authentic ${product.name} at ৳${priceFormatted} BDT with warranty from NEED ELECTRO.`
+    : `Buy 100% authentic ${product.name} at ৳${priceFormatted} BDT in Bangladesh. ${
+        product.warrantyPeriodMonths ? `${product.warrantyPeriodMonths} Months Warranty. ` : 'Official warranty. '
+      }Genuine hardware, cash on delivery nationwide & express delivery in Moulvibazar, Sylhet.`;
 
   const brandKeywords = product.brand ? [`${product.brand} price in Bangladesh`, `${product.brand} Moulvibazar`] : [];
   const laptopKeywords = isLaptop

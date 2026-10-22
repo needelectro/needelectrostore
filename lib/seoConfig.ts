@@ -280,14 +280,25 @@ export function buildProductSchema(product: {
                         product.name.toLowerCase().includes('used') ||
                         (product.description && (product.description.toLowerCase().includes('used') || product.description.toLowerCase().includes('refurbished')));
 
+  // Strip markdown and HTML tags for Schema.org clean plain-text requirement
+  const rawDesc = (product.description || '').trim();
+  const cleanPlainDesc = rawDesc
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/[*#_`|~-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const finalDesc = cleanPlainDesc || `${product.name} available at ${BUSINESS_INFO.name} Moulvibazar. Genuine product with warranty and fast delivery across Bangladesh.`;
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
     image: img.startsWith('http') ? img : `${BUSINESS_INFO.domain}${img}`,
-    description: product.description || `${product.name} available at ${BUSINESS_INFO.name} Moulvibazar. Genuine product with warranty and fast delivery across Bangladesh.`,
+    description: finalDesc,
     sku: product.sku,
-    mpn: product.sku,
+    mpn: product.model || product.sku,
+    ...(product.model ? { model: product.model } : {}),
     brand: {
       '@type': 'Brand',
       name: product.brand || 'NEED ELECTRO',
@@ -302,7 +313,7 @@ export function buildProductSchema(product: {
       itemCondition: isRefurbished ? 'https://schema.org/RefurbishedCondition' : 'https://schema.org/NewCondition',
       availability: product.currentStock > 0 
         ? 'https://schema.org/InStock' 
-        : 'https://schema.org/OutOfStock',
+        : 'https://schema.org/BackOrder',
       seller: {
         '@type': 'Organization',
         name: BUSINESS_INFO.name,
