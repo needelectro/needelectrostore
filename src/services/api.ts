@@ -1,6 +1,8 @@
 // NEED ELECTRO ERP — Centralized Typed API Client
 // Communicates with backend Express server & SQLite production database
 
+import { Quotation, Sale } from '../types';
+
 const TOKEN_KEY = 'NEED_ELECTRO_AUTH_TOKEN_V1';
 
 export function getSessionToken(): string | null {
@@ -843,6 +845,40 @@ export const api = {
     updateSettings: (settings: any) => request<{ success: boolean; data: any; message: string }>('/api/admin/image-recovery', {
       method: 'POST',
       body: JSON.stringify({ action: 'update_settings', settings })
+    })
+  },
+
+  // 27. Sales Quotation Management System
+  quotations: {
+    getQuotations: (params?: { q?: string; status?: string; startDate?: string; endDate?: string }) => {
+      const qp = new URLSearchParams();
+      if (params?.q) qp.set('q', params.q);
+      if (params?.status && params.status !== 'ALL') qp.set('status', params.status);
+      if (params?.startDate) qp.set('startDate', params.startDate);
+      if (params?.endDate) qp.set('endDate', params.endDate);
+      const qs = qp.toString();
+      return request<{ success: boolean; data: Quotation[]; summary?: any; error?: string }>(`/api/quotations${qs ? `?${qs}` : ''}`);
+    },
+    getQuotation: (id: string) => request<{ success: boolean; data: Quotation; error?: string }>(`/api/quotations/${id}`),
+    createQuotation: (data: any) => request<{ success: boolean; data: Quotation; message?: string; error?: string }>('/api/quotations', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+    updateQuotation: (id: string, data: any) => request<{ success: boolean; data: Quotation; message?: string; error?: string }>(`/api/quotations/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    }),
+    updateStatus: (id: string, status: string, notes?: string) => request<{ success: boolean; data: Quotation; message?: string; error?: string }>(`/api/quotations/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, notes })
+    }),
+    convertToOrder: (id: string, options?: any) => request<{ success: boolean; sale: Sale; quotation: Quotation; message?: string; error?: string }>(`/api/quotations/${id}/convert`, {
+      method: 'POST',
+      body: JSON.stringify(options || {})
+    }),
+    deleteQuotation: (id: string, reason?: string) => request<{ success: boolean; message?: string; error?: string }>(`/api/quotations/${id}`, {
+      method: 'DELETE',
+      body: JSON.stringify({ reason })
     })
   }
 };

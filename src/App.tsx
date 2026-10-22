@@ -9,6 +9,7 @@ import { ThermalReceiptPrint } from './components/print/ThermalReceiptPrint';
 import { EMIAgreementPrint } from './components/print/EMIAgreementPrint';
 import { BarcodeLabelPrint } from './components/print/BarcodeLabelPrint';
 import { InvestmentMemoPrint } from './components/print/InvestmentMemoPrint';
+import { A4QuotationPrint } from './components/print/A4QuotationPrint';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { LockScreenModal } from './components/auth/LockScreenModal';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
@@ -64,6 +65,7 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
     activeEmiAgreementToPrint, setActiveEmiAgreementToPrint,
     activeBarcodeToPrint, setActiveBarcodeToPrint,
     activeInvestmentMemoToPrint, setActiveInvestmentMemoToPrint,
+    activeQuotationToPrint, setActiveQuotationToPrint,
     isAuthenticated, isAuthInitializing, isLocked, currentUser, hasPermission, setupStatus
   } = useERP();
 
@@ -173,7 +175,9 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
     activeInvoiceToPrint ||
     activeThermalReceiptToPrint ||
     activeEmiAgreementToPrint ||
-    activeBarcodeToPrint
+    activeBarcodeToPrint ||
+    activeInvestmentMemoToPrint ||
+    activeQuotationToPrint
   );
 
   useEffect(() => {
@@ -454,6 +458,8 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
         return <POSModule onNavigate={handleNavigate} />;
       case 'sales':
         return <SalesModule onNavigate={handleNavigate} />;
+      case 'quotations':
+        return <SalesModule onNavigate={handleNavigate} initialTab="QUOTATIONS" />;
       case 'returns':
         return <ReturnsModule onNavigate={handleNavigate} />;
       case 'emi':
@@ -662,6 +668,17 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
           investment={activeInvestmentMemoToPrint}
           settings={settings}
           onClose={() => setActiveInvestmentMemoToPrint(null)}
+        />
+      </ErrorBoundary>
+    )}
+
+    {/* Quotation Print & PDF Overlay */}
+    {activeQuotationToPrint && (
+      <ErrorBoundary onReset={() => setActiveQuotationToPrint(null)}>
+        <A4QuotationPrint
+          quotation={activeQuotationToPrint}
+          settings={settings}
+          onClose={() => setActiveQuotationToPrint(null)}
         />
       </ErrorBoundary>
     )}

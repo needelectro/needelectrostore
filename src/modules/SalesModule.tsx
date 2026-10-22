@@ -11,15 +11,18 @@ import {
 
 import { getInvoiceItemSpecs, formatWarrantyInfo } from '../services/invoiceSpecsHelper';
 import { WebsiteOrdersManager } from '../components/admin/WebsiteOrdersManager';
+import { QuotationsManager } from '../components/quotations/QuotationsManager';
 
 interface SalesModuleProps {
   onNavigate: (module: string, targetId?: string) => void;
+  initialTab?: 'INVOICES' | 'QUOTATIONS' | 'WEBSITE_ORDERS';
 }
 
-export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
+export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate, initialTab }) => {
   const { 
     sales, products, branches, financialAccounts, setActiveInvoiceToPrint, setActiveThermalReceiptToPrint,
-    currentUser, updateSale, deleteSale, recordInvoicePayment, refreshSales, refreshFromDatabase, addToast 
+    currentUser, updateSale, deleteSale, recordInvoicePayment, refreshSales, refreshFromDatabase, addToast,
+    quotations 
   } = useERP();
 
   // Search & Filtering States - Initialized from URL query params
@@ -47,7 +50,13 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
   const [selectedBranchId, setSelectedBranchId] = useState<string>('ALL');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('ALL');
   const [isSyncing, setIsSyncing] = useState(false);
-  const [viewMode, setViewMode] = useState<'INVOICES' | 'WEBSITE_ORDERS'>('INVOICES');
+  const [viewMode, setViewMode] = useState<'INVOICES' | 'QUOTATIONS' | 'WEBSITE_ORDERS'>(initialTab || 'INVOICES');
+
+  useEffect(() => {
+    if (initialTab) {
+      setViewMode(initialTab);
+    }
+  }, [initialTab]);
 
   // Keep URL search params in sync without replacing other query parameters (e.g. page)
   useEffect(() => {
@@ -369,8 +378,8 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Mode Switcher: Invoices vs Website Orders */}
-      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+      {/* Mode Switcher: Invoices vs Quotations vs Website Orders */}
+      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', flexWrap: 'wrap' }}>
         <button
           onClick={() => setViewMode('INVOICES')}
           style={{
@@ -390,6 +399,40 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
         >
           <ReceiptText size={15} />
           Invoices &amp; Showroom Sales
+        </button>
+
+        <button
+          onClick={() => setViewMode('QUOTATIONS')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            padding: '0.55rem 1rem',
+            borderRadius: 'var(--radius-md)',
+            fontSize: '0.85rem',
+            fontWeight: viewMode === 'QUOTATIONS' ? 700 : 500,
+            color: viewMode === 'QUOTATIONS' ? '#fff' : 'var(--text-secondary)',
+            background: viewMode === 'QUOTATIONS' ? 'var(--brand-primary)' : 'var(--bg-card)',
+            border: '1px solid',
+            borderColor: viewMode === 'QUOTATIONS' ? 'var(--brand-primary)' : 'var(--border-color)',
+            cursor: 'pointer'
+          }}
+        >
+          <FileText size={15} />
+          Sales Quotations
+          {quotations.length > 0 && (
+            <span style={{
+              background: viewMode === 'QUOTATIONS' ? 'rgba(255,255,255,0.25)' : 'var(--brand-primary)',
+              color: '#fff',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              padding: '1px 6px',
+              borderRadius: '999px',
+              marginLeft: '4px'
+            }}>
+              {quotations.length}
+            </span>
+          )}
         </button>
 
         <button
@@ -414,7 +457,14 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ onNavigate }) => {
         </button>
       </div>
 
-      {viewMode === 'WEBSITE_ORDERS' ? (
+      {viewMode === 'QUOTATIONS' ? (
+        <QuotationsManager
+          onNavigateToInvoice={(inv) => {
+            setViewMode('INVOICES');
+            setSearchQuery(inv);
+          }}
+        />
+      ) : viewMode === 'WEBSITE_ORDERS' ? (
         <WebsiteOrdersManager />
       ) : (
         <>

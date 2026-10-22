@@ -10,7 +10,8 @@ import {
   ProductCategoryConfig, BrandConfig, ConfigurablePaymentMethod, ExpenseCategoryConfig,
   ServiceCategoryConfig, WarrantyRuleConfig, DynamicNotificationTemplate,
   PriceChangeAudit, CustomerMergeAudit, PosSettings, InventoryRules,
-  CashAdjustment, CustomerPayment, OtherIncome, OwnerWithdrawal
+  CashAdjustment, CustomerPayment, OtherIncome, OwnerWithdrawal,
+  Quotation, QuotationItem
 } from '../types';
 import {
   INITIAL_SETTINGS, INITIAL_BRANCHES, INITIAL_USERS, INITIAL_EMI_PLANS,
@@ -51,6 +52,7 @@ interface ERPContextType {
   hasPermission: (moduleOrPermission: string) => boolean;
   refreshFromDatabase: () => Promise<boolean>;
   refreshSales: () => Promise<Sale[]>;
+  refreshQuotations: () => Promise<Quotation[]>;
 
   // Master State
   settings: SystemSettings;
@@ -93,6 +95,7 @@ interface ERPContextType {
   suppliers: Supplier[];
   customers: Customer[];
   sales: Sale[];
+  quotations: Quotation[];
   purchases: Purchase[];
   returns: ProductReturn[];
   investments: Investment[];
@@ -128,8 +131,14 @@ interface ERPContextType {
   setActiveBarcodeToPrint: (data: { product: Product; serials?: string[] } | null) => void;
   activeInvestmentMemoToPrint: Investment | null;
   setActiveInvestmentMemoToPrint: (inv: Investment | null) => void;
+  activeQuotationToPrint: Quotation | null;
+  setActiveQuotationToPrint: (q: Quotation | null) => void;
 
   // Core Business Actions
+  createQuotation: (quotationData: any) => Promise<{ success: boolean; data?: Quotation; error?: string }>;
+  updateQuotation: (id: string, updates: any) => Promise<{ success: boolean; data?: Quotation; error?: string }>;
+  updateQuotationStatus: (id: string, status: string, notes?: string) => Promise<{ success: boolean; data?: Quotation; error?: string }>;
+  convertQuotationToOrder: (id: string, options?: any) => Promise<{ success: boolean; sale?: Sale; quotation?: Quotation; error?: string }>;
   createSale: (saleData: Omit<Sale, 'id' | 'invoiceNumber' | 'createdAt'>, emiPlanConfig?: { planId: string; downPayment: number; durationMonths: number }, paymentAccountId?: string) => Promise<{ success: boolean; sale?: Sale; error?: string }>;
   collectEMIPayment: (emiAccountId: string, installmentId: string, amount: number, penaltyAmount: number, paymentMethod: PaymentMethod, ref?: string, notes?: string, accountId?: string) => Promise<{ success: boolean; error?: string; receiptNumber?: string }>;
   createProduct: (productData: Omit<Product, 'id' | 'createdAt'>, initialSerials?: string[]) => Promise<{ success: boolean; error?: string; product?: Product; expense?: any }>;
@@ -291,6 +300,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [suppliers, setSuppliers] = useState<Supplier[]>(() => getStoredData('suppliers', []));
   const [customers, setCustomers] = useState<Customer[]>(() => getStoredData('customers', []));
   const [sales, setSales] = useState<Sale[]>(() => getStoredData('sales', []));
+  const [quotations, setQuotations] = useState<Quotation[]>(() => getStoredData('quotations', []));
   const [emiPlans, setEmiPlans] = useState<EMIPlan[]>(() => getStoredData('emi_plans', INITIAL_EMI_PLANS));
   const [emiAccounts, setEmiAccounts] = useState<EMIAccount[]>(() => getStoredData('emi_accounts', []));
   const [emiPayments, setEmiPayments] = useState<EMIPaymentRecord[]>(() => getStoredData('emi_payments', []));
@@ -336,6 +346,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeThermalReceiptToPrint, setActiveThermalReceiptToPrint] = useState<Sale | null>(null);
   const [activeBarcodeToPrint, setActiveBarcodeToPrint] = useState<{ product: Product; serials?: string[] } | null>(null);
   const [activeInvestmentMemoToPrint, setActiveInvestmentMemoToPrint] = useState<Investment | null>(null);
+  const [activeQuotationToPrint, setActiveQuotationToPrint] = useState<Quotation | null>(null);
 
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -354,6 +365,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => { setStoredData('suppliers', suppliers); }, [suppliers]);
   useEffect(() => { setStoredData('customers', customers); }, [customers]);
   useEffect(() => { setStoredData('sales', sales); }, [sales]);
+  useEffect(() => { setStoredData('quotations', quotations); }, [quotations]);
   useEffect(() => { setStoredData('purchases', purchases); }, [purchases]);
   useEffect(() => { setStoredData('financial_accounts', financialAccounts); }, [financialAccounts]);
   useEffect(() => { setStoredData('investments', investments); }, [investments]);
@@ -398,6 +410,20 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     } catch (e: any) {
       console.warn('Direct sales fetch notice:', e.message);
+    }
+    return [];
+  };
+
+  const refreshQuotations = async (): Promise<Quotation[]> => {
+    try {
+      const res = await api.quotations.getQuotations();
+      if (res && res.success && Array.isArray(res.data)) {
+        setQuotations(res.data);
+        setStoredData('quotations', res.data);
+        return res.data;
+      }
+    } catch (e: any) {
+      console.warn('Direct quotations fetch notice:', e.message);
     }
     return [];
   };
@@ -469,11 +495,13 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (!Array.isArray(d.sales) || d.sales.length === 0) {
           await refreshSales();
         }
+        await refreshQuotations();
         return true;
       }
     } catch (err: any) {
       console.warn('Database sync notice:', err.message);
       await refreshSales();
+      await refreshQuotations();
     }
     return false;
   };
@@ -629,6 +657,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (perm === target) return true;
       if (perm.startsWith(`${target}.`)) return true;
       if (target === 'pos' && (perm.startsWith('sales.') || perm === 'pos.view')) return true;
+      if (target === 'quotations' && (perm.startsWith('quotations.') || perm.startsWith('sales.') || perm === 'quotations')) return true;
       if (target === 'inventory' && (perm.startsWith('inventory.') || perm.startsWith('products.'))) return true;
       if (target === 'accounting' && (perm.startsWith('accounting.') || perm.startsWith('financial.'))) return true;
       if (target === 'service' && (perm.startsWith('services.') || perm.startsWith('service.'))) return true;
@@ -1103,6 +1132,93 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
     // -------------------------------------------------------------
+  // SALES QUOTATION BUSINESS ACTIONS (ZERO INVENTORY IMPACT)
+  // -------------------------------------------------------------
+  const createQuotation = async (
+    quotationData: any
+  ): Promise<{ success: boolean; data?: Quotation; error?: string }> => {
+    try {
+      const res = await api.quotations.createQuotation(quotationData);
+      if (res && res.success && res.data) {
+        setQuotations(prev => [res.data, ...prev.filter(q => q.id !== res.data.id)]);
+        addToast('success', 'Quotation Generated', `Quotation ${res.data.quotationNumber} created successfully.`);
+        return { success: true, data: res.data };
+      }
+      return { success: false, error: (res as any)?.error || res?.message || 'Failed to create quotation' };
+    } catch (e: any) {
+      const msg = e.data?.error || e.message || 'Failed to create quotation';
+      addToast('error', 'Quotation Error', msg);
+      return { success: false, error: msg };
+    }
+  };
+
+  const updateQuotation = async (
+    id: string,
+    updates: any
+  ): Promise<{ success: boolean; data?: Quotation; error?: string }> => {
+    try {
+      const res = await api.quotations.updateQuotation(id, updates);
+      if (res && res.success && res.data) {
+        setQuotations(prev => prev.map(q => q.id === id ? res.data : q));
+        addToast('success', 'Quotation Updated', `Quotation ${res.data.quotationNumber} updated successfully.`);
+        return { success: true, data: res.data };
+      }
+      return { success: false, error: (res as any)?.error || res?.message || 'Failed to update quotation' };
+    } catch (e: any) {
+      const msg = e.data?.error || e.message || 'Failed to update quotation';
+      addToast('error', 'Update Error', msg);
+      return { success: false, error: msg };
+    }
+  };
+
+  const updateQuotationStatus = async (
+    id: string,
+    status: string,
+    notes?: string
+  ): Promise<{ success: boolean; data?: Quotation; error?: string }> => {
+    try {
+      const res = await api.quotations.updateStatus(id, status, notes);
+      if (res && res.success && res.data) {
+        setQuotations(prev => prev.map(q => q.id === id ? res.data : q));
+        addToast('info', 'Status Updated', `Quotation status changed to ${status}.`);
+        return { success: true, data: res.data };
+      }
+      return { success: false, error: (res as any)?.error || res?.message || 'Failed to update status' };
+    } catch (e: any) {
+      const msg = e.data?.error || e.message || 'Failed to update status';
+      addToast('error', 'Status Error', msg);
+      return { success: false, error: msg };
+    }
+  };
+
+  const convertQuotationToOrder = async (
+    id: string,
+    options?: any
+  ): Promise<{ success: boolean; sale?: Sale; quotation?: Quotation; error?: string }> => {
+    try {
+      const res = await api.quotations.convertToOrder(id, options);
+      if (res && res.success) {
+        if (res.quotation) {
+          setQuotations(prev => prev.map(q => q.id === id ? res.quotation : q));
+        }
+        if (res.sale) {
+          setSales(prev => [res.sale, ...prev.filter(s => s.id !== res.sale.id)]);
+        }
+        await refreshSales();
+        await refreshQuotations();
+        await refreshFromDatabase();
+        addToast('success', 'Converted to Order', res.message || 'Quotation successfully converted to Sales Order.');
+        return { success: true, sale: res.sale, quotation: res.quotation };
+      }
+      return { success: false, error: (res as any)?.error || res?.message || 'Failed to convert quotation' };
+    } catch (e: any) {
+      const msg = e.data?.error || e.message || 'Failed to convert quotation';
+      addToast('error', 'Conversion Error', msg);
+      return { success: false, error: msg };
+    }
+  };
+
+  // -------------------------------------------------------------
   // BUSINESS RULE 1 & 2: POS SALE WITH SERIAL VALIDATION & EMI CREATION
   // -------------------------------------------------------------
   const createSale = async (
@@ -2747,6 +2863,14 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setActiveBarcodeToPrint,
         activeInvestmentMemoToPrint,
         setActiveInvestmentMemoToPrint,
+        activeQuotationToPrint,
+        setActiveQuotationToPrint,
+        quotations,
+        refreshQuotations,
+        createQuotation,
+        updateQuotation,
+        updateQuotationStatus,
+        convertQuotationToOrder,
         createSale,
         collectEMIPayment,
         createProduct,

@@ -209,7 +209,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
   ];
 
   const whatsappMessage = encodeURIComponent(
-    `Hello NEED ELECTRO Moulvibazar! I want to inquire about purchasing:\nProduct: ${product.name}\nSKU: ${product.sku}\nPrice: ৳${retailPriceNum.toLocaleString()}\nIs it available in your Kusumbag showroom?`
+    `Hello NEED ELECTRO Moulvibazar! I want to inquire about purchasing:\nProduct: ${product.name}\nSKU: ${product.sku}\nPrice: ৳${retailPriceNum.toLocaleString()}\nIs this available for delivery or pickup in Moulvibazar?`
   );
 
   return (

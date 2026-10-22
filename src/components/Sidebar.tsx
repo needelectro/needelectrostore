@@ -5,7 +5,7 @@ import {
   Truck, Users, PackageSearch, ShieldCheck, Wrench, Wallet,
   PieChart, BookOpen, UserCheck, GitFork, BarChart3,
   Lock, ScrollText, Settings, ChevronRight, Zap, RotateCcw, Sliders, Landmark,
-  User, Globe, X, ShoppingBag, Sparkles
+  User, Globe, X, ShoppingBag, Sparkles, FileText
 } from 'lucide-react';
 import { NeedElectroLogo } from './NeedElectroLogo';
 import { UserProfileModal } from './UserProfileModal';
@@ -46,7 +46,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     emiAccounts, 
     products, 
     services, 
-    hasPermission 
+    hasPermission,
+    quotations 
   } = useERP();
 
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -79,6 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'website_orders', label: isBangla ? 'অনলাইন অর্ডার' : 'Online Store Orders', icon: ShoppingBag, badge: 'STORE', badgeColor: '#10b981' },
         { id: 'pos', label: isBangla ? 'পিওএস / সেলস বিলিং' : 'POS / Billing', icon: ShoppingCart, highlight: true },
         { id: 'sales', label: isBangla ? 'বিক্রয় ও ইনভয়েস' : 'Sales & Invoices', icon: ReceiptText },
+        { id: 'quotations', label: isBangla ? 'কোটেশন ব্যবস্থাপনা' : 'Sales Quotations', icon: FileText, badge: quotations.length > 0 ? formatNumber(quotations.length) : undefined, badgeColor: '#008CFF' },
         { id: 'returns', label: isBangla ? 'রিটার্ন ও আরএমএ' : 'Returns & RMA', icon: RotateCcw },
         { id: 'emi', label: isBangla ? 'ল্যাপটপ ইএমআই সিস্টেম' : 'Laptop EMI System', icon: CalendarClock, badge: overdueCount > 0 ? formatNumber(overdueCount) : undefined, badgeColor: '#ef4444' },
         { id: 'inventory', label: isBangla ? 'ইনভেন্টরি ও সিরিয়াল' : 'Inventory & Serials', icon: Boxes, badge: lowStockCount > 0 ? formatNumber(lowStockCount) : undefined, badgeColor: '#f59e0b' },
