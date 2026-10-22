@@ -1433,7 +1433,7 @@ model Coupon {
 // ---------------------------------------------------------
 
 model Quotation {
-  id                     String    @id
+  id                     String    @id @default(cuid())
   quotationNumber        String    @unique @map("quotation_number")
   referenceNumber        String?   @map("reference_number")
   customerId             String?   @map("customer_id")
@@ -1491,7 +1491,7 @@ model Quotation {
 }
 
 model QuotationItem {
-  id                   String   @id
+  id                   String   @id @default(cuid())
   quotationId          String   @map("quotation_id")
   productId            String?  @map("product_id")
   productName          String   @map("product_name")
