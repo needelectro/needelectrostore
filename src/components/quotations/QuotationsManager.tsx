@@ -21,6 +21,8 @@ export const QuotationsManager: React.FC<QuotationsManagerProps> = ({
     quotations, 
     refreshQuotations, 
     setActiveQuotationToPrint, 
+    activeQuotationToEdit,
+    setActiveQuotationToEdit,
     currentUser, 
     hasPermission,
     addToast 
@@ -43,6 +45,16 @@ export const QuotationsManager: React.FC<QuotationsManagerProps> = ({
   useEffect(() => {
     refreshQuotations().catch(() => {});
   }, []);
+
+  // Listen for global edit triggers (e.g. from Print Preview)
+  useEffect(() => {
+    if (activeQuotationToEdit) {
+      setQuotationToDuplicate(null);
+      setQuotationToEdit(activeQuotationToEdit);
+      setIsCreateModalOpen(true);
+      setActiveQuotationToEdit(null);
+    }
+  }, [activeQuotationToEdit, setActiveQuotationToEdit]);
 
   const handleManualRefresh = async () => {
     setIsRefreshing(true);
@@ -579,11 +591,11 @@ export const QuotationsManager: React.FC<QuotationsManagerProps> = ({
                             <Copy size={15} />
                           </button>
 
-                          {q.effectiveStatus === 'DRAFT' && (
+                          {q.effectiveStatus !== 'CONVERTED' && (
                             <button
                               className="btn btn-ghost btn-xs"
                               onClick={() => handleEdit(q)}
-                              title="Edit Draft"
+                              title="Edit Quotation"
                             >
                               <Edit2 size={15} />
                             </button>

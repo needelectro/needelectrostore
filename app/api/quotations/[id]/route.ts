@@ -123,9 +123,9 @@ export async function PUT(
     return NextResponse.json({ success: false, error: 'Quotation not found' }, { status: 404 });
   }
 
-  if (existing.status !== 'DRAFT') {
+  if (existing.status === 'CONVERTED' || existing.convertedSalesOrderId) {
     return NextResponse.json(
-      { success: false, error: `Only DRAFT quotations can be edited. Current status is ${existing.status}.` },
+      { success: false, error: 'Converted quotations cannot be modified because a sales order has already been created from this quotation.' },
       { status: 400 }
     );
   }
@@ -216,14 +216,15 @@ export async function PUT(
     const now = new Date();
     const validUntilDate = new Date(data.validUntil);
 
+    const newStatus = data.status || existing.status;
     const updatedHistory = Array.isArray(existing.statusHistory)
       ? [...(existing.statusHistory as any[])]
       : [];
     updatedHistory.push({
-      status: 'DRAFT',
+      status: newStatus,
       timestamp: now.toISOString(),
       updatedBy: user.name || 'Sales Staff',
-      notes: 'Quotation modified',
+      notes: `Quotation modified (Status: ${newStatus}, Total: ৳${calculatedGrandTotal.toLocaleString()})`,
     });
 
     const updated = await prisma.$transaction(async (tx) => {
@@ -248,7 +249,9 @@ export async function PUT(
           billingAddress: data.billingAddress || null,
           deliveryAddress: data.deliveryAddress || null,
           branchId: data.branchId || existing.branchId,
+          quotationDate: data.quotationDate ? new Date(data.quotationDate) : existing.quotationDate,
           validUntil: validUntilDate,
+          status: newStatus,
           subtotal: new Prisma.Decimal(calculatedSubtotal),
           discountTotal: new Prisma.Decimal(discountTotal),
           vatPercent: new Prisma.Decimal(vatPercent),

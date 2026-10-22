@@ -4,7 +4,7 @@ import { useERP } from '../../services/erpStore';
 import { 
   X, Plus, Trash2, Search, FileText, Calendar, User, Phone, 
   MapPin, Shield, DollarSign, Tag, Info, AlertCircle, CheckCircle2,
-  Building, Sparkles, Loader2, ArrowRight
+  Building, Sparkles, Loader2, ArrowRight, Save, Printer
 } from 'lucide-react';
 import { amountToBangladeshiTakaWords } from '../../utils/numberToWords';
 
@@ -88,6 +88,7 @@ export const CreateQuotationModal: React.FC<CreateQuotationModalProps> = ({
   const [warrantyTerms, setWarrantyTerms] = useState('Official NEED ELECTRO product warranty terms apply.');
   const [customerNotes, setCustomerNotes] = useState('');
   const [internalNotes, setInternalNotes] = useState('');
+  const [status, setStatus] = useState<string>('DRAFT');
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -123,6 +124,7 @@ export const CreateQuotationModal: React.FC<CreateQuotationModalProps> = ({
       setWarrantyTerms(src.warrantyTerms || 'Official NEED ELECTRO product warranty terms apply.');
       setCustomerNotes(src.customerNotes || '');
       setInternalNotes(src.internalNotes || '');
+      setStatus(src.status || 'DRAFT');
 
       if (src.items && src.items.length > 0) {
         setLineItems(
@@ -171,6 +173,7 @@ export const CreateQuotationModal: React.FC<CreateQuotationModalProps> = ({
       setOtherCharges(0);
       setCustomerNotes('');
       setInternalNotes('');
+      setStatus('DRAFT');
     }
   }, [quotationToEdit, initialDuplicateQuotation, isOpen, suggestedNumber]);
 
@@ -259,7 +262,7 @@ export const CreateQuotationModal: React.FC<CreateQuotationModalProps> = ({
     return amountToBangladeshiTakaWords(grandTotal);
   }, [grandTotal]);
 
-  const handleSubmit = async (targetStatus: 'DRAFT' | 'SENT') => {
+  const handleSubmit = async (targetStatus?: string, openPrintAfterSubmit: boolean = false) => {
     // Validations
     if (!customerName.trim()) {
       addToast('error', 'Validation Error', 'Please enter a customer name.');
@@ -278,6 +281,8 @@ export const CreateQuotationModal: React.FC<CreateQuotationModalProps> = ({
       return;
     }
 
+    const finalStatus = targetStatus || status || (quotationToEdit ? quotationToEdit.status : 'DRAFT');
+
     setIsSaving(true);
     try {
       const payload = {
@@ -293,7 +298,7 @@ export const CreateQuotationModal: React.FC<CreateQuotationModalProps> = ({
         branchId: selectedBranchId,
         quotationDate,
         validUntil,
-        status: targetStatus,
+        status: finalStatus,
         subtotal,
         discountTotal: overallDiscount,
         vatPercent,
@@ -334,7 +339,7 @@ export const CreateQuotationModal: React.FC<CreateQuotationModalProps> = ({
         const res = await updateQuotation(quotationToEdit.id, payload);
         if (res.success && res.data) {
           onClose();
-          if (targetStatus === 'SENT') {
+          if (openPrintAfterSubmit || finalStatus === 'SENT') {
             setActiveQuotationToPrint(res.data);
           }
         }
@@ -342,7 +347,7 @@ export const CreateQuotationModal: React.FC<CreateQuotationModalProps> = ({
         const res = await createQuotation(payload);
         if (res.success && res.data) {
           onClose();
-          if (targetStatus === 'SENT') {
+          if (openPrintAfterSubmit || finalStatus === 'SENT') {
             setActiveQuotationToPrint(res.data);
           }
         }
@@ -365,7 +370,7 @@ export const CreateQuotationModal: React.FC<CreateQuotationModalProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FileText className="text-primary" size={22} />
               <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>
-                {quotationToEdit ? `Edit Draft Quotation — ${quotationToEdit.quotationNumber}` : 'Create Commercial Sales Quotation'}
+                {quotationToEdit ? `Edit Quotation — ${quotationToEdit.quotationNumber}` : 'Create Commercial Sales Quotation'}
               </h2>
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
@@ -459,6 +464,37 @@ export const CreateQuotationModal: React.FC<CreateQuotationModalProps> = ({
                 ))}
               </select>
             </div>
+
+            {quotationToEdit && (
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>
+                  QUOTATION STATUS
+                </label>
+                <select
+                  className="input input-sm w-full font-bold"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  style={{
+                    color:
+                      status === 'ACCEPTED'
+                        ? '#10b981'
+                        : status === 'SENT'
+                        ? '#0284c7'
+                        : status === 'REJECTED'
+                        ? '#ef4444'
+                        : status === 'EXPIRED'
+                        ? '#f59e0b'
+                        : 'var(--text-primary)',
+                  }}
+                >
+                  <option value="DRAFT">Draft Proposal (Internal)</option>
+                  <option value="SENT">Sent / Issued to Customer</option>
+                  <option value="ACCEPTED">Accepted by Customer</option>
+                  <option value="REJECTED">Rejected by Customer</option>
+                  <option value="EXPIRED">Expired</option>
+                </select>
+              </div>
+            )}
           </div>
 
           {/* Customer Information Section */}
@@ -1029,43 +1065,86 @@ export const CreateQuotationModal: React.FC<CreateQuotationModalProps> = ({
         >
           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
             Prepared by: <strong>{currentUser?.name || 'Sales Staff'}</strong>
+            {quotationToEdit && (
+              <span style={{ marginLeft: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.1)', color: '#0284c7', fontWeight: 600 }}>
+                Editing {quotationToEdit.quotationNumber}
+              </span>
+            )}
           </div>
 
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button className="btn btn-secondary btn-sm" onClick={onClose} disabled={isSaving}>
               Cancel
             </button>
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => handleSubmit('DRAFT')}
-              disabled={isSaving}
-              style={{ fontWeight: 600 }}
-            >
-              {isSaving ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
-              Save as Draft
-            </button>
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={() => handleSubmit('SENT')}
-              disabled={isSaving}
-              style={{
-                background: 'linear-gradient(135deg, #0284c7 0%, #002B5B 100%)',
-                fontWeight: 700,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-              }}
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" /> Saving...
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 size={16} /> Save & Issue Quotation
-                </>
-              )}
-            </button>
+            {quotationToEdit ? (
+              <>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => handleSubmit(status, false)}
+                  disabled={isSaving}
+                  style={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                >
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                  Save Changes
+                </button>
+                <button
+                  className="btn btn-primary btn-sm"
+                  onClick={() => handleSubmit(status, true)}
+                  disabled={isSaving}
+                  style={{
+                    background: 'linear-gradient(135deg, #0284c7 0%, #002B5B 100%)',
+                    fontWeight: 700,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                  }}
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" /> Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Printer size={16} /> Save & Preview / Print
+                    </>
+                  )}
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => handleSubmit('DRAFT', false)}
+                  disabled={isSaving}
+                  style={{ fontWeight: 600 }}
+                >
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
+                  Save as Draft
+                </button>
+                <button
+                  className="btn btn-primary btn-sm"
+                  onClick={() => handleSubmit('SENT', true)}
+                  disabled={isSaving}
+                  style={{
+                    background: 'linear-gradient(135deg, #0284c7 0%, #002B5B 100%)',
+                    fontWeight: 700,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                  }}
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" /> Saving...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 size={16} /> Save & Issue Quotation
+                    </>
+                  )}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

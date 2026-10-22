@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Quotation, SystemSettings } from '../../types';
-import { Printer, X, Download, Loader2, Share2, Copy, Check } from 'lucide-react';
+import { Printer, X, Download, Loader2, Share2, Copy, Check, Edit2 } from 'lucide-react';
 import { NeedElectroLogo } from '../NeedElectroLogo';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -11,6 +11,7 @@ interface A4QuotationPrintProps {
   settings: SystemSettings;
   onClose: () => void;
   onConvert?: () => void;
+  onEdit?: (quotation: Quotation) => void;
 }
 
 export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
@@ -18,6 +19,7 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
   settings,
   onClose,
   onConvert,
+  onEdit,
 }) => {
   if (!quotation) return null;
 
@@ -191,6 +193,16 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
               {copied ? <Check size={15} className="text-success" /> : <Copy size={15} />}
               {copied ? 'Copied' : 'Copy'}
             </button>
+            {onEdit && quotation.status !== 'CONVERTED' && (
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => onEdit(quotation)}
+                title="Edit Quotation details, pricing or items"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600 }}
+              >
+                <Edit2 size={15} /> Edit Quotation
+              </button>
+            )}
             {onConvert && quotation.status !== 'CONVERTED' && (
               <button
                 className="btn btn-primary btn-sm"

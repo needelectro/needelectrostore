@@ -133,6 +133,8 @@ interface ERPContextType {
   setActiveInvestmentMemoToPrint: (inv: Investment | null) => void;
   activeQuotationToPrint: Quotation | null;
   setActiveQuotationToPrint: (q: Quotation | null) => void;
+  activeQuotationToEdit: Quotation | null;
+  setActiveQuotationToEdit: (q: Quotation | null) => void;
 
   // Core Business Actions
   createQuotation: (quotationData: any) => Promise<{ success: boolean; data?: Quotation; error?: string }>;
@@ -347,6 +349,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeBarcodeToPrint, setActiveBarcodeToPrint] = useState<{ product: Product; serials?: string[] } | null>(null);
   const [activeInvestmentMemoToPrint, setActiveInvestmentMemoToPrint] = useState<Investment | null>(null);
   const [activeQuotationToPrint, setActiveQuotationToPrint] = useState<Quotation | null>(null);
+  const [activeQuotationToEdit, setActiveQuotationToEdit] = useState<Quotation | null>(null);
 
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -2865,6 +2868,8 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setActiveInvestmentMemoToPrint,
         activeQuotationToPrint,
         setActiveQuotationToPrint,
+        activeQuotationToEdit,
+        setActiveQuotationToEdit,
         quotations,
         refreshQuotations,
         createQuotation,

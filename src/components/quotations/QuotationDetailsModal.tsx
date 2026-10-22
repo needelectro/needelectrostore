@@ -4,7 +4,7 @@ import { useERP } from '../../services/erpStore';
 import { 
   X, Printer, Download, Share2, Copy, Check, FileCheck, ArrowRight,
   User, Phone, Mail, MapPin, Calendar, Clock, AlertTriangle, ShieldCheck,
-  CheckCircle2, XCircle, RotateCcw, ExternalLink
+  CheckCircle2, XCircle, RotateCcw, ExternalLink, Edit2
 } from 'lucide-react';
 import { amountToBangladeshiTakaWords } from '../../utils/numberToWords';
 
@@ -14,6 +14,7 @@ interface QuotationDetailsModalProps {
   onClose: () => void;
   onOpenConvertDialog: (quotation: Quotation) => void;
   onViewInvoice?: (invoiceNumber: string) => void;
+  onEdit?: (quotation: Quotation) => void;
   onEditDraft?: (quotation: Quotation) => void;
 }
 
@@ -23,6 +24,7 @@ export const QuotationDetailsModal: React.FC<QuotationDetailsModalProps> = ({
   onClose,
   onOpenConvertDialog,
   onViewInvoice,
+  onEdit,
   onEditDraft,
 }) => {
   const { setActiveQuotationToPrint, updateQuotationStatus, addToast, settings } = useERP();
@@ -399,9 +401,14 @@ export const QuotationDetailsModal: React.FC<QuotationDetailsModalProps> = ({
         <div className="modal-footer" style={{ borderTop: '1px solid var(--border-color)', padding: '0.85rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           {/* Quick status change toggles */}
           <div style={{ display: 'flex', gap: '0.4rem' }}>
-            {quotation.status === 'DRAFT' && onEditDraft && (
-              <button className="btn btn-secondary btn-sm" onClick={() => onEditDraft(quotation)}>
-                Edit Draft
+            {quotation.status !== 'CONVERTED' && (onEdit || onEditDraft) && (
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => (onEdit ? onEdit(quotation) : onEditDraft!(quotation))}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600 }}
+                title="Edit quotation pricing, items, or customer details"
+              >
+                <Edit2 size={14} /> Edit Quotation
               </button>
             )}
             {quotation.status === 'DRAFT' && (

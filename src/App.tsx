@@ -66,6 +66,7 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
     activeBarcodeToPrint, setActiveBarcodeToPrint,
     activeInvestmentMemoToPrint, setActiveInvestmentMemoToPrint,
     activeQuotationToPrint, setActiveQuotationToPrint,
+    activeQuotationToEdit, setActiveQuotationToEdit,
     isAuthenticated, isAuthInitializing, isLocked, currentUser, hasPermission, setupStatus
   } = useERP();
 
@@ -679,6 +680,11 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
           quotation={activeQuotationToPrint}
           settings={settings}
           onClose={() => setActiveQuotationToPrint(null)}
+          onEdit={(q) => {
+            setActiveQuotationToPrint(null);
+            setActiveQuotationToEdit(q);
+            handleNavigate('quotations');
+          }}
         />
       </ErrorBoundary>
     )}
