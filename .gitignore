@@ -53,4 +53,6 @@ android/local.properties
 android/.gradle/
 *.jks
 *.keystore
+release-artifacts/*.apk
+release-artifacts/*.aab
 
