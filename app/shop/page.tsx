@@ -16,9 +16,9 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Shop Laptops, Computers & CCTV | NEED ELECTRO',
+    title: 'Computer & Laptop Shop in BD | NEED ELECTRO Store',
     description:
-      'Browse laptops, desktop computers, CCTV systems and electrical products with warranty at NEED ELECTRO Bangladesh. Order online with doorstep delivery.',
+      'Shop laptops, computers, CCTV cameras & accessories at NEED ELECTRO Bangladesh. Genuine products, official warranty, laptop EMI & nationwide delivery.',
     path: '/shop',
     keywords: [
       'Online shop Bangladesh',
@@ -138,7 +138,7 @@ export default async function ShopMasterPage() {
             <span>Official NEED ELECTRO Storefront — {mappedProducts.length} Products Available</span>
           </div>
           <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-[#002B5B] tracking-tight leading-tight">
-            Shop All Products in Moulvibazar &amp; Bangladesh
+            Online Computer &amp; Laptop Shop in Bangladesh
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 max-w-3xl leading-relaxed">
             Explore our complete live catalog of laptops, computers, CCTV surveillance cameras, electrical equipment, and computer accessories. 100% genuine products with official warranty and doorstep cash on delivery across Bangladesh.

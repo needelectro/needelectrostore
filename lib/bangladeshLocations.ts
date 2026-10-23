@@ -162,9 +162,11 @@ function createDistrict(
       };
 
   // Bing compliant titles (<= 60 chars) and meta descriptions (50-158 chars)
-  const defaultTitle = `${nameEn} Tech & Laptops | NEED ELECTRO`.slice(0, 60);
+  const defaultTitle = isMoulvibazar
+    ? 'Computer & Laptop Shop in Moulvibazar | NEED ELECTRO'
+    : `${nameEn} Tech & Laptops | NEED ELECTRO`.slice(0, 60);
   const defaultDescription = isMoulvibazar
-    ? `Explore laptops, CCTV cameras and electrical products at NEED ELECTRO. Official warranty, fast delivery and tech services in Moulvibazar.`
+    ? `Moulvibazar's trusted computer & laptop shop. Buy genuine HP, Dell, Lenovo laptops, desktop PCs, and CCTV cameras with warranty & fast local delivery.`
     : `Buy laptops, CCTV cameras and electrical components in ${nameEn}. Fast nationwide delivery, cash on delivery and warranty at NEED ELECTRO.`;
 
   return {

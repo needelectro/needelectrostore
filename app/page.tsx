@@ -26,36 +26,30 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'NEED ELECTRO Bangladesh | Electrical & Tech Solutions',
+    title: 'Computer & Laptop Shop in Moulvibazar | NEED ELECTRO',
     description:
-      'Shop laptops, computers, CCTV cameras and electrical products at NEED ELECTRO. Explore technical services and digital solutions in Bangladesh.',
+      "Moulvibazar's trusted computer & laptop shop. Shop genuine HP, Dell, Lenovo laptops, desktop PCs, CCTV cameras & accessories with fast local delivery.",
     path: '/',
     keywords: [
       'Computer shop in Moulvibazar',
-      'Computer price in Moulvibazar',
       'Laptop shop in Moulvibazar',
-      'Laptop price in Moulvibazar',
-      'CCTV camera shop in Moulvibazar',
-      'CCTV camera price in Bangladesh',
-      'Tech gadgets in Moulvibazar',
-      'Tech gadgets price in Bangladesh',
+      'Computer shop in Moulvibazar Bangladesh',
       'Laptop price in Bangladesh',
+      'CCTV camera shop in Moulvibazar',
+      'Gadget shop in Moulvibazar',
+      'Computer price in Moulvibazar',
+      'Laptop price in Moulvibazar',
       'HP EliteBook price in Bangladesh',
       'Desktop computer price in Bangladesh',
       'Computer accessories in Bangladesh',
       'Electrical shop online Bangladesh',
-      'Electrical services in Moulvibazar',
-      'Electrician service in Bangladesh',
-      'CCTV installation service',
-      'Laptop and computer servicing',
-      'Networking and Wi-Fi installation',
-      'Electrical products online Bangladesh',
-      'Genuine laptop with warranty in Bangladesh',
+      'CCTV installation in Moulvibazar',
+      'Laptop servicing Moulvibazar',
       'NEED ELECTRO',
-      'NEED ELECTRO SHOP',
+      'NEED ELECTRO STORE',
       'মৌলভীবাজার ল্যাপটপ দোকান',
       'কম্পিউটার দোকান মৌলভীবাজার',
-      'সিসিটিভি ক্যামেরা মৌলভীবাজার',
+      'মৌলভীবাজার সিসিটিভি ক্যামেরা',
     ],
   });
 }
@@ -184,9 +178,33 @@ export default async function HomePage() {
       <CustomerHeader />
 
       <main className="w-full max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 xl:px-10 py-3.5 sm:py-5 space-y-4 sm:space-y-6 flex-1">
-        <h1 className="sr-only">
-          NEED ELECTRO — Authentic Laptops, CCTV, Computers &amp; Electrical Store in Bangladesh
-        </h1>
+        {/* Visible Search Intent Header Banner */}
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="space-y-1">
+            <h1 className="text-lg sm:text-2xl font-black text-[#002B5B] tracking-tight">
+              Computer &amp; Laptop Shop in Moulvibazar — NEED ELECTRO
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-600">
+              Moulvibazar's trusted technology marketplace for genuine laptops, desktop PCs, CCTV cameras &amp; accessories with official warranty and fast local delivery.
+            </p>
+          </div>
+          <div className="flex items-center gap-2.5 shrink-0 text-xs">
+            <Link
+              href="/moulvibazar"
+              className="px-4 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-[#002B5B] font-bold transition-colors inline-flex items-center gap-1.5"
+            >
+              <MapPin size={13} className="text-[#008CFF]" />
+              <span>Moulvibazar Hub</span>
+            </Link>
+            <Link
+              href="/shop"
+              className="px-4 py-2 rounded-xl bg-[#008CFF] hover:bg-blue-600 text-white font-bold transition-colors inline-flex items-center gap-1.5 shadow-xs"
+            >
+              <span>Explore Products</span>
+              <ArrowRight size={13} />
+            </Link>
+          </div>
+        </div>
 
         {/* 1. Hero Section — Compact, Premium Image-Only Banner Carousel */}
         <section aria-label="Hero Promotions" className="w-full">
@@ -194,15 +212,15 @@ export default async function HomePage() {
         </section>
 
         {/* 2. Status / Operational Strip (Trust Computer MB Style: Rounded-full Pill) */}
-        <section aria-label="Showroom Operational Notice">
+        <section aria-label="Hub Operational Notice">
           <div className="bg-white rounded-full py-2.5 px-4 sm:px-6 shadow-xs border border-slate-200/90 flex flex-wrap items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="font-bold text-[#002B5B]">
-                Showroom Status:
+                Tech Hub Status:
               </span>
               <span className="text-slate-600 hidden sm:inline">
-                Open Saturday to Thursday (9:30 AM – 9:30 PM). Kusumbag, Moulvibazar.
+                Open Saturday to Thursday (9:30 AM – 9:30 PM). Moulvibazar Operations &amp; Doorstep Delivery.
               </span>
             </div>
 

@@ -246,12 +246,20 @@ export default async function LocationsHubPage() {
 
                 {/* District Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {districtsInDivision.map((district) => (
-                    <Link
-                      key={district.id}
-                      href={`/locations/${district.slug}`}
-                      className="p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 hover:border-blue-500 hover:bg-blue-50/30 dark:hover:border-blue-500/50 transition-all group flex flex-col justify-between"
-                    >
+                  {districtsInDivision.map((district) => {
+                    const destinationHref =
+                      district.slug === 'moulvibazar'
+                        ? '/moulvibazar'
+                        : district.slug === 'sylhet'
+                        ? '/sylhet'
+                        : `/locations/${district.slug}`;
+
+                    return (
+                      <Link
+                        key={district.id}
+                        href={destinationHref}
+                        className="p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 hover:border-blue-500 hover:bg-blue-50/30 dark:hover:border-blue-500/50 transition-all group flex flex-col justify-between"
+                      >
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">
                           <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors">
@@ -273,8 +281,9 @@ export default async function LocationsHubPage() {
                         </span>
                       </div>
                     </Link>
-                  ))}
-                </div>
+                  );
+                })}
+              </div>
               </div>
             );
           })}

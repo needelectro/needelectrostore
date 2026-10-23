@@ -11,11 +11,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.needelectro.store'),
   title: {
-    default: 'NEED ELECTRO Bangladesh | Electrical & Tech Solutions',
+    default: 'Computer & Laptop Shop in Moulvibazar | NEED ELECTRO',
     template: '%s | NEED ELECTRO',
   },
   description:
-    'Shop laptops, computers, CCTV cameras and electrical products at NEED ELECTRO. Explore technical services and digital solutions in Bangladesh.',
+    "Moulvibazar's trusted computer & laptop shop. Shop genuine HP, Dell, Lenovo laptops, desktop PCs, CCTV cameras & electrical gear with fast delivery.",
   keywords: [
     'NEED ELECTRO',
     'NEED ELECTRO SHOP',

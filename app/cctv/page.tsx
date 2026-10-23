@@ -13,21 +13,20 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'CCTV Cameras & Security Systems | NEED ELECTRO',
+    title: 'CCTV Camera Shop in Moulvibazar | NEED ELECTRO',
     description:
-      'Explore HD and IP CCTV cameras, DVRs, NVRs, and security systems at NEED ELECTRO Bangladesh. Professional installation and technical support.',
+      'Premier CCTV camera shop in Moulvibazar. Buy Hikvision & Dahua HD/IP security cameras, NVRs, and DVRs with professional local installation & warranty.',
     path: '/cctv',
     keywords: [
       'CCTV camera shop in Moulvibazar',
       'CCTV camera price in Bangladesh',
-      'CCTV installation service',
       'CCTV camera in Moulvibazar',
-      'CCTV shop in Moulvibazar',
       'CCTV installation in Moulvibazar',
       'Security camera price in Bangladesh',
       'Hikvision CCTV camera Bangladesh',
       'Dahua CCTV camera Bangladesh',
       'IP camera Moulvibazar',
+      'CCTV installation service',
       'মৌলভীবাজার সিসিটিভি ক্যামেরা',
       'সিসিটিভি ক্যামেরা দাম বাংলাদেশ',
     ],
@@ -109,7 +108,7 @@ export default async function CctvPage() {
           </div>
 
           <h1 className="text-2xl sm:text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
-            CCTV Camera in Moulvibazar — Cameras, DVR/NVR & Professional Installation
+            CCTV Camera Shop in Moulvibazar — Security Systems &amp; Setup
           </h1>
 
           <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-xs sm:text-sm md:text-base leading-relaxed">

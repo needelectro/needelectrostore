@@ -13,26 +13,24 @@ export const revalidate = 60; // Revalidate every minute
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Laptops in Bangladesh | NEED ELECTRO',
+    title: 'Laptop Shop in Moulvibazar | Price in BD | NEED ELECTRO',
     description:
-      'Buy authentic HP, Dell, and Lenovo laptops in Bangladesh. Explore business, student, and gaming laptops with warranty and EMI from NEED ELECTRO.',
+      'Best laptop shop in Moulvibazar. Check latest laptop price in Bangladesh for HP, Dell & Lenovo. 7-day replacement, 2-year warranty & 0% EMI available.',
     path: '/laptops',
     keywords: [
       'Laptop shop in Moulvibazar',
-      'Laptop price in Moulvibazar',
       'Laptop price in Bangladesh',
+      'Laptop shop in Moulvibazar Bangladesh',
+      'Laptop price in Moulvibazar',
       'HP EliteBook price in Bangladesh',
-      'Genuine laptop with warranty in Bangladesh',
-      'Laptop shop Moulvibazar',
-      'Laptop seller Moulvibazar',
+      'Dell Latitude price in Bangladesh',
+      'Lenovo ThinkPad price in Bangladesh',
       'Used laptop in Moulvibazar',
-      'HP laptop in Moulvibazar',
-      'Dell laptop in Moulvibazar',
-      'Lenovo laptop in Moulvibazar',
+      'Computer shop in Moulvibazar',
       'Business laptop Moulvibazar',
       'Student laptop Moulvibazar',
       'Laptop EMI in Moulvibazar',
-      'মৌলভীবাজার ল্যাপটপ',
+      'মৌলভীবাজার ল্যাপটপ দোকান',
       'ল্যাপটপের দাম বাংলাদেশ',
     ],
   });
@@ -152,11 +150,11 @@ export default async function LaptopsPage() {
           </div>
 
           <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
-            Laptops in Moulvibazar — HP, Dell & Lenovo with Warranty & EMI
+            Laptop Shop in Moulvibazar — Latest Laptop Price in Bangladesh
           </h1>
 
           <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
-            Welcome to {BUSINESS_INFO.name}. Whether you need an ultra-durable business laptop for office work, a high-performance machine for software programming and freelancing, or a budget-friendly student laptop in Moulvibazar, our Kusumbag showroom features tested, genuine devices backed by replacement warranties and monthly installment financing.
+            Welcome to {BUSINESS_INFO.name}. Whether you need an ultra-durable business laptop for office work, a high-performance machine for software programming and freelancing, or a budget-friendly student laptop in Moulvibazar, our central tech hub features tested, genuine devices backed by replacement warranties, fast local delivery, and monthly installment financing.
           </p>
 
           {/* Brand Quick Links */}

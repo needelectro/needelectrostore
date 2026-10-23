@@ -12,15 +12,15 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Computer Accessories | NEED ELECTRO',
+    title: 'Gadget & Accessories Shop in Moulvibazar | NEED ELECTRO',
     description:
-      'Shop SSDs, RAM upgrades, mechanical keyboards, mice, and computer components at NEED ELECTRO Bangladesh. Genuine quality with warranty.',
+      'Top gadget & computer accessories shop in Moulvibazar. High-speed NVMe SSDs, RAM, gaming mice, keyboards & adapters with warranty at NEED ELECTRO.',
     path: '/computer-accessories',
     keywords: [
-      'Computer accessories in Bangladesh',
+      'Gadget shop in Moulvibazar',
       'Computer accessories in Moulvibazar',
+      'Computer accessories in Bangladesh',
       'Tech gadgets in Moulvibazar',
-      'Tech gadgets price in Bangladesh',
       'SSD price Moulvibazar',
       'RAM upgrade Moulvibazar',
       'Laptop charger Moulvibazar',
@@ -110,7 +110,7 @@ export default async function ComputerAccessoriesPage() {
           </div>
 
           <h1 className="text-2xl sm:text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
-            Computer Accessories in Moulvibazar — SSDs, RAM, Keyboards & Mice
+            Gadget &amp; Computer Accessories Shop in Moulvibazar
           </h1>
 
           <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-xs sm:text-sm md:text-base leading-relaxed">

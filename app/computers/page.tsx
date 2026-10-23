@@ -12,18 +12,19 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Desktop Computers & PCs | NEED ELECTRO',
+    title: 'Computer Shop in Moulvibazar BD | NEED ELECTRO',
     description:
-      'Custom desktop PCs, office computers, and components with warranty at NEED ELECTRO Bangladesh. High-performance setups delivered nationwide.',
+      'Looking for a trusted computer shop in Moulvibazar? Custom desktop PCs, gaming rigs, monitors, and components with warranty at NEED ELECTRO Bangladesh.',
     path: '/computers',
     keywords: [
       'Computer shop in Moulvibazar',
+      'Computer shop in Moulvibazar Bangladesh',
       'Computer price in Moulvibazar',
       'Desktop computer price in Bangladesh',
       'Desktop computer Moulvibazar',
       'PC parts Moulvibazar',
-      'Office computer Moulvibazar',
       'Gaming PC Moulvibazar',
+      'Office computer Moulvibazar',
       'Computer accessories in Bangladesh',
       'Desktop PC price Bangladesh',
       'মৌলভীবাজার কম্পিউটার দোকান',

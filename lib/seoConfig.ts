@@ -224,7 +224,7 @@ export function buildLocalBusinessSchema() {
     url: BUSINESS_INFO.domain,
     telephone: BUSINESS_INFO.phoneClean,
     priceRange: '৳৳',
-    description: `${BUSINESS_INFO.name} is a trusted electrical, technology and software solutions platform in Bangladesh. A Sister Concern of ${BUSINESS_INFO.parentOrganization}. Offering authentic laptops, desktop computers, CCTV security systems, electrical components, and certified technical services.`,
+    description: `${BUSINESS_INFO.name} is Moulvibazar's trusted computer and laptop shop, electrical and technology marketplace in Bangladesh. A Sister Concern of ${BUSINESS_INFO.parentOrganization}. Offering tested laptops, desktop computers, CCTV security systems, electrical components, and certified technical services.`,
     address: {
       '@type': 'PostalAddress',
       addressLocality: BUSINESS_INFO.address.addressLocality,
@@ -233,6 +233,14 @@ export function buildLocalBusinessSchema() {
       addressCountry: BUSINESS_INFO.address.addressCountry,
     },
     areaServed: [
+      {
+        '@type': 'City',
+        name: 'Moulvibazar',
+      },
+      {
+        '@type': 'AdministrativeArea',
+        name: 'Sylhet Division',
+      },
       {
         '@type': 'Country',
         name: 'Bangladesh',

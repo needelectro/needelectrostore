@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import {
   BUSINESS_INFO,
@@ -105,12 +105,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function LocationDetailPage({ params }: Props) {
   const cleanSlug = params.slug.toLowerCase().trim();
 
-  // If user requests moulvibazar or sylhet via /locations, redirect to their canonical hub
+  // If user requests moulvibazar or sylhet via /locations, permanently redirect (308) to their primary canonical hub
   if (cleanSlug === 'moulvibazar') {
-    redirect('/moulvibazar');
+    permanentRedirect('/moulvibazar');
   }
   if (cleanSlug === 'sylhet') {
-    redirect('/sylhet');
+    permanentRedirect('/sylhet');
   }
 
   const district = getDistrictBySlug(cleanSlug);
