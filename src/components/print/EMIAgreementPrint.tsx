@@ -366,6 +366,12 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
                     <span>Monthly Installment:</span>
                     <span>৳{account.monthlyInstallment.toLocaleString()} / Mo</span>
                   </div>
+                  {financialTerms && financialTerms.totalInterest > 0 && account.durationMonths > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', color: '#b45309', fontWeight: 600 }}>
+                      <span>• Interest Added:</span>
+                      <span>+৳{Math.floor(financialTerms.totalInterest / account.durationMonths).toLocaleString()} / Mo (Principal: ৳{Math.floor(account.financedAmount / account.durationMonths).toLocaleString()})</span>
+                    </div>
+                  )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800 }}>
                     <span>Total Financed Obligation:</span>
                     <span>৳{(account.financedAmount + (financialTerms?.totalInterest || 0)).toLocaleString()}</span>

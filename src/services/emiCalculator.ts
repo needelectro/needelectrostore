@@ -16,6 +16,7 @@ export interface FinancialCalculationParams {
   isInterestFree: boolean;
   interestRatePercent: number;
   interestMethod: 'FLAT' | 'REDUCING_BALANCE';
+  interestBasis?: 'TOTAL_FLAT' | 'ANNUAL';
   durationMonths: number;
   firstDueDate?: string;
   recurringDueDay?: number;
@@ -37,6 +38,10 @@ export interface FinancialCalculationResult {
   totalCustomerPayable: number;
   regularInstallmentAmount: number;
   finalInstallmentAmount: number;
+  monthlyPrincipalPortion: number;
+  monthlyInterestPortion: number;
+  finalPrincipalPortion: number;
+  finalInterestPortion: number;
   effectiveAnnualRate: number;
 }
 
@@ -52,6 +57,7 @@ export interface GeneratedScheduleItem {
 
 /**
  * Perform exact financial calculations for an EMI contract.
+ * Interest is explicitly calculated and added into each monthly installment.
  */
 export function calculateEMIFinancials(params: FinancialCalculationParams): FinancialCalculationResult {
   const originalPrice = Math.max(0, Math.round(Number(params.originalPrice) || 0));
@@ -103,8 +109,13 @@ export function calculateEMIFinancials(params: FinancialCalculationParams): Fina
     const rate = Math.max(0, Number(params.interestRatePercent) || 0);
 
     if (params.interestMethod === 'FLAT') {
-      // Flat Rate: Interest = Principal * (Rate / 100) * (Months / 12)
-      totalInterest = Math.round((financedPrincipal * rate * (durationMonths / 12)) / 100);
+      if (params.interestBasis === 'ANNUAL') {
+        // Annual Flat APR: Principal * (Rate / 100) * (Months / 12)
+        totalInterest = Math.round((financedPrincipal * rate * (durationMonths / 12)) / 100);
+      } else {
+        // Total Tenure Flat %: Principal * (Rate / 100) directly
+        totalInterest = Math.round((financedPrincipal * rate) / 100);
+      }
     } else {
       // Reducing Balance Method (standard monthly amortization formula)
       const monthlyRate = rate > 0 ? (rate / 100) / 12 : 0;
@@ -119,16 +130,19 @@ export function calculateEMIFinancials(params: FinancialCalculationParams): Fina
     }
   }
 
-  // 8. Total scheduled repayment
+  // 8. Total scheduled repayment (Financed Principal + Total Interest)
   const totalFinancedRepayment = financedPrincipal + totalInterest;
   const totalCustomerPayable = downPaymentAmount + totalFinancedRepayment;
 
-  // 9. Installment breakdown
-  const baseMonthly = durationMonths > 0 ? Math.floor(totalFinancedRepayment / durationMonths) : 0;
-  const regularInstallmentAmount = baseMonthly;
-  // Reconcile final installment so exact sum of all installments equals totalFinancedRepayment
-  const totalRegularExceptFinal = baseMonthly * (durationMonths - 1);
-  const finalInstallmentAmount = Math.max(0, totalFinancedRepayment - totalRegularExceptFinal);
+  // 9. Monthly Installment Breakdown (Interest added to monthly installment)
+  const basePrincipal = durationMonths > 0 ? Math.floor(financedPrincipal / durationMonths) : 0;
+  const finalPrincipal = financedPrincipal - (basePrincipal * (durationMonths - 1));
+
+  const baseInterest = durationMonths > 0 ? Math.floor(totalInterest / durationMonths) : 0;
+  const finalInterest = totalInterest - (baseInterest * (durationMonths - 1));
+
+  const regularInstallmentAmount = basePrincipal + baseInterest;
+  const finalInstallmentAmount = finalPrincipal + finalInterest;
 
   return {
     originalPrice,
@@ -146,24 +160,32 @@ export function calculateEMIFinancials(params: FinancialCalculationParams): Fina
     totalCustomerPayable,
     regularInstallmentAmount,
     finalInstallmentAmount,
+    monthlyPrincipalPortion: basePrincipal,
+    monthlyInterestPortion: baseInterest,
+    finalPrincipalPortion: finalPrincipal,
+    finalInterestPortion: finalInterest,
     effectiveAnnualRate: params.isInterestFree ? 0 : Number(params.interestRatePercent || 0),
   };
 }
 
 /**
  * Generate a dynamic repayment schedule with verified due dates and balanced amounts.
+ * Interest is explicitly calculated and added into each monthly installment.
  */
 export function generateRepaymentSchedule(
   durationMonths: number,
   totalRepayment: number,
   firstDueDateStr?: string,
-  recurringDueDay?: number
+  recurringDueDay?: number,
+  financedPrincipal?: number,
+  totalInterest?: number,
+  interestMethod: 'FLAT' | 'REDUCING_BALANCE' = 'FLAT',
+  annualRate: number = 0
 ): GeneratedScheduleItem[] {
   const months = Math.max(1, Math.round(durationMonths || 1));
   const total = Math.max(0, Math.round(totalRepayment || 0));
-
-  const baseAmount = Math.floor(total / months);
-  const finalAmount = total - (baseAmount * (months - 1));
+  const principal = Math.max(0, Math.round(financedPrincipal !== undefined ? financedPrincipal : total));
+  const interest = Math.max(0, Math.round(totalInterest !== undefined ? totalInterest : (total - principal)));
 
   // Determine starting date
   let baseDate: Date;
@@ -179,29 +201,74 @@ export function generateRepaymentSchedule(
 
   const targetDay = recurringDueDay || baseDate.getDate();
   const schedule: GeneratedScheduleItem[] = [];
-  let remaining = total;
 
-  for (let i = 1; i <= months; i++) {
-    const instDate = new Date(baseDate);
-    instDate.setMonth(baseDate.getMonth() + (i - 1));
+  if (interestMethod === 'REDUCING_BALANCE' && annualRate > 0 && interest > 0) {
+    const monthlyRate = (annualRate / 100) / 12;
+    const factor = Math.pow(1 + monthlyRate, months);
+    const emi = Math.round((principal * monthlyRate * factor) / (factor - 1));
+    let remPrincipal = principal;
+    let remTotal = total;
 
-    // Handle month-end overflows safely (e.g. Feb 30 -> Feb 28)
-    const maxDays = new Date(instDate.getFullYear(), instDate.getMonth() + 1, 0).getDate();
-    const clampedDay = Math.min(targetDay, maxDays);
-    instDate.setDate(clampedDay);
+    for (let i = 1; i <= months; i++) {
+      const instDate = new Date(baseDate);
+      instDate.setMonth(baseDate.getMonth() + (i - 1));
+      const maxDays = new Date(instDate.getFullYear(), instDate.getMonth() + 1, 0).getDate();
+      instDate.setDate(Math.min(targetDay, maxDays));
 
-    const amount = i === months ? finalAmount : baseAmount;
-    remaining = Math.max(0, remaining - amount);
+      let monthInterest = Math.round(remPrincipal * monthlyRate);
+      let monthPrincipal = emi - monthInterest;
 
-    schedule.push({
-      installmentNumber: i,
-      dueDate: instDate.toISOString().split('T')[0],
-      amount,
-      principalPortion: amount,
-      interestPortion: 0,
-      remainingBalanceAfter: remaining,
-      status: 'UPCOMING',
-    });
+      if (i === months) {
+        monthPrincipal = remPrincipal;
+        monthInterest = Math.max(0, remTotal - monthPrincipal);
+      }
+
+      const installmentAmount = monthPrincipal + monthInterest;
+      remPrincipal = Math.max(0, remPrincipal - monthPrincipal);
+      remTotal = Math.max(0, remTotal - installmentAmount);
+
+      schedule.push({
+        installmentNumber: i,
+        dueDate: instDate.toISOString().split('T')[0],
+        amount: installmentAmount,
+        principalPortion: monthPrincipal,
+        interestPortion: monthInterest,
+        remainingBalanceAfter: remTotal,
+        status: 'UPCOMING',
+      });
+    }
+  } else {
+    // Flat Rate or 0% interest: interest is evenly distributed into each monthly installment
+    const basePrincipal = Math.floor(principal / months);
+    const finalPrincipal = principal - (basePrincipal * (months - 1));
+
+    const baseInterest = Math.floor(interest / months);
+    const finalInterest = interest - (baseInterest * (months - 1));
+
+    let remTotal = total;
+
+    for (let i = 1; i <= months; i++) {
+      const instDate = new Date(baseDate);
+      instDate.setMonth(baseDate.getMonth() + (i - 1));
+      const maxDays = new Date(instDate.getFullYear(), instDate.getMonth() + 1, 0).getDate();
+      instDate.setDate(Math.min(targetDay, maxDays));
+
+      const pPortion = i === months ? finalPrincipal : basePrincipal;
+      const iPortion = i === months ? finalInterest : baseInterest;
+      const amount = pPortion + iPortion;
+
+      remTotal = Math.max(0, remTotal - amount);
+
+      schedule.push({
+        installmentNumber: i,
+        dueDate: instDate.toISOString().split('T')[0],
+        amount,
+        principalPortion: pPortion,
+        interestPortion: iPortion,
+        remainingBalanceAfter: remTotal,
+        status: 'UPCOMING',
+      });
+    }
   }
 
   return schedule;
@@ -211,8 +278,10 @@ export function generateRepaymentSchedule(
  * Reconcile a manually adjusted repayment schedule so the sum matches contract obligations.
  */
 export function reconcileSchedule(
-  schedule: { installmentNumber: number; dueDate: string; amount: number; notes?: string }[],
-  targetTotal: number
+  schedule: { installmentNumber: number; dueDate: string; amount: number; principalPortion?: number; interestPortion?: number; notes?: string }[],
+  targetTotal: number,
+  targetPrincipal: number = 0,
+  targetInterest: number = 0
 ): {
   reconciledSchedule: GeneratedScheduleItem[];
   difference: number;
@@ -225,12 +294,17 @@ export function reconcileSchedule(
   const reconciledSchedule: GeneratedScheduleItem[] = schedule.map((item) => {
     const amt = Math.round(Number(item.amount) || 0);
     runningBalance = Math.max(0, runningBalance - amt);
+
+    const interestRatio = targetTotal > 0 ? (targetInterest / targetTotal) : 0;
+    const estInterest = Math.round(amt * interestRatio);
+    const estPrincipal = amt - estInterest;
+
     return {
       installmentNumber: item.installmentNumber,
       dueDate: item.dueDate,
       amount: amt,
-      principalPortion: amt,
-      interestPortion: 0,
+      principalPortion: item.principalPortion !== undefined ? item.principalPortion : estPrincipal,
+      interestPortion: item.interestPortion !== undefined ? item.interestPortion : estInterest,
       remainingBalanceAfter: runningBalance,
       status: 'UPCOMING',
     };

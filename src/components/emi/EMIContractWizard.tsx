@@ -140,6 +140,7 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
   const [isInterestFree, setIsInterestFree] = useState<boolean>(true);
   const [interestRatePercent, setInterestRatePercent] = useState<number>(0);
   const [interestMethod, setInterestMethod] = useState<'FLAT' | 'REDUCING_BALANCE'>('FLAT');
+  const [interestBasis, setInterestBasis] = useState<'TOTAL_FLAT' | 'ANNUAL'>('TOTAL_FLAT');
   const [interestAdjustmentReason, setInterestAdjustmentReason] = useState<string>('');
 
   // Installment Tenure
@@ -194,6 +195,7 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
       isInterestFree,
       interestRatePercent,
       interestMethod,
+      interestBasis,
       durationMonths,
       firstDueDate,
       recurringDueDay,
@@ -203,7 +205,7 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
     defaultProductPrice, agreedPrice, discountType, discountValue,
     processingFee, documentationFee, deliveryCharge, otherCharges,
     taxPercent, downPaymentType, downPaymentValue, isInterestFree,
-    interestRatePercent, interestMethod, durationMonths, firstDueDate, recurringDueDay
+    interestRatePercent, interestMethod, interestBasis, durationMonths, firstDueDate, recurringDueDay
   ]);
 
   // Regenerate schedule whenever financial inputs change (unless manual edit mode)
@@ -213,16 +215,35 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
         durationMonths,
         financials.totalFinancedRepayment,
         firstDueDate,
-        recurringDueDay
+        recurringDueDay,
+        financials.financedPrincipal,
+        financials.totalInterest,
+        interestMethod,
+        interestRatePercent
       );
       setCustomSchedule(generated);
     }
-  }, [durationMonths, financials.totalFinancedRepayment, firstDueDate, recurringDueDay, isCustomScheduleActive]);
+  }, [
+    durationMonths,
+    financials.totalFinancedRepayment,
+    financials.financedPrincipal,
+    financials.totalInterest,
+    interestMethod,
+    interestRatePercent,
+    firstDueDate,
+    recurringDueDay,
+    isCustomScheduleActive
+  ]);
 
   // Schedule Reconciliation
   const scheduleReconciliation = useMemo(() => {
-    return reconcileSchedule(customSchedule, financials.totalFinancedRepayment);
-  }, [customSchedule, financials.totalFinancedRepayment]);
+    return reconcileSchedule(
+      customSchedule,
+      financials.totalFinancedRepayment,
+      financials.financedPrincipal,
+      financials.totalInterest
+    );
+  }, [customSchedule, financials.totalFinancedRepayment, financials.financedPrincipal, financials.totalInterest]);
 
   // Handler to auto balance final installment
   const handleAutoBalanceSchedule = () => {
@@ -240,7 +261,11 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
       durationMonths,
       financials.totalFinancedRepayment,
       firstDueDate,
-      recurringDueDay
+      recurringDueDay,
+      financials.financedPrincipal,
+      financials.totalInterest,
+      interestMethod,
+      interestRatePercent
     );
     setCustomSchedule(generated);
   };
@@ -458,6 +483,7 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
         financedAmount: financials.financedPrincipal,
         monthlyInstallment: financials.regularInstallmentAmount,
         totalPayable: financials.totalCustomerPayable,
+        totalFinancedRepayment: financials.totalFinancedRepayment,
         interestRatePercent: financials.effectiveAnnualRate,
         isInterestFree,
         interestMethod,
@@ -509,7 +535,14 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
           earlySettlementDiscountPercent: 0,
         },
         clauses,
-        schedule: customSchedule,
+        schedule: customSchedule.map((inst, idx) => ({
+          installmentNumber: inst.installmentNumber,
+          dueDate: inst.dueDate,
+          amount: inst.amount,
+          principalPortion: scheduleReconciliation.reconciledSchedule[idx]?.principalPortion || inst.principalPortion || 0,
+          interestPortion: scheduleReconciliation.reconciledSchedule[idx]?.interestPortion || inst.interestPortion || 0,
+          remainingBalanceAfter: scheduleReconciliation.reconciledSchedule[idx]?.remainingBalanceAfter || 0,
+        })),
         customerAcceptance: {
           isAccepted: true,
           acceptedAt: new Date().toISOString(),
@@ -1098,38 +1131,90 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                 </div>
 
                 {!isInterestFree && (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '0.75rem' }}>
-                    <div className="form-group">
-                      <label className="form-label">Annual / Period Interest Rate (%)</label>
-                      <input
-                        type="number"
-                        className="form-input"
-                        value={interestRatePercent}
-                        onChange={e => setInterestRatePercent(Math.max(0, Number(e.target.value)))}
-                      />
+                  <>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '0.75rem' }}>
+                      <div className="form-group">
+                        <label className="form-label">Interest Rate (%)</label>
+                        <input
+                          type="number"
+                          className="form-input"
+                          value={interestRatePercent}
+                          onChange={e => setInterestRatePercent(Math.max(0, Number(e.target.value)))}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Calculation Method</label>
+                        <select
+                          className="form-select"
+                          value={interestMethod}
+                          onChange={e => setInterestMethod(e.target.value as any)}
+                        >
+                          <option value="FLAT">Flat Rate Calculation</option>
+                          <option value="REDUCING_BALANCE">Reducing Balance (Amortized)</option>
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Calculation Basis</label>
+                        <select
+                          className="form-select"
+                          value={interestBasis}
+                          onChange={e => setInterestBasis(e.target.value as any)}
+                        >
+                          <option value="TOTAL_FLAT">% on Financed Principal (Store Retail EMI)</option>
+                          <option value="ANNUAL">% Per Annum (Annual Flat APR)</option>
+                        </select>
+                      </div>
                     </div>
-                    <div className="form-group">
-                      <label className="form-label">Interest Calculation Method</label>
-                      <select
-                        className="form-select"
-                        value={interestMethod}
-                        onChange={e => setInterestMethod(e.target.value as any)}
-                      >
-                        <option value="FLAT">Flat Rate Calculation</option>
-                        <option value="REDUCING_BALANCE">Reducing Balance (Amortized)</option>
-                      </select>
+
+                    {/* Prominent Monthly Installment Interest Addition Banner */}
+                    <div style={{
+                      background: 'rgba(0, 140, 255, 0.08)',
+                      border: '1px solid rgba(0, 140, 255, 0.25)',
+                      borderRadius: '8px',
+                      padding: '0.85rem 1rem',
+                      marginTop: '0.85rem',
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                      gap: '0.75rem'
+                    }}>
+                      <div>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Financed Principal:</span>
+                        <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--brand-primary)' }}>
+                          ৳{financials.financedPrincipal.toLocaleString()}
+                        </div>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                          ৳{financials.monthlyPrincipalPortion.toLocaleString()} / mo principal
+                        </span>
+                      </div>
+                      <div>
+                        <span style={{ fontSize: '0.75rem', color: '#f59e0b' }}>Total Financing Interest:</span>
+                        <div style={{ fontWeight: 800, fontSize: '1rem', color: '#f59e0b' }}>
+                          +৳{financials.totalInterest.toLocaleString()}
+                        </div>
+                        <span style={{ fontSize: '0.7rem', color: '#f59e0b', fontWeight: 600 }}>
+                          +৳{financials.monthlyInterestPortion.toLocaleString()} / mo interest added
+                        </span>
+                      </div>
+                      <div>
+                        <span style={{ fontSize: '0.75rem', color: '#10b981' }}>Total Monthly Installment:</span>
+                        <div style={{ fontWeight: 800, fontSize: '1.15rem', color: '#10b981' }}>
+                          ৳{financials.regularInstallmentAmount.toLocaleString()} / mo
+                        </div>
+                        <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 600 }}>
+                          Principal + Interest Combined
+                        </span>
+                      </div>
+                      <div>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Total Financed Repayment:</span>
+                        <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}>
+                          ৳{financials.totalFinancedRepayment.toLocaleString()}
+                        </div>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                          Across {durationMonths} monthly installments
+                        </span>
+                      </div>
                     </div>
-                    <div className="form-group">
-                      <label className="form-label">Total Interest Calculated</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={`৳${financials.totalInterest.toLocaleString()}`}
-                        disabled
-                        style={{ fontWeight: 700, color: 'var(--brand-primary)' }}
-                      />
-                    </div>
-                  </div>
+                  </>
                 )}
               </div>
 
@@ -1266,49 +1351,58 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                   <table className="erp-table" style={{ fontSize: '0.8rem', width: '100%' }}>
                     <thead>
                       <tr>
-                        <th style={{ width: '10%', textAlign: 'center' }}>#</th>
-                        <th style={{ width: '35%' }}>Due Date</th>
-                        <th style={{ width: '35%', textAlign: 'right' }}>Installment Amount (৳)</th>
-                        <th style={{ width: '20%', textAlign: 'right' }}>Remaining Bal</th>
+                        <th style={{ width: '8%', textAlign: 'center' }}>#</th>
+                        <th style={{ width: '22%' }}>Due Date</th>
+                        <th style={{ width: '20%', textAlign: 'right' }}>Principal (৳)</th>
+                        <th style={{ width: '22%', textAlign: 'right', color: '#f59e0b' }}>Interest Added (৳)</th>
+                        <th style={{ width: '28%', textAlign: 'right' }}>Total Installment (৳)</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {customSchedule.map((inst, idx) => (
-                        <tr key={inst.installmentNumber}>
-                          <td style={{ textAlign: 'center', fontWeight: 700 }}>#{inst.installmentNumber}</td>
-                          <td>
-                            <input
-                              type="date"
-                              className="form-input form-input-xs"
-                              value={inst.dueDate}
-                              onChange={e => {
-                                setIsCustomScheduleActive(true);
-                                const newSched = [...customSchedule];
-                                newSched[idx].dueDate = e.target.value;
-                                setCustomSchedule(newSched);
-                              }}
-                              style={{ padding: '2px 6px', fontSize: '0.775rem' }}
-                            />
-                          </td>
-                          <td style={{ textAlign: 'right' }}>
-                            <input
-                              type="number"
-                              className="form-input form-input-xs"
-                              value={inst.amount}
-                              onChange={e => {
-                                setIsCustomScheduleActive(true);
-                                const newSched = [...customSchedule];
-                                newSched[idx].amount = Math.max(0, Number(e.target.value));
-                                setCustomSchedule(newSched);
-                              }}
-                              style={{ textAlign: 'right', fontWeight: 700, padding: '2px 6px', fontSize: '0.825rem' }}
-                            />
-                          </td>
-                          <td style={{ textAlign: 'right', color: 'var(--text-muted)' }}>
-                            ৳{scheduleReconciliation.reconciledSchedule[idx]?.remainingBalanceAfter.toLocaleString()}
-                          </td>
-                        </tr>
-                      ))}
+                      {customSchedule.map((inst, idx) => {
+                        const reconciled = scheduleReconciliation.reconciledSchedule[idx];
+                        const pPortion = reconciled?.principalPortion || inst.principalPortion || 0;
+                        const iPortion = reconciled?.interestPortion || inst.interestPortion || 0;
+                        return (
+                          <tr key={inst.installmentNumber}>
+                            <td style={{ textAlign: 'center', fontWeight: 700 }}>#{inst.installmentNumber}</td>
+                            <td>
+                              <input
+                                type="date"
+                                className="form-input form-input-xs"
+                                value={inst.dueDate}
+                                onChange={e => {
+                                  setIsCustomScheduleActive(true);
+                                  const newSched = [...customSchedule];
+                                  newSched[idx].dueDate = e.target.value;
+                                  setCustomSchedule(newSched);
+                                }}
+                                style={{ padding: '2px 6px', fontSize: '0.775rem' }}
+                              />
+                            </td>
+                            <td style={{ textAlign: 'right', color: 'var(--text-muted)', fontWeight: 600 }}>
+                              ৳{pPortion.toLocaleString()}
+                            </td>
+                            <td style={{ textAlign: 'right', color: '#f59e0b', fontWeight: 600 }}>
+                              {iPortion > 0 ? `+৳${iPortion.toLocaleString()}` : '৳0'}
+                            </td>
+                            <td style={{ textAlign: 'right' }}>
+                              <input
+                                type="number"
+                                className="form-input form-input-xs"
+                                value={inst.amount}
+                                onChange={e => {
+                                  setIsCustomScheduleActive(true);
+                                  const newSched = [...customSchedule];
+                                  newSched[idx].amount = Math.max(0, Number(e.target.value));
+                                  setCustomSchedule(newSched);
+                                }}
+                                style={{ textAlign: 'right', fontWeight: 700, padding: '2px 6px', fontSize: '0.825rem', color: '#10b981' }}
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -1916,7 +2010,16 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
 
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>12. Regular Installment:</span>
-              <strong>৳{financials.regularInstallmentAmount.toLocaleString()} / mo</strong>
+              <div style={{ textAlign: 'right' }}>
+                <strong style={{ color: '#10b981', fontSize: '0.95rem' }}>
+                  ৳{financials.regularInstallmentAmount.toLocaleString()} / mo
+                </strong>
+                {financials.totalInterest > 0 && (
+                  <div style={{ fontSize: '0.7rem', color: '#f59e0b' }}>
+                    (Principal: ৳{financials.monthlyPrincipalPortion.toLocaleString()} + Interest: ৳{financials.monthlyInterestPortion.toLocaleString()})
+                  </div>
+                )}
+              </div>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>

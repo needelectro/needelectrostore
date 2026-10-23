@@ -519,13 +519,17 @@ export async function POST(req: NextRequest) {
           0,
           Number(emiPlanConfig.financedAmount !== undefined ? emiPlanConfig.financedAmount : (calculatedGrandTotal - downPayment))
         );
-        const monthlyInstallment = Math.max(
-          0,
-          Number(emiPlanConfig.monthlyInstallment !== undefined ? emiPlanConfig.monthlyInstallment : Math.round(financedAmount / durationMonths))
-        );
         const totalPayable = Math.max(
           0,
           Number(emiPlanConfig.totalPayable !== undefined ? emiPlanConfig.totalPayable : (downPayment + financedAmount))
+        );
+        const totalFinancedRepayment = Math.max(
+          0,
+          Number(emiPlanConfig.totalFinancedRepayment !== undefined ? emiPlanConfig.totalFinancedRepayment : (totalPayable - downPayment))
+        );
+        const monthlyInstallment = Math.max(
+          0,
+          Number(emiPlanConfig.monthlyInstallment !== undefined ? emiPlanConfig.monthlyInstallment : Math.round(totalFinancedRepayment / durationMonths))
         );
 
         const startDate = new Date();
@@ -563,7 +567,7 @@ export async function POST(req: NextRequest) {
             monthlyInstallment: new Prisma.Decimal(monthlyInstallment),
             totalPayable: new Prisma.Decimal(totalPayable),
             totalPaid: new Prisma.Decimal(downPayment),
-            remainingBalance: new Prisma.Decimal(financedAmount),
+            remainingBalance: new Prisma.Decimal(totalFinancedRepayment),
             startDate,
             endDate,
             status: 'ACTIVE',

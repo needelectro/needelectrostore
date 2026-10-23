@@ -378,13 +378,16 @@ export const DEFAULT_25_EMI_CLAUSES: EMIContractClause[] = [
 export function interpolateClauseText(text: string, context: ContractInterpolationContext): string {
   if (!text) return '';
 
+  const totalInterestCalc = Math.max(0, (context.monthlyInstallment * context.durationMonths) - context.financedAmount);
+  const monthlyInterestCalc = context.durationMonths > 0 ? Math.floor(totalInterestCalc / context.durationMonths) : 0;
+
   const interestDisclosureEn = context.isInterestFree
     ? 'Interest Rate: 0%. No interest will be charged under this agreement, subject to the other expressly disclosed contractual terms and applicable law.'
-    : `Interest Rate: ${context.interestRate}% per annum / period. Total financing interest charge is ৳${context.interestRate > 0 ? (context.contractPrice - context.downPayment > 0 ? (context.monthlyInstallment * context.durationMonths - (context.contractPrice - context.downPayment)) : 0) : 0}.`;
+    : `Interest Rate: ${context.interestRate}%. Total financing interest charge is ৳${totalInterestCalc.toLocaleString()}, which is added into each monthly installment (approx. +৳${monthlyInterestCalc.toLocaleString()}/month included in regular installment of ৳${context.monthlyInstallment.toLocaleString()}).`;
 
   const interestDisclosureBn = context.isInterestFree
     ? 'সুদের হার: ০% (Interest Free)। এই চুক্তির আওতায় কোনো সুদ ধার্য করা হইবে না।'
-    : `সুদের হার: ${context.interestRate}%। অনুমোদিত অর্থায়ন সুদ প্রযোজ্য হইবে।`;
+    : `সুদের হার: ${context.interestRate}%। মোট অর্থায়ন সুদ ৳${totalInterestCalc.toLocaleString()}, যাহা প্রতি মাসের কিস্তির সহিত যুক্ত থাকিবে (মাসিক ৳${context.monthlyInstallment.toLocaleString()} কিস্তির মধ্যে আনুমানিক +৳${monthlyInterestCalc.toLocaleString()} সুদ অন্তর্ভুক্ত)।`;
 
   const interestMethodEn = context.interestMethod === 'REDUCING_BALANCE'
     ? 'Reducing Balance Amortization Formula'

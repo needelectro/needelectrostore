@@ -145,6 +145,7 @@ export const createSaleSchema = z.object({
     financedAmount: z.number().nonnegative().optional(),
     monthlyInstallment: z.number().nonnegative().optional(),
     totalPayable: z.number().nonnegative().optional(),
+    totalFinancedRepayment: z.number().nonnegative().optional(),
     interestRatePercent: z.number().optional().default(0),
     isInterestFree: z.boolean().optional().default(true),
     interestMethod: z.string().optional().default('FLAT'),
