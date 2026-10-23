@@ -47,7 +47,7 @@ export const CustomerFooter: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#F4F6F8] dark:bg-[#071328] text-[#334155] dark:text-slate-300 border-t border-slate-200/90 dark:border-slate-800 pt-12 pb-8 transition-colors">
+    <footer className="bg-[#F4F6F8] dark:bg-[#071328] text-[#334155] dark:text-slate-300 border-t border-slate-200/90 dark:border-slate-800 pt-12 pb-20 md:pb-8 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
 
         {/* Website Network Banner — Clear Differentiation Between .store and .com */}
@@ -454,6 +454,22 @@ export const CustomerFooter: React.FC = () => {
             <span>•</span>
             <Link href="/admin" className="hover:text-[#008CFF] opacity-75">Staff ERP</Link>
           </div>
+        </div>
+
+        {/* Software Developer Attribution */}
+        <div className="border-t border-slate-200/70 dark:border-slate-800/70 pt-4 text-center text-xs text-[#64748B] dark:text-slate-400">
+          <p>
+            Software Developed By{' '}
+            <a
+              href="https://amdadsgroup.netlify.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#008CFF] hover:underline font-bold transition-colors inline-flex items-center gap-1"
+            >
+              <span>Amdads Group</span>
+              <ExternalLink size={11} />
+            </a>
+          </p>
         </div>
 
       </div>

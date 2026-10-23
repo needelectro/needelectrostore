@@ -2096,6 +2096,18 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) 
           <span>Branch: {selectedBranch.name}</span>
           <span>•</span>
           <span>© {new Date().getFullYear()} All Rights Reserved</span>
+          <span>•</span>
+          <span>
+            Software Developed By{' '}
+            <a
+              href="https://amdadsgroup.netlify.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#008CFF', fontWeight: 600, textDecoration: 'none' }}
+            >
+              Amdads Group
+            </a>
+          </span>
         </div>
       </footer>
 

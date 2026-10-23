@@ -3326,6 +3326,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
               Shop No: 5, MR Plaza, Kusumbag, Moulvibazar • 01733-983752
             </div>
           </div>
+
+          <div style={{
+            borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+            marginTop: '1.25rem',
+            paddingTop: '0.85rem',
+            textAlign: 'center',
+            fontSize: '0.78rem',
+            color: '#94a3b8'
+          }}>
+            Software Developed By{' '}
+            <a
+              href="https://amdadsgroup.netlify.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#008CFF', fontWeight: 700, textDecoration: 'none' }}
+            >
+              Amdads Group
+            </a>
+          </div>
         </div>
       </footer>
 
