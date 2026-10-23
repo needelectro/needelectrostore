@@ -2,9 +2,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { DatabaseSync } from 'node:sqlite';
 import { PrismaClient, Prisma } from '@prisma/client';
 import { generateInvoiceHTML } from '../lib/pdf.ts';
+
+const prisma = new PrismaClient();
 
 console.log('\n======================================================');
 console.log('  NEED ELECTRO ERP — PRODUCTION VERIFICATION SUITE');
@@ -25,17 +26,13 @@ function assert(condition, message) {
 }
 
 // -------------------------------------------------------------
-// TEST 1: SQLite Data Preservation & SQL Seed Generation
+// TEST 1: Database Integrity & PostgreSQL Super Admin Verification
 // -------------------------------------------------------------
-console.log('\n--- Test 1: Data Preservation & SQLite Seed Export ---');
-const dbPath = path.resolve(process.cwd(), 'data/need_electro.db');
+console.log('\n--- Test 1: Data Preservation & Production Database Verification ---');
 const seedPath = path.resolve(process.cwd(), 'prisma/seed_from_sqlite.sql');
-
-assert(fs.existsSync(dbPath), 'Existing SQLite database data/need_electro.db exists.');
 assert(fs.existsSync(seedPath), 'PostgreSQL migration seed prisma/seed_from_sqlite.sql generated.');
 
-const db = new DatabaseSync(dbPath);
-const userRow = db.prepare("SELECT * FROM users WHERE role = 'SUPER_ADMIN'").get();
+const userRow = await prisma.user.findFirst({ where: { role: 'SUPER_ADMIN' } });
 assert(userRow && userRow.email === 'contact.amdadur@gmail.com', 'Super Admin Amdadur Rahman found in database.');
 assert(userRow.name === 'Amdadur Rahman', 'Super Admin name matches exact specification.');
 
@@ -161,6 +158,8 @@ assert(fs.existsSync(path.resolve(process.cwd(), 'app/api/pdf/generate/route.ts'
 assert(fs.existsSync(path.resolve(process.cwd(), 'vercel.json')), 'vercel.json exists.');
 assert(fs.existsSync(path.resolve(process.cwd(), '.github/workflows/deploy.yml')), '.github/workflows/deploy.yml exists.');
 assert(fs.existsSync(path.resolve(process.cwd(), 'docs/DEPLOYMENT_GUIDE.md')), 'docs/DEPLOYMENT_GUIDE.md exists.');
+
+await prisma.$disconnect();
 
 console.log('\n======================================================');
 console.log(`  ALL ${totalTests} VERIFICATION TESTS PASSED SUCCESSFULLY! (${passedTests}/${totalTests})`);

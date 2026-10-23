@@ -1,5 +1,4 @@
-// Comprehensive Test Suite for NEED ELECTRO Quotation PDF Generation
-import { buildQuotationPdf } from '../src/utils/generateQuotationPdf.js';
+import { buildQuotationPdf } from '../src/utils/generateQuotationPdf.ts';
 import fs from 'fs';
 import path from 'path';
 import { PrismaClient } from '@prisma/client';
