@@ -562,6 +562,8 @@ export interface EMIFinancialTerms {
   
   // Interest
   isInterestFree: boolean;
+  interestType?: 'PERCENTAGE' | 'FIXED_AMOUNT';
+  manualInterestAmount?: number;
   interestRatePercent: number;
   interestCalculationMethod: 'FLAT' | 'REDUCING_BALANCE';
   interestPeriod: 'MONTHLY' | 'ANNUAL';

@@ -314,7 +314,11 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
               <div style={{ background: '#f1f5f9', padding: '6px 10px', fontWeight: 'bold', fontSize: '11px', textTransform: 'uppercase', display: 'flex', justifyContent: 'space-between' }}>
                 <span>3. Equipment Specification & Comprehensive Financial Terms</span>
                 <span style={{ color: '#2563eb' }}>
-                  {financialTerms?.isInterestFree || !financialTerms ? '0% Interest-Free Scheme' : `${financialTerms.interestRatePercent}% Interest (${financialTerms.interestCalculationMethod})`}
+                  {financialTerms?.isInterestFree || !financialTerms 
+                    ? '0% Interest-Free Scheme' 
+                    : financialTerms.interestType === 'FIXED_AMOUNT'
+                      ? `৳${(financialTerms.totalInterest || 0).toLocaleString()} Fixed Interest (${financialTerms.interestRatePercent}% Equiv)`
+                      : `${financialTerms.interestRatePercent}% Interest (${financialTerms.interestCalculationMethod})`}
                 </span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', padding: '10px', gap: '15px', fontSize: '11px' }}>

@@ -148,6 +148,8 @@ export const createSaleSchema = z.object({
     totalFinancedRepayment: z.number().nonnegative().optional(),
     interestRatePercent: z.number().optional().default(0),
     isInterestFree: z.boolean().optional().default(true),
+    interestType: z.enum(['PERCENTAGE', 'FIXED_AMOUNT']).optional().default('FIXED_AMOUNT'),
+    customInterestAmount: z.number().nonnegative().optional(),
     interestMethod: z.string().optional().default('FLAT'),
     guarantor: z.object({
       name: z.string().optional(),

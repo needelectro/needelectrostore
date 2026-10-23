@@ -138,6 +138,8 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
   // STEP 3: INTEREST & INSTALLMENT SCHEDULE STATE
   // -------------------------------------------------------------
   const [isInterestFree, setIsInterestFree] = useState<boolean>(true);
+  const [interestType, setInterestType] = useState<'PERCENTAGE' | 'FIXED_AMOUNT'>('FIXED_AMOUNT');
+  const [customInterestAmount, setCustomInterestAmount] = useState<number>(0);
   const [interestRatePercent, setInterestRatePercent] = useState<number>(0);
   const [interestMethod, setInterestMethod] = useState<'FLAT' | 'REDUCING_BALANCE'>('FLAT');
   const [interestBasis, setInterestBasis] = useState<'TOTAL_FLAT' | 'ANNUAL'>('TOTAL_FLAT');
@@ -168,9 +170,12 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
       setLateFeePerDay(Number(currentPlan.lateFeePerDay) || 50);
       if (Number(currentPlan.interestRatePercent) > 0) {
         setIsInterestFree(false);
+        setInterestType('PERCENTAGE');
         setInterestRatePercent(Number(currentPlan.interestRatePercent));
       } else {
         setIsInterestFree(true);
+        setInterestType('FIXED_AMOUNT');
+        setCustomInterestAmount(0);
         setInterestRatePercent(0);
       }
     }
@@ -193,6 +198,8 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
       downPaymentType,
       downPaymentValue,
       isInterestFree,
+      interestType,
+      customInterestAmount,
       interestRatePercent,
       interestMethod,
       interestBasis,
@@ -205,6 +212,7 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
     defaultProductPrice, agreedPrice, discountType, discountValue,
     processingFee, documentationFee, deliveryCharge, otherCharges,
     taxPercent, downPaymentType, downPaymentValue, isInterestFree,
+    interestType, customInterestAmount,
     interestRatePercent, interestMethod, interestBasis, durationMonths, firstDueDate, recurringDueDay
   ]);
 
@@ -486,6 +494,8 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
         totalFinancedRepayment: financials.totalFinancedRepayment,
         interestRatePercent: financials.effectiveAnnualRate,
         isInterestFree,
+        interestType,
+        customInterestAmount: interestType === 'FIXED_AMOUNT' ? customInterestAmount : 0,
         interestMethod,
         guarantor: guarantorName ? {
           name: guarantorName.trim(),
@@ -518,6 +528,8 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
           downPaymentStatus,
           downPaymentTxRef,
           isInterestFree,
+          interestType,
+          manualInterestAmount: interestType === 'FIXED_AMOUNT' ? customInterestAmount : 0,
           interestRatePercent: financials.effectiveAnnualRate,
           interestCalculationMethod: interestMethod,
           interestPeriod: 'MONTHLY',
@@ -1101,48 +1113,148 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
               </div>
 
               {/* Interest Configuration Panel */}
-              <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '10px', marginBottom: '1.25rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <span style={{ fontWeight: 800, fontSize: '0.875rem' }}>Interest Configuration</span>
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <div style={{ background: 'var(--bg-secondary)', padding: '1.15rem', borderRadius: '10px', marginBottom: '1.25rem', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div>
+                    <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>Interest Scheme & Addition</span>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      Choose how interest is determined and added to each monthly installment
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
                     <button
                       type="button"
                       className={`btn btn-xs ${isInterestFree ? 'btn-success' : 'btn-secondary'}`}
                       onClick={() => {
                         setIsInterestFree(true);
+                        setInterestType('FIXED_AMOUNT');
+                        setCustomInterestAmount(0);
                         setInterestRatePercent(0);
                       }}
                       style={{ fontWeight: 700 }}
                     >
-                      ✓ 0% Interest-Free Contract
+                      ✓ 0% Interest-Free
                     </button>
                     <button
                       type="button"
-                      className={`btn btn-xs ${!isInterestFree ? 'btn-primary' : 'btn-secondary'}`}
+                      className={`btn btn-xs ${!isInterestFree && interestType === 'FIXED_AMOUNT' ? 'btn-primary' : 'btn-secondary'}`}
                       onClick={() => {
                         setIsInterestFree(false);
-                        setInterestRatePercent(5);
+                        setInterestType('FIXED_AMOUNT');
+                        if (customInterestAmount === 0) {
+                          setCustomInterestAmount(3000);
+                        }
                       }}
-                      style={{ fontWeight: 700 }}
+                      style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}
                     >
-                      Interest-Bearing Financing
+                      ৳ Manual Fixed Amount
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-xs ${!isInterestFree && interestType === 'PERCENTAGE' ? 'btn-primary' : 'btn-secondary'}`}
+                      onClick={() => {
+                        setIsInterestFree(false);
+                        setInterestType('PERCENTAGE');
+                        if (interestRatePercent === 0) {
+                          setInterestRatePercent(5);
+                        }
+                      }}
+                      style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      % Percentage Rate
                     </button>
                   </div>
                 </div>
 
-                {!isInterestFree && (
-                  <>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '0.75rem' }}>
-                      <div className="form-group">
+                {isInterestFree && (
+                  <div style={{ background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '8px', padding: '0.75rem 1rem', fontSize: '0.8rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <CheckCircle2 size={16} />
+                    <span><strong>0% Interest-Free Contract:</strong> No interest surcharge applied. Monthly installment is 100% principal repayment (৳{financials.monthlyPrincipalPortion.toLocaleString()} / mo).</span>
+                  </div>
+                )}
+
+                {/* Option 1: Manual Fixed Interest Amount in BDT */}
+                {!isInterestFree && interestType === 'FIXED_AMOUNT' && (
+                  <div style={{ background: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '1rem', marginTop: '0.75rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label className="form-label" style={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span>Manual Interest Amount (টাকা / BDT)</span>
+                          <span style={{ color: 'var(--brand-primary)', fontSize: '0.75rem', fontWeight: 700 }}>
+                            Equiv: {financials.effectiveAnnualRate}% Rate
+                          </span>
+                        </label>
+                        <div style={{ position: 'relative' }}>
+                          <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontWeight: 800, color: 'var(--brand-primary)', fontSize: '1rem' }}>৳</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="100"
+                            className="form-input"
+                            style={{ paddingLeft: '28px', fontWeight: 800, fontSize: '1.05rem', color: 'var(--brand-primary)' }}
+                            value={customInterestAmount}
+                            onChange={e => setCustomInterestAmount(Math.max(0, Math.round(Number(e.target.value) || 0)))}
+                            placeholder="Enter manual interest (e.g. 3000)"
+                          />
+                        </div>
+                        {/* Quick Presets */}
+                        <div style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Quick Presets:</span>
+                          {[1000, 2000, 3000, 5000, 7500, 10000].map(amt => (
+                            <button
+                              key={amt}
+                              type="button"
+                              className={`btn btn-xs ${customInterestAmount === amt ? 'btn-primary' : 'btn-secondary'}`}
+                              style={{ fontSize: '0.7rem', padding: '2px 8px' }}
+                              onClick={() => setCustomInterestAmount(amt)}
+                            >
+                              ৳{amt.toLocaleString()}
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            className="btn btn-xs btn-secondary"
+                            style={{ fontSize: '0.7rem', padding: '2px 8px', color: '#ef4444' }}
+                            onClick={() => setCustomInterestAmount(0)}
+                          >
+                            Reset
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label className="form-label">Financing Surcharge / Admin Note</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={interestAdjustmentReason}
+                          onChange={e => setInterestAdjustmentReason(e.target.value)}
+                          placeholder="e.g. Pre-agreed installment surcharge, showroom financing fee"
+                        />
+                        <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)', marginTop: '6px', lineHeight: 1.4 }}>
+                          💡 <strong>Monthly Addition:</strong> ৳{customInterestAmount.toLocaleString()} interest is evenly divided into {durationMonths} installments (<strong>+৳{financials.monthlyInterestPortion.toLocaleString()}/mo</strong> added to ৳{financials.monthlyPrincipalPortion.toLocaleString()}/mo principal).
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Option 2: Formula-based Percentage Rate */}
+                {!isInterestFree && interestType === 'PERCENTAGE' && (
+                  <div style={{ background: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '1rem', marginTop: '0.75rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                      <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label">Interest Rate (%)</label>
                         <input
                           type="number"
+                          min="0"
+                          step="0.5"
                           className="form-input"
                           value={interestRatePercent}
                           onChange={e => setInterestRatePercent(Math.max(0, Number(e.target.value)))}
                         />
                       </div>
-                      <div className="form-group">
+                      <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label">Calculation Method</label>
                         <select
                           className="form-select"
@@ -1153,7 +1265,7 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                           <option value="REDUCING_BALANCE">Reducing Balance (Amortized)</option>
                         </select>
                       </div>
-                      <div className="form-group">
+                      <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label">Calculation Basis</label>
                         <select
                           className="form-select"
@@ -1165,6 +1277,18 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                         </select>
                       </div>
                     </div>
+                    <div className="form-group" style={{ marginTop: '0.75rem', marginBottom: 0 }}>
+                      <label className="form-label">Adjustment Reason (Optional)</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={interestAdjustmentReason}
+                        onChange={e => setInterestAdjustmentReason(e.target.value)}
+                        placeholder="Reason for rate adjustment if overridden"
+                      />
+                    </div>
+                  </div>
+                )}
 
                     {/* Prominent Monthly Installment Interest Addition Banner */}
                     <div style={{
@@ -1214,8 +1338,6 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                         </span>
                       </div>
                     </div>
-                  </>
-                )}
               </div>
 
               {/* Installment Tenure Presets & Dates */}
@@ -1764,10 +1886,10 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                 </div>
 
                 {/* Financial Summary Strip */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', background: '#EAF4FF', padding: '8px 12px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700, color: '#002B5B', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', background: '#EAF4FF', padding: '8px 12px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700, color: '#002B5B', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
                   <span>Financed Principal: ৳{financials.financedPrincipal.toLocaleString()}</span>
-                  <span>Interest: {isInterestFree ? '0% Free' : `${financials.effectiveAnnualRate}% (৳${financials.totalInterest.toLocaleString()})`}</span>
-                  <span>Installments: {durationMonths} × ৳{financials.regularInstallmentAmount.toLocaleString()}</span>
+                  <span>Interest: {isInterestFree ? '0% Free' : interestType === 'FIXED_AMOUNT' ? `৳${financials.totalInterest.toLocaleString()} Manual Fixed (${financials.effectiveAnnualRate}%)` : `${financials.effectiveAnnualRate}% (৳${financials.totalInterest.toLocaleString()})`}</span>
+                  <span>Installments: {durationMonths} × ৳{financials.regularInstallmentAmount.toLocaleString()} {financials.totalInterest > 0 ? `(৳${financials.monthlyPrincipalPortion.toLocaleString()} P + ৳${financials.monthlyInterestPortion.toLocaleString()} I)` : ''}</span>
                   <span>Total Payable: ৳{financials.totalCustomerPayable.toLocaleString()}</span>
                 </div>
 
@@ -1987,15 +2109,17 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span>8. Interest Rate:</span>
+              <span>8. Interest Mode:</span>
               <span className={`badge ${isInterestFree ? 'badge-success' : 'badge-primary'}`} style={{ fontSize: '0.675rem' }}>
-                {isInterestFree ? '0% Free' : `${financials.effectiveAnnualRate}% (${interestMethod})`}
+                {isInterestFree ? '0% Free' : interestType === 'FIXED_AMOUNT' ? `৳${financials.totalInterest.toLocaleString()} Manual (${financials.effectiveAnnualRate}%)` : `${financials.effectiveAnnualRate}% (${interestMethod})`}
               </span>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>9. Total Financing Interest:</span>
-              <span>৳{financials.totalInterest.toLocaleString()}</span>
+              <strong style={{ color: financials.totalInterest > 0 ? '#f59e0b' : 'inherit' }}>
+                {financials.totalInterest > 0 ? `+৳${financials.totalInterest.toLocaleString()}` : '৳0'}
+              </strong>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-color)', paddingTop: '6px', fontWeight: 700 }}>

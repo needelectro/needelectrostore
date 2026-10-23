@@ -14,6 +14,8 @@ export interface FinancialCalculationParams {
   downPaymentType: 'PERCENTAGE' | 'FIXED';
   downPaymentValue: number;
   isInterestFree: boolean;
+  interestType?: 'PERCENTAGE' | 'FIXED_AMOUNT';
+  customInterestAmount?: number;
   interestRatePercent: number;
   interestMethod: 'FLAT' | 'REDUCING_BALANCE';
   interestBasis?: 'TOTAL_FLAT' | 'ANNUAL';
@@ -33,6 +35,8 @@ export interface FinancialCalculationResult {
   finalContractPrice: number;
   downPaymentAmount: number;
   financedPrincipal: number;
+  interestType: 'PERCENTAGE' | 'FIXED_AMOUNT';
+  manualInterestAmount: number;
   totalInterest: number;
   totalFinancedRepayment: number;
   totalCustomerPayable: number;
@@ -103,29 +107,36 @@ export function calculateEMIFinancials(params: FinancialCalculationParams): Fina
 
   // 7. Interest calculation
   const durationMonths = Math.max(1, Math.round(Number(params.durationMonths) || 1));
+  const interestType = params.interestType || 'PERCENTAGE';
+  const customInterestAmount = Math.max(0, Math.round(Number(params.customInterestAmount) || 0));
   let totalInterest = 0;
 
   if (!params.isInterestFree && financedPrincipal > 0) {
-    const rate = Math.max(0, Number(params.interestRatePercent) || 0);
-
-    if (params.interestMethod === 'FLAT') {
-      if (params.interestBasis === 'ANNUAL') {
-        // Annual Flat APR: Principal * (Rate / 100) * (Months / 12)
-        totalInterest = Math.round((financedPrincipal * rate * (durationMonths / 12)) / 100);
-      } else {
-        // Total Tenure Flat %: Principal * (Rate / 100) directly
-        totalInterest = Math.round((financedPrincipal * rate) / 100);
-      }
+    if (interestType === 'FIXED_AMOUNT') {
+      // Direct manual interest amount entered by administrator (in BDT ৳)
+      totalInterest = customInterestAmount;
     } else {
-      // Reducing Balance Method (standard monthly amortization formula)
-      const monthlyRate = rate > 0 ? (rate / 100) / 12 : 0;
-      if (monthlyRate > 0) {
-        const factor = Math.pow(1 + monthlyRate, durationMonths);
-        const emi = (financedPrincipal * monthlyRate * factor) / (factor - 1);
-        const totalPayableAmortized = Math.round(emi * durationMonths);
-        totalInterest = Math.max(0, totalPayableAmortized - financedPrincipal);
+      const rate = Math.max(0, Number(params.interestRatePercent) || 0);
+
+      if (params.interestMethod === 'FLAT') {
+        if (params.interestBasis === 'ANNUAL') {
+          // Annual Flat APR: Principal * (Rate / 100) * (Months / 12)
+          totalInterest = Math.round((financedPrincipal * rate * (durationMonths / 12)) / 100);
+        } else {
+          // Total Tenure Flat %: Principal * (Rate / 100) directly
+          totalInterest = Math.round((financedPrincipal * rate) / 100);
+        }
       } else {
-        totalInterest = 0;
+        // Reducing Balance Method (standard monthly amortization formula)
+        const monthlyRate = rate > 0 ? (rate / 100) / 12 : 0;
+        if (monthlyRate > 0) {
+          const factor = Math.pow(1 + monthlyRate, durationMonths);
+          const emi = (financedPrincipal * monthlyRate * factor) / (factor - 1);
+          const totalPayableAmortized = Math.round(emi * durationMonths);
+          totalInterest = Math.max(0, totalPayableAmortized - financedPrincipal);
+        } else {
+          totalInterest = 0;
+        }
       }
     }
   }
@@ -144,6 +155,12 @@ export function calculateEMIFinancials(params: FinancialCalculationParams): Fina
   const regularInstallmentAmount = basePrincipal + baseInterest;
   const finalInstallmentAmount = finalPrincipal + finalInterest;
 
+  const effectiveAnnualRate = params.isInterestFree
+    ? 0
+    : interestType === 'FIXED_AMOUNT'
+      ? (financedPrincipal > 0 ? Number(((totalInterest / financedPrincipal) * 100).toFixed(2)) : 0)
+      : Number(params.interestRatePercent || 0);
+
   return {
     originalPrice,
     agreedPrice,
@@ -155,6 +172,8 @@ export function calculateEMIFinancials(params: FinancialCalculationParams): Fina
     finalContractPrice,
     downPaymentAmount,
     financedPrincipal,
+    interestType,
+    manualInterestAmount: customInterestAmount,
     totalInterest,
     totalFinancedRepayment,
     totalCustomerPayable,
@@ -164,7 +183,7 @@ export function calculateEMIFinancials(params: FinancialCalculationParams): Fina
     monthlyInterestPortion: baseInterest,
     finalPrincipalPortion: finalPrincipal,
     finalInterestPortion: finalInterest,
-    effectiveAnnualRate: params.isInterestFree ? 0 : Number(params.interestRatePercent || 0),
+    effectiveAnnualRate,
   };
 }
 
