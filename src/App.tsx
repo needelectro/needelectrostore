@@ -151,10 +151,10 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Redirect authenticated user away from /login back to destination or /dashboard
+  // Redirect authenticated user away from /login or /admin/login back to destination or /dashboard
   useEffect(() => {
     if (isAuthenticated && typeof window !== 'undefined') {
-      if (window.location.pathname === '/login') {
+      if (window.location.pathname === '/login' || window.location.pathname === '/admin/login') {
         const urlParams = new URLSearchParams(window.location.search);
         const redirectParam = urlParams.get('redirect');
         if (redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
@@ -335,7 +335,7 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
         <>
           <LandingPage onOpenLogin={() => {
             setShowLanding(false);
-            navigateToUrl('/login');
+            navigateToUrl('/admin/login');
           }} />
           <ToastContainer />
         </>
@@ -345,9 +345,14 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
     // Preserve the original destination for login redirect
     if (typeof window !== 'undefined') {
       const parsed = parseRoute(window.location.pathname, window.location.search);
-      if (window.location.pathname !== '/login' && window.location.pathname !== '/' && (parsed.isProtected || initialMode === 'admin')) {
+      if (
+        window.location.pathname !== '/login' &&
+        window.location.pathname !== '/admin/login' &&
+        window.location.pathname !== '/' &&
+        (parsed.isProtected || initialMode === 'admin')
+      ) {
         const fullCurrentPath = window.location.pathname + window.location.search;
-        const loginUrl = `/login?redirect=${encodeURIComponent(fullCurrentPath)}`;
+        const loginUrl = `/admin/login?redirect=${encodeURIComponent(fullCurrentPath)}`;
         navigateToUrl(loginUrl, true);
       }
     }

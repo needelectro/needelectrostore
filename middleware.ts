@@ -17,6 +17,8 @@ const PERMANENT_REDIRECTS: Record<string, string> = {
   '/installments': '/laptop-emi',
   '/moulvibazar-laptop': '/moulvibazar',
   '/moulvibazar-computer': '/moulvibazar',
+  '/login': '/admin/login',
+  '/login/': '/admin/login',
 };
 
 export function middleware(request: NextRequest) {

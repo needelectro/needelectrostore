@@ -92,7 +92,7 @@ export function parseRoute(pathname: string = '', search: string = ''): ParsedRo
   const fullPath = search ? `${cleanPath}?${search.replace(/^\?/, '')}` : cleanPath;
 
   // 1. Explicit Login Route
-  if (cleanPath === '/login' || searchParams['portal'] === 'login') {
+  if (cleanPath === '/login' || cleanPath === '/admin/login' || searchParams['portal'] === 'login') {
     return {
       module: 'dashboard',
       isLogin: true,

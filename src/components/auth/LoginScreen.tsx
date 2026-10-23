@@ -41,6 +41,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBackToHome, onSucces
           const redirectParam = urlParams.get('redirect');
           if (redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
             onSuccessRedirect?.(redirectParam);
+          } else {
+            onSuccessRedirect?.('/admin');
           }
         }
       } else {

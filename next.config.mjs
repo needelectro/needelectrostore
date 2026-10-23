@@ -73,7 +73,7 @@ const nextConfig = {
       { source: '/seo-management/:path*', destination: '/admin' },
       { source: '/seo_management', destination: '/admin' },
       { source: '/seo_management/:path*', destination: '/admin' },
-      { source: '/login', destination: '/admin' },
+      { source: '/login', destination: '/admin/login' },
     ];
   },
   async headers() {
