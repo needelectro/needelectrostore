@@ -9,8 +9,80 @@ const WELCOME_TEXT =
 const AUDIO_SRC = '/welcome-voice.mp3';
 const STORAGE_KEY = 'needElectroVoiceWelcomePlayed';
 
+const ADMIN_ROUTE_PREFIXES = [
+  '/admin',
+  '/dashboard',
+  '/pos',
+  '/erp',
+  '/sales',
+  '/returns',
+  '/emi',
+  '/inventory',
+  '/purchases',
+  '/products',
+  '/customers',
+  '/suppliers',
+  '/service',
+  '/warranty',
+  '/accounting',
+  '/cash-management',
+  '/cash_management',
+  '/ledgers',
+  '/expenses',
+  '/reports',
+  '/employees',
+  '/branches',
+  '/roles',
+  '/audit',
+  '/settings',
+  '/control-center',
+  '/control_center',
+  '/seo-management',
+  '/seo_management',
+  '/login',
+];
+
+export const isAdminPanelRoute = (pathname?: string | null): boolean => {
+  const currentPath = (pathname || (typeof window !== 'undefined' ? window.location.pathname : '')) || '';
+  const lower = currentPath.toLowerCase().trim();
+
+  // Admin keywords & explicit admin routes
+  if (lower.startsWith('/admin') || lower.includes('/admin') || lower.includes('admin=')) {
+    return true;
+  }
+
+  // Exact matching for /login
+  if (lower === '/login' || lower.startsWith('/login/')) {
+    return true;
+  }
+
+  // Any ERP module route prefixes
+  for (const prefix of ADMIN_ROUTE_PREFIXES) {
+    if (lower === prefix || lower.startsWith(`${prefix}/`) || lower.startsWith(`${prefix}?`)) {
+      return true;
+    }
+  }
+
+  // URL search query flags (e.g. ?portal=true or ?portal=login or ?admin=true)
+  if (typeof window !== 'undefined') {
+    try {
+      const search = window.location.search;
+      if (search) {
+        const params = new URLSearchParams(search);
+        if (params.get('portal') || params.get('admin') || params.get('module')) {
+          return true;
+        }
+      }
+    } catch {}
+  }
+
+  return false;
+};
+
 export const VoiceWelcome: React.FC = () => {
   const pathname = usePathname();
+  const isAdmin = isAdminPanelRoute(pathname);
+
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [needsInteraction, setNeedsInteraction] = useState(false);
@@ -19,6 +91,21 @@ export const VoiceWelcome: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasPlayedRef = useRef(false);
   const dismissedRef = useRef(false);
+
+  // Stop any active audio / speech synthesis immediately if entering admin panel
+  useEffect(() => {
+    if (isAdmin) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        try {
+          window.speechSynthesis.cancel();
+        } catch {}
+      }
+    }
+  }, [isAdmin]);
 
   // Helper to pick human-like female voice for Web Speech API fallback
   const getPreferredFemaleVoice = useCallback((): SpeechSynthesisVoice | null => {
@@ -71,7 +158,7 @@ export const VoiceWelcome: React.FC = () => {
 
   // Web Speech API fallback if MP3 fails
   const playSpeechSynthesisFallback = useCallback(() => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+    if (typeof window === 'undefined' || isAdminPanelRoute(pathname) || !('speechSynthesis' in window)) {
       setIsSpeaking(false);
       return;
     }
@@ -119,12 +206,12 @@ export const VoiceWelcome: React.FC = () => {
     } catch {
       setIsSpeaking(false);
     }
-  }, [getPreferredFemaleVoice]);
+  }, [getPreferredFemaleVoice, pathname]);
 
   // Main playback: High-fidelity natural female voice audio with speech synthesis backup
   const playWelcome = useCallback(
     (isAutoAttempt = false) => {
-      if (typeof window === 'undefined') return;
+      if (typeof window === 'undefined' || isAdminPanelRoute(pathname)) return;
 
       // Cancel any ongoing speech synthesis
       if ('speechSynthesis' in window) {
@@ -194,12 +281,21 @@ export const VoiceWelcome: React.FC = () => {
         }
       }
     },
-    [playSpeechSynthesisFallback]
+    [pathname, playSpeechSynthesisFallback]
   );
 
   useEffect(() => {
-    // Never run on admin / ERP routes
-    if (pathname?.startsWith('/admin')) {
+    // Strictly never run on admin / ERP routes
+    if (isAdminPanelRoute(pathname)) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        try {
+          window.speechSynthesis.cancel();
+        } catch {}
+      }
       return;
     }
 
@@ -294,8 +390,8 @@ export const VoiceWelcome: React.FC = () => {
     playWelcome(false);
   };
 
-  // Do not render on admin routes
-  if (pathname?.startsWith('/admin')) {
+  // Strictly never render on admin panel or ERP routes
+  if (isAdmin || isAdminPanelRoute(pathname)) {
     return null;
   }
 
