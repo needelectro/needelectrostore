@@ -14,11 +14,14 @@ import {
   GeneratedScheduleItem
 } from '../../services/emiCalculator';
 import { 
+  DEFAULT_20_COMPANY_CLAUSES,
   DEFAULT_25_EMI_CLAUSES, 
-  EMIContractClause, 
+  LegalClause, 
+  LegalTemplateVersion,
+  getCombinedContractClauses,
   interpolateClauseText,
   ContractInterpolationContext 
-} from '../../services/emiContractClauses';
+} from '../../services/legalTermsService';
 
 interface EMIContractWizardProps {
   customers: Customer[];
@@ -279,14 +282,52 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
   };
 
   // -------------------------------------------------------------
-  // STEP 4: TERMS & CONDITIONS CLAUSE EDITOR STATE
+  // STEP 4: TERMS & CONDITIONS CLAUSE EDITOR STATE (Section A + B + C)
   // -------------------------------------------------------------
-  const [clauses, setClauses] = useState<EMIContractClause[]>(() => {
+  const [companyTermsVersion, setCompanyTermsVersion] = useState<string>('v1.0');
+  const [emiTermsVersion, setEmiTermsVersion] = useState<string>('v1.0');
+  const [companyClauses, setCompanyClauses] = useState<LegalClause[]>(() => {
+    return JSON.parse(JSON.stringify(DEFAULT_20_COMPANY_CLAUSES));
+  });
+  const [emiClauses, setEmiClauses] = useState<LegalClause[]>(() => {
     return JSON.parse(JSON.stringify(DEFAULT_25_EMI_CLAUSES));
   });
+  const [customClauses, setCustomClauses] = useState<LegalClause[]>([]);
+
+  // Active section tab inside Step 4: 'ALL' | 'SECTION_A' | 'SECTION_B' | 'SECTION_C'
+  const [activeSectionTab, setActiveSectionTab] = useState<'ALL' | 'SECTION_A' | 'SECTION_B' | 'SECTION_C'>('ALL');
   const [termsLanguage, setTermsLanguage] = useState<'EN' | 'BN' | 'BOTH'>('EN');
   const [clauseFilter, setClauseFilter] = useState<'ALL' | 'MANDATORY' | 'FINANCIAL' | 'LEGAL' | 'OPERATIONAL' | 'SCHEDULE'>('ALL');
   const [editingClauseId, setEditingClauseId] = useState<string | null>(null);
+
+  // Fetch central approved templates from server on mount
+  useEffect(() => {
+    fetch('/api/legal-templates')
+      .then(res => res.json())
+      .then(data => {
+        if (data.activeVersion) {
+          if (Array.isArray(data.activeVersion.companyClauses) && data.activeVersion.companyClauses.length > 0) {
+            setCompanyClauses(data.activeVersion.companyClauses);
+            setCompanyTermsVersion(data.activeVersion.versionNumber || 'v1.0');
+          }
+          if (Array.isArray(data.activeVersion.emiClauses) && data.activeVersion.emiClauses.length > 0) {
+            setEmiClauses(data.activeVersion.emiClauses);
+            setEmiTermsVersion(data.activeVersion.versionNumber || 'v1.0');
+          }
+        }
+      })
+      .catch(err => {
+        console.warn('Could not load central legal templates, using local defaults', err);
+      });
+  }, []);
+
+  // Combined Contract Clauses (Section A + Section B + Section C)
+  const combined = useMemo(() => {
+    return getCombinedContractClauses(companyClauses, emiClauses, customClauses);
+  }, [companyClauses, emiClauses, customClauses]);
+
+  // Backward compatible clauses alias
+  const clauses = combined.allClauses;
 
   // New custom clause form
   const [showAddClause, setShowAddClause] = useState(false);
@@ -300,18 +341,20 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
       alert('Please enter clause title and text content.');
       return;
     }
-    const newClause: EMIContractClause = {
+    const newClause: LegalClause = {
       id: 'custom-' + Date.now(),
-      number: clauses.length + 1,
+      number: customClauses.length + 1,
+      section: 'CUSTOM',
       title: newClauseTitle.trim(),
       titleBn: newClauseTitleBn.trim() || newClauseTitle.trim(),
       content: newClauseContent.trim(),
       contentBn: newClauseContentBn.trim() || newClauseContent.trim(),
       isMandatory: false,
-      order: clauses.length + 1,
-      category: 'CUSTOM',
+      appliesToEmi: true,
+      order: customClauses.length + 1,
+      category: 'SPECIAL_COVENANT',
     };
-    setClauses(prev => [...prev, newClause]);
+    setCustomClauses(prev => [...prev, newClause]);
     setNewClauseTitle('');
     setNewClauseTitleBn('');
     setNewClauseContent('');
@@ -319,37 +362,87 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
     setShowAddClause(false);
   };
 
-  const handleDeleteClause = (clauseId: string) => {
-    const clause = clauses.find(c => c.id === clauseId);
-    if (clause?.isMandatory) {
-      alert('Mandatory contractual clauses cannot be deleted.');
-      return;
+  const handleDeleteClause = (clauseId: string, section: 'COMPANY' | 'EMI' | 'CUSTOM') => {
+    if (section === 'COMPANY') {
+      const c = companyClauses.find(item => item.id === clauseId);
+      if (c?.isMandatory) {
+        alert('Mandatory company terms cannot be deleted.');
+        return;
+      }
+      setCompanyClauses(prev => prev.filter(item => item.id !== clauseId).map((item, idx) => ({ ...item, number: idx + 1, order: idx + 1 })));
+    } else if (section === 'EMI') {
+      const c = emiClauses.find(item => item.id === clauseId);
+      if (c?.isMandatory) {
+        alert('Mandatory EMI terms cannot be deleted.');
+        return;
+      }
+      setEmiClauses(prev => prev.filter(item => item.id !== clauseId).map((item, idx) => ({ ...item, number: idx + 1, order: idx + 1 })));
+    } else {
+      setCustomClauses(prev => prev.filter(item => item.id !== clauseId).map((item, idx) => ({ ...item, number: idx + 1, order: idx + 1 })));
     }
-    setClauses(prev => prev.filter(c => c.id !== clauseId).map((c, idx) => ({ ...c, number: idx + 1, order: idx + 1 })));
   };
 
-  const handleMoveClause = (index: number, direction: 'UP' | 'DOWN') => {
-    if ((direction === 'UP' && index === 0) || (direction === 'DOWN' && index === clauses.length - 1)) return;
-    const newClauses = [...clauses];
+  const handleMoveClause = (clauseId: string, section: 'COMPANY' | 'EMI' | 'CUSTOM', direction: 'UP' | 'DOWN') => {
+    const list = section === 'COMPANY' ? [...companyClauses] : section === 'EMI' ? [...emiClauses] : [...customClauses];
+    const index = list.findIndex(c => c.id === clauseId);
+    if (index === -1) return;
+    if ((direction === 'UP' && index === 0) || (direction === 'DOWN' && index === list.length - 1)) return;
     const targetIdx = direction === 'UP' ? index - 1 : index + 1;
-    const temp = newClauses[index];
-    newClauses[index] = newClauses[targetIdx];
-    newClauses[targetIdx] = temp;
-    setClauses(newClauses.map((c, idx) => ({ ...c, number: idx + 1, order: idx + 1 })));
+    const temp = list[index];
+    list[index] = list[targetIdx];
+    list[targetIdx] = temp;
+    const renumbered = list.map((c, idx) => ({ ...c, number: idx + 1, order: idx + 1 }));
+    if (section === 'COMPANY') setCompanyClauses(renumbered);
+    else if (section === 'EMI') setEmiClauses(renumbered);
+    else setCustomClauses(renumbered);
   };
 
   const handleResetToDefaultClauses = () => {
-    if (confirm('Reset all contractual clauses back to the standard 25 template clauses? Custom edits will be overwritten.')) {
-      setClauses(JSON.parse(JSON.stringify(DEFAULT_25_EMI_CLAUSES)));
+    if (confirm('Reset contract clauses back to the active published company & EMI templates? Any deal-specific edits will be overwritten.')) {
+      setCompanyClauses(JSON.parse(JSON.stringify(DEFAULT_20_COMPANY_CLAUSES)));
+      setEmiClauses(JSON.parse(JSON.stringify(DEFAULT_25_EMI_CLAUSES)));
+      setCustomClauses([]);
     }
   };
+
+  const handleEditClauseContent = (clauseId: string, section: 'COMPANY' | 'EMI' | 'CUSTOM', enText?: string, bnText?: string) => {
+    const updateList = (list: LegalClause[]) => list.map(c => {
+      if (c.id === clauseId) {
+        return {
+          ...c,
+          content: enText !== undefined ? enText : c.content,
+          contentBn: bnText !== undefined ? bnText : c.contentBn,
+        };
+      }
+      return c;
+    });
+
+    if (section === 'COMPANY') setCompanyClauses(prev => updateList(prev));
+    else if (section === 'EMI') setEmiClauses(prev => updateList(prev));
+    else setCustomClauses(prev => updateList(prev));
+  };
+
+  const displayedClauses = useMemo(() => {
+    let list: LegalClause[] = [];
+    if (activeSectionTab === 'SECTION_A') list = combined.sectionA;
+    else if (activeSectionTab === 'SECTION_B') list = combined.sectionB;
+    else if (activeSectionTab === 'SECTION_C') list = combined.sectionC;
+    else list = combined.allClauses;
+
+    if (clauseFilter !== 'ALL') {
+      if (clauseFilter === 'MANDATORY') list = list.filter(c => c.isMandatory);
+      else list = list.filter(c => c.category === clauseFilter);
+    }
+    return list;
+  }, [activeSectionTab, combined, clauseFilter]);
 
   // -------------------------------------------------------------
   // STEP 5: PREVIEW & CUSTOMER AFFIRMATIVE ACCEPTANCE STATE
   // -------------------------------------------------------------
   const [confirmedFinancials, setConfirmedFinancials] = useState(false);
   const [confirmedSchedule, setConfirmedSchedule] = useState(false);
-  const [confirmedTerms, setConfirmedTerms] = useState(false);
+  const [confirmedCompanyTerms, setConfirmedCompanyTerms] = useState(false);
+  const [confirmedEmiTerms, setConfirmedEmiTerms] = useState(false);
   const [confirmedIdentity, setConfirmedIdentity] = useState(false);
   const [acceptanceNotes, setAcceptanceNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -415,8 +508,8 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
   // FINAL CONTRACT EXECUTION HANDLER
   // -------------------------------------------------------------
   const handleExecuteContract = async () => {
-    if (!confirmedFinancials || !confirmedSchedule || !confirmedTerms || !confirmedIdentity) {
-      alert('Please complete all 4 mandatory affirmative acceptance checks before executing the contract.');
+    if (!confirmedFinancials || !confirmedSchedule || !confirmedCompanyTerms || !confirmedEmiTerms || !confirmedIdentity) {
+      alert('Please complete all 5 mandatory affirmative acceptance checks (including Section A Company Terms and Section B EMI Terms) before executing the contract.');
       return;
     }
 
@@ -477,12 +570,17 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
         finalCustomerPhone = cRes.customer.phone;
       }
 
-      // 2. Prepare structured contract payload
-      const contractTermsText = clauses.map(c => {
-        const content = termsLanguage === 'BN' ? c.contentBn : c.content;
-        const title = termsLanguage === 'BN' ? c.titleBn : c.title;
-        return `${c.number}. ${title}\n${interpolateClauseText(content, interpolationContext)}\n`;
-      }).join('\n');
+      // 2. Prepare structured contract payload with Section A, Section B, and Section C
+      const contractTermsText = [
+        `=== SECTION A: NEED ELECTRO GENERAL COMPANY TERMS & CONDITIONS (${companyTermsVersion}) ===\n`,
+        ...combined.sectionA.map(c => `A.${c.number}. ${termsLanguage === 'BN' ? c.titleBn : c.title}\n${interpolateClauseText(termsLanguage === 'BN' ? c.contentBn : c.content, interpolationContext)}\n`),
+        `\n=== SECTION B: HIRE-PURCHASE & EMI-SPECIFIC TERMS & CONDITIONS (${emiTermsVersion}) ===\n`,
+        ...combined.sectionB.map(c => `B.${c.number}. ${termsLanguage === 'BN' ? c.titleBn : c.title}\n${interpolateClauseText(termsLanguage === 'BN' ? c.contentBn : c.content, interpolationContext)}\n`),
+        ...(combined.sectionC.length > 0 ? [
+          `\n=== SECTION C: SPECIAL CONTRACT-SPECIFIC COVENANTS ===\n`,
+          ...combined.sectionC.map(c => `C.${c.number}. ${termsLanguage === 'BN' ? c.titleBn : c.title}\n${interpolateClauseText(termsLanguage === 'BN' ? c.contentBn : c.content, interpolationContext)}\n`)
+        ] : [])
+      ].join('\n');
 
       const emiPlanConfigPayload = {
         planId: selectedPlanId,
@@ -546,7 +644,12 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
           lateFeePerDay,
           earlySettlementDiscountPercent: 0,
         },
-        clauses,
+        companyTermsVersion,
+        emiTermsVersion,
+        companyClauses: combined.sectionA,
+        emiClauses: combined.sectionB,
+        customClauses: combined.sectionC,
+        clauses: combined.allClauses,
         schedule: customSchedule.map((inst, idx) => ({
           installmentNumber: inst.installmentNumber,
           dueDate: inst.dueDate,
@@ -562,7 +665,10 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
           acceptanceMethod: 'ELECTRONIC_AFFIRMATIVE',
           confirmedFinancials,
           confirmedSchedule,
-          confirmedTerms,
+          confirmedCompanyTerms,
+          confirmedEmiTerms,
+          confirmedTerms: confirmedCompanyTerms && confirmedEmiTerms,
+          confirmedIdentity,
           notes: acceptanceNotes,
         },
         termsLanguage,
@@ -653,7 +759,7 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
             </h2>
           </div>
           <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', margin: 0 }}>
-            Configure custom financial terms, adjust repayment schedules, and manage all 25 legal clauses before finalizing.
+            Configure custom financial terms, adjust repayment schedules, and manage complete Company (Section A) & EMI (Section B) legal terms.
           </p>
         </div>
 
@@ -663,7 +769,7 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
             { id: 'customer', num: 1, label: 'Customer & Guarantor' },
             { id: 'financials', num: 2, label: 'Product & Pricing' },
             { id: 'schedule', num: 3, label: 'Schedule & Interest' },
-            { id: 'clauses', num: 4, label: '25 Terms & Clauses' },
+            { id: 'clauses', num: 4, label: `Legal Terms (${combined.allClauses.length})` },
             { id: 'preview', num: 5, label: 'Preview & Execute' },
           ].map(s => (
             <button
@@ -1544,23 +1650,23 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                   onClick={() => setActiveStep('clauses')}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}
                 >
-                  Manage 25 Terms & Conditions <ArrowRight size={16} />
+                  Manage Legal Terms & Conditions (A+B) <ArrowRight size={16} />
                 </button>
               </div>
             </div>
           )}
 
-          {/* STEP 4: TERMS & CONDITIONS CLAUSE EDITOR */}
+          {/* STEP 4: TERMS & CONDITIONS CLAUSE EDITOR (Section A + Section B + Section C) */}
           {activeStep === 'clauses' && (
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <div>
                   <h3 style={{ fontSize: '1.05rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <FileText size={18} color="var(--brand-primary)" />
-                    Step 4: Contract Terms & Conditions Clause Management
+                    Step 4: Contract Legal Terms & Conditions Management
                   </h3>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                    Standard 25 Hire-Purchase Clauses under Bangladesh Law. Reorder, edit, or append custom terms.
+                    Section A: Company Policies ({companyTermsVersion}) + Section B: EMI Terms ({emiTermsVersion}) + Section C: Deal Covenants
                   </span>
                 </div>
 
@@ -1591,10 +1697,61 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                 </div>
               </div>
 
+              {/* Section Tabs (All Combined vs Section A vs Section B vs Section C) */}
+              <div style={{ display: 'flex', gap: '0.35rem', marginBottom: '0.85rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className={`btn btn-xs ${activeSectionTab === 'ALL' ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setActiveSectionTab('ALL')}
+                  style={{ fontWeight: activeSectionTab === 'ALL' ? 800 : 500 }}
+                >
+                  All Combined ({combined.allClauses.length})
+                </button>
+                <button
+                  type="button"
+                  className={`btn btn-xs ${activeSectionTab === 'SECTION_A' ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setActiveSectionTab('SECTION_A')}
+                  style={{ 
+                    fontWeight: activeSectionTab === 'SECTION_A' ? 800 : 500,
+                    background: activeSectionTab === 'SECTION_A' ? '#1e3a8a' : undefined,
+                    color: activeSectionTab === 'SECTION_A' ? '#fff' : undefined,
+                    borderColor: '#1e3a8a'
+                  }}
+                >
+                  Section A: Company Policies ({combined.sectionA.length})
+                </button>
+                <button
+                  type="button"
+                  className={`btn btn-xs ${activeSectionTab === 'SECTION_B' ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setActiveSectionTab('SECTION_B')}
+                  style={{ 
+                    fontWeight: activeSectionTab === 'SECTION_B' ? 800 : 500,
+                    background: activeSectionTab === 'SECTION_B' ? '#0284c7' : undefined,
+                    color: activeSectionTab === 'SECTION_B' ? '#fff' : undefined,
+                    borderColor: '#0284c7'
+                  }}
+                >
+                  Section B: EMI Terms ({combined.sectionB.length})
+                </button>
+                <button
+                  type="button"
+                  className={`btn btn-xs ${activeSectionTab === 'SECTION_C' ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setActiveSectionTab('SECTION_C')}
+                  style={{ 
+                    fontWeight: activeSectionTab === 'SECTION_C' ? 800 : 500,
+                    background: activeSectionTab === 'SECTION_C' ? '#475569' : undefined,
+                    color: activeSectionTab === 'SECTION_C' ? '#fff' : undefined,
+                    borderColor: '#475569'
+                  }}
+                >
+                  Section C: Deal Covenants ({combined.sectionC.length})
+                </button>
+              </div>
+
               {/* Toolbar */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', background: 'var(--bg-secondary)', padding: '0.5rem 0.75rem', borderRadius: '8px' }}>
-                <div style={{ display: 'flex', gap: '0.35rem' }}>
-                  {(['ALL', 'FINANCIAL', 'LEGAL', 'OPERATIONAL', 'SCHEDULE'] as const).map(cat => (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', background: 'var(--bg-secondary)', padding: '0.5rem 0.75rem', borderRadius: '8px', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                  {(['ALL', 'MANDATORY', 'FINANCIAL', 'LEGAL', 'OPERATIONAL', 'SCHEDULE'] as const).map(cat => (
                     <button
                       key={cat}
                       type="button"
@@ -1613,7 +1770,7 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                     className="btn btn-xs btn-secondary"
                     onClick={() => setShowAddClause(true)}
                   >
-                    <Plus size={12} /> Add Custom Clause
+                    <Plus size={12} /> Add Deal Clause
                   </button>
                   <button
                     type="button"
@@ -1629,7 +1786,7 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
               {showAddClause && (
                 <div style={{ background: 'rgba(0, 140, 255, 0.08)', border: '1px dashed var(--brand-primary)', borderRadius: '8px', padding: '1rem', marginBottom: '1rem' }}>
                   <div style={{ fontWeight: 800, fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                    + Add New Contractual Clause
+                    + Add New Contract-Specific Clause (Section C)
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                     <input
@@ -1683,132 +1840,140 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
               )}
 
               {/* Clauses List */}
-              <div style={{ maxHeight: '450px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {clauses
-                  .filter(c => clauseFilter === 'ALL' || c.category === clauseFilter)
-                  .map((clause, idx) => {
-                    const isEditing = editingClauseId === clause.id;
-                    return (
-                      <div
-                        key={clause.id}
-                        style={{
-                          border: '1px solid var(--border-color)',
-                          borderRadius: '8px',
-                          padding: '0.75rem 1rem',
-                          background: 'var(--bg-card)',
-                          transition: 'all 0.15s'
-                        }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <span style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--brand-primary)' }}>
-                              Clause {clause.number}: {termsLanguage === 'BN' ? clause.titleBn : clause.title}
-                            </span>
-                            {clause.isMandatory ? (
-                              <span className="badge badge-secondary" style={{ fontSize: '0.65rem' }}>
-                                <Lock size={10} /> Mandatory
-                              </span>
-                            ) : (
-                              <span className="badge badge-neutral" style={{ fontSize: '0.65rem' }}>
-                                Optional
-                              </span>
-                            )}
-                            <span className="badge" style={{ fontSize: '0.65rem', opacity: 0.7 }}>
-                              {clause.category}
-                            </span>
-                          </div>
+              <div style={{ maxHeight: '460px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {displayedClauses.map((clause, idx) => {
+                  const isEditing = editingClauseId === clause.id;
+                  const secPrefix = clause.section === 'COMPANY' ? 'A' : clause.section === 'EMI' ? 'B' : 'C';
+                  const secBadgeColor = clause.section === 'COMPANY' ? '#1e3a8a' : clause.section === 'EMI' ? '#0284c7' : '#475569';
+                  const secLabel = clause.section === 'COMPANY' ? `Section A: Company` : clause.section === 'EMI' ? `Section B: EMI` : `Section C: Deal`;
 
-                          <div style={{ display: 'flex', gap: '0.25rem' }}>
-                            <button
-                              type="button"
-                              className="btn btn-ghost btn-xs"
-                              disabled={idx === 0}
-                              onClick={() => handleMoveClause(idx, 'UP')}
-                              title="Move Clause Up"
-                            >
-                              <MoveUp size={13} />
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-ghost btn-xs"
-                              disabled={idx === clauses.length - 1}
-                              onClick={() => handleMoveClause(idx, 'DOWN')}
-                              title="Move Clause Down"
-                            >
-                              <MoveDown size={13} />
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-ghost btn-xs"
-                              onClick={() => setEditingClauseId(isEditing ? null : clause.id)}
-                              title="Edit Clause Content"
-                            >
-                              {isEditing ? 'Done' : 'Edit'}
-                            </button>
-                            {!clause.isMandatory && (
-                              <button
-                                type="button"
-                                className="btn btn-ghost btn-xs text-danger"
-                                onClick={() => handleDeleteClause(clause.id)}
-                                title="Remove Clause"
-                              >
-                                <Trash2 size={13} />
-                              </button>
-                            )}
-                          </div>
+                  return (
+                    <div
+                      key={clause.id}
+                      style={{
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '8px',
+                        padding: '0.75rem 1rem',
+                        background: 'var(--bg-card)',
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          <span 
+                            style={{ 
+                              background: secBadgeColor, 
+                              color: '#fff', 
+                              fontSize: '0.65rem', 
+                              padding: '2px 6px', 
+                              borderRadius: '4px', 
+                              fontWeight: 700 
+                            }}
+                          >
+                            {secLabel}
+                          </span>
+                          <span style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--brand-primary)' }}>
+                            Clause {secPrefix}.{clause.number}: {termsLanguage === 'BN' ? clause.titleBn : clause.title}
+                          </span>
+                          {clause.isMandatory ? (
+                            <span className="badge badge-secondary" style={{ fontSize: '0.65rem' }}>
+                              <Lock size={10} /> Mandatory
+                            </span>
+                          ) : (
+                            <span className="badge badge-neutral" style={{ fontSize: '0.65rem' }}>
+                              Optional
+                            </span>
+                          )}
+                          <span className="badge" style={{ fontSize: '0.65rem', opacity: 0.7 }}>
+                            {clause.category}
+                          </span>
                         </div>
 
-                        {/* Clause Content Body */}
-                        {isEditing ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
-                            {(termsLanguage === 'EN' || termsLanguage === 'BOTH') && (
-                              <div>
-                                <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>English Content:</label>
-                                <textarea
-                                  className="form-textarea"
-                                  rows={3}
-                                  value={clause.content}
-                                  onChange={e => {
-                                    const text = e.target.value;
-                                    setClauses(prev => prev.map(c => c.id === clause.id ? { ...c, content: text } : c));
-                                  }}
-                                  style={{ fontSize: '0.8rem', width: '100%' }}
-                                />
-                              </div>
-                            )}
-                            {(termsLanguage === 'BN' || termsLanguage === 'BOTH') && (
-                              <div>
-                                <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>বাংলা বিষয়বস্তু:</label>
-                                <textarea
-                                  className="form-textarea"
-                                  rows={3}
-                                  value={clause.contentBn}
-                                  onChange={e => {
-                                    const text = e.target.value;
-                                    setClauses(prev => prev.map(c => c.id === clause.id ? { ...c, contentBn: text } : c));
-                                  }}
-                                  style={{ fontSize: '0.8rem', width: '100%' }}
-                                />
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                            {termsLanguage === 'BN' ? (
-                              <p style={{ margin: 0 }}>{interpolateClauseText(clause.contentBn, interpolationContext)}</p>
-                            ) : termsLanguage === 'BOTH' ? (
-                              <div>
-                                <p style={{ margin: 0, marginBottom: '4px' }}>{interpolateClauseText(clause.content, interpolationContext)}</p>
-                                <p style={{ margin: 0, fontStyle: 'italic', opacity: 0.85 }}>{interpolateClauseText(clause.contentBn, interpolationContext)}</p>
-                              </div>
-                            ) : (
-                              <p style={{ margin: 0 }}>{interpolateClauseText(clause.content, interpolationContext)}</p>
-                            )}
-                          </div>
-                        )}
+                        <div style={{ display: 'flex', gap: '0.25rem' }}>
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-xs"
+                            disabled={idx === 0}
+                            onClick={() => handleMoveClause(clause.id, clause.section, 'UP')}
+                            title="Move Clause Up"
+                          >
+                            <MoveUp size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-xs"
+                            disabled={idx === displayedClauses.length - 1}
+                            onClick={() => handleMoveClause(clause.id, clause.section, 'DOWN')}
+                            title="Move Clause Down"
+                          >
+                            <MoveDown size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-xs"
+                            onClick={() => setEditingClauseId(isEditing ? null : clause.id)}
+                            title="Edit Clause Content"
+                          >
+                            {isEditing ? 'Done' : 'Edit'}
+                          </button>
+                          {!clause.isMandatory && (
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-xs text-danger"
+                              onClick={() => handleDeleteClause(clause.id, clause.section)}
+                              title="Remove Clause"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    );
-                  })}
+
+                      {/* Clause Content Body */}
+                      {isEditing ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
+                          {(termsLanguage === 'EN' || termsLanguage === 'BOTH') && (
+                            <div>
+                              <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>English Content:</label>
+                              <textarea
+                                className="form-textarea"
+                                rows={3}
+                                value={clause.content}
+                                onChange={e => handleEditClauseContent(clause.id, clause.section, e.target.value, undefined)}
+                                style={{ fontSize: '0.8rem', width: '100%' }}
+                              />
+                            </div>
+                          )}
+                          {(termsLanguage === 'BN' || termsLanguage === 'BOTH') && (
+                            <div>
+                              <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>বাংলা বিষয়বস্তু:</label>
+                              <textarea
+                                className="form-textarea"
+                                rows={3}
+                                value={clause.contentBn}
+                                onChange={e => handleEditClauseContent(clause.id, clause.section, undefined, e.target.value)}
+                                style={{ fontSize: '0.8rem', width: '100%' }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                          {termsLanguage === 'BN' ? (
+                            <p style={{ margin: 0 }}>{interpolateClauseText(clause.contentBn, interpolationContext)}</p>
+                          ) : termsLanguage === 'BOTH' ? (
+                            <div>
+                              <p style={{ margin: 0, marginBottom: '4px' }}>{interpolateClauseText(clause.content, interpolationContext)}</p>
+                              <p style={{ margin: 0, fontStyle: 'italic', opacity: 0.85 }}>{interpolateClauseText(clause.contentBn, interpolationContext)}</p>
+                            </div>
+                          ) : (
+                            <p style={{ margin: 0 }}>{interpolateClauseText(clause.content, interpolationContext)}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.5rem' }}>
@@ -1850,7 +2015,7 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                   padding: '1.5rem', 
                   border: '1px solid #cbd5e1', 
                   boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                  maxHeight: '420px',
+                  maxHeight: '440px',
                   overflowY: 'auto',
                   fontFamily: '"Plus Jakarta Sans", sans-serif',
                   marginBottom: '1.25rem'
@@ -1862,7 +2027,7 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                     {settings?.companyName || 'NEED ELECTRO'}
                   </h2>
                   <div style={{ fontSize: '0.8rem', color: '#64748B', marginTop: '2px' }}>
-                    Trusted Electrical and Technological Solutions • Moulvibazar, Bangladesh
+                    Trusted Electrical and Technological Solutions • Shop#5, MR Plaza, Kusumbag, Moulvibazar, Sylhet
                   </div>
                   <div style={{ display: 'inline-block', background: '#002B5B', color: '#fff', fontSize: '0.75rem', fontWeight: 700, padding: '2px 10px', borderRadius: '4px', marginTop: '6px' }}>
                     COMMERCIAL HIRE-PURCHASE & LAPTOP FINANCING AGREEMENT
@@ -1893,21 +2058,74 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                   <span>Total Payable: ৳{financials.totalCustomerPayable.toLocaleString()}</span>
                 </div>
 
-                {/* 25 Clauses Rendered */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {clauses.map(c => (
-                    <div key={c.id} style={{ fontSize: '0.8rem', lineHeight: 1.5 }}>
-                      <div style={{ fontWeight: 800, color: '#002B5B' }}>
-                        {c.number}. {termsLanguage === 'BN' ? c.titleBn : c.title}
+                {/* SECTION A: General Company Terms & Conditions */}
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <div style={{ background: '#1e3a8a', color: '#fff', padding: '6px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 800, marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>SECTION A: NEED ELECTRO GENERAL COMPANY TERMS & CONDITIONS</span>
+                    <span style={{ fontSize: '0.7rem', opacity: 0.9 }}>Template: {companyTermsVersion} ({combined.sectionA.length} Clauses)</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    {combined.sectionA.map(c => (
+                      <div key={c.id} style={{ fontSize: '0.775rem', lineHeight: 1.45, background: '#f8fafc', padding: '6px 8px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ fontWeight: 800, color: '#1e3a8a', marginBottom: '2px' }}>
+                          A.{c.number}. {termsLanguage === 'BN' ? c.titleBn : c.title}
+                          {termsLanguage === 'BOTH' && ` / ${c.titleBn}`}
+                        </div>
+                        <div style={{ color: '#334155', textAlign: 'justify' }}>
+                          {termsLanguage === 'BN' 
+                            ? interpolateClauseText(c.contentBn, interpolationContext)
+                            : interpolateClauseText(c.content, interpolationContext)}
+                        </div>
                       </div>
-                      <div style={{ color: '#334155', textAlign: 'justify' }}>
-                        {termsLanguage === 'BN' 
-                          ? interpolateClauseText(c.contentBn, interpolationContext)
-                          : interpolateClauseText(c.content, interpolationContext)}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
+
+                {/* SECTION B: EMI Financing Terms */}
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <div style={{ background: '#0284c7', color: '#fff', padding: '6px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 800, marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>SECTION B: HIRE-PURCHASE & EMI-SPECIFIC TERMS & CONDITIONS</span>
+                    <span style={{ fontSize: '0.7rem', opacity: 0.9 }}>Template: {emiTermsVersion} ({combined.sectionB.length} Clauses)</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    {combined.sectionB.map(c => (
+                      <div key={c.id} style={{ fontSize: '0.775rem', lineHeight: 1.45, background: '#f8fafc', padding: '6px 8px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ fontWeight: 800, color: '#0284c7', marginBottom: '2px' }}>
+                          B.{c.number}. {termsLanguage === 'BN' ? c.titleBn : c.title}
+                          {termsLanguage === 'BOTH' && ` / ${c.titleBn}`}
+                        </div>
+                        <div style={{ color: '#334155', textAlign: 'justify' }}>
+                          {termsLanguage === 'BN' 
+                            ? interpolateClauseText(c.contentBn, interpolationContext)
+                            : interpolateClauseText(c.content, interpolationContext)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* SECTION C: Special Deal Covenants (if any) */}
+                {combined.sectionC.length > 0 && (
+                  <div style={{ marginBottom: '1.25rem' }}>
+                    <div style={{ background: '#475569', color: '#fff', padding: '6px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 800, marginBottom: '0.5rem' }}>
+                      SECTION C: SPECIAL CONTRACT-SPECIFIC COVENANTS ({combined.sectionC.length} Clauses)
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                      {combined.sectionC.map(c => (
+                        <div key={c.id} style={{ fontSize: '0.775rem', lineHeight: 1.45, background: '#f8fafc', padding: '6px 8px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+                          <div style={{ fontWeight: 800, color: '#475569', marginBottom: '2px' }}>
+                            C.{c.number}. {termsLanguage === 'BN' ? c.titleBn : c.title}
+                          </div>
+                          <div style={{ color: '#334155', textAlign: 'justify' }}>
+                            {termsLanguage === 'BN' 
+                              ? interpolateClauseText(c.contentBn, interpolationContext)
+                              : interpolateClauseText(c.content, interpolationContext)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Signatures Placeholder */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px dashed #cbd5e1', textAlign: 'center', fontSize: '0.75rem' }}>
@@ -1927,9 +2145,26 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                     <div>For {settings?.companyName || 'NEED ELECTRO'}</div>
                   </div>
                 </div>
+
+                {/* Mandatory Developer Credit */}
+                <div 
+                  style={{
+                    marginTop: '1.25rem',
+                    paddingTop: '6px',
+                    borderTop: '1.5px solid #000000',
+                    textAlign: 'center',
+                    fontSize: '0.75rem',
+                    fontWeight: 800,
+                    color: '#000000',
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase'
+                  }}
+                >
+                  Software Developed By AMDADS GROUP
+                </div>
               </div>
 
-              {/* Affirmative Customer Confirmation Controls */}
+              {/* Affirmative Customer Confirmation Controls (5 Explicit Safeguards) */}
               <div style={{ background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '10px', padding: '1.25rem', marginBottom: '1.25rem' }}>
                 <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#10b981', marginBottom: '0.75rem' }}>
                   Mandatory Affirmative Customer Confirmation (সকল শর্তে স্পষ্ট সম্মতি আবশ্যক)
@@ -1944,7 +2179,7 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                       style={{ width: '16px', height: '16px' }}
                     />
                     <span>
-                      Customer has reviewed and confirmed the agreed price (৳{financials.finalContractPrice.toLocaleString()}), down payment (৳{financials.downPaymentAmount.toLocaleString()}), and total payable amount.
+                      <strong>1. Financial Obligation:</strong> Customer has reviewed and confirmed the agreed price (৳{financials.finalContractPrice.toLocaleString()}), down payment (৳{financials.downPaymentAmount.toLocaleString()}), monthly installment (৳{financials.regularInstallmentAmount.toLocaleString()}/mo), and total obligation (৳{financials.totalCustomerPayable.toLocaleString()}).
                     </span>
                   </label>
 
@@ -1956,19 +2191,31 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                       style={{ width: '16px', height: '16px' }}
                     />
                     <span>
-                      Customer has reviewed and accepted the {durationMonths}-month repayment schedule starting on {firstDueDate}.
+                      <strong>2. Repayment Schedule:</strong> Customer has reviewed and accepted the {durationMonths}-month installment schedule starting on {firstDueDate} with maturity date {customSchedule[customSchedule.length - 1]?.dueDate || 'Maturity Date'}.
                     </span>
                   </label>
 
                   <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.825rem', cursor: 'pointer' }}>
                     <input
                       type="checkbox"
-                      checked={confirmedTerms}
-                      onChange={e => setConfirmedTerms(e.target.checked)}
+                      checked={confirmedCompanyTerms}
+                      onChange={e => setConfirmedCompanyTerms(e.target.checked)}
                       style={{ width: '16px', height: '16px' }}
                     />
                     <span>
-                      Customer has received and agreed to all 25 contractual terms & conditions without objection.
+                      <strong>3. Section A Company Policies:</strong> Customer has received, reviewed, and accepted the NEED ELECTRO General Company Terms & Conditions (Section A: 20 Standard Policies, {companyTermsVersion}) governing sales, warranties, delivery, and services.
+                    </span>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.825rem', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={confirmedEmiTerms}
+                      onChange={e => setConfirmedEmiTerms(e.target.checked)}
+                      style={{ width: '16px', height: '16px' }}
+                    />
+                    <span>
+                      <strong>4. Section B EMI Terms:</strong> Customer has received, reviewed, and accepted the Hire-Purchase & EMI-Specific Terms & Conditions (Section B: 25 Financial Clauses, {emiTermsVersion}) governing interest, overdue rules, repossession, and title retention.
                     </span>
                   </label>
 
@@ -1980,7 +2227,7 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                       style={{ width: '16px', height: '16px' }}
                     />
                     <span>
-                      Customer National ID ({activeCustomer.nid}) and guarantor particulars have been physically or digitally verified.
+                      <strong>5. Verified Identity:</strong> Customer National ID ({activeCustomer.nid}) and guarantor particulars have been physically or digitally verified.
                     </span>
                   </label>
                 </div>
@@ -1990,7 +2237,7 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="e.g. Executed in presence of branch manager; original NID verified."
+                    placeholder="e.g. Executed in showroom in presence of manager; original NID card verified."
                     value={acceptanceNotes}
                     onChange={e => setAcceptanceNotes(e.target.value)}
                   />
@@ -2021,7 +2268,8 @@ export const EMIContractWizard: React.FC<EMIContractWizardProps> = ({
                     disabled={
                       !confirmedFinancials || 
                       !confirmedSchedule || 
-                      !confirmedTerms || 
+                      !confirmedCompanyTerms || 
+                      !confirmedEmiTerms || 
                       !confirmedIdentity || 
                       !scheduleReconciliation.isBalanced ||
                       isSubmitting

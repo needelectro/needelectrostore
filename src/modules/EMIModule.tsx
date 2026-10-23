@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { EMIContractWizard } from '../components/emi/EMIContractWizard';
 import { EMIAmendmentModal } from '../components/emi/EMIAmendmentModal';
+import { LegalTemplatesManager } from '../components/admin/LegalTemplatesManager';
 
 
 interface EMIModuleProps {
@@ -48,8 +49,8 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
     }
   };
 
-  // Active View Tab: 'dashboard' | 'accounts' | 'collect' | 'new_emi' | 'reminders' | 'plans'
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'accounts' | 'collect' | 'new_emi' | 'reminders' | 'plans'>(
+  // Active View Tab: 'dashboard' | 'accounts' | 'collect' | 'new_emi' | 'reminders' | 'plans' | 'legal_templates'
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'accounts' | 'collect' | 'new_emi' | 'reminders' | 'plans' | 'legal_templates'>(
     initialMode === 'new' ? 'new_emi' : 'dashboard'
   );
 
@@ -533,6 +534,13 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
           onClick={() => setActiveTab('plans')}
         >
           Configurable Plans ({emiPlans.length})
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'legal_templates' ? 'active' : ''}`}
+          onClick={() => setActiveTab('legal_templates')}
+          style={{ fontWeight: 700, color: activeTab === 'legal_templates' ? '#fff' : 'var(--brand-primary)' }}
+        >
+          Legal & Contract Terms (A + B)
         </button>
       </div>
 
@@ -1470,6 +1478,15 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* TAB 7: LEGAL & CONTRACT TEMPLATES */}
+      {/* ------------------------------------------------------------- */}
+      {activeTab === 'legal_templates' && (
+        <div style={{ marginTop: '0.5rem' }}>
+          <LegalTemplatesManager onNavigate={onNavigate} />
         </div>
       )}
 

@@ -33,6 +33,20 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
   const savedClauses: EMIContractClause[] = 
     account.contractClauses || structuredTerms?.clauses || [];
 
+  const companyTermsVersion: string =
+    account.companyTermsVersion || structuredTerms?.companyTermsVersion || 'v1.0';
+  const emiTermsVersion: string =
+    account.emiTermsVersion || structuredTerms?.emiTermsVersion || 'v1.0';
+
+  const companyClauses: any[] =
+    account.companyClauses || structuredTerms?.companyClauses || [];
+  const emiClauses: any[] =
+    account.emiClauses || structuredTerms?.emiClauses || [];
+  const customClauses: any[] =
+    account.customClauses || structuredTerms?.customClauses || [];
+
+  const hasSectionedClauses = companyClauses.length > 0 || emiClauses.length > 0;
+
   const customerAcceptance = 
     account.customerAcceptance || structuredTerms?.customerAcceptance;
 
@@ -70,7 +84,14 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
     lateFeePerDay: financialTerms?.lateFeePerDay || 0,
     companyName: settings.companyName || 'NEED ELECTRO',
     companyPhone: settings.phone || '+880 1733-983752',
-    companyAddress: settings.address || 'Moulvibazar, Sylhet, Bangladesh'
+    companyAddress: settings.address || 'Shop#5, MR Plaza, Kusumbag, Moulvibazar, Sylhet, Bangladesh',
+    companyEmail: settings.email || 'info.needelectro@gmail.com',
+  };
+
+  // Helper to interpolate clause content safely
+  const formatClauseContent = (text: string | undefined): string => {
+    if (!text) return '';
+    return interpolateClauseText(text, interpContext as any);
   };
 
   // If no clauses were stored in contractTerms, interpolate the 25 standard clauses
@@ -423,40 +444,176 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
               </table>
             </div>
 
-            {/* 25 Complete Terms & Conditions Clauses */}
-            <div style={{ marginBottom: '20px' }}>
-              <h4 style={{ fontSize: '11px', textTransform: 'uppercase', color: '#1e3a8a', marginBottom: '6px', borderBottom: '1px solid #cbd5e1', paddingBottom: '4px' }}>
-                5. Complete Contract Terms and Conditions ({activeClauses.length} Clauses)
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '9.5px', lineHeight: '1.45', color: '#334155' }}>
-                {activeClauses.map((clause, idx) => (
-                  <div key={clause.id || idx} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '6px 8px' }}>
-                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '2px' }}>
-                      Clause {clause.number || idx + 1}: {printLanguage === 'BN' ? clause.titleBn : clause.title}
-                      {printLanguage === 'BOTH' && ` / ${clause.titleBn}`}
+            {/* Sectioned or Single Contract Terms & Conditions */}
+            {hasSectionedClauses ? (
+              <div style={{ marginBottom: '20px' }}>
+                {/* SECTION A: General Company Terms & Conditions */}
+                {companyClauses.length > 0 && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ 
+                      background: '#1e3a8a', 
+                      color: '#ffffff', 
+                      padding: '5px 10px', 
+                      borderRadius: '4px', 
+                      fontSize: '11px', 
+                      fontWeight: 'bold', 
+                      display: 'flex', 
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '8px'
+                    }}>
+                      <span>5. SECTION A: NEED ELECTRO GENERAL COMPANY TERMS & CONDITIONS</span>
+                      <span style={{ fontSize: '9px', opacity: 0.9 }}>Template: {companyTermsVersion} ({companyClauses.length} Clauses)</span>
                     </div>
-                    {(printLanguage === 'EN' || printLanguage === 'BOTH') && (
-                      <p style={{ margin: 0, textAlign: 'justify' }}>{clause.content}</p>
-                    )}
-                    {(printLanguage === 'BN' || printLanguage === 'BOTH') && (
-                      <p style={{ margin: (printLanguage === 'BOTH' ? '4px 0 0 0' : 0), color: '#1e293b', textAlign: 'justify' }}>
-                        {clause.contentBn}
-                      </p>
-                    )}
+                    <p style={{ fontSize: '9px', color: '#64748b', fontStyle: 'italic', margin: '0 0 6px 2px' }}>
+                      These general company terms govern all product sales, warranty services, payments, customer duties, and corporate policies of NEED ELECTRO under applicable Bangladesh consumer and contract law.
+                    </p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '9px', lineHeight: '1.4', color: '#334155' }}>
+                      {companyClauses.map((clause, idx) => (
+                        <div key={clause.id || idx} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '5px 8px' }}>
+                          <div style={{ fontWeight: 700, color: '#1e3a8a', marginBottom: '2px' }}>
+                            A.{clause.number || idx + 1}: {printLanguage === 'BN' ? clause.titleBn : clause.title}
+                            {printLanguage === 'BOTH' && ` / ${clause.titleBn}`}
+                          </div>
+                          {(printLanguage === 'EN' || printLanguage === 'BOTH') && (
+                            <p style={{ margin: 0, textAlign: 'justify' }}>{formatClauseContent(clause.content)}</p>
+                          )}
+                          {(printLanguage === 'BN' || printLanguage === 'BOTH') && (
+                            <p style={{ margin: (printLanguage === 'BOTH' ? '3px 0 0 0' : 0), color: '#1e293b', textAlign: 'justify' }}>
+                              {formatClauseContent(clause.contentBn)}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
+                )}
 
-            {/* Electronic Affirmation Evidence (if available) */}
+                {/* SECTION B: EMI-Specific Terms & Conditions */}
+                {emiClauses.length > 0 && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ 
+                      background: '#0284c7', 
+                      color: '#ffffff', 
+                      padding: '5px 10px', 
+                      borderRadius: '4px', 
+                      fontSize: '11px', 
+                      fontWeight: 'bold', 
+                      display: 'flex', 
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '8px'
+                    }}>
+                      <span>6. SECTION B: HIRE-PURCHASE & EMI-SPECIFIC TERMS & CONDITIONS</span>
+                      <span style={{ fontSize: '9px', opacity: 0.9 }}>Template: {emiTermsVersion} ({emiClauses.length} Clauses)</span>
+                    </div>
+                    <p style={{ fontSize: '9px', color: '#64748b', fontStyle: 'italic', margin: '0 0 6px 2px' }}>
+                      These financial and operational clauses govern down payment, installment due dates, interest calculation, default remedies, repossession, guarantor liability, and legal title retention.
+                    </p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '9px', lineHeight: '1.4', color: '#334155' }}>
+                      {emiClauses.map((clause, idx) => (
+                        <div key={clause.id || idx} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '5px 8px' }}>
+                          <div style={{ fontWeight: 700, color: '#0284c7', marginBottom: '2px' }}>
+                            B.{clause.number || idx + 1}: {printLanguage === 'BN' ? clause.titleBn : clause.title}
+                            {printLanguage === 'BOTH' && ` / ${clause.titleBn}`}
+                          </div>
+                          {(printLanguage === 'EN' || printLanguage === 'BOTH') && (
+                            <p style={{ margin: 0, textAlign: 'justify' }}>{formatClauseContent(clause.content)}</p>
+                          )}
+                          {(printLanguage === 'BN' || printLanguage === 'BOTH') && (
+                            <p style={{ margin: (printLanguage === 'BOTH' ? '3px 0 0 0' : 0), color: '#1e293b', textAlign: 'justify' }}>
+                              {formatClauseContent(clause.contentBn)}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* SECTION C: Additional Deal-Specific Clauses (if any) */}
+                {customClauses.length > 0 && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ 
+                      background: '#475569', 
+                      color: '#ffffff', 
+                      padding: '5px 10px', 
+                      borderRadius: '4px', 
+                      fontSize: '11px', 
+                      fontWeight: 'bold', 
+                      marginBottom: '8px' 
+                    }}>
+                      7. SECTION C: SPECIAL CONTRACT-SPECIFIC COVENANTS ({customClauses.length} Clauses)
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '9px', lineHeight: '1.4', color: '#334155' }}>
+                      {customClauses.map((clause, idx) => (
+                        <div key={clause.id || idx} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '5px 8px' }}>
+                          <div style={{ fontWeight: 700, color: '#334155', marginBottom: '2px' }}>
+                            C.{clause.number || idx + 1}: {printLanguage === 'BN' ? clause.titleBn : clause.title}
+                            {printLanguage === 'BOTH' && ` / ${clause.titleBn}`}
+                          </div>
+                          {(printLanguage === 'EN' || printLanguage === 'BOTH') && (
+                            <p style={{ margin: 0, textAlign: 'justify' }}>{formatClauseContent(clause.content)}</p>
+                          )}
+                          {(printLanguage === 'BN' || printLanguage === 'BOTH') && (
+                            <p style={{ margin: (printLanguage === 'BOTH' ? '3px 0 0 0' : 0), color: '#1e293b', textAlign: 'justify' }}>
+                              {formatClauseContent(clause.contentBn)}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Legacy Single-Section Clauses Fallback */
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ fontSize: '11px', textTransform: 'uppercase', color: '#1e3a8a', marginBottom: '6px', borderBottom: '1px solid #cbd5e1', paddingBottom: '4px' }}>
+                  5. Complete Contract Terms and Conditions ({activeClauses.length} Clauses)
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '9.5px', lineHeight: '1.45', color: '#334155' }}>
+                  {activeClauses.map((clause, idx) => (
+                    <div key={clause.id || idx} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '6px 8px' }}>
+                      <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '2px' }}>
+                        Clause {clause.number || idx + 1}: {printLanguage === 'BN' ? clause.titleBn : clause.title}
+                        {printLanguage === 'BOTH' && ` / ${clause.titleBn}`}
+                      </div>
+                      {(printLanguage === 'EN' || printLanguage === 'BOTH') && (
+                        <p style={{ margin: 0, textAlign: 'justify' }}>{formatClauseContent(clause.content)}</p>
+                      )}
+                      {(printLanguage === 'BN' || printLanguage === 'BOTH') && (
+                        <p style={{ margin: (printLanguage === 'BOTH' ? '4px 0 0 0' : 0), color: '#1e293b', textAlign: 'justify' }}>
+                          {formatClauseContent(clause.contentBn)}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Electronic Affirmation Evidence */}
             {customerAcceptance && (
               <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '8px 10px', marginBottom: '16px', fontSize: '10px', color: '#166534' }}>
-                <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-                  <ShieldCheck size={14} /> Electronic Affirmative Customer Acceptance Record
+                <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <ShieldCheck size={14} /> Electronic Affirmative Customer Acceptance Record (বৈধ সম্মতি রেকর্ড)
                 </div>
-                <p style={{ margin: 0 }}>
-                  Customer <strong>{account.customerName}</strong> affirmatively verified the financial terms, repayment schedule, and all 25 contract conditions on <strong>{customerAcceptance.acceptedAt || account.startDate}</strong> via {customerAcceptance.acceptanceMethod}.
+                <p style={{ margin: 0, lineHeight: 1.5 }}>
+                  Customer <strong>{account.customerName}</strong> affirmatively reviewed and irrevocably accepted all obligations under this Agreement on <strong>{customerAcceptance.acceptedAt || account.startDate}</strong> via {customerAcceptance.acceptanceMethod}.
                 </p>
+                <div style={{ display: 'flex', gap: '12px', marginTop: '6px', fontSize: '9px', fontWeight: 600, flexWrap: 'wrap' }}>
+                  <span>✓ Financial Terms Confirmed</span>
+                  <span>✓ Repayment Schedule Confirmed</span>
+                  <span>✓ Section A: NEED ELECTRO Company Terms Confirmed</span>
+                  <span>✓ Section B: EMI Financing Terms Confirmed</span>
+                  <span>✓ NID ({account.customerNid || 'Verified'}) & Guarantor Verified</span>
+                </div>
+                {customerAcceptance.notes && (
+                  <p style={{ margin: '4px 0 0 0', fontSize: '9px', fontStyle: 'italic', color: '#15803d' }}>
+                    Execution Note: {customerAcceptance.notes}
+                  </p>
+                )}
               </div>
             )}
 

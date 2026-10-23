@@ -619,6 +619,9 @@ export interface EMICustomerAcceptance {
   confirmedFinancials: boolean;
   confirmedSchedule: boolean;
   confirmedTerms: boolean;
+  confirmedCompanyTerms?: boolean;
+  confirmedEmiTerms?: boolean;
+  confirmedIdentity?: boolean;
   notes?: string;
 }
 
@@ -654,6 +657,11 @@ export interface EMIAccount {
   // Extended Advanced Contract Specifications
   financialTerms?: EMIFinancialTerms;
   contractClauses?: EMIContractClause[];
+  companyClauses?: any[];
+  emiClauses?: any[];
+  customClauses?: any[];
+  companyTermsVersion?: string;
+  emiTermsVersion?: string;
   termsLanguage?: 'EN' | 'BN' | 'BOTH';
   customerAcceptance?: EMICustomerAcceptance;
   amendments?: EMIAmendmentRecord[];

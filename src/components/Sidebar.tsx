@@ -5,7 +5,7 @@ import {
   Truck, Users, PackageSearch, ShieldCheck, Wrench, Wallet,
   PieChart, BookOpen, UserCheck, GitFork, BarChart3,
   Lock, ScrollText, Settings, ChevronRight, Zap, RotateCcw, Sliders, Landmark,
-  User, Globe, X, ShoppingBag, Sparkles, FileText
+  User, Globe, X, ShoppingBag, Sparkles, FileText, Scale
 } from 'lucide-react';
 import { NeedElectroLogo } from './NeedElectroLogo';
 import { UserProfileModal } from './UserProfileModal';
@@ -115,6 +115,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'banners', label: isBangla ? 'স্টোর ব্যানার ও স্লাইডার' : 'Store Banners & Hero', icon: Sparkles, badge: 'HERO', badgeColor: '#0084d6' },
         { id: 'guides_cms', label: isBangla ? 'বায়িং গাইড সিএমএস' : 'Guides & Content CMS', icon: BookOpen, badge: 'CMS', badgeColor: '#10b981' },
         { id: 'seo_management', label: isBangla ? 'এসইও ম্যানেজমেন্ট' : 'SEO Management', icon: Globe, badge: 'SEO', badgeColor: '#06b6d4' },
+        { id: 'legal_templates', label: isBangla ? 'লিগ্যাল ও চুক্তি টেমপ্লেট' : 'Legal & Contract Terms', icon: Scale, badge: 'LEGAL', badgeColor: '#8b5cf6' },
         { id: 'employees', label: isBangla ? 'কর্মচারী ও টেকনিশিয়ান' : 'Employees & Techs', icon: UserCheck },
         { id: 'branches', label: isBangla ? 'শাখা ও ট্রান্সফার' : 'Branches & Transfers', icon: GitFork },
         { id: 'roles', label: isBangla ? 'রোল ও পারমিশন' : 'Roles & RBAC', icon: Lock },

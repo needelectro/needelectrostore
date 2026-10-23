@@ -44,6 +44,7 @@ import { BannersManager } from './components/admin/BannersManager';
 import { GuidesCmsManager } from './components/admin/GuidesCmsManager';
 import { WebsiteManagementHub } from './components/admin/WebsiteManagementHub';
 import { ImageRecoveryManager } from './components/admin/ImageRecoveryManager';
+import { LegalTemplatesModule } from './modules/LegalTemplatesModule';
 
 import { InitialSetupModal } from './components/auth/InitialSetupModal';
 import { LandingPage } from './components/landing/LandingPage';
@@ -516,6 +517,8 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
         return <ControlCenterModule onNavigate={handleNavigate} initialTab={moduleInitialParam as any} />;
       case 'seo_management':
         return <ControlCenterModule onNavigate={handleNavigate} initialTab="seo" />;
+      case 'legal_templates':
+        return <LegalTemplatesModule onNavigate={handleNavigate} />;
       case 'image_recovery':
         return <ImageRecoveryManager onNavigate={handleNavigate} />;
       default:

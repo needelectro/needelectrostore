@@ -538,12 +538,18 @@ export async function POST(req: NextRequest) {
 
         // Prepare structured contract terms payload
         const contractTermsPayload = JSON.stringify({
-          version: 1,
+          version: 2,
           language: emiPlanConfig.termsLanguage || 'EN',
+          companyTermsVersion: emiPlanConfig.companyTermsVersion || 'v1.0',
+          emiTermsVersion: emiPlanConfig.emiTermsVersion || 'v1.0',
+          companyClauses: emiPlanConfig.companyClauses || [],
+          emiClauses: emiPlanConfig.emiClauses || [],
+          customClauses: emiPlanConfig.customClauses || [],
           clauses: emiPlanConfig.clauses || [],
           financialTerms: emiPlanConfig.financialTerms || null,
           customerAcceptance: emiPlanConfig.customerAcceptance || null,
           contractTermsText: emiPlanConfig.contractTermsText || '',
+          snapshotTimestamp: new Date().toISOString(),
         });
 
         const emiAccount = await tx.eMIAccount.create({
