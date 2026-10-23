@@ -700,29 +700,6 @@ export const WebsiteManagementHub: React.FC<WebsiteManagementHubProps> = ({ onNa
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Assign technicians &amp; track jobs</div>
                 </div>
               </button>
-
-              <button
-                onClick={() => onNavigate && onNavigate('image_recovery')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '12px',
-                  borderRadius: '8px',
-                  background: 'var(--bg-card-muted)',
-                  border: '1px solid #8b5cf6',
-                  color: 'var(--text-primary)',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  textAlign: 'left'
-                }}
-              >
-                <Sparkles size={18} color="#8b5cf6" />
-                <div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#8b5cf6' }}>AI Image Recovery</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Automate missing product images</div>
-                </div>
-              </button>
             </div>
           </div>
 

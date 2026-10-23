@@ -77,7 +77,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       group: isBangla ? 'প্রধান কার্যক্রম' : 'Core Operations',
       items: [
         { id: 'dashboard', label: isBangla ? 'ড্যাশবোর্ড' : 'Dashboard', icon: LayoutDashboard },
-        { id: 'website_orders', label: isBangla ? 'অনলাইন অর্ডার' : 'Online Store Orders', icon: ShoppingBag, badge: 'STORE', badgeColor: '#10b981' },
         { id: 'pos', label: isBangla ? 'পিওএস / সেলস বিলিং' : 'POS / Billing', icon: ShoppingCart, highlight: true },
         { id: 'sales', label: isBangla ? 'বিক্রয় ও ইনভয়েস' : 'Sales & Invoices', icon: ReceiptText },
         { id: 'quotations', label: isBangla ? 'কোটেশন ব্যবস্থাপনা' : 'Sales Quotations', icon: FileText, badge: quotations.length > 0 ? formatNumber(quotations.length) : undefined, badgeColor: '#008CFF' },
@@ -111,7 +110,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       group: isBangla ? 'এন্টারপ্রাইজ কন্ট্রোল' : 'Enterprise Control',
       items: [
         { id: 'website_management', label: isBangla ? 'ওয়েবসাইট ম্যানেজমেন্ট হাব' : 'Website Management Hub', icon: Globe, badge: 'SYNC', badgeColor: '#008CFF', highlight: true },
-        { id: 'image_recovery', label: isBangla ? 'এআই ইমেজ রিকভারি' : 'AI Image Recovery', icon: Sparkles, badge: 'AI', badgeColor: '#8b5cf6', highlight: true },
+        { id: 'website_orders', label: isBangla ? 'অনলাইন অর্ডার' : 'Online Store Orders', icon: ShoppingBag, badge: 'STORE', badgeColor: '#10b981' },
         { id: 'control_center', label: isBangla ? 'সিস্টেম কন্ট্রোল সেন্টার' : 'System Control Center', icon: Sliders, badge: 'SUPER', badgeColor: '#2563eb' },
         { id: 'banners', label: isBangla ? 'স্টোর ব্যানার ও স্লাইডার' : 'Store Banners & Hero', icon: Sparkles, badge: 'HERO', badgeColor: '#0084d6' },
         { id: 'guides_cms', label: isBangla ? 'বায়িং গাইড সিএমএস' : 'Guides & Content CMS', icon: BookOpen, badge: 'CMS', badgeColor: '#10b981' },
