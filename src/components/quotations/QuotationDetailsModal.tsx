@@ -441,6 +441,25 @@ export const QuotationDetailsModal: React.FC<QuotationDetailsModalProps> = ({
           </div>
 
           <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {quotation.convertedInvoiceNumber && onViewInvoice && (
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  onClose();
+                  onViewInvoice(quotation.convertedInvoiceNumber!);
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                }}
+              >
+                <CheckCircle2 size={16} /> View Converted Order ({quotation.convertedInvoiceNumber})
+              </button>
+            )}
             {quotation.status !== 'CONVERTED' && (
               <button
                 className="btn btn-primary btn-sm"

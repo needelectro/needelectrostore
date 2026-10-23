@@ -458,7 +458,7 @@ export const QuotationsManager: React.FC<QuotationsManagerProps> = ({
                   <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Total (৳)</th>
                   <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>Status</th>
                   <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>Prepared By</th>
-                  <th style={{ padding: '0.75rem 1rem', textAlign: 'center', width: '180px' }}>Actions</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'center', minWidth: '270px', width: '270px' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -570,69 +570,125 @@ export const QuotationsManager: React.FC<QuotationsManagerProps> = ({
                       </td>
 
                       {/* Actions */}
-                      <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', gap: '0.3rem', alignItems: 'center' }}>
+                      <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                        <div
+                          style={{
+                            display: 'inline-flex',
+                            gap: '0.35rem',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexWrap: 'nowrap',
+                          }}
+                        >
                           <button
-                            className="btn btn-ghost btn-xs text-primary"
+                            type="button"
+                            className="btn-icon-xs"
                             onClick={() => setViewingQuotation(q)}
                             title="View Quotation Details"
+                            style={{ color: 'var(--brand-primary)', flexShrink: 0 }}
                           >
-                            <Eye size={15} />
+                            <Eye size={15} style={{ flexShrink: 0 }} />
                           </button>
 
                           <button
-                            className="btn btn-ghost btn-xs"
+                            type="button"
+                            className="btn-icon-xs"
                             onClick={() => setActiveQuotationToPrint(q)}
                             title="Print Quotation (A4)"
+                            style={{ color: 'var(--text-secondary)', flexShrink: 0 }}
                           >
-                            <Printer size={15} />
+                            <Printer size={15} style={{ flexShrink: 0 }} />
                           </button>
 
                           <button
-                            className="btn btn-ghost btn-xs"
+                            type="button"
+                            className="btn-icon-xs"
                             onClick={() => handleWhatsApp(q)}
-                            style={{ color: '#10b981' }}
                             title="Share on WhatsApp"
+                            style={{ color: '#10b981', flexShrink: 0 }}
                           >
-                            <Share2 size={15} />
+                            <Share2 size={15} style={{ flexShrink: 0 }} />
                           </button>
 
                           <button
-                            className="btn btn-ghost btn-xs"
+                            type="button"
+                            className="btn-icon-xs"
                             onClick={() => handleDuplicate(q)}
                             title="Duplicate Quotation"
+                            style={{ color: 'var(--text-secondary)', flexShrink: 0 }}
                           >
-                            <Copy size={15} />
+                            <Copy size={15} style={{ flexShrink: 0 }} />
                           </button>
 
                           {q.effectiveStatus !== 'CONVERTED' && (
                             <button
-                              className="btn btn-ghost btn-xs"
+                              type="button"
+                              className="btn-icon-xs"
                               onClick={() => handleEdit(q)}
                               title="Edit Quotation"
+                              style={{ color: '#f59e0b', flexShrink: 0 }}
                             >
-                              <Edit2 size={15} />
+                              <Edit2 size={15} style={{ flexShrink: 0 }} />
                             </button>
                           )}
 
-                          {q.effectiveStatus !== 'CONVERTED' && (
+                          {q.effectiveStatus !== 'CONVERTED' ? (
                             <button
-                              className="btn btn-xs btn-outline-primary"
+                              type="button"
+                              className="btn btn-xs"
                               onClick={() => setConvertingQuotation(q)}
-                              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', padding: '2px 6px' }}
-                              title="Convert to Sales Order"
+                              style={{
+                                background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                                color: '#ffffff',
+                                border: 'none',
+                                fontWeight: 700,
+                                fontSize: '0.72rem',
+                                padding: '4px 9px',
+                                borderRadius: '6px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                boxShadow: '0 2px 6px rgba(2, 132, 199, 0.35)',
+                                cursor: 'pointer',
+                                flexShrink: 0,
+                              }}
+                              title="Convert Quotation to Sales Order"
                             >
-                              <ArrowRight size={13} /> Order
+                              <ArrowRight size={13} style={{ flexShrink: 0 }} /> Order
                             </button>
-                          )}
+                          ) : q.convertedInvoiceNumber ? (
+                            <button
+                              type="button"
+                              className="btn btn-xs"
+                              onClick={() => onNavigateToInvoice && onNavigateToInvoice(q.convertedInvoiceNumber!)}
+                              style={{
+                                background: 'rgba(139, 92, 246, 0.15)',
+                                color: '#a78bfa',
+                                border: '1px solid rgba(139, 92, 246, 0.35)',
+                                fontWeight: 700,
+                                fontSize: '0.72rem',
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                cursor: 'pointer',
+                                flexShrink: 0,
+                              }}
+                              title={`View Converted Sales Order (${q.convertedInvoiceNumber})`}
+                            >
+                              <CheckCircle2 size={13} style={{ flexShrink: 0 }} /> Order
+                            </button>
+                          ) : null}
 
                           <button
-                            className="btn btn-ghost btn-xs"
+                            type="button"
+                            className="btn-icon-xs"
                             onClick={() => setDeletingQuotation(q)}
                             title="Delete Quotation"
-                            style={{ color: '#ef4444' }}
+                            style={{ color: '#ef4444', flexShrink: 0 }}
                           >
-                            <Trash2 size={15} />
+                            <Trash2 size={15} style={{ flexShrink: 0 }} />
                           </button>
                         </div>
                       </td>
