@@ -4,7 +4,7 @@ import { useERP } from '../../services/erpStore';
 import { 
   FileText, Search, Plus, Filter, Calendar, Printer, Share2, 
   Copy, Eye, Edit2, CheckCircle2, AlertTriangle, ArrowRight, 
-  RefreshCw, TrendingUp, Clock, ShieldAlert, Check, X, Building
+  RefreshCw, TrendingUp, Clock, ShieldAlert, Check, X, Building, Trash2
 } from 'lucide-react';
 import { CreateQuotationModal } from './CreateQuotationModal';
 import { QuotationDetailsModal } from './QuotationDetailsModal';
@@ -25,7 +25,8 @@ export const QuotationsManager: React.FC<QuotationsManagerProps> = ({
     setActiveQuotationToEdit,
     currentUser, 
     hasPermission,
-    addToast 
+    addToast,
+    deleteQuotation,
   } = useERP();
 
   // Filters
@@ -40,6 +41,8 @@ export const QuotationsManager: React.FC<QuotationsManagerProps> = ({
   const [quotationToDuplicate, setQuotationToDuplicate] = useState<Quotation | null>(null);
   const [viewingQuotation, setViewingQuotation] = useState<Quotation | null>(null);
   const [convertingQuotation, setConvertingQuotation] = useState<Quotation | null>(null);
+  const [deletingQuotation, setDeletingQuotation] = useState<Quotation | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Sync latest quotations on mount
   useEffect(() => {
@@ -169,6 +172,17 @@ export const QuotationsManager: React.FC<QuotationsManagerProps> = ({
 
     const message = `Hello ${q.customerName}, your NEED ELECTRO sales quotation ${q.quotationNumber} is ready.\n\nTotal Quoted Amount: ${q.currencySymbol || '৳'} ${Number(q.grandTotal).toLocaleString()}\nValid Until: ${q.validUntil}\n\nPlease review your quotation document for full details.\nThank you!`;
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingQuotation) return;
+    setIsDeleting(true);
+    try {
+      await deleteQuotation(deletingQuotation.id);
+    } finally {
+      setIsDeleting(false);
+      setDeletingQuotation(null);
+    }
   };
 
   return (
@@ -611,6 +625,15 @@ export const QuotationsManager: React.FC<QuotationsManagerProps> = ({
                               <ArrowRight size={13} /> Order
                             </button>
                           )}
+
+                          <button
+                            className="btn btn-ghost btn-xs"
+                            onClick={() => setDeletingQuotation(q)}
+                            title="Delete Quotation"
+                            style={{ color: '#ef4444' }}
+                          >
+                            <Trash2 size={15} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -662,6 +685,120 @@ export const QuotationsManager: React.FC<QuotationsManagerProps> = ({
             }
           }}
         />
+      )}
+
+      {/* Delete Quotation Confirmation Modal */}
+      {deletingQuotation && (
+        <div className="modal-overlay" style={{ zIndex: 99999 }}>
+          <div
+            className="modal-content"
+            style={{ maxWidth: '440px', borderRadius: '12px', overflow: 'hidden', padding: 0 }}
+          >
+            {/* Red danger header */}
+            <div
+              style={{
+                background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+                padding: '1.25rem 1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+              }}
+            >
+              <div
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Trash2 size={20} color="#fff" />
+              </div>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: '1rem', color: '#fff' }}>Delete Quotation</div>
+                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.85)', marginTop: '2px' }}>This action cannot be undone</div>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: '1.5rem' }}>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: 1.55 }}>
+                You are about to permanently delete quotation{' '}
+                <strong style={{ color: '#ef4444', fontFamily: 'monospace', fontSize: '0.95rem' }}>
+                  {deletingQuotation.quotationNumber}
+                </strong>{' '}
+                for{' '}
+                <strong>{deletingQuotation.customerName}</strong>.
+              </p>
+              <div
+                style={{
+                  marginTop: '1rem',
+                  background: 'rgba(239, 68, 68, 0.07)',
+                  border: '1px solid rgba(239, 68, 68, 0.25)',
+                  borderLeft: '4px solid #ef4444',
+                  borderRadius: '6px',
+                  padding: '0.75rem 1rem',
+                  fontSize: '0.8rem',
+                  color: '#b91c1c',
+                  lineHeight: 1.5,
+                }}
+              >
+                <strong>⚠ Warning:</strong> This will permanently remove the quotation record from the database. No inventory, sales, or payments are affected since quotations do not reserve stock.
+              </div>
+            </div>
+
+            {/* Footer buttons */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '0.75rem',
+                padding: '1rem 1.5rem',
+                borderTop: '1px solid var(--border-color)',
+                background: 'var(--bg-secondary)',
+              }}
+            >
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => setDeletingQuotation(null)}
+                disabled={isDeleting}
+                style={{ fontWeight: 600 }}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-sm"
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                style={{
+                  background: isDeleting ? '#fca5a5' : 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+                  color: '#fff',
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  border: 'none',
+                  minWidth: '130px',
+                  justifyContent: 'center',
+                }}
+              >
+                {isDeleting ? (
+                  <>
+                    <RefreshCw size={14} className="animate-spin" /> Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={14} /> Yes, Delete It
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

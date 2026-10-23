@@ -141,6 +141,7 @@ interface ERPContextType {
   updateQuotation: (id: string, updates: any) => Promise<{ success: boolean; data?: Quotation; error?: string }>;
   updateQuotationStatus: (id: string, status: string, notes?: string) => Promise<{ success: boolean; data?: Quotation; error?: string }>;
   convertQuotationToOrder: (id: string, options?: any) => Promise<{ success: boolean; sale?: Sale; quotation?: Quotation; error?: string }>;
+  deleteQuotation: (id: string) => Promise<{ success: boolean; error?: string }>;
   createSale: (saleData: Omit<Sale, 'id' | 'invoiceNumber' | 'createdAt'>, emiPlanConfig?: { planId: string; downPayment: number; durationMonths: number }, paymentAccountId?: string) => Promise<{ success: boolean; sale?: Sale; error?: string }>;
   collectEMIPayment: (emiAccountId: string, installmentId: string, amount: number, penaltyAmount: number, paymentMethod: PaymentMethod, ref?: string, notes?: string, accountId?: string) => Promise<{ success: boolean; error?: string; receiptNumber?: string }>;
   createProduct: (productData: Omit<Product, 'id' | 'createdAt'>, initialSerials?: string[]) => Promise<{ success: boolean; error?: string; product?: Product; expense?: any }>;
@@ -1218,6 +1219,24 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const msg = e.data?.error || e.message || 'Failed to convert quotation';
       addToast('error', 'Conversion Error', msg);
       return { success: false, error: msg };
+    }
+  };
+
+  const deleteQuotation = async (id: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.quotations.deleteQuotation(id);
+      if (!res || !res.success) {
+        const err = (res as any)?.error || res?.message || 'Failed to delete quotation.';
+        addToast('error', 'Delete Failed', err);
+        return { success: false, error: err };
+      }
+      setQuotations(prev => prev.filter(q => q.id !== id));
+      addToast('success', 'Quotation Deleted', 'The quotation has been permanently removed.');
+      return { success: true };
+    } catch (err: any) {
+      const errMsg = err?.data?.error || err?.message || 'Error deleting quotation.';
+      addToast('error', 'Delete Failed', errMsg);
+      return { success: false, error: errMsg };
     }
   };
 
@@ -2876,6 +2895,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateQuotation,
         updateQuotationStatus,
         convertQuotationToOrder,
+        deleteQuotation,
         createSale,
         collectEMIPayment,
         createProduct,
