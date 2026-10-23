@@ -510,12 +510,37 @@ export async function POST(req: NextRequest) {
         const emiAccountId = 'emi-' + Date.now();
         const emiNumber = 'EMI-' + Date.now().toString().slice(-6);
 
-        const primaryItem = validatedItems[0];
+        const primaryItem = validatedItems[0] || { productId: 'laptop', productName: 'Laptop Equipment', serialNumbers: [] };
         const primarySerial = (primaryItem.serialNumbers && primaryItem.serialNumbers[0]) || 'N/A';
+
+        const durationMonths = Math.max(1, Number(emiPlanConfig.durationMonths) || 6);
+        const downPayment = Math.max(0, Number(emiPlanConfig.downPayment || 0));
+        const financedAmount = Math.max(
+          0,
+          Number(emiPlanConfig.financedAmount !== undefined ? emiPlanConfig.financedAmount : (calculatedGrandTotal - downPayment))
+        );
+        const monthlyInstallment = Math.max(
+          0,
+          Number(emiPlanConfig.monthlyInstallment !== undefined ? emiPlanConfig.monthlyInstallment : Math.round(financedAmount / durationMonths))
+        );
+        const totalPayable = Math.max(
+          0,
+          Number(emiPlanConfig.totalPayable !== undefined ? emiPlanConfig.totalPayable : (downPayment + financedAmount))
+        );
 
         const startDate = new Date();
         const endDate = new Date();
-        endDate.setMonth(endDate.getMonth() + emiPlanConfig.durationMonths);
+        endDate.setMonth(endDate.getMonth() + durationMonths);
+
+        // Prepare structured contract terms payload
+        const contractTermsPayload = JSON.stringify({
+          version: 1,
+          language: emiPlanConfig.termsLanguage || 'EN',
+          clauses: emiPlanConfig.clauses || [],
+          financialTerms: emiPlanConfig.financialTerms || null,
+          customerAcceptance: emiPlanConfig.customerAcceptance || null,
+          contractTermsText: emiPlanConfig.contractTermsText || '',
+        });
 
         const emiAccount = await tx.eMIAccount.create({
           data: {
@@ -525,21 +550,24 @@ export async function POST(req: NextRequest) {
             customerId: saleData.customerId,
             customerName: saleData.customerName,
             customerPhone: saleData.customerPhone,
+            customerAddress: saleData.billingAddress || customer?.address || null,
+            customerNid: customer?.nid || null,
             guarantor: emiPlanConfig.guarantor || {},
             productId: primaryItem.productId,
             productName: primaryItem.productName,
             serialNumber: primarySerial,
             laptopPrice: new Prisma.Decimal(calculatedGrandTotal),
-            downPayment: new Prisma.Decimal(emiPlanConfig.downPayment),
-            financedAmount: new Prisma.Decimal(emiPlanConfig.financedAmount),
-            durationMonths: emiPlanConfig.durationMonths,
-            monthlyInstallment: new Prisma.Decimal(emiPlanConfig.monthlyInstallment),
-            totalPayable: new Prisma.Decimal(emiPlanConfig.totalPayable),
-            totalPaid: new Prisma.Decimal(emiPlanConfig.downPayment),
-            remainingBalance: new Prisma.Decimal(emiPlanConfig.financedAmount),
+            downPayment: new Prisma.Decimal(downPayment),
+            financedAmount: new Prisma.Decimal(financedAmount),
+            durationMonths,
+            monthlyInstallment: new Prisma.Decimal(monthlyInstallment),
+            totalPayable: new Prisma.Decimal(totalPayable),
+            totalPaid: new Prisma.Decimal(downPayment),
+            remainingBalance: new Prisma.Decimal(financedAmount),
             startDate,
             endDate,
             status: 'ACTIVE',
+            contractTerms: contractTermsPayload,
             approvedBy: user.name,
           },
         });
@@ -558,27 +586,48 @@ export async function POST(req: NextRequest) {
           });
         }
 
-        // Generate Installment Schedule
-        for (let i = 1; i <= emiPlanConfig.durationMonths; i++) {
-          const dueDate = new Date();
-          dueDate.setMonth(dueDate.getMonth() + i);
+        // Generate or Persist Customized Installment Schedule
+        if (Array.isArray(emiPlanConfig.schedule) && emiPlanConfig.schedule.length > 0) {
+          for (const item of emiPlanConfig.schedule) {
+            const dueDate = item.dueDate ? new Date(item.dueDate) : new Date();
+            await tx.eMIInstallment.create({
+              data: {
+                id: 'inst-' + Date.now() + '-' + item.installmentNumber + '-' + Math.random().toString(36).substring(2, 5),
+                emiAccountId: emiAccount.id,
+                installmentNumber: Number(item.installmentNumber),
+                dueDate,
+                amount: new Prisma.Decimal(Number(item.amount) || monthlyInstallment),
+                penaltyAmount: new Prisma.Decimal(0),
+                paidAmount: new Prisma.Decimal(0),
+                status: 'UPCOMING',
+              },
+            });
+          }
+        } else {
+          for (let i = 1; i <= durationMonths; i++) {
+            const dueDate = new Date();
+            dueDate.setMonth(dueDate.getMonth() + i);
 
-          await tx.eMIInstallment.create({
-            data: {
-              id: 'inst-' + Date.now() + '-' + i,
-              emiAccountId: emiAccount.id,
-              installmentNumber: i,
-              dueDate,
-              amount: new Prisma.Decimal(emiPlanConfig.monthlyInstallment),
-              penaltyAmount: new Prisma.Decimal(0),
-              paidAmount: new Prisma.Decimal(0),
-              status: 'UPCOMING',
-            },
-          });
+            await tx.eMIInstallment.create({
+              data: {
+                id: 'inst-' + Date.now() + '-' + i,
+                emiAccountId: emiAccount.id,
+                installmentNumber: i,
+                dueDate,
+                amount: new Prisma.Decimal(monthlyInstallment),
+                penaltyAmount: new Prisma.Decimal(0),
+                paidAmount: new Prisma.Decimal(0),
+                status: 'UPCOMING',
+              },
+            });
+          }
         }
 
         // Record Down Payment if received
-        if (emiPlanConfig.downPayment > 0) {
+        if (downPayment > 0) {
+          const dpMethod = emiPlanConfig.financialTerms?.downPaymentMethod || (saleData.payments?.[0]?.method) || 'CASH';
+          const dpTxRef = emiPlanConfig.financialTerms?.downPaymentTxRef || (saleData.payments?.[0]?.ref) || null;
+
           await tx.eMIPayment.create({
             data: {
               id: 'epay-' + Date.now(),
@@ -589,12 +638,13 @@ export async function POST(req: NextRequest) {
               installmentNumber: 0,
               customerId: saleData.customerId,
               customerName: saleData.customerName,
-              amount: new Prisma.Decimal(emiPlanConfig.downPayment),
+              amount: new Prisma.Decimal(downPayment),
               penaltyPaid: new Prisma.Decimal(0),
               paymentDate: new Date(),
-              paymentMethod: 'CASH',
+              paymentMethod: String(dpMethod),
+              transactionRef: dpTxRef,
               collectedBy: user.name,
-              notes: `Down payment for ${emiNumber}`,
+              notes: `Down payment for contract ${emiNumber}`,
             },
           });
         }

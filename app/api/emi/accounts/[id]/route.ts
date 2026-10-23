@@ -23,36 +23,63 @@ export async function PUT(
     }
 
     const updated = await prisma.$transaction(async (tx) => {
+      // 1. Update EMIAccount fields
       const emi = await tx.eMIAccount.update({
         where: { id: params.id },
         data: {
-          ...(body.accountNumber && { accountNumber: body.accountNumber }),
           ...(body.customerName && { customerName: body.customerName }),
           ...(body.customerPhone && { customerPhone: body.customerPhone }),
+          ...(body.customerAddress !== undefined && { customerAddress: body.customerAddress }),
+          ...(body.customerNid !== undefined && { customerNid: body.customerNid }),
           ...(body.status && { status: body.status }),
-          ...(body.principal !== undefined && { principal: new Prisma.Decimal(body.principal) }),
           ...(body.downPayment !== undefined && { downPayment: new Prisma.Decimal(body.downPayment) }),
-          ...(body.totalReceivable !== undefined && { totalReceivable: new Prisma.Decimal(body.totalReceivable) }),
+          ...(body.financedAmount !== undefined && { financedAmount: new Prisma.Decimal(body.financedAmount) }),
+          ...(body.monthlyInstallment !== undefined && { monthlyInstallment: new Prisma.Decimal(body.monthlyInstallment) }),
+          ...(body.totalPayable !== undefined && { totalPayable: new Prisma.Decimal(body.totalPayable) }),
           ...(body.totalPaid !== undefined && { totalPaid: new Prisma.Decimal(body.totalPaid) }),
           ...(body.remainingBalance !== undefined && { remainingBalance: new Prisma.Decimal(body.remainingBalance) }),
-          ...(body.nextDueDate && { nextDueDate: new Date(body.nextDueDate) }),
-          ...(body.notes !== undefined && { notes: body.notes }),
-          ...(body.guarantorName !== undefined && { guarantorName: body.guarantorName }),
-          ...(body.guarantorPhone !== undefined && { guarantorPhone: body.guarantorPhone }),
-          ...(body.guarantorNid !== undefined && { guarantorNid: body.guarantorNid }),
-          ...(body.guarantorAddress !== undefined && { guarantorAddress: body.guarantorAddress }),
+          ...(body.contractTerms !== undefined && {
+            contractTerms: typeof body.contractTerms === 'object' ? JSON.stringify(body.contractTerms) : String(body.contractTerms),
+          }),
+          ...(body.guarantor !== undefined && { guarantor: body.guarantor }),
+        },
+        include: {
+          installments: { orderBy: { installmentNumber: 'asc' } },
+          payments: { orderBy: { paymentDate: 'desc' } },
         },
       });
 
+      // 2. If installment schedule amendments were provided, update unpaid installments
+      if (Array.isArray(body.amendedInstallments)) {
+        for (const inst of body.amendedInstallments) {
+          if (inst.id) {
+            await tx.eMIInstallment.updateMany({
+              where: {
+                id: inst.id,
+                emiAccountId: emi.id,
+                status: { not: 'PAID' }, // Never overwrite verified paid installments
+              },
+              data: {
+                ...(inst.dueDate && { dueDate: new Date(inst.dueDate) }),
+                ...(inst.amount !== undefined && { amount: new Prisma.Decimal(inst.amount) }),
+                ...(inst.status && { status: inst.status }),
+              },
+            });
+          }
+        }
+      }
+
+      // 3. Record full audit log
+      const auditReason = body.amendmentReason || body.reason || 'Contract Terms / Schedule Update';
       await tx.auditLog.create({
         data: {
           id: 'audit-' + Date.now(),
           userId: user.id,
           userName: user.name,
-          action: 'SUPER_ADMIN_EMI_UPDATE',
+          action: 'EMI_CONTRACT_AMENDMENT',
           module: 'EMI',
           recordId: emi.id,
-          details: `Super Admin ${user.name} modified EMI Account ${emi.emiNumber} (Customer: ${emi.customerName}, Status: ${emi.status}, Remaining: ${emi.remainingBalance})`,
+          details: `Admin ${user.name} amended EMI Contract ${emi.emiNumber} (${emi.customerName}). Reason: ${auditReason}. Status: ${emi.status}, Remaining: ৳${emi.remainingBalance}`,
         },
       });
 

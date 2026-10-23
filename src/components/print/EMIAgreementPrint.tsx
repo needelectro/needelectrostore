@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { EMIAccount, SystemSettings } from '../../types';
-import { Printer, X, FileText, ShieldCheck, Download, Loader2 } from 'lucide-react';
+import { EMIAccount, SystemSettings, EMIContractClause, EMIFinancialTerms } from '../../types';
+import { Printer, X, FileText, Download, Loader2, Globe, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { NeedElectroLogo } from '../NeedElectroLogo';
+import { getDefaultEMIClauses, interpolateClauseText } from '../../services/emiContractClauses';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
@@ -13,6 +14,73 @@ interface EMIAgreementPrintProps {
 
 export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, settings, onClose }) => {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
+  // Parse structured contract terms if stored as JSON
+  let structuredTerms: any = null;
+  try {
+    if (typeof account.contractTerms === 'string' && account.contractTerms.startsWith('{')) {
+      structuredTerms = JSON.parse(account.contractTerms);
+    } else if (typeof account.contractTerms === 'object' && account.contractTerms !== null) {
+      structuredTerms = account.contractTerms;
+    }
+  } catch (e) {
+    structuredTerms = null;
+  }
+
+  const financialTerms: EMIFinancialTerms | undefined = 
+    account.financialTerms || structuredTerms?.financialTerms;
+
+  const savedClauses: EMIContractClause[] = 
+    account.contractClauses || structuredTerms?.clauses || [];
+
+  const customerAcceptance = 
+    account.customerAcceptance || structuredTerms?.customerAcceptance;
+
+  const initialLang: 'EN' | 'BN' | 'BOTH' = 
+    account.termsLanguage || structuredTerms?.termsLanguage || 'BOTH';
+
+  const [printLanguage, setPrintLanguage] = useState<'EN' | 'BN' | 'BOTH'>(initialLang);
+
+  // Build context for clause interpolation
+  const interpContext = {
+    customerName: account.customerName,
+    customerPhone: account.customerPhone,
+    customerAddress: account.customerAddress,
+    customerNid: account.customerNid,
+    guarantorName: account.guarantor?.name,
+    guarantorPhone: account.guarantor?.phone,
+    guarantorRelation: account.guarantor?.relationship,
+    guarantorNid: account.guarantor?.nid,
+    productName: account.productName,
+    serialNumber: account.serialNumber,
+    contractNumber: account.emiNumber,
+    agreementDate: account.startDate,
+    contractPrice: account.laptopPrice,
+    downPayment: account.downPayment,
+    financedAmount: account.financedAmount,
+    interestRate: financialTerms?.interestRatePercent || 0,
+    isInterestFree: financialTerms ? financialTerms.isInterestFree : true,
+    interestMethod: financialTerms?.interestCalculationMethod || 'FLAT',
+    durationMonths: account.durationMonths,
+    monthlyInstallment: account.monthlyInstallment,
+    finalInstallment: financialTerms?.finalInstallmentAmount || account.monthlyInstallment,
+    firstDueDate: account.installments[0]?.dueDate || '',
+    finalDueDate: account.endDate,
+    gracePeriodDays: financialTerms?.gracePeriodDays || 5,
+    lateFeePerDay: financialTerms?.lateFeePerDay || 0,
+    companyName: settings.companyName || 'NEED ELECTRO',
+    companyPhone: settings.phone || '+880 1733-983752',
+    companyAddress: settings.address || 'Moulvibazar, Sylhet, Bangladesh'
+  };
+
+  // If no clauses were stored in contractTerms, interpolate the 25 standard clauses
+  const activeClauses: EMIContractClause[] = savedClauses.length > 0 
+    ? savedClauses 
+    : getDefaultEMIClauses().map(c => ({
+        ...c,
+        content: interpolateClauseText(c.content, interpContext),
+        contentBn: interpolateClauseText(c.contentBn, interpContext)
+      }));
 
   const handlePrint = () => {
     window.print();
@@ -96,9 +164,34 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
         <div className="modal-header no-print">
           <div className="modal-title">
             <FileText size={20} className="text-primary" />
-            Official Laptop Hire-Purchase (EMI) Contract Agreement — {account.emiNumber}
+            Official EMI Contract & Terms Agreement — {account.emiNumber}
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            {/* Language Switcher */}
+            <div style={{ display: 'flex', border: '1px solid #cbd5e1', borderRadius: '4px', overflow: 'hidden' }}>
+              <button
+                className={`btn btn-xs ${printLanguage === 'BOTH' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setPrintLanguage('BOTH')}
+                style={{ borderRadius: 0, padding: '4px 8px', fontSize: '11px' }}
+              >
+                Dual (EN + বাংলা)
+              </button>
+              <button
+                className={`btn btn-xs ${printLanguage === 'EN' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setPrintLanguage('EN')}
+                style={{ borderRadius: 0, padding: '4px 8px', fontSize: '11px' }}
+              >
+                English
+              </button>
+              <button
+                className={`btn btn-xs ${printLanguage === 'BN' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setPrintLanguage('BN')}
+                style={{ borderRadius: 0, padding: '4px 8px', fontSize: '11px' }}
+              >
+                বাংলা
+              </button>
+            </div>
+
             <button 
               className="btn btn-success btn-sm" 
               onClick={handleDownloadPDF} 
@@ -127,7 +220,7 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
 
         <div className="modal-body a4-preview-body">
           <div className="a4-print-document" id="printable-emi-contract">
-            {/* Watermark Background from Official Previous Memo */}
+            {/* Watermark Background */}
             <div 
               className="a4-watermark-overlay" 
               aria-hidden="true"
@@ -164,6 +257,7 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
                   showSisterConcern={false} 
                 />
                 <div className="a4-company-details" style={{ marginTop: '6px', fontSize: '11px', color: '#475569', lineHeight: '1.45' }}>
+                  <p><strong>NEED ELECTRO</strong> — Trusted Electrical and Technological Solutions</p>
                   <p><strong>Main Branch Moulvibazar:</strong> {settings.address || 'Shop#5, MR Plaza, Kusumbag, Moulvibazar, Sylhet, Bangladesh'}</p>
                   <p>Hotline: <strong>{settings.phone || '+880 1733-983752'}</strong> | Email: <strong>info.needelectro@gmail.com</strong></p>
                 </div>
@@ -178,17 +272,18 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
                   <p><strong>Related Invoice:</strong> {account.saleInvoiceId}</p>
                   <p><strong>Effective Date:</strong> {account.startDate}</p>
                   <p><strong>Maturity Date:</strong> {account.endDate}</p>
+                  <p><strong>Contract Version:</strong> v{account.contractVersion || structuredTerms?.contractVersion || 1}.0</p>
                 </div>
               </div>
             </div>
 
             {/* Preamble */}
-            <div style={{ fontSize: '11px', lineHeight: '1.5', marginBottom: '15px', color: '#334155', textAlign: 'justify' }}>
-              This Hire-Purchase Agreement is executed on <strong>{account.startDate}</strong> between <strong>{settings.companyName}</strong> (hereinafter referred to as the <em>'Owner/Seller'</em>) and the Customer/Hirer detailed below pursuant to the applicable laws of Bangladesh.
+            <div style={{ fontSize: '11px', lineHeight: '1.5', margin: '12px 0', color: '#334155', textAlign: 'justify' }}>
+              This Hire-Purchase and Installment Financing Agreement is formally executed on <strong>{account.startDate}</strong> between <strong>{settings.companyName || 'NEED ELECTRO'}</strong> (hereinafter referred to as the <em>'Seller / Financier'</em>) and the Customer detailed below pursuant to the Contract Act 1872, Sale of Goods Act 1930, and the applicable laws of Bangladesh.
             </div>
 
             {/* Parties Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
               <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '10px' }}>
                 <h4 style={{ fontSize: '11px', textTransform: 'uppercase', color: '#1e3a8a', borderBottom: '1px solid #cbd5e1', paddingBottom: '4px', marginBottom: '6px' }}>
                   1. Customer (Hirer) Particulars
@@ -214,48 +309,75 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
               </div>
             </div>
 
-            {/* Product & Financial Overview */}
-            <div style={{ border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden', marginBottom: '15px' }}>
-              <div style={{ background: '#f1f5f9', padding: '6px 10px', fontWeight: 'bold', fontSize: '11px', textTransform: 'uppercase' }}>
-                3. Equipment Specification & Financial Terms
+            {/* Product & Comprehensive Financial Terms Overview */}
+            <div style={{ border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden', marginBottom: '12px' }}>
+              <div style={{ background: '#f1f5f9', padding: '6px 10px', fontWeight: 'bold', fontSize: '11px', textTransform: 'uppercase', display: 'flex', justifyContent: 'space-between' }}>
+                <span>3. Equipment Specification & Comprehensive Financial Terms</span>
+                <span style={{ color: '#2563eb' }}>
+                  {financialTerms?.isInterestFree || !financialTerms ? '0% Interest-Free Scheme' : `${financialTerms.interestRatePercent}% Interest (${financialTerms.interestCalculationMethod})`}
+                </span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', padding: '10px', gap: '15px', fontSize: '11px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', padding: '10px', gap: '15px', fontSize: '11px' }}>
                 <div>
                   <p><strong>Product Description:</strong> {account.productName}</p>
                   <p style={{ marginTop: '3px' }}>
-                    <strong style={{ color: '#2563eb' }}>Serial Number:</strong>{' '}
-                    <span style={{ background: '#eff6ff', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
-                      {account.serialNumber}
+                    <strong style={{ color: '#2563eb' }}>Serial Number / IMEI:</strong>{' '}
+                    <span style={{ background: '#eff6ff', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                      {account.serialNumber || 'N/A'}
                     </span>
                   </p>
                   <p style={{ marginTop: '3px' }}><strong>Tenure:</strong> {account.durationMonths} Monthly Installments</p>
-                  <p><strong>Status:</strong> <span style={{ fontWeight: 'bold', color: '#16a34a' }}>{account.status}</span></p>
+                  <p><strong>Grace Period:</strong> {financialTerms?.gracePeriodDays || 5} Days</p>
+                  <p><strong>Late Penalty Policy:</strong> {financialTerms?.lateFeePerDay ? `৳${financialTerms.lateFeePerDay}/day after grace period` : 'No contractual late fee configured'}</p>
+                  <p><strong>Account Status:</strong> <span style={{ fontWeight: 'bold', color: '#16a34a' }}>{account.status}</span></p>
                 </div>
-                <div style={{ background: '#f8fafc', padding: '8px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+
+                {/* Financial Summary Box */}
+                <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '4px', border: '1px solid #e2e8f0', lineHeight: '1.6' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Total Laptop Price:</span>
+                    <span>Agreed Product Price:</span>
                     <strong>৳{account.laptopPrice.toLocaleString()}</strong>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#16a34a' }}>
-                    <span>Down Payment Received:</span>
-                    <strong>৳{account.downPayment.toLocaleString()}</strong>
+                  {financialTerms && (financialTerms.processingFee > 0 || financialTerms.deliveryCharge > 0) && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                      <span>Additional Eligible Fees:</span>
+                      <span>+৳{(financialTerms.processingFee + financialTerms.documentationFee + financialTerms.deliveryCharge + financialTerms.otherCharges).toLocaleString()}</span>
+                    </div>
+                  )}
+                  {financialTerms && financialTerms.taxAmount > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                      <span>Statutory Tax / VAT:</span>
+                      <span>+৳{financialTerms.taxAmount.toLocaleString()}</span>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#16a34a', borderTop: '1px dashed #cbd5e1', paddingTop: '2px' }}>
+                    <span>Down Payment Verified:</span>
+                    <strong>-৳{account.downPayment.toLocaleString()}</strong>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#2563eb', fontWeight: 'bold', borderTop: '1px solid #cbd5e1', marginTop: '4px', paddingTop: '4px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#2563eb', fontWeight: 'bold' }}>
                     <span>Financed Principal:</span>
                     <span>৳{account.financedAmount.toLocaleString()}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#dc2626', fontWeight: 'bold', marginTop: '2px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
+                    <span>Contract Interest Charge:</span>
+                    <span>{financialTerms?.totalInterest ? `+৳${financialTerms.totalInterest.toLocaleString()}` : '৳0 (0% Rate)'}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#dc2626', fontWeight: 'bold', borderTop: '1px solid #cbd5e1', marginTop: '4px', paddingTop: '4px' }}>
                     <span>Monthly Installment:</span>
-                    <span>৳{account.monthlyInstallment.toLocaleString()} / Month</span>
+                    <span>৳{account.monthlyInstallment.toLocaleString()} / Mo</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800 }}>
+                    <span>Total Financed Obligation:</span>
+                    <span>৳{(account.financedAmount + (financialTerms?.totalInterest || 0)).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Installment Schedule Table */}
-            <div style={{ marginBottom: '15px' }}>
+            <div style={{ marginBottom: '14px' }}>
               <h4 style={{ fontSize: '11px', textTransform: 'uppercase', color: '#1e3a8a', marginBottom: '6px' }}>
-                4. Mandatory Repayment Schedule
+                4. Authoritative Repayment Schedule
               </h4>
               <table className="a4-items-table" style={{ fontSize: '10px', marginBottom: '0' }}>
                 <thead>
@@ -291,20 +413,45 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
               </table>
             </div>
 
-            {/* Legal Terms & Conditions */}
-            <div style={{ fontSize: '9.5px', color: '#475569', lineHeight: '1.4', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px', marginBottom: '25px' }}>
-              <div style={{ fontWeight: 'bold', textTransform: 'uppercase', color: '#0f172a', marginBottom: '2px' }}>
-                Contractual Undertaking & Repossession Terms:
+            {/* 25 Complete Terms & Conditions Clauses */}
+            <div style={{ marginBottom: '20px' }}>
+              <h4 style={{ fontSize: '11px', textTransform: 'uppercase', color: '#1e3a8a', marginBottom: '6px', borderBottom: '1px solid #cbd5e1', paddingBottom: '4px' }}>
+                5. Complete Contract Terms and Conditions ({activeClauses.length} Clauses)
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '9.5px', lineHeight: '1.45', color: '#334155' }}>
+                {activeClauses.map((clause, idx) => (
+                  <div key={clause.id || idx} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '6px 8px' }}>
+                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '2px' }}>
+                      Clause {clause.number || idx + 1}: {printLanguage === 'BN' ? clause.titleBn : clause.title}
+                      {printLanguage === 'BOTH' && ` / ${clause.titleBn}`}
+                    </div>
+                    {(printLanguage === 'EN' || printLanguage === 'BOTH') && (
+                      <p style={{ margin: 0, textAlign: 'justify' }}>{clause.content}</p>
+                    )}
+                    {(printLanguage === 'BN' || printLanguage === 'BOTH') && (
+                      <p style={{ margin: (printLanguage === 'BOTH' ? '4px 0 0 0' : 0), color: '#1e293b', textAlign: 'justify' }}>
+                        {clause.contentBn}
+                      </p>
+                    )}
+                  </div>
+                ))}
               </div>
-              <ol style={{ paddingLeft: '14px' }}>
-                <li><strong>Title & Ownership:</strong> Absolute ownership and title of the equipment ({account.productName}, Serial: {account.serialNumber}) shall solely vest with {settings.companyName} until all installments are liquidated in full.</li>
-                <li><strong>Default & Recovery:</strong> If the Hirer fails or defaults to pay 2 (two) consecutive installments or absconds, {settings.companyName} reserves the legal right under the Contract Act & Penal Code to immediately repossess the equipment and institute legal proceedings against both Hirer and Guarantor.</li>
-                <li><strong>Maintenance:</strong> The Hirer shall keep the equipment in good working order and not pledge, sell, or mortgage the same to any third party.</li>
-              </ol>
             </div>
 
+            {/* Electronic Affirmation Evidence (if available) */}
+            {customerAcceptance && (
+              <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '8px 10px', marginBottom: '16px', fontSize: '10px', color: '#166534' }}>
+                <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                  <ShieldCheck size={14} /> Electronic Affirmative Customer Acceptance Record
+                </div>
+                <p style={{ margin: 0 }}>
+                  Customer <strong>{account.customerName}</strong> affirmatively verified the financial terms, repayment schedule, and all 25 contract conditions on <strong>{customerAcceptance.acceptedAt || account.startDate}</strong> via {customerAcceptance.acceptanceMethod}.
+                </p>
+              </div>
+            )}
+
             {/* Signatures */}
-            <div className="a4-signatures" style={{ marginTop: '30px' }}>
+            <div className="a4-signatures" style={{ marginTop: '24px' }}>
               <div className="a4-signature-box">
                 <div>{account.customerName}</div>
                 <div style={{ fontSize: '9px', color: '#64748b' }}>Hirer / Customer Signature</div>
@@ -314,7 +461,7 @@ export const EMIAgreementPrint: React.FC<EMIAgreementPrintProps> = ({ account, s
                 <div style={{ fontSize: '9px', color: '#64748b' }}>Guarantor Signature</div>
               </div>
               <div className="a4-signature-box">
-                <div>{account.approvedBy}</div>
+                <div>{account.approvedBy || 'Authorized Manager'}</div>
                 <div style={{ fontSize: '9px', color: '#64748b' }}>For NEED ELECTRO</div>
               </div>
             </div>

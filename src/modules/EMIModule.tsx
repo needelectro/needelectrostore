@@ -7,8 +7,12 @@ import {
   CalendarClock, Search, Plus, CheckCircle2, AlertTriangle, 
   Wallet, FileText, Phone, MessageSquare, ShieldCheck, Printer, 
   X, Check, Laptop, Clock, ArrowRight, UserCheck, AlertCircle, Share2,
-  Edit2, Trash2, RotateCcw, Sliders, DollarSign, Percent, Calculator, Power
+  Edit2, Trash2, RotateCcw, Sliders, DollarSign, Percent, Calculator, Power,
+  FileEdit
 } from 'lucide-react';
+import { EMIContractWizard } from '../components/emi/EMIContractWizard';
+import { EMIAmendmentModal } from '../components/emi/EMIAmendmentModal';
+
 
 interface EMIModuleProps {
   initialMode?: string;
@@ -55,6 +59,10 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
 
   // Selected Account for Detailed Drawer
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
+
+  // Contract Amendment & Restructuring State
+  const [amendingAccount, setAmendingAccount] = useState<EMIAccount | null>(null);
+
 
   // -------------------------------------------------------------
   // WIZARD STATE: CREATE NEW EMI SALE
@@ -799,6 +807,14 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
                             Schedule
                           </button>
                           <button 
+                            className="btn btn-warning btn-sm"
+                            onClick={() => setAmendingAccount(acc)}
+                            title="Amend / Restructure Contract"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                          >
+                            <FileEdit size={14} /> Amend
+                          </button>
+                          <button 
                             className="btn btn-ghost btn-sm"
                             onClick={() => setActiveEmiAgreementToPrint(acc)}
                             title="Print Hire-Purchase Legal Agreement"
@@ -1079,291 +1095,27 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* TAB 4: NEW EMI SALE WIZARD */}
+      {/* TAB 4: ADVANCED EMI CONTRACT WIZARD & CLAUSE ENGINE */}
       {/* ------------------------------------------------------------- */}
       {activeTab === 'new_emi' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.25rem' }}>
-          {/* Left: Input Form */}
-          <div className="erp-card" style={{ padding: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Laptop size={22} color="#2563eb" />
-              New Laptop Hire-Purchase (EMI) Contract Wizard
-            </h3>
-
-            {/* Step 1: Customer Profile */}
-            <div style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <span style={{ fontWeight: '700', fontSize: '0.9rem', textTransform: 'uppercase', color: 'var(--brand-primary)' }}>
-                  1. Customer & Guarantor Details
-                </span>
-                <div style={{ display: 'flex', gap: '0.35rem' }}>
-                  <button
-                    className={`btn btn-sm ${wizardCustomerType === 'EXISTING' ? 'btn-primary' : 'btn-secondary'}`}
-                    onClick={() => setWizardCustomerType('EXISTING')}
-                  >
-                    Existing Customer
-                  </button>
-                  <button
-                    className={`btn btn-sm ${wizardCustomerType === 'NEW' ? 'btn-primary' : 'btn-secondary'}`}
-                    onClick={() => setWizardCustomerType('NEW')}
-                  >
-                    + Register New Customer
-                  </button>
-                </div>
-              </div>
-
-              {wizardCustomerType === 'EXISTING' ? (
-                <div className="form-group">
-                  <label className="form-label">Select Customer</label>
-                  <select
-                    className="form-select"
-                    value={selectedCustId}
-                    onChange={e => setSelectedCustId(e.target.value)}
-                  >
-                    {customers.map(c => (
-                      <option key={c.id} value={c.id}>
-                        {c.name} ({c.phone}) — NID: {c.nid || 'Verified'}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <div className="form-group">
-                    <label className="form-label">Customer Full Name *</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="e.g. Shakawat Hossain"
-                      value={newCustName}
-                      onChange={e => setNewCustName(e.target.value)}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Mobile Phone *</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="e.g. 01711-556677"
-                      value={newCustPhone}
-                      onChange={e => setNewCustPhone(e.target.value)}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">National ID (NID) Number *</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="10 or 17 digit NID"
-                      value={newCustNid}
-                      onChange={e => setNewCustNid(e.target.value)}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Present Residential Address *</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="e.g. Sector 10, Uttara, Dhaka"
-                      value={newCustAddress}
-                      onChange={e => setNewCustAddress(e.target.value)}
-                    />
-                  </div>
-
-                  <div style={{ gridColumn: '1 / -1', marginTop: '0.5rem', fontWeight: '700', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                    Guarantor Information (জামিনদারের বিবরণ):
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Guarantor Name</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="e.g. Abdul Karim"
-                      value={guarantorName}
-                      onChange={e => setGuarantorName(e.target.value)}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Guarantor Phone</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="01819-..."
-                      value={guarantorPhone}
-                      onChange={e => setGuarantorPhone(e.target.value)}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Step 2: Laptop & Serial Number Selection */}
-            <div style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1.25rem' }}>
-              <span style={{ fontWeight: '700', fontSize: '0.9rem', textTransform: 'uppercase', color: 'var(--brand-primary)', display: 'block', marginBottom: '0.75rem' }}>
-                2. Laptop & Serial Number (Optional)
-              </span>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <div className="form-group">
-                  <label className="form-label">Choose Laptop Model *</label>
-                  <select
-                    className="form-select"
-                    value={selectedProdId}
-                    onChange={e => {
-                      setSelectedProdId(e.target.value);
-                      const sers = serials.filter(s => s.productId === e.target.value && s.status === 'AVAILABLE');
-                      setSelectedSerial(sers[0]?.serialNumber || '');
-                    }}
-                  >
-                    {laptopProducts.map(p => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} — ৳{(p.emiPrice || p.retailPrice).toLocaleString()}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Physical Serial Number (Optional)</label>
-                  <select
-                    className="form-select"
-                    value={selectedSerial}
-                    onChange={e => setSelectedSerial(e.target.value)}
-                  >
-                    <option value="">— No Serial Number —</option>
-                    {availableSerials.map(s => (
-                      <option key={s.id} value={s.serialNumber}>
-                        {s.serialNumber} (Available in {selectedBranch.name})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Step 3: Configure EMI Plan & Down Payment */}
-            <div>
-              <span style={{ fontWeight: '700', fontSize: '0.9rem', textTransform: 'uppercase', color: 'var(--brand-primary)', display: 'block', marginBottom: '0.75rem' }}>
-                3. EMI Plan & Down Payment Terms
-              </span>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <div className="form-group">
-                  <label className="form-label">EMI Tenure Plan *</label>
-                  <select
-                    className="form-select"
-                    value={selectedPlanId}
-                    onChange={e => {
-                      setSelectedPlanId(e.target.value);
-                      const plan = emiPlans.find(p => p.id === e.target.value);
-                      if (plan) {
-                        setCustomDownPayment(Math.round((laptopPrice * plan.minDownPaymentPercent) / 100));
-                      }
-                    }}
-                  >
-                    {emiPlans.filter(p => p.isActive).map(plan => (
-                      <option key={plan.id} value={plan.id}>
-                        {plan.name} ({plan.durationMonths} Months, Min {plan.minDownPaymentPercent}% Down)
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Down Payment Collected (৳) *</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    value={customDownPayment}
-                    onChange={e => setCustomDownPayment(Number(e.target.value) || 0)}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Down Payment Method</label>
-                  <select
-                    className="form-select"
-                    value={downPaymentMethod}
-                    onChange={e => setDownPaymentMethod(e.target.value as PaymentMethod)}
-                  >
-                    {(['bKash', 'Nagad', 'Cash', 'Rocket', 'Bank Transfer', 'Card'] as PaymentMethod[]).map(m => (
-                      <option key={m} value={m}>{m}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Real-time Calculation Summary & Agreement Preview */}
-          <div className="erp-card" style={{ padding: '1.25rem', height: 'fit-content' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '1rem' }}>
-              EMI Contract Amortization Preview
-            </h3>
-
-            <div style={{ background: 'var(--bg-card-muted)', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.85rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Laptop EMI Total:</span>
-                <strong>৳{laptopPrice.toLocaleString()}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#10b981' }}>
-                <span>Down Payment Received:</span>
-                <strong>-৳{downPayment.toLocaleString()}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-color)', paddingTop: '0.4rem', fontWeight: 'bold', color: 'var(--brand-primary)' }}>
-                <span>Financed Principal:</span>
-                <span>৳{financedAmount.toLocaleString()}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#f59e0b', fontWeight: '800', fontSize: '1.1rem', marginTop: '4px' }}>
-                <span>Monthly Installment:</span>
-                <span>৳{monthlyInstallment.toLocaleString()} / mo</span>
-              </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                Tenure: {durationMonths} consecutive monthly installments
-              </div>
-            </div>
-
-            {/* Generated Installment Dates Table */}
-            <div style={{ marginBottom: '1.25rem' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
-                Proposed Payment Schedule:
-              </div>
-              <div style={{ maxHeight: '160px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-                <table className="erp-table" style={{ fontSize: '0.8rem' }}>
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Due Date</th>
-                      <th style={{ textAlign: 'right' }}>Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Array.from({ length: durationMonths }).map((_, idx) => {
-                      const d = new Date();
-                      d.setMonth(d.getMonth() + idx + 1);
-                      return (
-                        <tr key={idx}>
-                          <td>Installment #{idx + 1}</td>
-                          <td>{d.toISOString().split('T')[0]}</td>
-                          <td style={{ textAlign: 'right', fontWeight: 'bold' }}>৳{monthlyInstallment.toLocaleString()}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <button
-              className="btn btn-primary btn-lg"
-              style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}
-              onClick={handleExecuteEmiSale}
-            >
-              <CheckCircle2 size={18} />
-              Execute EMI Contract & Generate Agreement
-            </button>
-          </div>
-        </div>
+        <EMIContractWizard
+          customers={customers}
+          products={products}
+          serials={serials}
+          emiPlans={emiPlans}
+          currentUser={currentUser}
+          selectedBranch={selectedBranch}
+          settings={settings}
+          createCustomer={createCustomer}
+          createSale={createSale}
+          onCancel={() => setActiveTab('accounts')}
+          onSuccess={async (newAccount) => {
+            addToast('success', 'EMI Contract Created', `Contract ${newAccount.emiNumber} created successfully!`);
+            if (refreshFromDatabase) await refreshFromDatabase();
+            setActiveTab('accounts');
+            setSelectedAccountId(newAccount.id);
+          }}
+        />
       )}
 
       {/* ------------------------------------------------------------- */}
@@ -2077,6 +1829,15 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
 
                 <div className="modal-footer">
                   <button 
+                    className="btn btn-warning btn-sm"
+                    onClick={() => {
+                      setAmendingAccount(acc);
+                      setSelectedAccountId(null);
+                    }}
+                  >
+                    <FileEdit size={15} /> Restructure / Amend Contract
+                  </button>
+                  <button 
                     className="btn btn-secondary btn-sm"
                     onClick={() => {
                       setActiveEmiAgreementToPrint(acc);
@@ -2100,6 +1861,21 @@ export const EMIModule: React.FC<EMIModuleProps> = ({ initialMode, onNavigate })
           );
         })()
       )}
+
+      {/* Contract Amendment & Restructuring Modal */}
+      {amendingAccount && (
+        <EMIAmendmentModal
+          account={amendingAccount}
+          currentUser={currentUser}
+          onClose={() => setAmendingAccount(null)}
+          onSuccess={async () => {
+            addToast('success', 'Contract Restructured', `EMI Contract ${amendingAccount.emiNumber} updated with audit trail.`);
+            if (refreshFromDatabase) await refreshFromDatabase();
+            setAmendingAccount(null);
+          }}
+        />
+      )}
     </div>
   );
 };
+

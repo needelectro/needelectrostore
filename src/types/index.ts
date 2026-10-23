@@ -522,6 +522,104 @@ export interface EMIInstallment {
   paymentMethod?: PaymentMethod;
 }
 
+export interface EMIContractClause {
+  id: string;
+  number: number;
+  title: string;
+  titleBn: string;
+  content: string;
+  contentBn: string;
+  isMandatory: boolean;
+  order: number;
+  category?: 'PARTIES' | 'FINANCIAL' | 'SCHEDULE' | 'LEGAL' | 'OPERATIONAL' | 'CUSTOM';
+}
+
+export interface EMIFinancialTerms {
+  originalPrice: number;
+  agreedPrice: number;
+  discountType: 'PERCENTAGE' | 'FIXED';
+  discountValue: number;
+  discountAmount: number;
+  processingFee: number;
+  documentationFee: number;
+  deliveryCharge: number;
+  otherCharges: number;
+  otherChargesDescription?: string;
+  taxPercent: number;
+  taxAmount: number;
+  finalContractPrice: number;
+  
+  // Down payment
+  downPaymentType: 'PERCENTAGE' | 'FIXED';
+  downPaymentValue: number;
+  downPaymentAmount: number;
+  minDownPaymentPercent: number;
+  downPaymentDueDate?: string;
+  downPaymentMethod: PaymentMethod;
+  downPaymentStatus: 'PENDING' | 'PARTIALLY_PAID' | 'PAID' | 'REFUNDED';
+  downPaymentReceipt?: string;
+  downPaymentTxRef?: string;
+  
+  // Interest
+  isInterestFree: boolean;
+  interestRatePercent: number;
+  interestCalculationMethod: 'FLAT' | 'REDUCING_BALANCE';
+  interestPeriod: 'MONTHLY' | 'ANNUAL';
+  interestStartDate?: string;
+  totalInterest: number;
+  totalFinancedRepayment: number;
+  interestAdjustmentReason?: string;
+  priceOverrideReason?: string;
+  
+  // Installments
+  durationMonths: number;
+  installmentFrequency: 'MONTHLY' | 'WEEKLY' | 'BIWEEKLY';
+  firstDueDate: string;
+  recurringDueDay: number;
+  gracePeriodDays: number;
+  regularInstallmentAmount: number;
+  finalInstallmentAmount: number;
+  
+  // Late & early settlement policies
+  lateFeePerDay: number;
+  earlySettlementDiscountPercent: number;
+  earlySettlementPolicy?: string;
+}
+
+export interface EMIScheduleItem {
+  installmentNumber: number;
+  dueDate: string;
+  amount: number;
+  principalPortion?: number;
+  interestPortion?: number;
+  remainingBalanceAfter?: number;
+  notes?: string;
+}
+
+export interface EMIAmendmentRecord {
+  id: string;
+  date: string;
+  amendedBy: string;
+  reason: string;
+  changes: {
+    field: string;
+    label: string;
+    oldValue: any;
+    newValue: any;
+  }[];
+}
+
+export interface EMICustomerAcceptance {
+  isAccepted: boolean;
+  acceptedAt?: string;
+  acceptedBy?: string;
+  acceptanceMethod: 'ELECTRONIC_AFFIRMATIVE' | 'PHYSICAL_SIGNATURE';
+  confirmedFinancials: boolean;
+  confirmedSchedule: boolean;
+  confirmedTerms: boolean;
+  notes?: string;
+}
+
 export interface EMIAccount {
   id: string;
   emiNumber: string; // e.g. "EMI-2026-001"
@@ -550,6 +648,14 @@ export interface EMIAccount {
   contractTerms: string;
   approvedBy: string;
   createdAt: string;
+
+  // Extended Advanced Contract Specifications
+  financialTerms?: EMIFinancialTerms;
+  contractClauses?: EMIContractClause[];
+  termsLanguage?: 'EN' | 'BN' | 'BOTH';
+  customerAcceptance?: EMICustomerAcceptance;
+  amendments?: EMIAmendmentRecord[];
+  contractVersion?: number;
 }
 
 export interface EMIPaymentRecord {
