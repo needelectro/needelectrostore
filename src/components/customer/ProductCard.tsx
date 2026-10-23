@@ -97,6 +97,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             src={imgUrl}
             alt={`${product.name} at ${BUSINESS_INFO.name} Bangladesh`}
             loading="lazy"
+            onError={(e) => {
+              const target = e.currentTarget as HTMLImageElement;
+              if (target.src !== fallbackImage) {
+                target.src = fallbackImage;
+              }
+            }}
             className="max-h-full max-w-full object-contain group-hover:scale-108 transition-transform duration-300 drop-shadow-xs"
           />
         </Link>

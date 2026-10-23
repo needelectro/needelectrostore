@@ -101,6 +101,17 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           <img
             src={activeImage}
             alt={`${product.name} at NEED ELECTRO`}
+            onError={(e) => {
+              const target = e.currentTarget as HTMLImageElement;
+              const fallback =
+                product.category?.toLowerCase().includes('laptop') ||
+                product.name?.toLowerCase().includes('laptop')
+                  ? '/logo-dark-transparent.png'
+                  : '/logo-icon.png';
+              if (target.src !== fallback) {
+                target.src = fallback;
+              }
+            }}
             className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
           />
           <span className="absolute top-4 left-4 bg-slate-100 border border-slate-200 text-[#002B5B] font-bold px-2.5 py-1 rounded-lg text-xs">
@@ -131,7 +142,15 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                     : 'border-slate-200 hover:border-slate-400'
                 }`}
               >
-                <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-contain" />
+                <img
+                  src={img}
+                  alt={`Thumbnail ${idx + 1}`}
+                  onError={(e) => {
+                    const target = e.currentTarget as HTMLImageElement;
+                    target.src = '/logo-icon.png';
+                  }}
+                  className="w-full h-full object-contain"
+                />
               </button>
             ))}
           </div>
