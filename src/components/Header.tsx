@@ -223,49 +223,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateToModule
           <span className="pos-btn-text">POS Terminal</span>
         </button>
 
-        {/* Online Orders Shortcut */}
-        <button 
-          className="btn btn-secondary btn-sm header-website-btn"
-          onClick={() => onNavigateToModule('website_orders')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.35rem',
-            padding: '0.35rem 0.65rem',
-            fontSize: '0.78rem',
-            fontWeight: '600',
-            flexShrink: 0,
-            background: 'rgba(16, 185, 129, 0.12)',
-            borderColor: 'rgba(16, 185, 129, 0.3)',
-            color: '#10b981'
-          }}
-          title="Online Website Orders & Direct Checkout"
-        >
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }} />
-          <span>Online Orders</span>
-        </button>
-
-        {/* View Public Customer Website (Live Preview in New Tab) */}
-        <a 
-          href="/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn btn-secondary btn-sm desktop-xl-only header-website-btn"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.35rem',
-            padding: '0.35rem 0.65rem',
-            fontSize: '0.78rem',
-            fontWeight: '600',
-            flexShrink: 0,
-            textDecoration: 'none'
-          }}
-          title="Open Live Customer Storefront in New Tab"
-        >
-          <Globe size={14} color="var(--brand-primary)" style={{ flexShrink: 0 }} />
-          <span>Live Store ↗</span>
-        </a>
       </div>
 
       {/* Right: Dedicated Utilities Cluster (ALWAYS VISIBLE & ANCHORED RIGHT) */}
