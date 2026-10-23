@@ -159,12 +159,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       {/* Card Body: Spacious and well-proportioned */}
       <div className="p-2.5 sm:p-3.5 md:p-4 bg-white flex-1 flex flex-col justify-between gap-2 sm:gap-2.5">
         {/* Category & Brand row */}
-        <div className="flex items-center justify-between text-[10px] sm:text-xs text-slate-400 font-medium leading-none">
-          <span className="text-slate-500 font-bold uppercase tracking-wider truncate max-w-[65%]">
+        <div className="flex items-center text-[10px] sm:text-xs text-slate-400 font-medium leading-none">
+          <span className="text-slate-500 font-bold uppercase tracking-wider truncate max-w-full">
             {product.brand} • {product.category}
-          </span>
-          <span className="font-mono text-[9px] sm:text-[10px] bg-[#F4F6F8] px-1.5 py-0.5 rounded text-slate-600 font-semibold border border-slate-200/60">
-            {product.sku}
           </span>
         </div>
 
