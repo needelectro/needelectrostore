@@ -86,7 +86,7 @@ body:has(.print-active-modal) .mobile-bottom-nav {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  border-bottom: 2px solid #000000;
+  border-bottom: 2px solid #0284c7;
   padding-bottom: 10px;
   margin-bottom: 12px;
 }
@@ -97,7 +97,7 @@ body:has(.print-active-modal) .mobile-bottom-nav {
 
 .a4-company-details {
   font-size: 11px;
-  color: #000000;
+  color: #334155;
   margin-top: 4px;
   line-height: 1.4;
 }
@@ -109,11 +109,12 @@ body:has(.print-active-modal) .mobile-bottom-nav {
 
 .a4-invoice-badge {
   display: inline-block;
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 800;
-  color: #000000;
+  color: #0369a1;
+  background: #e0f2fe;
   text-transform: uppercase;
-  border: 2px solid #000000;
+  border: 1.5px solid #bae6fd;
   padding: 3px 12px;
   border-radius: 4px;
   letter-spacing: 0.04em;
@@ -135,8 +136,8 @@ body:has(.print-active-modal) .mobile-bottom-nav {
 
 .a4-bill-to {
   flex: 1;
-  background: transparent;
-  border: 1.5px solid #000000;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
   border-radius: 4px;
   padding: 8px 12px;
   font-size: 11.5px;
@@ -146,10 +147,10 @@ body:has(.print-active-modal) .mobile-bottom-nav {
 .a4-bill-to h4 {
   font-size: 11px;
   font-weight: 800;
-  color: #000000;
+  color: #002B5B;
   text-transform: uppercase;
   margin: 0 0 4px 0;
-  border-bottom: 1px solid #cbd5e1;
+  border-bottom: 1px solid #e2e8f0;
   padding-bottom: 3px;
 }
 
@@ -157,7 +158,7 @@ body:has(.print-active-modal) .mobile-bottom-nav {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 12px;
-  border: 1.5px solid #000000;
+  border: 1px solid #cbd5e1;
   background: transparent !important;
 }
 
@@ -166,10 +167,10 @@ body:has(.print-active-modal) .mobile-bottom-nav {
 }
 
 .a4-items-table th {
-  background: rgba(241, 245, 249, 0.85);
-  color: #000000;
-  border: 1px solid #000000;
-  border-bottom: 2px solid #000000;
+  background: #f8fafc;
+  color: #002B5B;
+  border: 1px solid #cbd5e1;
+  border-bottom: 2px solid #0284c7;
   padding: 7px 8px;
   font-size: 11.5px;
   text-transform: uppercase;
@@ -178,11 +179,11 @@ body:has(.print-active-modal) .mobile-bottom-nav {
 }
 
 .a4-items-table td {
-  border: 1px solid #cbd5e1;
+  border: 1px solid #e2e8f0;
   padding: 7px 8px;
   font-size: 11.5px;
   vertical-align: top;
-  color: #000000;
+  color: #0f172a;
   background: transparent !important;
 }
 
@@ -203,22 +204,22 @@ body:has(.print-active-modal) .mobile-bottom-nav {
 .a4-signature-box {
   text-align: center;
   width: 180px;
-  border-top: 1.5px solid #000000;
+  border-top: 1.5px dashed #64748b;
   padding-top: 5px;
   font-size: 11px;
   font-weight: 700;
-  color: #000000;
+  color: #334155;
 }
 
 .a4-software-dev-credit {
   display: block;
   margin-top: 10px;
   padding-top: 6px;
-  border-top: 1.5px solid #000000;
+  border-top: 1px dashed #cbd5e1;
   text-align: center;
-  font-size: 11px;
-  font-weight: 800;
-  color: #000000;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #64748b;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -274,7 +275,11 @@ body:has(.print-active-modal) .mobile-bottom-nav {
   }
 
   /* Reset all outer containers */
-  html, body, #root {
+  html, body, #root,
+  [data-theme='dark'],
+  html[data-theme='dark'],
+  body[data-theme='dark'] {
+    color-scheme: light !important;
     background: #ffffff !important;
     color: #000000 !important;
     height: auto !important;
@@ -449,7 +454,7 @@ body:has(.print-active-modal) .mobile-bottom-nav {
     display: flex !important;
     justify-content: space-between !important;
     align-items: flex-start !important;
-    border-bottom: 2px solid #000000 !important;
+    border-bottom: 2px solid #0284c7 !important;
     padding-bottom: 10px !important;
     margin-bottom: 12px !important;
   }
@@ -460,7 +465,7 @@ body:has(.print-active-modal) .mobile-bottom-nav {
 
   .a4-company-details {
     font-size: 11px !important;
-    color: #000000 !important;
+    color: #334155 !important;
     margin-top: 4px !important;
     line-height: 1.4 !important;
   }
@@ -472,11 +477,12 @@ body:has(.print-active-modal) .mobile-bottom-nav {
 
   .a4-invoice-badge {
     display: inline-block !important;
-    font-size: 16px !important;
+    font-size: 13px !important;
     font-weight: 800 !important;
-    color: #000000 !important;
+    color: #0369a1 !important;
+    background: #e0f2fe !important;
     text-transform: uppercase !important;
-    border: 2px solid #000000 !important;
+    border: 1.5px solid #bae6fd !important;
     padding: 3px 12px !important;
     border-radius: 4px !important;
     letter-spacing: 0.04em !important;
@@ -498,8 +504,8 @@ body:has(.print-active-modal) .mobile-bottom-nav {
 
   .a4-bill-to {
     flex: 1 !important;
-    background: transparent !important;
-    border: 1.5px solid #000000 !important;
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
     border-radius: 4px !important;
     padding: 8px 12px !important;
     font-size: 11.5px !important;
@@ -509,10 +515,10 @@ body:has(.print-active-modal) .mobile-bottom-nav {
   .a4-bill-to h4 {
     font-size: 11px !important;
     font-weight: 800 !important;
-    color: #000000 !important;
+    color: #002B5B !important;
     text-transform: uppercase !important;
     margin-bottom: 4px !important;
-    border-bottom: 1px solid #cbd5e1 !important;
+    border-bottom: 1px solid #e2e8f0 !important;
     padding-bottom: 3px !important;
   }
 
@@ -520,7 +526,7 @@ body:has(.print-active-modal) .mobile-bottom-nav {
     width: 100% !important;
     border-collapse: collapse !important;
     margin-bottom: 12px !important;
-    border: 1.5px solid #000000 !important;
+    border: 1px solid #cbd5e1 !important;
     background: transparent !important;
   }
 
@@ -529,10 +535,10 @@ body:has(.print-active-modal) .mobile-bottom-nav {
   }
 
   .a4-items-table th {
-    background: #f1f5f9 !important;
-    color: #000000 !important;
-    border: 1px solid #000000 !important;
-    border-bottom: 2px solid #000000 !important;
+    background: #f8fafc !important;
+    color: #002B5B !important;
+    border: 1px solid #cbd5e1 !important;
+    border-bottom: 2px solid #0284c7 !important;
     padding: 7px 8px !important;
     font-size: 11.5px !important;
     text-transform: uppercase !important;
@@ -541,11 +547,11 @@ body:has(.print-active-modal) .mobile-bottom-nav {
   }
 
   .a4-items-table td {
-    border: 1px solid #cbd5e1 !important;
+    border: 1px solid #e2e8f0 !important;
     padding: 7px 8px !important;
     font-size: 11.5px !important;
     vertical-align: top !important;
-    color: #000000 !important;
+    color: #0f172a !important;
     background: transparent !important;
   }
 
@@ -612,11 +618,11 @@ body:has(.print-active-modal) .mobile-bottom-nav {
   .a4-signature-box {
     text-align: center !important;
     width: 180px !important;
-    border-top: 1.5px solid #000000 !important;
+    border-top: 1.5px dashed #64748b !important;
     padding-top: 5px !important;
     font-size: 11px !important;
     font-weight: 700 !important;
-    color: #000000 !important;
+    color: #334155 !important;
   }
 
   .a4-software-dev-credit,
@@ -624,11 +630,11 @@ body:has(.print-active-modal) .mobile-bottom-nav {
     display: block !important;
     margin-top: 10px !important;
     padding-top: 6px !important;
-    border-top: 1.5px solid #000000 !important;
+    border-top: 1px dashed #cbd5e1 !important;
     text-align: center !important;
-    font-size: 11px !important;
-    font-weight: 800 !important;
-    color: #000000 !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    color: #64748b !important;
     letter-spacing: 0.05em !important;
     text-transform: uppercase !important;
   }

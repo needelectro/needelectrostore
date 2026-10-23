@@ -186,7 +186,7 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
             </div>
 
             {/* Header */}
-            <div className="a4-header a4-quotation-header" style={{ position: 'relative', zIndex: 1, borderBottom: '2.5px solid #002B5B', paddingBottom: '16px', marginBottom: '18px' }}>
+            <div className="a4-header a4-quotation-header" style={{ position: 'relative', zIndex: 1, borderBottom: '2px solid #0284c7', paddingBottom: '16px', marginBottom: '18px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div className="a4-logo-group">
                   <NeedElectroLogo variant="master-image" size="lg" theme="light" showSisterConcern={false} />
@@ -202,8 +202,9 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
                   <div
                     style={{
                       display: 'inline-block',
-                      background: '#002B5B',
-                      color: '#ffffff',
+                      background: '#e0f2fe',
+                      color: '#0369a1',
+                      border: '1px solid #bae6fd',
                       padding: '4px 12px',
                       borderRadius: '4px',
                       fontSize: '11px',
@@ -327,13 +328,13 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
             <div className="a4-quotation-table-container" style={{ position: 'relative', zIndex: 1, marginBottom: '18px' }}>
               <table className="a4-items-table a4-quotation-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11.5px' }}>
                 <thead>
-                  <tr style={{ background: '#002B5B', color: '#ffffff' }}>
-                    <th style={{ padding: '8px 8px', textAlign: 'center', width: '35px', borderRadius: '4px 0 0 0', border: '1px solid #002B5B' }}>#</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'left', border: '1px solid #002B5B' }}>Item & Specifications</th>
-                    <th style={{ padding: '8px 8px', textAlign: 'center', width: '55px', border: '1px solid #002B5B' }}>Qty</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'right', width: '105px', border: '1px solid #002B5B' }}>Unit Price</th>
-                    {discountTotal > 0 && <th style={{ padding: '8px 10px', textAlign: 'right', width: '85px', border: '1px solid #002B5B' }}>Disc.</th>}
-                    <th style={{ padding: '8px 10px', textAlign: 'right', width: '115px', borderRadius: '0 4px 0 0', border: '1px solid #002B5B' }}>Total ({currency})</th>
+                  <tr style={{ background: '#f8fafc', borderBottom: '2px solid #0284c7' }}>
+                    <th style={{ padding: '8px 8px', textAlign: 'center', width: '35px', borderRadius: '4px 0 0 0', border: '1px solid #cbd5e1', borderBottom: '2px solid #0284c7', background: '#f8fafc', color: '#002B5B', fontWeight: 800 }}>#</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'left', border: '1px solid #cbd5e1', borderBottom: '2px solid #0284c7', background: '#f8fafc', color: '#002B5B', fontWeight: 800 }}>Item & Specifications</th>
+                    <th style={{ padding: '8px 8px', textAlign: 'center', width: '55px', border: '1px solid #cbd5e1', borderBottom: '2px solid #0284c7', background: '#f8fafc', color: '#002B5B', fontWeight: 800 }}>Qty</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'right', width: '105px', border: '1px solid #cbd5e1', borderBottom: '2px solid #0284c7', background: '#f8fafc', color: '#002B5B', fontWeight: 800 }}>Unit Price</th>
+                    {discountTotal > 0 && <th style={{ padding: '8px 10px', textAlign: 'right', width: '85px', border: '1px solid #cbd5e1', borderBottom: '2px solid #0284c7', background: '#f8fafc', color: '#002B5B', fontWeight: 800 }}>Disc.</th>}
+                    <th style={{ padding: '8px 10px', textAlign: 'right', width: '115px', borderRadius: '0 4px 0 0', border: '1px solid #cbd5e1', borderBottom: '2px solid #0284c7', background: '#f8fafc', color: '#002B5B', fontWeight: 800 }}>Total ({currency})</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -419,7 +420,7 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
                         <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 600 }}>+ {currency} {otherCharges.toLocaleString('en-IN')}</td>
                       </tr>
                     )}
-                    <tr style={{ background: '#f1f5f9', borderTop: '2px solid #002B5B', borderBottom: '2px solid #002B5B' }}>
+                    <tr style={{ background: '#f8fafc', borderTop: '2px solid #0284c7', borderBottom: '2px solid #0284c7' }}>
                       <td style={{ padding: '8px 8px', fontWeight: 800, color: '#002B5B', fontSize: '13px' }}>Grand Total:</td>
                       <td style={{ padding: '8px 8px', textAlign: 'right', fontWeight: 900, color: '#002B5B', fontSize: '15px' }}>
                         {currency} {grandTotal.toLocaleString('en-IN')}
@@ -525,7 +526,7 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
                 textAlign: 'center',
               }}
             >
-              <p style={{ margin: 0, fontWeight: 800, fontSize: '10px', color: '#000000', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: '10px', color: '#64748b', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                 Software Developed By AMDADS GROUP
               </p>
             </div>

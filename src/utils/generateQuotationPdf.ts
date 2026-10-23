@@ -343,15 +343,15 @@ export function buildQuotationPdf(
     showHead: 'everyPage', // Repeat table header on continuation pages
     rowPageBreak: 'avoid',  // Never cut a table row across pages
     headStyles: {
-      fillColor: brandDarkNavy,
-      textColor: [255, 255, 255],
+      fillColor: [248, 250, 252],
+      textColor: brandDarkNavy,
       fontSize: 7.5,
       fontStyle: 'bold',
       halign: 'center',
       valign: 'middle',
       cellPadding: 2.2,
       lineWidth: 0.1,
-      lineColor: brandDarkNavy,
+      lineColor: borderGrey,
     },
     bodyStyles: {
       fontSize: 7.5,

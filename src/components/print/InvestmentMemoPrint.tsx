@@ -187,7 +187,7 @@ export const InvestmentMemoPrint: React.FC<InvestmentMemoPrintProps> = ({
         </div>
 
         {/* Modal Scrollable Container */}
-        <div className="modal-body a4-preview-body" style={{ background: '#525659', padding: '1.5rem 0', display: 'flex', justifyContent: 'center' }}>
+        <div className="modal-body a4-preview-body" style={{ background: '#cbd5e1', padding: '1.5rem 0', display: 'flex', justifyContent: 'center' }}>
           {/* Printable A4 Document Sheet */}
           <div
             className="a4-print-document"
@@ -300,14 +300,15 @@ export const InvestmentMemoPrint: React.FC<InvestmentMemoPrintProps> = ({
                   <div
                     style={{
                       display: 'inline-block',
-                      background: '#000000',
-                      color: '#ffffff',
-                      fontSize: '15px',
+                      background: '#e0f2fe',
+                      color: '#0369a1',
+                      border: '1.5px solid #bae6fd',
+                      fontSize: '13px',
                       fontWeight: 900,
                       letterSpacing: '0.08em',
                       textTransform: 'uppercase',
-                      padding: '5px 14px',
-                      borderRadius: '3px',
+                      padding: '4px 14px',
+                      borderRadius: '4px',
                       marginBottom: '8px',
                     }}
                   >

@@ -426,7 +426,7 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
                     <span>৳{vatAmount.toLocaleString()}</span>
                   </div>
                 )}
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderTop: '2px solid #000000', borderBottom: '2px solid #000000', fontSize: '14px', fontWeight: 800 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 8px', background: '#f8fafc', borderTop: '2px solid #0284c7', borderBottom: '2px solid #0284c7', fontSize: '14px', fontWeight: 800, color: '#002B5B' }}>
                   <span>Grand Total:</span>
                   <span>৳{grandTotal.toLocaleString()}</span>
                 </div>
@@ -478,11 +478,11 @@ export const A4InvoicePrint: React.FC<A4InvoicePrintProps> = ({ sale, settings, 
                 style={{
                   marginTop: '8px',
                   paddingTop: '6px',
-                  borderTop: '1.5px solid #000000',
+                  borderTop: '1px dashed #cbd5e1',
                   textAlign: 'center',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  color: '#000000',
+                  fontSize: '10.5px',
+                  fontWeight: 700,
+                  color: '#64748b',
                   letterSpacing: '0.06em',
                   textTransform: 'uppercase'
                 }}
