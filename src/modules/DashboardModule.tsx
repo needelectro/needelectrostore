@@ -356,41 +356,6 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({ onNavigate }) 
                 ৳{physicalCashBalance.toLocaleString()} drawer • ৳{digitalBankBalance.toLocaleString()} bank/digital
               </div>
             </div>
-
-            <div
-              style={{
-                cursor: 'pointer',
-                transition: 'transform 0.15s ease'
-              }}
-              onClick={() => onNavigate('website_orders')}
-              title="Open Online Website Orders & Store Management"
-            >
-              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
-                  <span>Online Storefront</span>
-                </span>
-                <span style={{ fontSize: '0.7rem', color: '#67e8f9' }}>Orders →</span>
-              </span>
-              <div style={{ fontSize: '1.9rem', fontWeight: 900, color: '#ffffff', marginTop: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span>Store Live</span>
-              </div>
-              <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '0.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <a
-                  href="/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  style={{ color: '#67e8f9', textDecoration: 'underline', fontWeight: 600 }}
-                >
-                  View Storefront ↗
-                </a>
-                <span>•</span>
-                <span onClick={(e) => { e.stopPropagation(); onNavigate('banners'); }} style={{ color: '#fef08a', cursor: 'pointer', fontWeight: 600 }}>
-                  Banners
-                </span>
-              </div>
-            </div>
           </div>
         </div>
       </section>
