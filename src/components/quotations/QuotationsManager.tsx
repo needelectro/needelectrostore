@@ -569,7 +569,7 @@ export const QuotationsManager: React.FC<QuotationsManagerProps> = ({
                           <button
                             className="btn btn-ghost btn-xs"
                             onClick={() => setActiveQuotationToPrint(q)}
-                            title="Print / Save PDF"
+                            title="Print Quotation (A4)"
                           >
                             <Printer size={15} />
                           </button>

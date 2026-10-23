@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Quotation, Sale } from '../../types';
 import { useERP } from '../../services/erpStore';
 import { 
-  X, Printer, Download, Share2, Copy, Check, FileCheck, ArrowRight,
+  X, Printer, Share2, Copy, Check, FileCheck, ArrowRight,
   User, Phone, Mail, MapPin, Calendar, Clock, AlertTriangle, ShieldCheck,
   CheckCircle2, XCircle, RotateCcw, ExternalLink, Edit2
 } from 'lucide-react';
@@ -110,7 +110,7 @@ export const QuotationDetailsModal: React.FC<QuotationDetailsModalProps> = ({
               onClick={() => setActiveQuotationToPrint(quotation)}
               style={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
             >
-              <Printer size={16} /> Print / PDF
+              <Printer size={16} /> Print Quotation (A4)
             </button>
             <button
               className="btn btn-secondary btn-sm"

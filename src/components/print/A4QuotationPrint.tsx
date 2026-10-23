@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Quotation, SystemSettings } from '../../types';
-import { Printer, X, Download, Loader2, Share2, Copy, Check, Edit2 } from 'lucide-react';
+import { Printer, X, Share2, Copy, Check, Edit2 } from 'lucide-react';
 import { NeedElectroLogo } from '../NeedElectroLogo';
 import { amountToBangladeshiTakaWords } from '../../utils/numberToWords';
-import { downloadQuotationPdf } from '../../utils/generateQuotationPdf';
 
 interface A4QuotationPrintProps {
   quotation: Quotation;
@@ -22,13 +21,12 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
 }) => {
   if (!quotation) return null;
 
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [copied, setCopied] = useState(false);
 
   React.useEffect(() => {
-    document.body.classList.add('is-printing-invoice');
+    document.body.classList.add('is-printing-invoice', 'is-printing-quotation', 'has-active-print-modal');
     return () => {
-      document.body.classList.remove('is-printing-invoice');
+      document.body.classList.remove('is-printing-invoice', 'is-printing-quotation', 'has-active-print-modal');
     };
   }, []);
 
@@ -55,18 +53,6 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
   const grandTotal = Number(quotation.grandTotal || 0);
 
   const amountInWords = amountToBangladeshiTakaWords(grandTotal);
-
-  const handleDownloadPDF = () => {
-    setIsGeneratingPDF(true);
-    try {
-      downloadQuotationPdf(quotation, settings, { currencyLabel: 'BDT' });
-    } catch (error) {
-      console.error('Failed to generate PDF:', error);
-      alert('Failed to generate PDF. Please use the Print / Save PDF option.');
-    } finally {
-      setIsGeneratingPDF(false);
-    }
-  };
 
   const handleCopy = () => {
     const text = `NEED ELECTRO SALES QUOTATION\nQuotation #: ${quotation.quotationNumber}\nCustomer: ${quotation.customerName}\nValid Until: ${quotation.validUntil}\nTotal Amount: ${currency} ${grandTotal.toLocaleString()}\n\nContact: ${companyPhone}\nWebsite: ${companyWebsite}`;
@@ -99,34 +85,29 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <button
-              className="btn btn-success btn-sm"
-              onClick={handleDownloadPDF}
-              disabled={isGeneratingPDF}
-              style={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-              title="Directly download high-quality A4 PDF quotation"
-            >
-              {isGeneratingPDF ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" /> Generating PDF...
-                </>
-              ) : (
-                <>
-                  <Download size={16} /> Download PDF
-                </>
-              )}
-            </button>
-            <button
               className="btn btn-primary btn-sm"
               onClick={handlePrint}
-              style={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+              style={{
+                background: 'linear-gradient(135deg, #0284c7 0%, #002B5B 100%)',
+                color: '#ffffff',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                boxShadow: '0 2px 6px rgba(2, 132, 199, 0.35)',
+                padding: '0.45rem 1.1rem',
+                fontSize: '0.875rem',
+                border: 'none',
+              }}
+              title="Print standard A4 Sales Quotation or Save as PDF"
             >
-              <Printer size={16} /> Print / Save PDF
+              <Printer size={16} /> Print Quotation (A4)
             </button>
             <button
               className="btn btn-secondary btn-sm"
               onClick={handleWhatsAppShare}
               title="Open prepared WhatsApp message for customer"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#10b981' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#10b981', fontWeight: 600 }}
             >
               <Share2 size={15} /> WhatsApp
             </button>
@@ -176,7 +157,7 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
 
         <div className="modal-body a4-preview-body">
           {/* Printable Sheet */}
-          <div className="a4-print-document" id="printable-a4-quotation">
+          <div className="a4-print-document a4-quotation-document" id="printable-a4-quotation">
             {/* Watermark Background */}
             <div
               className="a4-watermark-overlay"
@@ -200,17 +181,17 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
               <img
                 src="/logo-transparent.png"
                 alt="NEED ELECTRO Watermark"
-                style={{ width: '55%', height: 'auto', display: 'block', opacity: 0.1 }}
+                style={{ width: '55%', height: 'auto', display: 'block', opacity: 0.08 }}
               />
             </div>
 
             {/* Header */}
-            <div className="a4-header" style={{ position: 'relative', zIndex: 1, borderBottom: '2px solid #002B5B', paddingBottom: '16px', marginBottom: '20px' }}>
+            <div className="a4-header a4-quotation-header" style={{ position: 'relative', zIndex: 1, borderBottom: '2.5px solid #002B5B', paddingBottom: '16px', marginBottom: '18px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div className="a4-logo-group">
                   <NeedElectroLogo variant="master-image" size="lg" theme="light" showSisterConcern={false} />
                   <div style={{ fontSize: '11px', color: '#475569', marginTop: '6px', lineHeight: '1.4' }}>
-                    <strong>NEED ELECTRO SHOWROOM & IT SOLUTIONS</strong><br />
+                    <strong style={{ color: '#002B5B', fontSize: '11.5px' }}>NEED ELECTRO SHOWROOM & IT SOLUTIONS</strong><br />
                     {companyAddress}<br />
                     Phone: {companyPhone} | Email: {companyEmail}<br />
                     Web: {companyWebsite}
@@ -262,11 +243,12 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
 
             {/* Customer & Prepared By Info Grid */}
             <div
+              className="a4-party-details a4-quotation-parties"
               style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
                 gap: '16px',
-                marginBottom: '20px',
+                marginBottom: '18px',
                 position: 'relative',
                 zIndex: 1,
               }}
@@ -274,12 +256,12 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
               <div
                 style={{
                   background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  border: '1.5px solid #cbd5e1',
                   borderRadius: '6px',
                   padding: '12px 14px',
                 }}
               >
-                <div style={{ fontSize: '10px', textTransform: 'uppercase', color: '#64748b', fontWeight: 800, letterSpacing: '0.5px', marginBottom: '4px' }}>
+                <div style={{ fontSize: '10px', textTransform: 'uppercase', color: '#002B5B', fontWeight: 800, letterSpacing: '0.5px', marginBottom: '6px', borderBottom: '1px solid #e2e8f0', paddingBottom: '3px' }}>
                   QUOTATION PREPARED FOR:
                 </div>
                 <div style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>
@@ -290,22 +272,22 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
                     {quotation.companyName}
                   </div>
                 )}
-                <div style={{ fontSize: '12px', color: '#334155', marginTop: '3px' }}>
+                <div style={{ fontSize: '12px', color: '#334155', marginTop: '4px' }}>
                   <strong>Phone:</strong> {quotation.customerPhone}
                 </div>
                 {quotation.customerEmail && (
-                  <div style={{ fontSize: '12px', color: '#334155' }}>
+                  <div style={{ fontSize: '12px', color: '#334155', marginTop: '2px' }}>
                     <strong>Email:</strong> {quotation.customerEmail}
                   </div>
                 )}
                 {quotation.billingAddress && (
-                  <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
-                    <strong>Address:</strong> {quotation.billingAddress}
+                  <div style={{ fontSize: '11px', color: '#475569', marginTop: '3px', lineHeight: '1.35' }}>
+                    <strong>Billing Address:</strong> {quotation.billingAddress}
                   </div>
                 )}
                 {quotation.deliveryAddress && (
-                  <div style={{ fontSize: '11px', color: '#64748b' }}>
-                    <strong>Delivery:</strong> {quotation.deliveryAddress}
+                  <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px', lineHeight: '1.35' }}>
+                    <strong>Delivery Address:</strong> {quotation.deliveryAddress}
                   </div>
                 )}
               </div>
@@ -313,69 +295,72 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
               <div
                 style={{
                   background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  border: '1.5px solid #cbd5e1',
                   borderRadius: '6px',
                   padding: '12px 14px',
                 }}
               >
-                <div style={{ fontSize: '10px', textTransform: 'uppercase', color: '#64748b', fontWeight: 800, letterSpacing: '0.5px', marginBottom: '4px' }}>
+                <div style={{ fontSize: '10px', textTransform: 'uppercase', color: '#002B5B', fontWeight: 800, letterSpacing: '0.5px', marginBottom: '6px', borderBottom: '1px solid #e2e8f0', paddingBottom: '3px' }}>
                   COMMERCIAL DETAILS & ISSUER:
                 </div>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
+                <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>
                   NEED ELECTRO Sales Department
                 </div>
-                <div style={{ fontSize: '12px', color: '#334155', marginTop: '3px' }}>
+                <div style={{ fontSize: '12px', color: '#334155', marginTop: '4px' }}>
                   <strong>Prepared By:</strong> {quotation.preparedByName || 'Showroom Sales Team'}
                 </div>
                 {quotation.salespersonName && (
-                  <div style={{ fontSize: '12px', color: '#334155' }}>
+                  <div style={{ fontSize: '12px', color: '#334155', marginTop: '2px' }}>
                     <strong>Sales Representative:</strong> {quotation.salespersonName}
                   </div>
                 )}
-                <div style={{ fontSize: '11px', color: '#0284c7', marginTop: '4px' }}>
+                <div style={{ fontSize: '11.5px', color: '#0284c7', marginTop: '6px', fontWeight: 600 }}>
                   Official Commercial Proposal | Subject to Confirmation
+                </div>
+                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px', lineHeight: '1.35' }}>
+                  All prices are quoted in Bangladeshi Taka ({currency}) and valid until {quotation.validUntil}.
                 </div>
               </div>
             </div>
 
             {/* Items Table */}
-            <div style={{ position: 'relative', zIndex: 1, marginBottom: '20px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+            <div className="a4-quotation-table-container" style={{ position: 'relative', zIndex: 1, marginBottom: '18px' }}>
+              <table className="a4-items-table a4-quotation-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11.5px' }}>
                 <thead>
                   <tr style={{ background: '#002B5B', color: '#ffffff' }}>
-                    <th style={{ padding: '8px 10px', textAlign: 'center', width: '35px', borderRadius: '4px 0 0 0' }}>#</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'left' }}>Item & Specifications</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'center', width: '55px' }}>Qty</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'right', width: '100px' }}>Unit Price</th>
-                    {discountTotal > 0 && <th style={{ padding: '8px 10px', textAlign: 'right', width: '85px' }}>Disc.</th>}
-                    <th style={{ padding: '8px 10px', textAlign: 'right', width: '115px', borderRadius: '0 4px 0 0' }}>Total ({currency})</th>
+                    <th style={{ padding: '8px 8px', textAlign: 'center', width: '35px', borderRadius: '4px 0 0 0', border: '1px solid #002B5B' }}>#</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'left', border: '1px solid #002B5B' }}>Item & Specifications</th>
+                    <th style={{ padding: '8px 8px', textAlign: 'center', width: '55px', border: '1px solid #002B5B' }}>Qty</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'right', width: '105px', border: '1px solid #002B5B' }}>Unit Price</th>
+                    {discountTotal > 0 && <th style={{ padding: '8px 10px', textAlign: 'right', width: '85px', border: '1px solid #002B5B' }}>Disc.</th>}
+                    <th style={{ padding: '8px 10px', textAlign: 'right', width: '115px', borderRadius: '0 4px 0 0', border: '1px solid #002B5B' }}>Total ({currency})</th>
                   </tr>
                 </thead>
                 <tbody>
                   {items.map((it, idx) => (
-                    <tr key={it.id || idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '8px 10px', textAlign: 'center', color: '#64748b' }}>{idx + 1}</td>
-                      <td style={{ padding: '8px 10px' }}>
-                        <div style={{ fontWeight: 700, color: '#0f172a' }}>{it.productName}</div>
-                        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '1px' }}>
-                          SKU: {it.sku}
-                          {it.model && <span style={{ marginLeft: '10px' }}>Model: {it.model}</span>}
-                          {it.brand && <span style={{ marginLeft: '10px' }}>Brand: {it.brand}</span>}
+                    <tr key={it.id || idx} style={{ borderBottom: '1px solid #cbd5e1' }}>
+                      <td style={{ padding: '8px 8px', textAlign: 'center', color: '#64748b', borderLeft: '1px solid #cbd5e1', borderRight: '1px solid #cbd5e1' }}>{idx + 1}</td>
+                      <td style={{ padding: '8px 10px', borderRight: '1px solid #cbd5e1' }}>
+                        <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '12px' }}>{it.productName}</div>
+                        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
+                          <span style={{ fontWeight: 600 }}>SKU:</span> {it.sku}
+                          {it.model && <span style={{ marginLeft: '8px' }}><span style={{ fontWeight: 600 }}>Model:</span> {it.model}</span>}
+                          {it.brand && <span style={{ marginLeft: '8px' }}><span style={{ fontWeight: 600 }}>Brand:</span> {it.brand}</span>}
                         </div>
                         {it.warrantyMonths ? (
-                          <div style={{ fontSize: '11px', color: '#0284c7', marginTop: '1px' }}>
-                            Warranty: {it.warrantyMonths} Months
+                          <div style={{ fontSize: '10.5px', color: '#0284c7', marginTop: '2px', fontWeight: 600 }}>
+                            Warranty: {it.warrantyMonths} Months Official Coverage
                           </div>
                         ) : null}
                       </td>
-                      <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 600 }}>{it.quantity}</td>
-                      <td style={{ padding: '8px 10px', textAlign: 'right' }}>{currency} {Number(it.unitPrice).toLocaleString('en-IN')}</td>
+                      <td style={{ padding: '8px 8px', textAlign: 'center', fontWeight: 700, color: '#0f172a', borderRight: '1px solid #cbd5e1' }}>{it.quantity}</td>
+                      <td style={{ padding: '8px 10px', textAlign: 'right', color: '#334155', borderRight: '1px solid #cbd5e1' }}>{currency} {Number(it.unitPrice).toLocaleString('en-IN')}</td>
                       {discountTotal > 0 && (
-                        <td style={{ padding: '8px 10px', textAlign: 'right', color: '#ef4444' }}>
+                        <td style={{ padding: '8px 10px', textAlign: 'right', color: '#ef4444', fontWeight: 600, borderRight: '1px solid #cbd5e1' }}>
                           {Number(it.discount || 0) > 0 ? `-${currency} ${Number(it.discount).toLocaleString('en-IN')}` : '-'}
                         </td>
                       )}
-                      <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 800, color: '#002B5B' }}>
+                      <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 800, color: '#002B5B', borderRight: '1px solid #cbd5e1' }}>
                         {currency} {Number(it.lineTotal).toLocaleString('en-IN')}
                       </td>
                     </tr>
@@ -385,20 +370,20 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
             </div>
 
             {/* Financial Summary & Amount in Words */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', position: 'relative', zIndex: 1 }}>
-              <div style={{ maxWidth: '55%' }}>
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '10px 14px' }}>
-                  <div style={{ fontSize: '10px', textTransform: 'uppercase', color: '#64748b', fontWeight: 700, marginBottom: '2px' }}>
+            <div className="a4-totals-section a4-quotation-summary" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px', position: 'relative', zIndex: 1, gap: '20px' }}>
+              <div style={{ flex: 1, maxWidth: '58%' }}>
+                <div style={{ background: '#f8fafc', border: '1.5px solid #cbd5e1', borderRadius: '6px', padding: '10px 14px' }}>
+                  <div style={{ fontSize: '10px', textTransform: 'uppercase', color: '#002B5B', fontWeight: 800, letterSpacing: '0.5px', marginBottom: '3px' }}>
                     AMOUNT IN WORDS:
                   </div>
-                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#002B5B', lineHeight: '1.4' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#002B5B', lineHeight: '1.45' }}>
                     {amountInWords}
                   </div>
                 </div>
               </div>
 
-              <div style={{ width: '300px' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+              <div style={{ width: '280px', flexShrink: 0 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11.5px' }}>
                   <tbody>
                     <tr>
                       <td style={{ padding: '4px 8px', color: '#64748b' }}>Subtotal:</td>
@@ -413,29 +398,29 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
                     {vatAmount > 0 && (
                       <tr>
                         <td style={{ padding: '4px 8px', color: '#64748b' }}>VAT / Tax ({quotation.vatPercent}%):</td>
-                        <td style={{ padding: '4px 8px', textAlign: 'right' }}>+ {currency} {vatAmount.toLocaleString('en-IN')}</td>
+                        <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 600 }}>+ {currency} {vatAmount.toLocaleString('en-IN')}</td>
                       </tr>
                     )}
                     {deliveryCharge > 0 && (
                       <tr>
                         <td style={{ padding: '4px 8px', color: '#64748b' }}>Delivery Charge:</td>
-                        <td style={{ padding: '4px 8px', textAlign: 'right' }}>+ {currency} {deliveryCharge.toLocaleString('en-IN')}</td>
+                        <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 600 }}>+ {currency} {deliveryCharge.toLocaleString('en-IN')}</td>
                       </tr>
                     )}
                     {serviceCharge > 0 && (
                       <tr>
                         <td style={{ padding: '4px 8px', color: '#64748b' }}>Service / Installation:</td>
-                        <td style={{ padding: '4px 8px', textAlign: 'right' }}>+ {currency} {serviceCharge.toLocaleString('en-IN')}</td>
+                        <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 600 }}>+ {currency} {serviceCharge.toLocaleString('en-IN')}</td>
                       </tr>
                     )}
                     {otherCharges > 0 && (
                       <tr>
                         <td style={{ padding: '4px 8px', color: '#64748b' }}>Other Charges:</td>
-                        <td style={{ padding: '4px 8px', textAlign: 'right' }}>+ {currency} {otherCharges.toLocaleString('en-IN')}</td>
+                        <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 600 }}>+ {currency} {otherCharges.toLocaleString('en-IN')}</td>
                       </tr>
                     )}
                     <tr style={{ background: '#f1f5f9', borderTop: '2px solid #002B5B', borderBottom: '2px solid #002B5B' }}>
-                      <td style={{ padding: '8px 8px', fontWeight: 800, color: '#002B5B', fontSize: '14px' }}>Grand Total:</td>
+                      <td style={{ padding: '8px 8px', fontWeight: 800, color: '#002B5B', fontSize: '13px' }}>Grand Total:</td>
                       <td style={{ padding: '8px 8px', textAlign: 'right', fontWeight: 900, color: '#002B5B', fontSize: '15px' }}>
                         {currency} {grandTotal.toLocaleString('en-IN')}
                       </td>
@@ -448,20 +433,21 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
             {/* Commercial Terms & Notes */}
             {(quotation.paymentTerms || quotation.deliveryTerms || quotation.warrantyTerms || quotation.customerNotes) && (
               <div
+                className="a4-quotation-terms"
                 style={{
                   position: 'relative',
                   zIndex: 1,
                   background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  border: '1.5px solid #cbd5e1',
                   borderRadius: '6px',
                   padding: '10px 14px',
                   fontSize: '11px',
                   color: '#334155',
                   lineHeight: '1.45',
-                  marginBottom: '16px',
+                  marginBottom: '14px',
                 }}
               >
-                <div style={{ fontWeight: 800, color: '#002B5B', fontSize: '11px', marginBottom: '4px', textTransform: 'uppercase' }}>
+                <div style={{ fontWeight: 800, color: '#002B5B', fontSize: '11px', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
                   Commercial Terms & Instructions:
                 </div>
                 {quotation.paymentTerms && (
@@ -481,42 +467,44 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
 
             {/* Disclaimer Box */}
             <div
+              className="a4-quotation-disclaimer"
               style={{
                 position: 'relative',
                 zIndex: 1,
                 background: '#fffbeb',
                 border: '1px solid #fef3c7',
                 borderLeft: '4px solid #f59e0b',
-                padding: '10px 14px',
+                padding: '9px 12px',
                 borderRadius: '4px',
-                fontSize: '11px',
+                fontSize: '10.5px',
                 color: '#92400e',
-                lineHeight: '1.45',
+                lineHeight: '1.4',
                 marginBottom: '16px',
               }}
             >
-              <strong>Important Commercial Notice:</strong> This document is a quotation only. It is not a sales invoice, payment receipt, or confirmation of stock reservation. Product availability and final order processing are subject to confirmation under NEED ELECTRO's applicable sales terms.
+              <strong>Important Commercial Notice:</strong> This document is a quotation only. It is not a sales invoice, payment receipt, or confirmation of stock reservation. Product availability and final order processing are subject to confirmation under NEED ELECTRO's standard sales terms.
             </div>
 
             {/* Signature Block */}
             <div
+              className="a4-signatures a4-quotation-signatures"
               style={{
                 position: 'relative',
                 zIndex: 1,
                 display: 'flex',
                 justifyContent: 'space-between',
-                marginTop: '30px',
-                paddingTop: '20px',
+                marginTop: '28px',
+                paddingTop: '16px',
               }}
             >
               <div style={{ width: '220px', textAlign: 'center' }}>
-                <div style={{ borderTop: '1px dashed #64748b', paddingTop: '6px', fontSize: '11px', color: '#475569', fontWeight: 600 }}>
+                <div style={{ borderTop: '1.5px dashed #64748b', paddingTop: '6px', fontSize: '11px', color: '#334155', fontWeight: 700 }}>
                   Customer Acceptance Signature & Date
                 </div>
               </div>
 
               <div style={{ width: '220px', textAlign: 'center' }}>
-                <div style={{ borderTop: '1px dashed #64748b', paddingTop: '6px', fontSize: '11px', color: '#475569', fontWeight: 600 }}>
+                <div style={{ borderTop: '1.5px dashed #64748b', paddingTop: '6px', fontSize: '11px', color: '#334155', fontWeight: 700 }}>
                   Authorized NEED ELECTRO Officer
                 </div>
               </div>
@@ -524,19 +512,20 @@ export const A4QuotationPrint: React.FC<A4QuotationPrintProps> = ({
 
             {/* Footer */}
             <div
+              className="a4-software-dev-credit a4-quotation-footer"
               style={{
                 position: 'relative',
                 zIndex: 1,
                 clear: 'both',
-                marginTop: '35px',
-                paddingTop: '12px',
+                marginTop: '28px',
+                paddingTop: '10px',
                 borderTop: '1px dashed #cbd5e1',
                 fontSize: '10px',
                 color: '#64748b',
                 textAlign: 'center',
               }}
             >
-              <p style={{ margin: 0, fontWeight: 800, fontSize: '10px', color: '#000', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              <p style={{ margin: 0, fontWeight: 800, fontSize: '10px', color: '#000000', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                 Software Developed By AMDADS GROUP
               </p>
             </div>
