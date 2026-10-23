@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.needelectro.store',
-  appName: 'NEED ELECTRO',
+  appName: 'Need Electro Store',
   webDir: 'android-shell',
   server: {
     // Connect securely to the live production storefront

@@ -36,9 +36,9 @@ public class MainActivity extends BridgeActivity {
             settings.setCacheMode(WebSettings.LOAD_DEFAULT);
             settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
 
-            // Custom user-agent identifier for NEED ELECTRO Android app
+            // Custom user-agent identifier for Need Electro Store Android app
             String defaultUserAgent = settings.getUserAgentString();
-            settings.setUserAgentString(defaultUserAgent + " NeedElectroAndroidApp/1.0");
+            settings.setUserAgentString(defaultUserAgent + " NeedElectroStoreAndroidApp/1.0");
 
             // Custom WebViewClient to intercept external links and handle network errors
             webView.setWebViewClient(new WebViewClient() {
@@ -109,7 +109,7 @@ public class MainActivity extends BridgeActivity {
         if (backPressedTime + BACK_PRESS_THRESHOLD > System.currentTimeMillis()) {
             super.onBackPressed();
         } else {
-            Toast.makeText(this, "Press back again to exit NEED ELECTRO", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Press back again to exit Need Electro Store", Toast.LENGTH_SHORT).show();
             backPressedTime = System.currentTimeMillis();
         }
     }
