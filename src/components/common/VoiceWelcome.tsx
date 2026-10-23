@@ -7,6 +7,7 @@ import { Volume2, X } from 'lucide-react';
 const WELCOME_TEXT =
   'Welcome to Need Electro, your trusted electrical and technological solutions.';
 const AUDIO_SRC = '/welcome-voice.mp3';
+const STORAGE_KEY = 'needElectroVoiceWelcomePlayed';
 
 export const VoiceWelcome: React.FC = () => {
   const pathname = usePathname();
@@ -99,6 +100,9 @@ export const VoiceWelcome: React.FC = () => {
         setHasPlayed(true);
         hasPlayedRef.current = true;
         setNeedsInteraction(false);
+        try {
+          localStorage.setItem(STORAGE_KEY, 'true');
+        } catch {}
       };
 
       utterance.onend = () => {
@@ -141,6 +145,9 @@ export const VoiceWelcome: React.FC = () => {
             setHasPlayed(true);
             hasPlayedRef.current = true;
             setNeedsInteraction(false);
+            try {
+              localStorage.setItem(STORAGE_KEY, 'true');
+            } catch {}
           };
           fallbackAudio.onended = () => setIsSpeaking(false);
           fallbackAudio.onerror = () => playSpeechSynthesisFallback();
@@ -166,6 +173,9 @@ export const VoiceWelcome: React.FC = () => {
               setHasPlayed(true);
               hasPlayedRef.current = true;
               setNeedsInteraction(false);
+              try {
+                localStorage.setItem(STORAGE_KEY, 'true');
+              } catch {}
             })
             .catch((err) => {
               if (err?.name === 'NotAllowedError') {
@@ -192,6 +202,16 @@ export const VoiceWelcome: React.FC = () => {
     if (pathname?.startsWith('/admin')) {
       return;
     }
+
+    // Check if welcome voice has already been played previously (Run ONLY 1 time on first visit)
+    try {
+      const alreadyPlayed = localStorage.getItem(STORAGE_KEY) === 'true';
+      if (alreadyPlayed) {
+        setHasPlayed(true);
+        hasPlayedRef.current = true;
+        return;
+      }
+    } catch {}
 
     // Detect mobile touch capability
     const isTouchDevice =
@@ -262,6 +282,9 @@ export const VoiceWelcome: React.FC = () => {
     dismissedRef.current = true;
     setDismissed(true);
     setNeedsInteraction(false);
+    try {
+      localStorage.setItem(STORAGE_KEY, 'true');
+    } catch {}
   };
 
   const handleManualPlay = (e: React.MouseEvent) => {
@@ -289,6 +312,9 @@ export const VoiceWelcome: React.FC = () => {
           setHasPlayed(true);
           hasPlayedRef.current = true;
           setNeedsInteraction(false);
+          try {
+            localStorage.setItem(STORAGE_KEY, 'true');
+          } catch {}
         }}
         onEnded={() => {
           setIsSpeaking(false);
