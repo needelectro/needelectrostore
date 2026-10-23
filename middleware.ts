@@ -58,7 +58,7 @@ export function middleware(request: NextRequest) {
   const response = NextResponse.next();
   if (
     pathname.startsWith('/admin') ||
-    pathname.startsWith('/api') ||
+    (pathname.startsWith('/api') && !pathname.startsWith('/api/feed') && !pathname.startsWith('/api/indexnow')) ||
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/erp') ||
     pathname.startsWith('/account') ||
