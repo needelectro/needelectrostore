@@ -44,3 +44,13 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# Android build outputs & local environment
+.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/.gradle/
+*.jks
+*.keystore
+

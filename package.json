@@ -14,12 +14,25 @@
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
     "prisma:migrate": "prisma migrate deploy",
-    "db:migrate-sqlite": "node scripts/migrate-sqlite-to-postgres.mjs"
+    "db:migrate-sqlite": "node scripts/migrate-sqlite-to-postgres.mjs",
+    "cap:sync": "cap sync android",
+    "cap:copy": "cap copy android",
+    "cap:assets": "node scripts/generate-android-assets.mjs",
+    "build:android": "node scripts/generate-android-assets.mjs && cap sync android"
   },
   "prisma": {
     "seed": "node prisma/seed.mjs"
   },
   "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/browser": "^7.0.0",
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/keyboard": "^7.0.0",
+    "@capacitor/network": "^7.0.0",
+    "@capacitor/splash-screen": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0",
     "@hookform/resolvers": "^3.10.0",
     "@prisma/client": "^5.22.0",
     "@supabase/supabase-js": "^2.49.1",

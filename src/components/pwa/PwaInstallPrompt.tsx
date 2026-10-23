@@ -16,10 +16,12 @@ export const PwaInstallPrompt: React.FC = () => {
   const { t, isBangla } = useLanguage();
 
   useEffect(() => {
-    // Check if already in standalone mode
+    // Check if already in standalone mode or native app
     if (
       window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone === true
+      (window.navigator as any).standalone === true ||
+      (typeof navigator !== 'undefined' && navigator.userAgent.includes('NeedElectroAndroidApp')) ||
+      (typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.())
     ) {
       setIsInstalled(true);
       return;

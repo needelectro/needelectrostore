@@ -1,0 +1,101 @@
+name: NEED ELECTRO Android App — Build & Package
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'android/**'
+      - 'android-shell/**'
+      - 'capacitor.config.ts'
+      - '.github/workflows/android-build.yml'
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build Type'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - aab
+          - apk
+
+jobs:
+  build-android:
+    name: Build Android APK and AAB
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup Java 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install NPM Dependencies
+        run: npm ci --prefer-offline
+
+      - name: Generate Android Brand Icons & Splash Assets
+        run: node scripts/generate-android-assets.mjs
+
+      - name: Capacitor Android Sync
+        run: npx cap sync android
+
+      - name: Make Gradle Wrapper Executable
+        run: chmod +x android/gradlew
+
+      - name: Build Debug APK
+        run: |
+          cd android
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Build Release APK
+        run: |
+          cd android
+          ./gradlew assembleRelease --stacktrace
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD || 'NeedElectro@2026' }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS || 'needelectro_upload' }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD || 'NeedElectro@2026' }}
+
+      - name: Build Google Play Release App Bundle (.aab)
+        run: |
+          cd android
+          ./gradlew bundleRelease --stacktrace
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD || 'NeedElectro@2026' }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS || 'needelectro_upload' }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD || 'NeedElectro@2026' }}
+
+      - name: Upload Debug APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: need-electro-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: warn
+
+      - name: Upload Release APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: need-electro-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: warn
+
+      - name: Upload Google Play AAB Bundle Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: need-electro-release-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: warn
