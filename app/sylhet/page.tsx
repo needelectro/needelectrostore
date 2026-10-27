@@ -16,7 +16,7 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Laptop, Computer & CCTV Store for Sylhet Division | NEED ELECTRO',
+    title: 'Computer & Laptop Shop in Sylhet | NEED ELECTRO',
     description:
       'Buy authentic HP, Dell, and Lenovo laptops, desktop computers, CCTV surveillance cameras, and electrical equipment in Sylhet. 24-hour express courier delivery across Sylhet Sadar, Zindabazar, Amberkhana & all upazilas.',
     path: '/sylhet',
@@ -32,6 +32,10 @@ export async function generateMetadata(): Promise<Metadata> {
       'Electrical products Sylhet',
       'Laptop EMI Sylhet',
       'Cash on delivery laptop Sylhet',
+      'মৌলভীবাজার ল্যাপটপের দোকান',
+      'কম্পিউটার দোকান মৌলভীবাজার',
+      'সিসিটিভি ক্যামেরা মৌলভীবাজার',
+      'ল্যাপটপ কিস্তিতে',
       'সিলেট ল্যাপটপের দোকান',
       'কম্পিউটার দোকান সিলেট',
     ],
@@ -75,6 +79,37 @@ export default async function SylhetPage() {
   const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
   const localSchema = buildLocalBusinessSchema();
 
+  const faqs = [
+    {
+      question: 'Can I get laptops on EMI in Moulvibazar & Sylhet?',
+      answer:
+        'Yes! NEED ELECTRO offers flexible 0% interest laptop and computer installment plans (3 to 12 months) for customers across Moulvibazar and Sylhet Division with local guarantor or NID verification.',
+    },
+    {
+      question: 'Do you provide home delivery in Moulvibazar & Sylhet?',
+      answer:
+        'Yes. We provide 24-hour express courier and doorstep delivery across Moulvibazar Sadar, Sreemangal, Kulaura, Rajnagar, and Sylhet City (Zindabazar, Amberkhana, Shibganj, Upashahar) with Cash on Delivery (COD) and open-box parcel inspection.',
+    },
+    {
+      question: 'Do you offer CCTV camera installation in Moulvibazar & Sylhet?',
+      answer:
+        'Yes. Our certified technicians provide complete turnkey HD and IP CCTV surveillance installation, DVR/NVR configuration, and mobile app live view setup across Moulvibazar and Sylhet Division.',
+    },
+  ];
+
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
       <script
@@ -84,6 +119,10 @@ export default async function SylhetPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
@@ -97,7 +136,7 @@ export default async function SylhetPage() {
           </div>
 
           <h1 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
-            Authentic Laptops, Computers &amp; CCTV for Sylhet
+            Computer &amp; Laptop Shop in Sylhet Division — NEED ELECTRO
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
@@ -123,27 +162,27 @@ export default async function SylhetPage() {
         </div>
       </section>
 
-      {/* Sylhet Features */}
+      {/* Sylhet Features / Localized Trust Badges */}
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 flex-1 space-y-10">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
           <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 flex items-start gap-3 shadow-xs">
             <Truck size={20} className="text-[#0084d6] shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-sm text-slate-900 dark:text-white">24-Hour Express Delivery</p>
-              <p className="text-slate-500 mt-0.5 leading-relaxed">Flat ৳60 delivery rate across all Sylhet districts with open-box verification.</p>
+              <p className="font-bold text-sm text-slate-900 dark:text-white">Fast Delivery to Moulvibazar Sadar, Sreemangal, Kulaura, Rajnagar &amp; Sylhet</p>
+              <p className="text-slate-500 mt-0.5 leading-relaxed">Doorstep Cash on Delivery (COD) &amp; bKash verified payment with open-box verification.</p>
             </div>
           </div>
           <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 flex items-start gap-3 shadow-xs">
             <ShieldCheck size={20} className="text-emerald-500 shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-sm text-slate-900 dark:text-white">Showroom Warranty Backing</p>
-              <p className="text-slate-500 mt-0.5 leading-relaxed">Direct replacement warranty handled locally from our Kusumbag hub.</p>
+              <p className="font-bold text-sm text-slate-900 dark:text-white">Official Warranty &amp; Local Servicing</p>
+              <p className="text-slate-500 mt-0.5 leading-relaxed">Direct 7-day replacement warranty and up to 2 years physical servicing at our Moulvibazar lab.</p>
             </div>
           </div>
           <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 flex items-start gap-3 shadow-xs">
             <CreditCard size={20} className="text-amber-500 shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-sm text-slate-900 dark:text-white">Sylhet Student &amp; Office EMI</p>
+              <p className="font-bold text-sm text-slate-900 dark:text-white">Sylhet Division Student &amp; Office EMI</p>
               <p className="text-slate-500 mt-0.5 leading-relaxed">3 to 12-month installment plans with debit card or local NID verification.</p>
             </div>
           </div>
