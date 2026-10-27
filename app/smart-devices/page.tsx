@@ -69,7 +69,7 @@ export default async function SmartDevicesPage() {
     path: '/smart-devices',
     items: products.slice(0, 30).map(p => ({
       name: p.name,
-      path: `/product/${p.sku || p.id}`,
+      url: `/product/${slugify(p.name)}-${p.sku.toLowerCase()}`,
       image: p.imageUrl || undefined,
       price: Number(p.retailPrice) || undefined,
     })),
