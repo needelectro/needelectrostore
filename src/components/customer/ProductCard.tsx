@@ -107,28 +107,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           />
         </Link>
 
-        {/* Badges on Top Left (Discount & In Stock) */}
-        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start pointer-events-none z-10">
-          {discountPercent > 0 && (
+        {/* Badges on Top Left (Discount) */}
+        {discountPercent > 0 && (
+          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start pointer-events-none z-10">
             <span className="bg-rose-500 text-white text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-md shadow-xs tracking-wider">
               -{discountPercent}% OFF
             </span>
-          )}
-          <span
-            className={`px-2 py-0.5 rounded-md text-[9.5px] sm:text-[10.5px] font-bold tracking-wide flex items-center gap-1.5 shadow-xs ${
-              isInStock
-                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                : 'bg-blue-50 text-[#008CFF] border border-blue-200/80'
-            }`}
-          >
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                isInStock ? 'bg-emerald-500 animate-pulse' : 'bg-[#008CFF]'
-              }`}
-            />
-            <span>{isInStock ? 'In Stock' : 'Available to Order'}</span>
-          </span>
-        </div>
+          </div>
+        )}
 
         {/* Top Right: Wishlist & WhatsApp */}
         <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
