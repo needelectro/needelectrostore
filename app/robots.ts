@@ -71,7 +71,9 @@ const DISALLOW_PATHS = [
   '/customer/dashboard',
   '/customer/settings',
   '/api/',
-  '/*?*q=', // Disallow crawling internal query string searches to prevent thin faceted duplicate URLs
+  '/*?*sort=*',
+  '/*?*filter=*',
+  '/*?*q=*',
 ];
 
 export default function robots(): MetadataRoute.Robots {
@@ -82,6 +84,11 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
+        allow: PUBLIC_ALLOW_PATHS,
+        disallow: DISALLOW_PATHS,
+      },
+      {
+        userAgent: ['Googlebot', 'Googlebot-Image', 'Googlebot-Mobile'],
         allow: PUBLIC_ALLOW_PATHS,
         disallow: DISALLOW_PATHS,
       },

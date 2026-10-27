@@ -60,6 +60,10 @@ export async function generateMetadata(): Promise<Metadata> {
       'Lenovo laptop in Moulvibazar',
       'Electrician in Moulvibazar',
       'Laptop EMI in Moulvibazar',
+      'মৌলভীবাজার ল্যাপটপের দোকান',
+      'কম্পিউটার দোকান মৌলভীবাজার',
+      'সিসিটিভি ক্যামেরা মৌলভীবাজার',
+      'ল্যাপটপ কিস্তিতে',
       'মৌলভীবাজার কম্পিউটার দোকান',
       'মৌলভীবাজার ল্যাপটপ শপ',
       'মৌলভীবাজার সিসি ক্যামেরা',
@@ -125,29 +129,29 @@ export default async function MoulvibazarPage() {
 
   const faqs = [
     {
+      question: 'Can I get laptops on EMI in Moulvibazar?',
+      answer:
+        'Yes! NEED ELECTRO provides flexible 0% interest laptop and desktop computer installment plans (3 to 12 months) for eligible students, professionals, and residents in Moulvibazar. Check our dedicated EMI page or contact our team on WhatsApp for fast qualification with local guarantor or NID.',
+    },
+    {
+      question: 'Do you provide home delivery in Moulvibazar & Sylhet?',
+      answer:
+        'Yes. We provide express doorstep delivery across Moulvibazar town, all upazilas (Sreemangal, Kulaura, Rajnagar, Kamalganj, Barlekha), and Sylhet Division. Local delivery is same-day or within 24 hours with Cash on Delivery (COD), bKash payment, and open-box parcel inspection before payment.',
+    },
+    {
+      question: 'Do you offer CCTV camera installation in Moulvibazar?',
+      answer:
+        'Yes. Our certified security technicians provide on-site HD and IP CCTV camera installation, DVR/NVR configuration, mobile app live view setup, and licensed electrical wiring services across Moulvibazar Sadar, Sreemangal, Kulaura, Rajnagar, Kamalganj, and Barlekha.',
+    },
+    {
       question: 'Where is NEED ELECTRO located in Moulvibazar, and how can I purchase?',
       answer:
-        'NEED ELECTRO operates its central technology hub, customer fulfillment center, and technician servicing workshop from Moulvibazar, Bangladesh. You can order directly online through needelectro.store or consult our sales team via WhatsApp/phone. We provide express doorstep delivery across Moulvibazar town and all upazilas, with Cash on Delivery and parcel inspection before payment.',
+        'NEED ELECTRO operates its central technology hub, customer fulfillment center, and technician servicing workshop from Central Road, NEED ELECTRO Building, Moulvibazar 3200, Bangladesh. You can order directly online through needelectro.store or consult our sales team via WhatsApp/phone.',
     },
     {
       question: 'What warranty and replacement guarantees are provided for laptops in Moulvibazar?',
       answer:
         'Every pre-owned and new laptop supplied by NEED ELECTRO includes a 7-day instant replacement guarantee and 2 years of free service warranty handled directly at our Moulvibazar technical lab. Devices undergo 24-point hardware stress testing covering motherboard health, battery runtime, display panel, and thermals.',
-    },
-    {
-      question: 'Can I purchase laptops and desktop computers with EMI in Moulvibazar?',
-      answer:
-        'Yes. NEED ELECTRO offers 0% interest laptop and computer installment plans (3 to 12 months) for eligible customers in Moulvibazar. Check our dedicated EMI page or contact our team on WhatsApp for fast qualification.',
-    },
-    {
-      question: 'Do you provide on-site CCTV camera installation and electrician services in Moulvibazar?',
-      answer:
-        'Yes. Our certified technicians provide on-site HD and IP CCTV camera installation, DVR/NVR configuration, mobile app live view setup, and licensed electrical wiring services across Moulvibazar Sadar, Sreemangal, Kulaura, Rajnagar, Kamalganj, and Barlekha.',
-    },
-    {
-      question: 'How fast is product delivery within Moulvibazar district?',
-      answer:
-        'For locations within Moulvibazar town (Kusumbag, Chowmuhana, Shamshernagar Road, Sreemangal Road), delivery is typically same-day or within 24 hours. Upazila orders are delivered within 24 to 48 hours via express courier with ৳60 delivery charge.',
     },
   ];
 

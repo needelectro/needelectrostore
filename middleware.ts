@@ -32,10 +32,10 @@ const PERMANENT_REDIRECTS: Record<string, string> = {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const host = request.headers.get('host') || '';
+  const host = (request.headers.get('host') || '').toLowerCase();
 
-  // 0. Canonical Hostname: enforce www.needelectro.store for apex needelectro.store
-  if (host === 'needelectro.store') {
+  // 0. Canonical Hostname: enforce www.needelectro.store for apex needelectro.store and default vercel.app domain
+  if (host === 'needelectro.store' || host === 'needelectroerp.vercel.app') {
     const url = new URL(request.url);
     url.host = 'www.needelectro.store';
     url.protocol = 'https:';
@@ -58,23 +58,38 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url, { status: 301 });
   }
 
-  // 2. Trailing Slash normalization (strip trailing slash if not root and not file)
+  // 2. Trailing Slash normalization (strip trailing slash if not root and not file/api)
   if (pathname.length > 1 && pathname.endsWith('/') && !pathname.startsWith('/api/')) {
     const url = request.nextUrl.clone();
     url.pathname = pathname.slice(0, -1);
     return NextResponse.redirect(url, { status: 301 });
   }
 
-  // 3. Security & Anti-Indexing Headers on Private Administrative Routes
+  // 3. Security & Anti-Indexing Headers on Private Administrative Routes & Previews
   const response = NextResponse.next();
+
+  // Prevent search engines from indexing internal preview/staging branches
+  if (host.endsWith('.vercel.app') && host !== 'needelectroerp.vercel.app') {
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  }
+
   if (
     pathname.startsWith('/admin') ||
     (pathname.startsWith('/api') && !pathname.startsWith('/api/feed') && !pathname.startsWith('/api/indexnow')) ||
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/erp') ||
-    pathname.startsWith('/account') ||
-    pathname.startsWith('/sales') ||
     pathname.startsWith('/pos') ||
+    pathname.startsWith('/cash-management') ||
+    pathname.startsWith('/cash_management') ||
+    pathname.startsWith('/checkout') ||
+    pathname.startsWith('/order-confirmation') ||
+    pathname.startsWith('/cart') ||
+    pathname.startsWith('/account') ||
+    pathname.startsWith('/customer/profile') ||
+    pathname.startsWith('/customer/orders') ||
+    pathname.startsWith('/customer/dashboard') ||
+    pathname.startsWith('/customer/settings') ||
+    pathname.startsWith('/sales') ||
     pathname.startsWith('/returns') ||
     pathname.startsWith('/emi') ||
     pathname.startsWith('/inventory') ||
@@ -84,8 +99,6 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/service') ||
     pathname.startsWith('/warranty') ||
     pathname.startsWith('/accounting') ||
-    pathname.startsWith('/cash-management') ||
-    pathname.startsWith('/cash_management') ||
     pathname.startsWith('/ledgers') ||
     pathname.startsWith('/expenses') ||
     pathname.startsWith('/reports') ||

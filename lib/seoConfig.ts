@@ -447,28 +447,6 @@ export function buildProductSchema(product: {
       name: product.brand || 'NEED ELECTRO',
     },
     category: product.category,
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      reviewCount: '19',
-      bestRating: '5',
-      worstRating: '1',
-    },
-    review: [
-      {
-        '@type': 'Review',
-        reviewRating: {
-          '@type': 'Rating',
-          ratingValue: '5',
-          bestRating: '5',
-        },
-        author: {
-          '@type': 'Person',
-          name: 'Verified Customer',
-        },
-        reviewBody: `Genuine authentic ${product.name} with fast delivery, tested hardware, and official warranty support from NEED ELECTRO Moulvibazar.`,
-      },
-    ],
     offers: {
       '@type': 'Offer',
       url: canonical,
