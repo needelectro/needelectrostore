@@ -277,6 +277,202 @@ export const SeoControlCenter: React.FC = () => {
         })}
       </div>
 
+      {/* 0. Live Audit & Health Hub */}
+      {activeSubTab === 'audit' && (
+        <div className="space-y-6">
+          {/* Top Score Banner */}
+          <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 border border-blue-800/40 rounded-2xl p-6 shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-5">
+              <div className="relative w-20 h-20 rounded-full flex items-center justify-center bg-slate-950 border-4 border-emerald-500 shadow-lg shadow-emerald-500/20">
+                <span className="text-2xl font-black text-white font-mono">
+                  {auditData ? `${auditData.score}%` : '...'}
+                </span>
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-white">Technical SEO Health & Integrity</h3>
+                  <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                    Live Verified
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mt-1 max-w-xl">
+                  Automated scan of all products, categories, guide articles, canonical URLs, and schema validation against Google Merchant & Bing Search standards.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={fetchAuditReport}
+              disabled={loadingAudit}
+              className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-700 transition-colors shrink-0 cursor-pointer"
+            >
+              <RefreshCw size={14} className={loadingAudit ? 'animate-spin text-cyan-400' : ''} />
+              <span>{loadingAudit ? 'Scanning...' : 'Re-run SEO Audit'}</span>
+            </button>
+          </div>
+
+          {/* Audit Metrics Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-1">
+              <span className="text-slate-400 font-semibold">Indexed Products</span>
+              <div className="text-xl font-black text-white font-mono">
+                {auditData ? `${auditData.products.published} / ${auditData.products.total}` : '...'}
+              </div>
+              <span className="text-[11px] text-emerald-400">Published in Store Catalog</span>
+            </div>
+
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-1">
+              <span className="text-slate-400 font-semibold">Sitemap Total URLs</span>
+              <div className="text-xl font-black text-white font-mono">
+                {auditData ? auditData.sitemap.totalUrls : '...'}
+              </div>
+              <span className="text-[11px] text-cyan-400">Active XML Sitemap</span>
+            </div>
+
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-1">
+              <span className="text-slate-400 font-semibold">Missing Product Images</span>
+              <div className="text-xl font-black text-white font-mono">
+                {auditData ? auditData.products.missingImagesCount : '...'}
+              </div>
+              <span className={`text-[11px] ${auditData?.products.missingImagesCount > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                {auditData?.products.missingImagesCount > 0 ? 'Needs Attention' : 'All Images Present'}
+              </span>
+            </div>
+
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-1">
+              <span className="text-slate-400 font-semibold">Thin / Missing Descriptions</span>
+              <div className="text-xl font-black text-white font-mono">
+                {auditData ? auditData.products.thinDescriptionsCount : '...'}
+              </div>
+              <span className={`text-[11px] ${auditData?.products.thinDescriptionsCount > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                {auditData?.products.thinDescriptionsCount > 0 ? 'Below 50 Characters' : 'Descriptions Optimized'}
+              </span>
+            </div>
+          </div>
+
+          {/* Interactive Tools: Slug Checker & IndexNow Submitter */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Slug Collision Checker */}
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
+              <div className="flex items-center gap-2">
+                <Tag size={16} className="text-cyan-400" />
+                <h4 className="text-sm font-bold text-white">Slug Collision & Availability Checker</h4>
+              </div>
+              <p className="text-xs text-slate-400">
+                Check whether a candidate URL slug collides with existing products, category landing pages, or system routes.
+              </p>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="e.g. hp-elitebook-845-g8"
+                  value={slugToCheck}
+                  onChange={e => setSlugToCheck(e.target.value)}
+                  className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-400 font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={handleCheckSlug}
+                  disabled={checkingSlug}
+                  className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors cursor-pointer shrink-0"
+                >
+                  {checkingSlug ? 'Checking...' : 'Check Slug'}
+                </button>
+              </div>
+
+              {slugResult && (
+                <div className={`p-3 rounded-xl border text-xs ${
+                  slugResult.isAvailable
+                    ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-300'
+                    : 'bg-rose-950/40 border-rose-800/50 text-rose-300'
+                }`}>
+                  <div className="font-bold flex items-center gap-1.5">
+                    {slugResult.isAvailable ? <Check size={14} /> : <AlertCircle size={14} />}
+                    <span>{slugResult.isAvailable ? 'Slug is Available for Publication!' : 'Slug Collision Detected!'}</span>
+                  </div>
+                  <div className="text-[11px] mt-1 font-mono">
+                    Candidate: /product/{slugResult.slug}
+                  </div>
+                  {slugResult.collisionType && (
+                    <div className="text-[11px] mt-1 text-slate-300">
+                      Collides with: {slugResult.collisionType}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Instant IndexNow Network Ping */}
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
+              <div className="flex items-center gap-2">
+                <Globe size={16} className="text-blue-400" />
+                <h4 className="text-sm font-bold text-white">Instant IndexNow Submission</h4>
+              </div>
+              <p className="text-xs text-slate-400">
+                Instantly notify Bing, Yandex, Naver, and Seznam crawlers of updated product catalog and guide URLs.
+              </p>
+
+              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs">
+                <div>
+                  <span className="font-semibold text-slate-200 block">Protocol Status</span>
+                  <span className="text-[11px] text-emerald-400 font-mono">Active Verification Key</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handlePingIndexNow}
+                  disabled={indexNowPinging}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors cursor-pointer"
+                >
+                  {indexNowPinging ? 'Pinging IndexNow...' : 'Submit URLs Now'}
+                </button>
+              </div>
+
+              {indexNowResult && (
+                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-1">
+                  <span className="font-bold text-cyan-400 block">Submission Response:</span>
+                  <p>{indexNowResult.message}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Product Schema Live Diagnostics */}
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-sm font-bold text-white">Live Product Schema.org Validator</h4>
+                <p className="text-xs text-slate-400">Verify Offer, availability, BDT pricing, and merchant return policies for any product.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleValidateProductSchema(inspectedProduct?.id || '')}
+                disabled={validatingSchema || !inspectedProduct}
+                className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors cursor-pointer"
+              >
+                {validatingSchema ? 'Validating...' : `Validate "${inspectedProduct?.name?.slice(0, 24)}..."`}
+              </button>
+            </div>
+
+            {productSchemaResult && (
+              <div className="space-y-3">
+                {productSchemaResult.diagnostics.length > 0 && (
+                  <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-800/40 text-amber-300 text-xs space-y-1">
+                    <span className="font-bold block">Diagnostics Warnings:</span>
+                    {productSchemaResult.diagnostics.map((d: string, idx: number) => (
+                      <div key={idx}>• {d}</div>
+                    ))}
+                  </div>
+                )}
+                <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 text-[11px] font-mono text-cyan-300 max-h-60 overflow-y-auto">
+                  <pre>{JSON.stringify(productSchemaResult.schema, null, 2)}</pre>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* 1. Global SEO */}
       {activeSubTab === 'global' && (
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-5">

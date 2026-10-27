@@ -99,27 +99,29 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       <div className="lg:col-span-5 space-y-4">
         {/* Main Display Image */}
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 md:p-8 aspect-[4/3] flex items-center justify-center relative overflow-hidden shadow-xs group">
-          <img
+          <Image
             src={activeImage}
             alt={`${product.name} ${product.brand ? product.brand + ' ' : ''}- Authentic Tech Gear at NEED ELECTRO Moulvibazar, Bangladesh`}
-            onError={(e) => {
-              const target = e.currentTarget as HTMLImageElement;
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 40vw"
+            priority
+            onError={() => {
               const fallback =
                 product.category?.toLowerCase().includes('laptop') ||
                 product.name?.toLowerCase().includes('laptop')
                   ? '/logo-dark-transparent.png'
                   : '/logo-icon.png';
-              if (target.src !== fallback) {
-                target.src = fallback;
+              if (activeImage !== fallback) {
+                setActiveImage(fallback);
               }
             }}
-            className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+            className="object-contain group-hover:scale-105 transition-transform duration-300"
           />
-          <span className="absolute top-4 left-4 bg-slate-100 border border-slate-200 text-[#002B5B] font-bold px-2.5 py-1 rounded-lg text-xs">
+          <span className="absolute top-4 left-4 bg-slate-100 border border-slate-200 text-[#002B5B] font-bold px-2.5 py-1 rounded-lg text-xs z-10">
             {product.brand}
           </span>
           <span
-            className={`absolute top-4 right-4 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+            className={`absolute top-4 right-4 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider z-10 ${
               isInStock
                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                 : 'bg-blue-50 text-[#008CFF] border border-blue-200'
@@ -137,20 +139,22 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
                 key={idx}
                 type="button"
                 onClick={() => setActiveImage(img)}
-                className={`w-16 h-16 rounded-xl bg-white p-1.5 shrink-0 border-2 transition-all overflow-hidden ${
+                className={`w-16 h-16 rounded-xl bg-white p-1.5 shrink-0 border-2 transition-all overflow-hidden relative ${
                   activeImage === img
                     ? 'border-[#008CFF] ring-2 ring-[#008CFF]/20'
                     : 'border-slate-200 hover:border-slate-400'
                 }`}
               >
-                <img
+                <Image
                   src={img}
                   alt={`Thumbnail ${idx + 1}`}
-                  onError={(e) => {
-                    const target = e.currentTarget as HTMLImageElement;
-                    target.src = '/logo-icon.png';
+                  fill
+                  sizes="64px"
+                  loading="lazy"
+                  onError={() => {
+                    // Fallback handled silently
                   }}
-                  className="w-full h-full object-contain"
+                  className="object-contain p-1"
                 />
               </button>
             ))}
