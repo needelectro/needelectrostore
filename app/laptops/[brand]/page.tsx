@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema, buildItemListSchema } from '@/lib/seoConfig';
+import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema, buildItemListSchema, slugify } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -194,7 +194,7 @@ export default async function BrandLaptopsPage({ params }: { params: { brand: st
     url: `/laptops/${brandInfo.slug}`,
     items: products.map((item) => ({
       name: item.name,
-      url: `/product/${item.name ? item.name.toLowerCase().replace(/[\s\W-]+/g, '-') : 'laptop'}-${item.sku.toLowerCase()}`,
+      url: `/product/${slugify(item.name)}-${item.sku.toLowerCase()}`,
       image: item.imageUrl,
       price: Number(item.retailPrice),
       brand: item.brand,
