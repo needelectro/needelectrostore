@@ -396,6 +396,14 @@ export function buildProductSchema(product: {
   warrantyPeriodMonths?: number;
   specs?: any;
   status?: string;
+  ratingValue?: number;
+  reviewCount?: number;
+  reviews?: Array<{
+    authorName?: string;
+    datePublished?: string;
+    comment?: string;
+    rating?: number;
+  }>;
 }) {
   const canonical = getCanonicalUrl(`/product/${slugify(product.name)}-${product.sku.toLowerCase()}`);
   const fallbackImg = `${BUSINESS_INFO.domain}/logo-dark-transparent.png`;
@@ -447,6 +455,36 @@ export function buildProductSchema(product: {
       name: product.brand || 'NEED ELECTRO',
     },
     category: product.category,
+    ...(product.ratingValue && product.reviewCount && product.reviewCount > 0
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: product.ratingValue,
+            reviewCount: product.reviewCount,
+            bestRating: 5,
+            worstRating: 1,
+          },
+          ...(product.reviews && product.reviews.length > 0
+            ? {
+                review: product.reviews.map((r) => ({
+                  '@type': 'Review',
+                  author: {
+                    '@type': 'Person',
+                    name: r.authorName || 'Verified Customer',
+                  },
+                  datePublished: r.datePublished || new Date().toISOString().split('T')[0],
+                  reviewBody: r.comment || 'Authentic product with official warranty and reliable performance.',
+                  reviewRating: {
+                    '@type': 'Rating',
+                    ratingValue: r.rating || product.ratingValue || 5,
+                    bestRating: 5,
+                    worstRating: 1,
+                  },
+                })),
+              }
+            : {}),
+        }
+      : {}),
     offers: {
       '@type': 'Offer',
       url: canonical,

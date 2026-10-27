@@ -198,6 +198,33 @@ async function runTestSuite() {
     'Strict compliance: No fake reviews or fabricated aggregateRating'
   );
 
+  // Review and aggregateRating support when reviews exist
+  const reviewedProductSchema = buildProductSchema({
+    name: 'HP EliteBook 845 G7',
+    sku: 'SKU-LPT-0012',
+    category: 'Laptop',
+    brand: 'HP',
+    retailPrice: 32000,
+    currentStock: 5,
+    ratingValue: 4.9,
+    reviewCount: 12,
+    reviews: [
+      {
+        authorName: 'Tanvir Ahmed',
+        comment: 'Excellent laptop, authentic HP quality and super fast delivery in Moulvibazar.',
+        rating: 5,
+      },
+    ],
+  });
+  assert(
+    Boolean(reviewedProductSchema.aggregateRating && reviewedProductSchema.aggregateRating.ratingValue === 4.9),
+    'Verified reviews unlock aggregateRating schema for SERP stars'
+  );
+  assert(
+    Boolean(Array.isArray(reviewedProductSchema.review) && reviewedProductSchema.review.length === 1),
+    'Verified reviews unlock individual Review schema'
+  );
+
   // Out of stock product availability check
   const outOfStockSchema = buildProductSchema({
     name: 'Sold Out Item',
