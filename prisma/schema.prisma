@@ -291,6 +291,7 @@ model Product {
   quotationItems QuotationItem[]
   reviews       ProductReview[]
   galleryPosts  GalleryPost[]
+  shares        ProductShare[]
 
   @@index([sku])
   @@index([category])
@@ -1686,6 +1687,24 @@ model GalleryPost {
   @@index([publishedAt])
   @@index([slug])
   @@map("gallery_posts")
+}
+
+model ProductShare {
+  id         String   @id @default(cuid())
+  productId  String   @map("product_id")
+  productSku String?  @map("product_sku")
+  method     String   // 'whatsapp' | 'facebook' | 'messenger' | 'telegram' | 'email' | 'copy_link' | 'native'
+  referrer   String?  // optional referral code
+  userAgent  String?  @map("user_agent")
+  ipAddress  String?  @map("ip_address")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([method])
+  @@index([createdAt])
+  @@map("product_shares")
 }
 
 

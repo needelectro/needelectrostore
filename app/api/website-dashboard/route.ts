@@ -32,7 +32,8 @@ export async function GET(req: NextRequest) {
       publishedGuides,
       totalPages,
       activeCoupons,
-      recentAuditLogs
+      recentAuditLogs,
+      totalShares
     ] = await Promise.all([
       prisma.product.count(),
       prisma.product.count({ where: { isPublished: true, status: 'ACTIVE' } }),
@@ -83,6 +84,7 @@ export async function GET(req: NextRequest) {
         orderBy: { timestamp: 'desc' },
         take: 6,
       }),
+      prisma.productShare.count().catch(() => 0),
     ]);
 
     // Check system configuration warnings
@@ -137,6 +139,9 @@ export async function GET(req: NextRequest) {
         },
         coupons: {
           active: activeCoupons,
+        },
+        shares: {
+          total: totalShares,
         },
         recentActivity: recentAuditLogs,
         warnings,

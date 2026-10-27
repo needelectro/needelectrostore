@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
   ShoppingBag, Truck, MessageCircle, Phone, CreditCard,
-  Check, ShieldCheck, Clock, MapPin, Plus, Minus
+  Check, ShieldCheck, Clock, MapPin, Plus, Minus, Share2
 } from 'lucide-react';
 import { BUSINESS_INFO } from '@/lib/seoConfig';
 import { useCart } from '@/src/services/cartContext';
 import { ProductReviewSummaryBadge } from './ProductReviewSummaryBadge';
+import { ProductShareModal } from './ProductShareModal';
 
 interface ProductDetailViewProps {
   product: {
@@ -58,6 +59,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
   const [activeImage, setActiveImage] = useState<string>(allImages[0]);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   const isInStock = product.currentStock > 0;
   // Business Policy: allow_order_when_stock_is_zero = true
@@ -130,6 +132,17 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           >
             {isInStock ? 'In Stock' : 'Available to Order'}
           </span>
+
+          {/* Floating Share Button on Product Image */}
+          <button
+            type="button"
+            onClick={() => setIsShareOpen(true)}
+            aria-label="Share product"
+            className="absolute bottom-4 right-4 z-10 w-9 h-9 rounded-full bg-white/95 hover:bg-white text-slate-600 hover:text-[#008CFF] border border-slate-200/90 shadow-md flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            title="Share this product"
+          >
+            <Share2 size={16} />
+          </button>
         </div>
 
         {/* Thumbnail Selector (if multiple images) */}
@@ -342,6 +355,16 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
             <Phone size={14} />
             <span>Call Showroom</span>
           </a>
+
+          <button
+            type="button"
+            onClick={() => setIsShareOpen(true)}
+            className="min-h-[44px] py-2.5 px-4 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#008CFF] border border-blue-200 font-bold text-xs flex items-center justify-center gap-2 transition-colors active:scale-95"
+            title="Share this product"
+          >
+            <Share2 size={15} />
+            <span>Share Product</span>
+          </button>
         </div>
 
         {/* Nationwide Delivery & Warranty Notice */}
@@ -355,6 +378,21 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           </p>
         </div>
       </div>
+
+      {/* Product Share Modal */}
+      <ProductShareModal
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        product={{
+          id: product.id,
+          name: product.name,
+          sku: product.sku,
+          retailPrice: product.retailPrice,
+          imageUrl: product.imageUrl,
+          category: product.category,
+          description: product.description,
+        }}
+      />
     </div>
   );
 };

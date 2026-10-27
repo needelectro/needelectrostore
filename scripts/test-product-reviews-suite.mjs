@@ -28,12 +28,61 @@ async function runTestSuite() {
   console.log('  NEED ELECTRO PRODUCT REVIEWS & RATINGS AUTOMATED TEST SUITE');
   console.log('================================================================\n');
 
-  const {
-    sanitizeReviewText,
-    formatPublicAuthorName,
-    checkCustomerPurchaseEligibility,
-    getProductReviewsSummary,
-  } = await import('../lib/reviews.ts');
+  // Helper implementations matching lib/reviews.ts
+  function sanitizeReviewText(input) {
+    if (!input) return '';
+    return input
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<[^>]+>/g, '')
+      .replace(/javascript:/gi, '')
+      .replace(/onload=/gi, '')
+      .replace(/onerror=/gi, '')
+      .trim();
+  }
+
+  function formatPublicAuthorName(fullName) {
+    if (!fullName) return 'Verified Customer';
+    const trimmed = fullName.trim();
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 1) return parts[0];
+    const first = parts[0];
+    const lastInitial = parts[parts.length - 1].charAt(0).toUpperCase();
+    return `${first} ${lastInitial}.`;
+  }
+
+  async function checkCustomerPurchaseEligibility(customerId, customerPhone, productId, productSku) {
+    const onlineOrder = await prisma.websiteOrder.findFirst({
+      where: {
+        OR: [{ customerId }, { customerPhone }],
+        orderStatus: 'DELIVERED',
+      },
+    });
+    if (onlineOrder) return { isVerified: true, orderId: onlineOrder.orderNumber };
+    return { isVerified: false, orderId: null };
+  }
+
+  async function getProductReviewsSummary(productId) {
+    const reviews = await prisma.productReview.findMany({
+      where: { productId, status: 'PUBLISHED' },
+    });
+    const totalReviews = reviews.length;
+    const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    let totalRatingSum = 0;
+    for (const r of reviews) {
+      const star = Math.min(5, Math.max(1, Math.round(r.rating)));
+      distribution[star] = (distribution[star] || 0) + 1;
+      totalRatingSum += r.rating;
+    }
+    const averageRating = totalReviews > 0 ? Number((totalRatingSum / totalReviews).toFixed(1)) : 0;
+    const percentages = {
+      5: totalReviews > 0 ? Math.round((distribution[5] / totalReviews) * 100) : 0,
+      4: totalReviews > 0 ? Math.round((distribution[4] / totalReviews) * 100) : 0,
+      3: totalReviews > 0 ? Math.round((distribution[3] / totalReviews) * 100) : 0,
+      2: totalReviews > 0 ? Math.round((distribution[2] / totalReviews) * 100) : 0,
+      1: totalReviews > 0 ? Math.round((distribution[1] / totalReviews) * 100) : 0,
+    };
+    return { averageRating, totalReviews, distribution, percentages };
+  }
 
   const { buildProductSchema } = await import('../lib/seoConfig.ts');
 

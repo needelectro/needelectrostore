@@ -5,10 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   ShoppingBag, Check, Heart, ShieldCheck,
-  Zap, MessageCircle, ArrowRight
+  Zap, MessageCircle, ArrowRight, Share2
 } from 'lucide-react';
 import { BUSINESS_INFO, slugify } from '@/lib/seoConfig';
 import { useCart } from '@/src/services/cartContext';
+import { ProductShareModal } from './ProductShareModal';
 
 export interface ProductCardData {
   id: string;
@@ -35,6 +36,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addItem, openCart } = useCart();
   const [added, setAdded] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   const slug = `${slugify(product.name)}-${product.sku.toLowerCase()}`;
   const isLaptop = product.category.toLowerCase().includes('laptop') || product.name.toLowerCase().includes('laptop');
@@ -116,8 +118,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         )}
 
-        {/* Top Right: Wishlist & WhatsApp */}
+        {/* Top Right: Share, Wishlist & WhatsApp */}
         <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsShareOpen(true);
+            }}
+            aria-label="Share product"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/95 hover:bg-[#008CFF]/10 text-slate-500 hover:text-[#008CFF] border border-slate-200/90 shadow-xs flex items-center justify-center transition-all opacity-90 hover:opacity-100 hover:scale-105"
+            title="Share this product"
+          >
+            <Share2 size={13} />
+          </button>
           <a
             href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=Hello%20NEED%20ELECTRO%2C%20I%20am%20interested%20in%20${encodeURIComponent(product.name)}%20(SKU:%20${product.sku}).%20Is%20it%20available%20for%20delivery%3F`}
             target="_blank"
@@ -214,6 +229,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
         </button>
       </div>
+
+      {/* Responsive Product Share Modal */}
+      <ProductShareModal
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        product={{
+          id: product.id,
+          name: product.name,
+          sku: product.sku,
+          retailPrice: product.retailPrice,
+          imageUrl: product.imageUrl,
+          category: product.category,
+          description: product.description,
+        }}
+      />
     </div>
   );
 };
