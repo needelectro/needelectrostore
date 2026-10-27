@@ -65,6 +65,8 @@ export function getModuleUrl(module: string, param?: string): string {
       return '/seo-management';
     case 'guides_cms':
       return '/admin/guides';
+    case 'gallery_updates':
+      return '/admin/gallery';
     case 'website_management':
       return param ? `/admin/website-management/${encodeURIComponent(param)}` : '/admin/website-management';
     default:
@@ -604,6 +606,19 @@ export function parseRoute(pathname: string = '', search: string = ''): ParsedRo
   if (cleanPath === '/admin/guides' || cleanPath === '/admin/guides-cms' || cleanPath === '/guides-cms') {
     return {
       module: 'guides_cms',
+      isLogin: false,
+      isLanding: false,
+      isProtected: true,
+      fullPath,
+      pathname: cleanPath,
+      searchParams,
+    };
+  }
+
+  // 25.1.1 Photo Gallery & Business Updates
+  if (cleanPath === '/admin/gallery' || cleanPath === '/admin/gallery-updates' || cleanPath === '/gallery-updates') {
+    return {
+      module: 'gallery_updates',
       isLogin: false,
       isLanding: false,
       isProtected: true,

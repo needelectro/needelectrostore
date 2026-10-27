@@ -10,6 +10,7 @@ import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
 import { ProductCard } from '@/src/components/customer/ProductCard';
 import { ProductDetailView } from '@/src/components/customer/ProductDetailView';
 import { ProductSpecificationsView } from '@/src/components/customer/ProductSpecificationsView';
+import { ProductReviewsSection } from '@/src/components/customer/ProductReviewsSection';
 import {
   ShieldCheck, CheckCircle2, Phone, MessageCircle, Truck,
   CreditCard, Clock, MapPin, Laptop, Cpu, Check, ArrowRight
@@ -185,6 +186,45 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
     !product.name.toLowerCase().includes('keyboard') &&
     !product.sku?.startsWith('SKU-ACC-');
 
+  // Query real verified reviews for Google Schema.org Structured Data
+  let reviewsData: { ratingValue?: number; reviewCount?: number; reviews?: any[] } = {};
+  try {
+    const publishedReviews = await prisma.productReview.findMany({
+      where: { productId: product.id, status: 'PUBLISHED' },
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        customerName: true,
+        rating: true,
+        comment: true,
+        createdAt: true,
+      },
+    });
+
+    if (publishedReviews.length > 0) {
+      const [totalCount, avgData] = await Promise.all([
+        prisma.productReview.count({ where: { productId: product.id, status: 'PUBLISHED' } }),
+        prisma.productReview.aggregate({
+          where: { productId: product.id, status: 'PUBLISHED' },
+          _avg: { rating: true },
+        }),
+      ]);
+
+      reviewsData = {
+        ratingValue: avgData._avg.rating ? Number(avgData._avg.rating.toFixed(1)) : 5,
+        reviewCount: totalCount,
+        reviews: publishedReviews.map((r) => ({
+          authorName: r.customerName,
+          datePublished: r.createdAt.toISOString().split('T')[0],
+          comment: r.comment,
+          rating: r.rating,
+        })),
+      };
+    }
+  } catch (err) {
+    console.error('Reviews schema fetch err:', err);
+  }
+
   // Structured Data
   const productSchema = buildProductSchema({
     name: product.name,
@@ -200,6 +240,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
     warrantyPeriodMonths: product.warrantyPeriodMonths,
     specs: product.specs,
     status: product.status,
+    ...reviewsData,
   });
 
   // Query related products from same category
@@ -268,6 +309,13 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
           warrantyPeriodMonths={product.warrantyPeriodMonths || undefined}
           productName={product.name}
           sku={product.sku}
+        />
+
+        {/* Customer Reviews & Ratings Section */}
+        <ProductReviewsSection
+          productId={product.id}
+          productName={product.name}
+          productSku={product.sku}
         />
 
         {/* Related Products Section */}

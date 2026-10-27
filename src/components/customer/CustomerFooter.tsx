@@ -289,6 +289,12 @@ export const CustomerFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
+                <Link href="/gallery" className="hover:text-[#008CFF] text-[#475569] dark:text-slate-400 transition-colors flex items-center gap-1.5">
+                  <ChevronRight size={12} className="text-slate-400" />
+                  <span>{isBangla ? 'ফটো গ্যালারি ও বিজনেস আপডেট' : 'Photo Gallery & Updates'}</span>
+                </Link>
+              </li>
+              <li>
                 <Link href="/faq" className="hover:text-[#008CFF] text-[#475569] dark:text-slate-400 transition-colors flex items-center gap-1.5">
                   <ChevronRight size={12} className="text-slate-400" />
                   <span>{t('footer.faqs', 'FAQs')}</span>

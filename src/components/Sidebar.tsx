@@ -5,7 +5,7 @@ import {
   Truck, Users, PackageSearch, ShieldCheck, Wrench, Wallet,
   PieChart, BookOpen, UserCheck, GitFork, BarChart3,
   Lock, ScrollText, Settings, ChevronRight, Zap, RotateCcw, Sliders, Landmark,
-  User, Globe, X, ShoppingBag, Sparkles, FileText, Scale
+  User, Globe, X, ShoppingBag, Sparkles, FileText, Scale, Camera, Star
 } from 'lucide-react';
 import { NeedElectroLogo } from './NeedElectroLogo';
 import { UserProfileModal } from './UserProfileModal';
@@ -111,8 +111,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'website_management', label: isBangla ? 'ওয়েবসাইট ম্যানেজমেন্ট হাব' : 'Website Management Hub', icon: Globe, badge: 'SYNC', badgeColor: '#008CFF', highlight: true },
         { id: 'website_orders', label: isBangla ? 'অনলাইন অর্ডার' : 'Online Store Orders', icon: ShoppingBag, badge: 'STORE', badgeColor: '#10b981' },
+        { id: 'product_reviews', label: isBangla ? 'পণ্য রিভিউ ও রেটিং' : 'Product Reviews', icon: Star, badge: 'REVIEWS', badgeColor: '#f59e0b' },
         { id: 'control_center', label: isBangla ? 'সিস্টেম কন্ট্রোল সেন্টার' : 'System Control Center', icon: Sliders, badge: 'SUPER', badgeColor: '#2563eb' },
         { id: 'banners', label: isBangla ? 'স্টোর ব্যানার ও স্লাইডার' : 'Store Banners & Hero', icon: Sparkles, badge: 'HERO', badgeColor: '#0084d6' },
+        { id: 'gallery_updates', label: isBangla ? 'ফটো গ্যালারি ও বিজনেস আপডেট' : 'Gallery & Updates', icon: Camera, badge: 'NEW', badgeColor: '#f59e0b' },
         { id: 'guides_cms', label: isBangla ? 'বায়িং গাইড সিএমএস' : 'Guides & Content CMS', icon: BookOpen, badge: 'CMS', badgeColor: '#10b981' },
         { id: 'seo_management', label: isBangla ? 'এসইও ম্যানেজমেন্ট' : 'SEO Management', icon: Globe, badge: 'SEO', badgeColor: '#06b6d4' },
         { id: 'legal_templates', label: isBangla ? 'লিগ্যাল ও চুক্তি টেমপ্লেট' : 'Legal & Contract Terms', icon: Scale, badge: 'LEGAL', badgeColor: '#8b5cf6' },

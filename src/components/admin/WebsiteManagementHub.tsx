@@ -7,10 +7,11 @@ import {
   CheckCircle2, AlertTriangle, AlertCircle, RefreshCw, Eye,
   ExternalLink, Search, Filter, ShoppingBag, Wrench, ShieldCheck,
   ChevronRight, Save, ToggleLeft, ToggleRight, X, ArrowUpDown,
-  Laptop, Calendar, DollarSign, Bell, Truck, Phone, MessageCircle
+  Laptop, Calendar, DollarSign, Bell, Truck, Phone, MessageCircle, Star
 } from 'lucide-react';
 import { api } from '@/src/services/api';
 import { BannersManager } from './BannersManager';
+import { ProductReviewsManager } from './ProductReviewsManager';
 
 type WebsiteHubTab = 
   | 'dashboard'
@@ -19,7 +20,8 @@ type WebsiteHubTab =
   | 'pages'
   | 'coupons'
   | 'navigation'
-  | 'settings';
+  | 'settings'
+  | 'reviews';
 
 interface DashboardStats {
   products: {
@@ -466,6 +468,7 @@ export const WebsiteManagementHub: React.FC<WebsiteManagementHubProps> = ({ onNa
           { id: 'coupons', label: 'Coupons & Discounts', icon: Tag, badge: coupons.length },
           { id: 'navigation', label: 'Navigation & Footer', icon: Navigation },
           { id: 'settings', label: 'Storefront Settings', icon: Settings },
+          { id: 'reviews', label: 'Customer Reviews', icon: Star },
         ].map(t => {
           const Icon = t.icon;
           const isActive = activeTab === t.id;
@@ -1436,6 +1439,13 @@ export const WebsiteManagementHub: React.FC<WebsiteManagementHubProps> = ({ onNa
             <span>Save Storefront Settings</span>
           </button>
         </form>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* SUB-SECTION H: PRODUCT REVIEWS & RATINGS                     */}
+      {/* ------------------------------------------------------------- */}
+      {activeTab === 'reviews' && (
+        <ProductReviewsManager onNavigate={onNavigate} />
       )}
 
       {/* ------------------------------------------------------------- */}

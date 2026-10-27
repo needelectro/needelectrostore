@@ -39,6 +39,7 @@ const CATEGORY_NAV_ITEMS = [
   { name: 'Computer Accessories', href: '/computer-accessories', icon: Smartphone },
   { name: 'Networking & Router', href: '/networking', icon: Wifi },
   { name: 'Certified Electrician', href: '/services/electrician', icon: Zap, badge: 'Moulvibazar' },
+  { name: 'Photo Gallery', href: '/gallery', icon: Camera, badge: 'Live' },
   { name: 'Laptop EMI', href: '/laptop-emi', icon: CreditCard, badge: '0%' },
 ];
 

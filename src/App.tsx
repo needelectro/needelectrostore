@@ -42,9 +42,11 @@ import { ControlCenterModule } from './modules/ControlCenterModule';
 import { WebsiteOrdersManager } from './components/admin/WebsiteOrdersManager';
 import { BannersManager } from './components/admin/BannersManager';
 import { GuidesCmsManager } from './components/admin/GuidesCmsManager';
+import { GalleryUpdatesManager } from './components/admin/GalleryUpdatesManager';
 import { WebsiteManagementHub } from './components/admin/WebsiteManagementHub';
 import { ImageRecoveryManager } from './components/admin/ImageRecoveryManager';
 import { LegalTemplatesModule } from './modules/LegalTemplatesModule';
+import { ProductReviewsManager } from './components/admin/ProductReviewsManager';
 
 import { InitialSetupModal } from './components/auth/InitialSetupModal';
 import { LandingPage } from './components/landing/LandingPage';
@@ -511,6 +513,8 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
         return <BannersManager />;
       case 'guides_cms':
         return <GuidesCmsManager />;
+      case 'gallery_updates':
+        return <GalleryUpdatesManager />;
       case 'website_management':
         return <WebsiteManagementHub onNavigate={handleNavigate} initialTab={moduleInitialParam as any} />;
       case 'control_center':
@@ -521,6 +525,8 @@ const MainAppLayout: React.FC<MainAppLayoutProps> = ({ initialMode }) => {
         return <LegalTemplatesModule onNavigate={handleNavigate} />;
       case 'image_recovery':
         return <ImageRecoveryManager onNavigate={handleNavigate} />;
+      case 'product_reviews':
+        return <ProductReviewsManager onNavigate={handleNavigate} />;
       default:
         return <DashboardModule onNavigate={handleNavigate} />;
     }

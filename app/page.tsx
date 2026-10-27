@@ -14,6 +14,7 @@ import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { HeroCarousel } from '@/src/components/customer/HeroCarousel';
 import { ProductCardData } from '@/src/components/customer/ProductCard';
 import { ProductTabsShowcase } from '@/src/components/customer/ProductTabsShowcase';
+import { BusinessUpdatesFeed } from '@/src/components/customer/BusinessUpdatesFeed';
 import {
   Laptop, Monitor, Camera, Zap, Wifi, Smartphone,
   Truck, ShieldCheck, CreditCard, Clock, CheckCircle2,
@@ -79,9 +80,10 @@ const BRANDS = [
 export default async function HomePage() {
   let banners: any[] = [];
   let products: any[] = [];
+  let galleryUpdates: any[] = [];
 
   try {
-    const [fetchedBanners, fetchedProducts] = await Promise.all([
+    const [fetchedBanners, fetchedProducts, fetchedGalleryUpdates] = await Promise.all([
       prisma.banner.findMany({
         where: {
           isActive: true,
@@ -103,10 +105,39 @@ export default async function HomePage() {
         ],
         take: 36,
       }).catch(() => []),
+      prisma.galleryPost.findMany({
+        where: { isPublished: true },
+        select: {
+          id: true,
+          title: true,
+          titleBn: true,
+          slug: true,
+          description: true,
+          descriptionBn: true,
+          categoryName: true,
+          coverImage: true,
+          isPinned: true,
+          publishedAt: true,
+          product: {
+            select: { name: true, sku: true, retailPrice: true },
+          },
+        },
+        orderBy: [{ isPinned: 'desc' }, { publishedAt: 'desc' }],
+        take: 4,
+      }).catch(() => []),
     ]);
 
     banners = fetchedBanners;
     products = fetchedProducts;
+    galleryUpdates = fetchedGalleryUpdates.map((item) => ({
+      ...item,
+      product: item.product
+        ? {
+            ...item.product,
+            retailPrice: Number(item.product.retailPrice),
+          }
+        : null,
+    }));
   } catch (err) {
     console.error('Failed to query homepage data from database:', err);
   }
@@ -615,6 +646,11 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* 7.1 Live Photo Gallery & Business Updates Feed */}
+        {galleryUpdates.length > 0 && (
+          <BusinessUpdatesFeed updates={galleryUpdates} />
+        )}
 
         {/* 8. Full-Width Solar Inverter & Emergency IPS Power Banner (Desktop only - consolidated into single hero carousel on mobile) */}
         <section aria-label="Solar and IPS Power Solutions" className="hidden md:block">

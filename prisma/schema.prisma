@@ -289,6 +289,9 @@ model Product {
   saleItems     SaleItem[]
   purchaseItems PurchaseItem[]
   quotationItems QuotationItem[]
+  reviews       ProductReview[]
+  galleryPosts  GalleryPost[]
+  shares        ProductShare[]
 
   @@index([sku])
   @@index([category])
@@ -362,6 +365,9 @@ model Customer {
   websiteOrders    WebsiteOrder[]
   sessions         CustomerSession[]
   quotations       Quotation[]
+  reviews          ProductReview[]
+  reviewVotes      ReviewVote[]
+  reviewReports    ReviewReport[]
 
   @@index([customerId])
   @@index([phone])
@@ -1521,4 +1527,166 @@ model QuotationItem {
   @@index([productId])
   @@map("quotation_items")
 }
+
+// ---------------------------------------------------------
+// 31. PRODUCT REVIEWS & RATINGS SUBSYSTEM
+// ---------------------------------------------------------
+
+model ProductReview {
+  id                 String    @id @default(cuid())
+  productId          String    @map("product_id")
+  customerId         String    @map("customer_id")
+  customerName       String    @map("customer_name")
+  rating             Int       // 1 to 5
+  title              String?
+  comment            String    @db.Text
+  isVerifiedPurchase Boolean   @default(false) @map("is_verified_purchase")
+  orderId            String?   @map("order_id")
+  status             String    @default("PUBLISHED") // 'PENDING' | 'PUBLISHED' | 'REJECTED' | 'HIDDEN'
+  helpfulCount       Int       @default(0) @map("helpful_count")
+  reportCount        Int       @default(0) @map("report_count")
+  moderationNotes    String?   @map("moderation_notes")
+  moderatedById      String?   @map("moderated_by_id")
+  moderatedAt        DateTime? @map("moderated_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  product            Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customer           Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  images             ReviewImage[]
+  votes              ReviewVote[]
+  reports            ReviewReport[]
+  responses          ReviewResponse[]
+
+  @@unique([productId, customerId])
+  @@index([productId])
+  @@index([customerId])
+  @@index([status])
+  @@index([rating])
+  @@index([isVerifiedPurchase])
+  @@index([createdAt])
+  @@index([helpfulCount])
+  @@map("product_reviews")
+}
+
+model ReviewImage {
+  id        String   @id @default(cuid())
+  reviewId  String   @map("review_id")
+  imageUrl  String   @map("image_url")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  review    ProductReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId])
+  @@map("review_images")
+}
+
+model ReviewVote {
+  id         String   @id @default(cuid())
+  reviewId   String   @map("review_id")
+  customerId String   @map("customer_id")
+  isHelpful  Boolean  @default(true) @map("is_helpful")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  review     ProductReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  customer   Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, customerId])
+  @@index([reviewId])
+  @@index([customerId])
+  @@map("review_votes")
+}
+
+model ReviewReport {
+  id         String   @id @default(cuid())
+  reviewId   String   @map("review_id")
+  customerId String?  @map("customer_id")
+  reason     String   // 'INAPPROPRIATE' | 'SPAM' | 'FAKE' | 'OFFENSIVE' | 'OTHER'
+  details    String?  @db.Text
+  ipAddress  String?  @map("ip_address")
+  status     String   @default("PENDING") // 'PENDING' | 'RESOLVED' | 'DISMISSED'
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  review     ProductReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  customer   Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([reviewId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("review_reports")
+}
+
+model ReviewResponse {
+  id         String   @id @default(cuid())
+  reviewId   String   @map("review_id")
+  userId     String   @map("user_id")
+  authorName String   @default("NEED ELECTRO Official") @map("author_name")
+  response   String   @db.Text
+  isOfficial Boolean  @default(true) @map("is_official")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+
+  review     ProductReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId])
+  @@map("review_responses")
+}
+
+// ---------------------------------------------------------
+// 34. PHOTO GALLERY & BUSINESS UPDATES
+// ---------------------------------------------------------
+
+model GalleryCategory {
+  id          String        @id @default(cuid())
+  name        String
+  nameBn      String?       @map("name_bn")
+  slug        String        @unique
+  description String?
+  sortOrder   Int           @default(0) @map("sort_order")
+  isActive    Boolean       @default(true) @map("is_active")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @default(now()) @updatedAt @map("updated_at")
+
+  posts       GalleryPost[]
+
+  @@index([slug])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@map("gallery_categories")
+}
+
+model GalleryPost {
+  id             String           @id @default(cuid())
+  title          String
+  titleBn        String?          @map("title_bn")
+  slug           String           @unique
+  description    String?          @db.Text
+  descriptionBn  String?          @map("description_bn") @db.Text
+  categoryId     String?          @map("category_id")
+  categoryName   String           @default("General") @map("category_name")
+  coverImage     String           @map("cover_image")
+  images         Json             // Array of { url: string, caption?: string, captionBn?: string, alt?: string, order?: number }
+  tags           Json?            // Array of string tags: ['Laptops', 'Arrival', 'Moulvibazar']
+  productId      String?          @map("product_id")
+  destinationUrl String?          @map("destination_url")
+  isPinned       Boolean          @default(false) @map("is_pinned")
+  isPublished    Boolean          @default(true) @map("is_published")
+  publishedAt    DateTime         @default(now()) @map("published_at")
+  views          Int              @default(0)
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @default(now()) @updatedAt @map("updated_at")
+
+  category       GalleryCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  product        Product?         @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([categoryId])
+  @@index([productId])
+  @@index([isPublished])
+  @@index([isPinned])
+  @@index([publishedAt])
+  @@index([slug])
+  @@map("gallery_posts")
+}
+
 

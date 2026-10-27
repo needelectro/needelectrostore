@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   User, Package, MapPin, ShieldCheck, LogOut,
   Clock, Truck, CheckCircle, ExternalLink,
-  ChevronRight, ArrowRight, ShoppingBag, Eye, Phone, Mail
+  ChevronRight, ArrowRight, ShoppingBag, Eye, Phone, Mail, Star
 } from 'lucide-react';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
@@ -200,8 +200,8 @@ export default function CustomerDashboardPage() {
           </div>
         </div>
 
-        {/* 3. Navigation Hub Grid (4 Direct Action Modules) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* 3. Navigation Hub Grid (5 Direct Action Modules) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           <Link
             href="/customer/orders"
             className="glass-panel p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-[#008CFF] dark:hover:border-[#008CFF] transition-all group shadow-sm flex items-center justify-between"
@@ -216,6 +216,26 @@ export default function CustomerDashboardPage() {
                 </p>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">
                   {isBangla ? 'সম্পূর্ণ ইতিহাস ও ইনভয়েস' : 'Order history & invoices'}
+                </p>
+              </div>
+            </div>
+            <ChevronRight size={18} className="text-slate-400 group-hover:translate-x-1 transition-transform" />
+          </Link>
+
+          <Link
+            href="/customer/reviews"
+            className="glass-panel p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-[#008CFF] dark:hover:border-[#008CFF] transition-all group shadow-sm flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Star size={20} className="fill-amber-400" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-[#008CFF] transition-colors">
+                  {isBangla ? 'আমার রিভিউসমূহ' : 'My Reviews'}
+                </p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {isBangla ? 'মতামত ও রেটিং দেখুন' : 'Feedback & ratings'}
                 </p>
               </div>
             </div>

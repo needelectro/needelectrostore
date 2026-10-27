@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { BUSINESS_INFO } from '@/lib/seoConfig';
 import { useCart } from '@/src/services/cartContext';
+import { ProductReviewSummaryBadge } from './ProductReviewSummaryBadge';
 
 interface ProductDetailViewProps {
   product: {
@@ -198,6 +199,10 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
           <h1 className="text-2xl md:text-3xl font-extrabold text-[#002B5B] tracking-tight leading-snug">
             {product.name}
           </h1>
+
+          <div className="mt-2.5 flex items-center gap-3">
+            <ProductReviewSummaryBadge productId={product.id} />
+          </div>
 
           {product.description && (
             <div className="mt-3 text-sm text-slate-600 leading-relaxed">
