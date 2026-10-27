@@ -291,7 +291,6 @@ model Product {
   quotationItems QuotationItem[]
   reviews       ProductReview[]
   galleryPosts  GalleryPost[]
-  shares        ProductShare[]
 
   @@index([sku])
   @@index([category])
