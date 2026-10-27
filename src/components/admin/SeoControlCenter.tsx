@@ -55,6 +55,118 @@ export const SeoControlCenter: React.FC = () => {
   const [newRedirectFrom, setNewRedirectFrom] = useState('');
   const [newRedirectTo, setNewRedirectTo] = useState('');
 
+  // Live SEO Audit & Governance States
+  const [auditData, setAuditData] = useState<any>(null);
+  const [loadingAudit, setLoadingAudit] = useState(false);
+  const [slugToCheck, setSlugToCheck] = useState('');
+  const [slugResult, setSlugResult] = useState<any>(null);
+  const [checkingSlug, setCheckingSlug] = useState(false);
+  const [indexNowPinging, setIndexNowPinging] = useState(false);
+  const [indexNowResult, setIndexNowResult] = useState<any>(null);
+  const [productSchemaResult, setProductSchemaResult] = useState<any>(null);
+  const [validatingSchema, setValidatingSchema] = useState(false);
+
+  const fetchAuditReport = async () => {
+    setLoadingAudit(true);
+    try {
+      const res = await fetch('/api/admin/seo', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+        },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAuditData(data.data);
+      }
+    } catch (err) {
+      console.error('Failed to load SEO audit report:', err);
+    } finally {
+      setLoadingAudit(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchAuditReport();
+  }, []);
+
+  const handleCheckSlug = async () => {
+    if (!slugToCheck.trim()) {
+      addToast('error', 'Validation Error', 'Please enter a candidate slug.');
+      return;
+    }
+    setCheckingSlug(true);
+    try {
+      const res = await fetch('/api/admin/seo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+        },
+        body: JSON.stringify({ action: 'check_slug', slug: slugToCheck }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSlugResult(data.data);
+      } else {
+        addToast('error', 'Check Failed', data.error);
+      }
+    } catch (err: any) {
+      addToast('error', 'Network Error', err.message);
+    } finally {
+      setCheckingSlug(false);
+    }
+  };
+
+  const handlePingIndexNow = async () => {
+    setIndexNowPinging(true);
+    try {
+      const res = await fetch('/api/admin/seo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+        },
+        body: JSON.stringify({ action: 'ping_indexnow' }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIndexNowResult(data.data);
+        addToast('success', 'IndexNow Ping Sent', data.data.message);
+      } else {
+        addToast('error', 'IndexNow Failed', data.error);
+      }
+    } catch (err: any) {
+      addToast('error', 'IndexNow Error', err.message);
+    } finally {
+      setIndexNowPinging(false);
+    }
+  };
+
+  const handleValidateProductSchema = async (productId: string) => {
+    setValidatingSchema(true);
+    try {
+      const res = await fetch('/api/admin/seo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+        },
+        body: JSON.stringify({ action: 'validate_schema', productId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setProductSchemaResult(data.data);
+        addToast('info', 'Schema Validated', 'Schema.org JSON-LD generated & inspected.');
+      } else {
+        addToast('error', 'Validation Failed', data.error);
+      }
+    } catch (err: any) {
+      addToast('error', 'Schema Error', err.message);
+    } finally {
+      setValidatingSchema(false);
+    }
+  };
+
   // Product SEO search inspector state
   const [productSearchQuery, setProductSearchQuery] = useState('');
   const [selectedProductIndex, setSelectedProductIndex] = useState(0);
@@ -102,6 +214,7 @@ export const SeoControlCenter: React.FC = () => {
   };
 
   const subTabs: Array<{ id: SeoSubTab; label: string; icon: any }> = [
+    { id: 'audit', label: '0. Audit & Health', icon: CheckCircle2 },
     { id: 'global', label: '1. Global SEO', icon: Globe },
     { id: 'homepage', label: '2. Homepage SEO', icon: Layers },
     { id: 'product_seo', label: '3. Product SEO', icon: Laptop },

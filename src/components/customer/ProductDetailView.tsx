@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   ShoppingBag, Truck, MessageCircle, Phone, CreditCard,
   Check, ShieldCheck, Clock, MapPin, Plus, Minus
