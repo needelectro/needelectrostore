@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export interface BannerSlide {
@@ -210,32 +211,32 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({
                 {!isErrored ? (
                   <>
                     {/* Ambient subtle background glow */}
-                    <img
+                    <Image
                       src={chosenSrc}
                       alt=""
+                      fill
                       aria-hidden="true"
-                      className="absolute inset-0 w-full h-full object-cover object-center blur-2xl opacity-30 scale-105 pointer-events-none"
+                      sizes="100vw"
+                      priority={index === 0}
+                      className="object-cover object-center blur-2xl opacity-30 scale-105 pointer-events-none"
                     />
 
-                    <picture className="w-full h-full block relative z-10">
-                      {slide.mobileImageUrl && (
-                        <source media="(max-width: 640px)" srcSet={slide.mobileImageUrl} />
-                      )}
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                    <div className="w-full h-full block relative z-10">
+                      <Image
                         src={chosenSrc}
                         alt={slide.title || 'NEED ELECTRO Promotional Banner'}
-                        loading={index === 0 ? 'eager' : 'lazy'}
-                        decoding="async"
+                        fill
+                        sizes="100vw"
+                        priority={index === 0}
+                        loading={index === 0 ? undefined : 'lazy'}
                         onError={() => handleImageError(slide.id)}
-                        className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.01]"
+                        className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.01]"
                       />
-                    </picture>
+                    </div>
                   </>
                 ) : (
                   <div className="w-full h-full bg-[#F4F6F8] flex items-center justify-center p-4">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/logo-icon.png" alt="NEED ELECTRO" className="h-10 opacity-60 object-contain" />
+                    <Image src="/logo-icon.png" alt="NEED ELECTRO" width={160} height={40} className="h-10 opacity-60 object-contain" />
                   </div>
                 )}
               </div>
