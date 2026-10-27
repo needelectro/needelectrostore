@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { BUSINESS_INFO, generateSeoMetadata, buildProductSchema, buildBreadcrumbSchema, slugify } from '@/lib/seoConfig';
@@ -122,18 +122,24 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const brandPart = product.brand ? `${product.brand} ` : '';
   const isLaptop = product.category.toLowerCase().includes('laptop') || product.name.toLowerCase().includes('laptop');
   const baseName = product.name.trim();
-  const title = baseName.length > 35
-    ? `${baseName.slice(0, 32)}... Price in BD | NEED ELECTRO`
+  const title = baseName.length > 45
+    ? `${baseName.slice(0, 42)}... Price in BD | NEED ELECTRO`
     : `${baseName} Price in BD | NEED ELECTRO`;
 
   const warrantyPart = product.warrantyPeriodMonths ? `${product.warrantyPeriodMonths}M warranty, ` : '';
-  const stockPart = product.currentStock > 0 ? 'in stock' : 'order today';
-  const description = `Explore ${product.name} at NEED ELECTRO. View specs, price (৳${priceFormatted} BDT), ${warrantyPart}${stockPart} and nationwide delivery in Bangladesh.`;
+  const stockPart = product.currentStock > 0
+    ? 'in stock'
+    : product.status === 'OUT_OF_STOCK'
+    ? 'currently out of stock'
+    : 'available to order';
+  const description = `${product.name} ${product.brand ? '(' + product.brand + ') ' : ''}price in Bangladesh: ৳${priceFormatted} BDT. ${warrantyPart}${stockPart}, verified specs & delivery from NEED ELECTRO Moulvibazar.`;
 
   const brandKeywords = product.brand ? [`${product.brand} price in Bangladesh`, `${product.brand} Moulvibazar`] : [];
   const laptopKeywords = isLaptop
     ? ['Laptop price in Bangladesh', 'Genuine laptop with warranty in Bangladesh', 'Laptop price in Moulvibazar', 'HP EliteBook price in Bangladesh']
     : [];
+
+  const isDiscontinued = product.status === 'DISCONTINUED';
 
   return generateSeoMetadata({
     title,
@@ -151,6 +157,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       'ল্যাপটপের দাম বাংলাদেশ',
     ],
     ogImage: product.imageUrl || '/logo-dark-transparent.png',
+    noIndex: isDiscontinued,
   });
 }
 
@@ -158,6 +165,13 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
   const product = await getProductBySlug(params.slug);
   if (!product) {
     notFound();
+  }
+
+  // 301 Permanent Canonical URL Redirect
+  // If user arrives via alternative slug, uppercase SKU, or legacy ID, permanently redirect to canonical URL
+  const canonicalSlug = `${slugify(product.name)}-${product.sku.toLowerCase()}`;
+  if (params.slug !== canonicalSlug) {
+    permanentRedirect(`/product/${canonicalSlug}`);
   }
 
   const isAvailable = product.currentStock > 0;
@@ -185,6 +199,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
     currentStock: product.currentStock,
     warrantyPeriodMonths: product.warrantyPeriodMonths,
     specs: product.specs,
+    status: product.status,
   });
 
   // Query related products from same category

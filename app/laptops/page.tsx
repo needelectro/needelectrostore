@@ -19,9 +19,13 @@ export async function generateMetadata(): Promise<Metadata> {
     path: '/laptops',
     keywords: [
       'Laptop shop in Moulvibazar',
+      'Laptop shop Moulvibazar',
       'Laptop price in Bangladesh',
-      'Laptop shop in Moulvibazar Bangladesh',
       'Laptop price in Moulvibazar',
+      'Laptop price Moulvibazar',
+      'Best laptop shop in Moulvibazar',
+      'Where to buy laptop in Moulvibazar',
+      'Laptop shop in Moulvibazar Bangladesh',
       'HP EliteBook price in Bangladesh',
       'Dell Latitude price in Bangladesh',
       'Lenovo ThinkPad price in Bangladesh',
@@ -30,8 +34,10 @@ export async function generateMetadata(): Promise<Metadata> {
       'Business laptop Moulvibazar',
       'Student laptop Moulvibazar',
       'Laptop EMI in Moulvibazar',
+      'মৌলভীবাজার ল্যাপটপ শপ',
       'মৌলভীবাজার ল্যাপটপ দোকান',
       'ল্যাপটপের দাম বাংলাদেশ',
+      'ল্যাপটপ কিস্তিতে মৌলভীবাজার',
     ],
   });
 }

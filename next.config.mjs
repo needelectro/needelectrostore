@@ -33,8 +33,6 @@ const nextConfig = {
       { source: '/inventory/:path*', destination: '/admin' },
       { source: '/purchases', destination: '/admin' },
       { source: '/purchases/:path*', destination: '/admin' },
-      { source: '/products', destination: '/admin' },
-      { source: '/products/:path*', destination: '/admin' },
       { source: '/customers', destination: '/admin' },
       { source: '/customers/:path*', destination: '/admin' },
       { source: '/suppliers', destination: '/admin' },

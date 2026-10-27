@@ -4,6 +4,15 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 // Known 301 Permanent Redirects Map
 const PERMANENT_REDIRECTS: Record<string, string> = {
+  '/products': '/shop',
+  '/products/': '/shop',
+  '/product': '/shop',
+  '/product/': '/shop',
+  '/catalog': '/shop',
+  '/catalogue': '/shop',
+  '/store': '/shop',
+  '/items': '/shop',
+  '/all-products': '/shop',
   '/laptop': '/laptops',
   '/laptop/': '/laptops',
   '/computer': '/computers',
@@ -70,7 +79,6 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/emi') ||
     pathname.startsWith('/inventory') ||
     pathname.startsWith('/purchases') ||
-    pathname.startsWith('/products') ||
     pathname.startsWith('/customers') ||
     pathname.startsWith('/suppliers') ||
     pathname.startsWith('/service') ||

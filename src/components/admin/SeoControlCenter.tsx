@@ -9,6 +9,7 @@ import {
 import { BUSINESS_INFO, BLOG_POSTS, slugify } from '@/lib/seoConfig';
 
 type SeoSubTab =
+  | 'audit'
   | 'global'
   | 'homepage'
   | 'product_seo'
@@ -27,7 +28,7 @@ type SeoSubTab =
 export const SeoControlCenter: React.FC = () => {
   const { settings, updateSettings, addToast, products } = useERP();
 
-  const [activeSubTab, setActiveSubTab] = useState<SeoSubTab>('global');
+  const [activeSubTab, setActiveSubTab] = useState<SeoSubTab>('audit');
 
   // Form states
   const [seoForm, setSeoForm] = useState({

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   ShoppingBag, Check, Heart, ShieldCheck,
   Zap, MessageCircle, ArrowRight
@@ -38,16 +39,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const slug = `${slugify(product.name)}-${product.sku.toLowerCase()}`;
   const isLaptop = product.category.toLowerCase().includes('laptop') || product.name.toLowerCase().includes('laptop');
   const fallbackImage = isLaptop ? '/logo-dark-transparent.png' : '/logo-icon.png';
-  const imgUrl = product.imageUrl || fallbackImage;
+  const [imgSrc, setImgSrc] = useState<string>(product.imageUrl || fallbackImage);
   const isInStock = product.currentStock > 0;
   // Business Policy: allow_order_when_stock_is_zero = true
-  // Approximate regular price and savings if regular price is not explicitly set
-  const regularPrice = product.regularPrice && product.regularPrice > product.retailPrice
-    ? product.regularPrice
-    : Math.round(product.retailPrice * 1.08); // 8% discount simulation like trustcomputermb
+  const hasGenuineDiscount = Boolean(product.regularPrice && product.regularPrice > product.retailPrice);
+  const regularPrice = hasGenuineDiscount && product.regularPrice ? product.regularPrice : null;
 
-  const savings = regularPrice - product.retailPrice;
-  const discountPercent = regularPrice > 0 ? Math.round((savings / regularPrice) * 100) : 0;
+  const savings = regularPrice ? regularPrice - product.retailPrice : 0;
+  const discountPercent = regularPrice && regularPrice > 0 ? Math.round((savings / regularPrice) * 100) : 0;
   const warrantyText = product.warrantyPeriodMonths 
     ? `${product.warrantyPeriodMonths} Months Warranty`
     : isLaptop 
@@ -92,18 +91,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     <div className="bg-white border border-slate-200/90 hover:border-[#008CFF] rounded-2xl overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative h-full">
       {/* Top Image Box: Generous 4:3 aspect ratio */}
       <div className="relative aspect-[4/3] w-full bg-[#F4F6F8]/60 overflow-hidden border-b border-slate-100 p-2 sm:p-3 md:p-4 flex items-center justify-center">
-        <Link href={`/product/${slug}`} className="w-full h-full flex items-center justify-center">
-          <img
-            src={imgUrl}
-            alt={`${product.name} at ${BUSINESS_INFO.name} Bangladesh`}
+        <Link href={`/product/${slug}`} className="relative w-full h-full block">
+          <Image
+            src={imgSrc}
+            alt={`${product.name} ${product.brand ? product.brand + ' ' : ''}in Moulvibazar, Bangladesh - NEED ELECTRO`}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
             loading="lazy"
-            onError={(e) => {
-              const target = e.currentTarget as HTMLImageElement;
-              if (target.src !== fallbackImage) {
-                target.src = fallbackImage;
+            onError={() => {
+              if (imgSrc !== fallbackImage) {
+                setImgSrc(fallbackImage);
               }
             }}
-            className="max-h-full max-w-full object-contain group-hover:scale-108 transition-transform duration-300 drop-shadow-xs"
+            className="object-contain group-hover:scale-108 transition-transform duration-300 drop-shadow-xs"
           />
         </Link>
 
@@ -187,7 +187,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <span className="text-sm sm:text-base md:text-lg font-black text-[#008CFF] font-mono">
               ৳{product.retailPrice.toLocaleString()}
             </span>
-            {savings > 0 && (
+            {savings > 0 && regularPrice !== null && (
               <span className="text-[10px] sm:text-xs text-slate-400 line-through font-mono">
                 ৳{regularPrice.toLocaleString()}
               </span>

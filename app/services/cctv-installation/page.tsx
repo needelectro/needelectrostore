@@ -15,6 +15,10 @@ export async function generateMetadata(): Promise<Metadata> {
     path: '/services/cctv-installation',
     keywords: [
       'CCTV installation service',
+      'CCTV installation in Moulvibazar',
+      'CCTV installation Moulvibazar',
+      'CCTV service Moulvibazar',
+      'CCTV repair Moulvibazar',
       'CCTV camera installation Moulvibazar',
       'CCTV camera shop in Moulvibazar',
       'CCTV camera price in Bangladesh',
@@ -22,6 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'Security camera Moulvibazar',
       'IP camera installation Moulvibazar',
       'CCTV shop Moulvibazar',
+      'মৌলভীবাজার সিসি ক্যামেরা ইনস্টলেশন',
       'মৌলভীবাজার সিসিটিভি ক্যামেরা',
       'সিসিটিভি ইনস্টলেশন মৌলভীবাজার',
     ],

@@ -1,5 +1,19 @@
 import type { Metadata, Viewport } from 'next';
+import { Plus_Jakarta_Sans, Hind_Siliguri } from 'next/font/google';
 import './globals.css';
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const hindSiliguri = Hind_Siliguri({
+  subsets: ['bengali'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-bangla',
+  display: 'swap',
+});
 
 export const viewport: Viewport = {
   themeColor: '#008CFF',
@@ -127,21 +141,40 @@ import { CustomerAuthProvider } from '@/src/services/customerAuthContext';
 import { MobileBottomNav } from '@/src/components/customer/MobileBottomNav';
 import { PwaInstallPrompt } from '@/src/components/pwa/PwaInstallPrompt';
 import { VoiceWelcome } from '@/src/components/common/VoiceWelcome';
+import {
+  buildOrganizationSchema,
+  buildLocalBusinessSchema,
+  buildWebSiteSchema,
+} from '@/lib/seoConfig';
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const organizationSchema = buildOrganizationSchema();
+  const localBusinessSchema = buildLocalBusinessSchema();
+  const webSiteSchema = buildWebSiteSchema();
+
   return (
-    <html lang="en" data-theme="light">
+    <html
+      lang="en"
+      data-theme="light"
+      className={`${plusJakartaSans.variable} ${hindSiliguri.variable}`}
+    >
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
-          rel="stylesheet"
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
         />
         <script
           dangerouslySetInnerHTML={{

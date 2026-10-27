@@ -37,8 +37,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        bangla: ['"Hind Siliguri"', '"Plus Jakarta Sans"', 'sans-serif'],
+        sans: ['var(--font-sans)', '"Plus Jakarta Sans"', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        bangla: ['var(--font-bangla)', '"Hind Siliguri"', 'sans-serif'],
       },
       borderRadius: {
         xl: '18px',

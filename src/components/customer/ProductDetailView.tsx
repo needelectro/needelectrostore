@@ -100,7 +100,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 md:p-8 aspect-[4/3] flex items-center justify-center relative overflow-hidden shadow-xs group">
           <img
             src={activeImage}
-            alt={`${product.name} at NEED ELECTRO`}
+            alt={`${product.name} ${product.brand ? product.brand + ' ' : ''}- Authentic Tech Gear at NEED ELECTRO Moulvibazar, Bangladesh`}
             onError={(e) => {
               const target = e.currentTarget as HTMLImageElement;
               const fallback =
