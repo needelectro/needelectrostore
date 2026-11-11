@@ -296,6 +296,72 @@ async function main() {
     }
   });
 
+  check('getCategoryUrlPath resolves all store categories to real existing App Router pages', () => {
+    const knownRoutes = new Set(
+      collectFiles('app', ['page.tsx']).map((f) => {
+        const dir = f.rel.replace(/^app\/?/, '').replace(/\/?page\.tsx$/, '');
+        return dir ? `/${dir}` : '/';
+      })
+    );
+    const sampleCategories = [
+      'Laptop',
+      'Laptop Accessories',
+      'Desktop',
+      'Monitor',
+      'Computers',
+      'Computer Accessories',
+      'Accessories',
+      'Cables',
+      'Chargers',
+      'Networking',
+      'Router',
+      'CCTV',
+      'Electrical Products',
+      'Smart Devices',
+    ];
+    for (const cat of sampleCategories) {
+      const target = seoConfig.getCategoryUrlPath(cat);
+      assert.ok(knownRoutes.has(target), `Category "${cat}" resolved to non-existent route "${target}"`);
+    }
+  });
+
+  check('Organization node links founder Person & needelectro.com; Product schema uses specs + #organization seller', () => {
+    const graphNodes = seoConfig.buildGlobalSiteGraphSchema()['@graph'];
+    const org = graphNodes.find((n) => n['@type'] === 'Organization');
+    assert.equal(org.founder['@type'], 'Person');
+    assert.equal(org.founder.name, 'Amdadur Rahman');
+    assert.ok(org.sameAs.includes('https://www.needelectro.com'), 'Organization sameAs should include https://www.needelectro.com');
+
+    const prod = seoConfig.buildProductSchema({
+      name: 'HP EliteBook 840 G8',
+      sku: 'SKU-TEST-1',
+      category: 'Laptop',
+      brand: 'HP',
+      retailPrice: 42000,
+      currentStock: 3,
+      specs: { processor: 'Core i5 11th Gen', ram: '16GB DDR4' },
+    });
+    assert.equal(prod.offers.seller['@id'], 'https://www.needelectro.store/#organization');
+    assert.ok(Array.isArray(prod.additionalProperty) && prod.additionalProperty.length === 2, 'Product schema should map structured specs');
+  });
+
+  check('Private/transactional routes have noindex layouts and API endpoints enforce auth/PII protection', () => {
+    for (const route of ['admin', 'cart', 'checkout', 'order-confirmation', 'offline', 'track-order', 'customer']) {
+      const layoutPath = path.join(ROOT, 'app', route, 'layout.tsx');
+      assert.equal(fs.existsSync(layoutPath), true, `Missing noindex layout app/${route}/layout.tsx`);
+      const layoutTxt = fs.readFileSync(layoutPath, 'utf8');
+      assert.ok(layoutTxt.includes('buildNoIndexMetadata'), `app/${route}/layout.tsx must call buildNoIndexMetadata`);
+    }
+    const indexNowSrc = fs.readFileSync(path.join(ROOT, 'app/api/indexnow/route.ts'), 'utf8');
+    assert.ok(indexNowSrc.includes('authenticateRequest'), 'POST /api/indexnow must authenticate staff callers');
+    const bootstrapSrc = fs.readFileSync(path.join(ROOT, 'app/api/bootstrap/route.ts'), 'utf8');
+    assert.ok(!bootstrapSrc.slice(0, bootstrapSrc.indexOf('authenticated: false')).includes('wholesalePrice'), 'Unauthenticated bootstrap must not expose wholesalePrice');
+    const trackSrc = fs.readFileSync(path.join(ROOT, 'app/api/orders/track/route.ts'), 'utf8');
+    assert.ok(trackSrc.includes('maskPhone') && !trackSrc.includes('contains:'), 'Order tracking API must avoid substring phone enumeration and mask PII');
+    assert.equal(fs.existsSync(path.join(ROOT, 'public/llms.txt')), true, 'Missing public/llms.txt AIO guide');
+    assert.equal(fs.existsSync(path.join(ROOT, 'public/logo-tool.html')), false, 'Unused public/logo-tool.html should remain removed');
+  });
+
   console.log(`\nSummary: ${passed} passed, ${failed} failed\n`);
   if (failed > 0) process.exit(1);
 }

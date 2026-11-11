@@ -108,6 +108,63 @@ export function getProductUrlPath(name: string, sku: string): string {
   return `/product/${namePart}-${sku.toLowerCase()}`;
 }
 
+// Canonical category landing route resolver (eliminates broken category links)
+export function getCategoryUrlPath(category?: string | null): string {
+  const norm = (category || '').toLowerCase().trim();
+  if (!norm) return '/shop';
+  if (
+    norm.includes('accessori') ||
+    norm.includes('accessory') ||
+    norm.includes('cable') ||
+    norm.includes('charger') ||
+    norm.includes('adapter') ||
+    norm.includes('ssd') ||
+    norm.includes('ram')
+  ) {
+    return '/computer-accessories';
+  }
+  if (norm.includes('laptop') || norm.includes('notebook') || norm.includes('macbook')) {
+    return '/laptops';
+  }
+  if (norm.includes('desktop') || norm.includes('monitor') || norm.includes('computer') || norm === 'pc') {
+    return '/computers';
+  }
+  if (norm.includes('network') || norm.includes('router') || norm.includes('wifi') || norm.includes('switch')) {
+    return '/networking';
+  }
+  if (norm.includes('cctv') || norm.includes('camera') || norm.includes('security') || norm.includes('nvr') || norm.includes('dvr')) {
+    return '/cctv';
+  }
+  if (norm.includes('electric')) {
+    return '/electrical-products';
+  }
+  if (norm.includes('smart') || norm.includes('gadget')) {
+    return '/smart-devices';
+  }
+  return '/shop';
+}
+
+// Non-indexable transactional / private portal metadata builder
+export function buildNoIndexMetadata(title: string, description: string): Metadata {
+  return {
+    title: {
+      absolute: `${title} | ${BUSINESS_INFO.name}`,
+    },
+    description,
+    robots: {
+      index: false,
+      follow: false,
+      noarchive: true,
+      nocache: true,
+      googleBot: {
+        index: false,
+        follow: false,
+        noarchive: true,
+      },
+    },
+  };
+}
+
 // Check if an image URL is a known placeholder or hotlinked Google Search thumbnail
 export function isLowQualityOrHotlinkedImage(url?: string | null): boolean {
   if (!url) return true;
@@ -264,6 +321,13 @@ function buildOrganizationNode(includeContext: boolean) {
     name: BUSINESS_INFO.name,
     legalName: BUSINESS_INFO.legalName,
     url: domain,
+    founder: {
+      '@type': 'Person',
+      '@id': `${domain}/#founder`,
+      name: BUSINESS_INFO.founder,
+      jobTitle: 'Founder & CEO',
+      worksFor: { '@id': `${domain}/#organization` },
+    },
     parentOrganization: {
       '@type': 'Organization',
       name: BUSINESS_INFO.parentOrganization,
@@ -273,6 +337,7 @@ function buildOrganizationNode(includeContext: boolean) {
     telephone: BUSINESS_INFO.phoneClean,
     email: BUSINESS_INFO.email,
     sameAs: [
+      'https://www.needelectro.com',
       BUSINESS_INFO.socialProfiles.facebook,
       BUSINESS_INFO.socialProfiles.instagram,
       BUSINESS_INFO.socialProfiles.youtube,
@@ -557,6 +622,26 @@ export function buildProductSchema(product: {
 
   const finalDesc = cleanPlainDesc || `${product.name} available at ${BUSINESS_INFO.name} Moulvibazar. Genuine product with warranty and fast delivery across Bangladesh.`;
 
+  const specProperties =
+    product.specs && typeof product.specs === 'object' && !Array.isArray(product.specs)
+      ? Object.entries(product.specs as Record<string, unknown>)
+          .filter(
+            ([k, v]) =>
+              k.trim().length > 0 &&
+              v !== null &&
+              v !== undefined &&
+              ['string', 'number', 'boolean'].includes(typeof v) &&
+              String(v).trim().length > 0 &&
+              String(v).trim().length <= 120
+          )
+          .slice(0, 12)
+          .map(([k, v]) => ({
+            '@type': 'PropertyValue',
+            name: k.replace(/[_-]+/g, ' ').trim(),
+            value: String(v).trim(),
+          }))
+      : [];
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -571,6 +656,7 @@ export function buildProductSchema(product: {
       name: product.brand || 'NEED ELECTRO',
     },
     category: product.category,
+    ...(specProperties.length > 0 ? { additionalProperty: specProperties } : {}),
     ...(product.ratingValue && product.reviewCount && product.reviewCount > 0
       ? {
           aggregateRating: {
@@ -610,8 +696,7 @@ export function buildProductSchema(product: {
       itemCondition: isRefurbished ? 'https://schema.org/RefurbishedCondition' : 'https://schema.org/NewCondition',
       availability,
       seller: {
-        '@type': 'Organization',
-        name: BUSINESS_INFO.name,
+        '@id': `${BUSINESS_INFO.domain.replace(/\/+$/, '')}/#organization`,
       },
       hasMerchantReturnPolicy: {
         '@type': 'MerchantReturnPolicy',

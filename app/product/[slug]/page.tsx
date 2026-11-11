@@ -8,6 +8,7 @@ import {
   DEFAULT_OG_IMAGE,
   generateSeoMetadata,
   buildProductSchema,
+  getCategoryUrlPath,
   getProductUrlPath,
   resolveCleanImageUrl,
   slugify,
@@ -19,6 +20,7 @@ import { ProductCard } from '@/src/components/customer/ProductCard';
 import { ProductDetailView } from '@/src/components/customer/ProductDetailView';
 import { ProductSpecificationsView } from '@/src/components/customer/ProductSpecificationsView';
 import { ProductReviewsSection } from '@/src/components/customer/ProductReviewsSection';
+import { ProductViewTracker } from '@/src/components/common/ProductViewTracker';
 import {
   ShieldCheck, CheckCircle2, Phone, MessageCircle, Truck,
   CreditCard, Clock, MapPin, Laptop, Cpu, Check, ArrowRight
@@ -266,9 +268,10 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
     console.error('Related products fetch error:', e);
   }
 
+  const categoryPath = getCategoryUrlPath(product.category);
   const breadcrumbs = [
-    { name: product.category || 'Products', path: isLaptop ? '/laptops' : `/${slugify(product.category)}` },
-    { name: product.name, path: `/product/${slugify(product.name)}-${product.sku.toLowerCase()}` },
+    { name: product.category || 'Products', path: categoryPath },
+    { name: product.name, path: getProductUrlPath(product.name, product.sku) },
   ];
 
   const whatsappMessage = encodeURIComponent(
@@ -277,6 +280,13 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
 
   return (
     <div className="min-h-screen bg-[#F4F6F8] text-[#002B5B] flex flex-col">
+      <ProductViewTracker
+        sku={product.sku}
+        name={product.name}
+        category={product.category}
+        brand={product.brand || 'NEED ELECTRO'}
+        price={retailPriceNum}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
@@ -326,7 +336,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
           <div className="mt-16 space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-[#002B5B]">Similar Products You Might Like</h2>
-              <Link href={isLaptop ? '/laptops' : `/${slugify(product.category)}`} className="text-xs font-bold text-[#008CFF] hover:underline">
+              <Link href={categoryPath} className="text-xs font-bold text-[#008CFF] hover:underline">
                 View More in {product.category} →
               </Link>
             </div>

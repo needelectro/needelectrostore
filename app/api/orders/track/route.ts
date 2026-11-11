@@ -3,6 +3,20 @@ import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
+function maskPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length < 6) return '***';
+  return `${digits.slice(0, 3)}****${digits.slice(-3)}`;
+}
+
+function maskName(name: string): string {
+  return name
+    .trim()
+    .split(/\s+/)
+    .map((part) => (part.length <= 2 ? `${part[0] || ''}*` : `${part.slice(0, 2)}${'*'.repeat(Math.min(4, part.length - 2))}`))
+    .join(' ');
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -17,14 +31,30 @@ export async function GET(request: Request) {
 
     const cleanQuery = query.replace(/\D/g, '');
     const isPhoneNumber = cleanQuery.length >= 10;
+    const normalizedLocalPhone = cleanQuery.startsWith('880')
+      ? `0${cleanQuery.slice(3)}`
+      : cleanQuery.startsWith('88')
+      ? cleanQuery.slice(2)
+      : cleanQuery.startsWith('0')
+      ? cleanQuery
+      : `0${cleanQuery}`;
+    const phoneVariants = isPhoneNumber
+      ? Array.from(
+          new Set([
+            query,
+            cleanQuery,
+            normalizedLocalPhone,
+            `+88${normalizedLocalPhone}`,
+            `88${normalizedLocalPhone}`,
+          ])
+        )
+      : [];
 
-    // Search by orderNumber or customerPhone
+    // Match exact order number OR exact normalized phone variants (no loose substring matching)
     const orders = await prisma.websiteOrder.findMany({
       where: isPhoneNumber
         ? {
-            customerPhone: {
-              contains: cleanQuery.startsWith('88') ? cleanQuery.slice(2) : cleanQuery,
-            },
+            customerPhone: { in: phoneVariants },
           }
         : {
             orderNumber: {
@@ -67,9 +97,9 @@ export async function GET(request: Request) {
           orderNumber: order.orderNumber,
           createdAt: order.createdAt,
           status: order.orderStatus,
-          customerName: order.customerName,
-          customerPhone: order.customerPhone,
-          deliveryAddress: order.deliveryAddress,
+          customerName: maskName(order.customerName),
+          customerPhone: maskPhone(order.customerPhone),
+          deliveryAddress: `${order.district} (Verified Address)`,
           district: order.district,
           paymentMethod: order.paymentMethod,
           paymentStatus: order.paymentStatus,

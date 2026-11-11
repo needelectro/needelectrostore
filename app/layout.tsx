@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import { Plus_Jakarta_Sans, Hind_Siliguri } from 'next/font/google';
 import './globals.css';
 import {
@@ -127,6 +128,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const globalSiteGraphSchema = buildGlobalSiteGraphSchema();
+  const gaMeasurementId = process.env.NEXT_PUBLIC_GA_ID?.trim() || '';
+  const gtmContainerId = process.env.NEXT_PUBLIC_GTM_ID?.trim() || '';
 
   return (
     <html
@@ -173,6 +176,22 @@ export default function RootLayout({
             </CartProvider>
           </CustomerAuthProvider>
         </LanguageProvider>
+        {gtmContainerId && (
+          <Script id="need-electro-gtm" strategy="afterInteractive">
+            {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmContainerId}');`}
+          </Script>
+        )}
+        {gaMeasurementId && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="need-electro-ga4" strategy="afterInteractive">
+              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('js',new Date());gtag('config','${gaMeasurementId}',{anonymize_ip:true});`}
+            </Script>
+          </>
+        )}
         <script
           dangerouslySetInnerHTML={{
             __html: `

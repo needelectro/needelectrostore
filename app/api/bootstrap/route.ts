@@ -35,7 +35,100 @@ export async function GET(req: NextRequest) {
   try {
     const user = await authenticateRequest(req);
 
-    // Ensure financial account balances match ledger entries
+    // If unauthenticated, strictly perform read-only public queries (never write defaults or expose ERP pricing/rules)
+    if (!user) {
+      const [settings, setupStatus, branches, publicProducts] = await Promise.all([
+        prisma.systemSettings.findUnique({
+          where: { id: 'main' },
+          select: {
+            companyName: true,
+            companyTagline: true,
+            sisterConcern: true,
+            mainBranchName: true,
+            phone: true,
+            email: true,
+            website: true,
+            address: true,
+            currencyCode: true,
+            currencySymbol: true,
+            theme: true,
+            logoUrl: true,
+            faviconUrl: true,
+            facebookUrl: true,
+            youtubeUrl: true,
+            linkedinUrl: true,
+            whatsappNumber: true,
+            supportEmail: true,
+            footerText: true,
+            accentColor: true,
+          },
+        }),
+        prisma.setupStatus.findUnique({ where: { id: 'main' } }),
+        prisma.branch.findMany({ orderBy: [{ isWarehouse: 'asc' }, { name: 'asc' }] }),
+        prisma.product.findMany({
+          where: {
+            isPublished: true,
+            status: { in: ['ACTIVE', 'OUT_OF_STOCK'] },
+          },
+          select: {
+            id: true,
+            name: true,
+            sku: true,
+            category: true,
+            brand: true,
+            model: true,
+            description: true,
+            imageUrl: true,
+            images: true,
+            retailPrice: true,
+            emiPrice: true,
+            currentStock: true,
+            warrantyPeriodMonths: true,
+            status: true,
+            specs: true,
+            createdAt: true,
+          },
+          orderBy: [{ currentStock: 'desc' }, { createdAt: 'desc' }],
+          take: 200,
+        }),
+      ]);
+
+      return NextResponse.json({
+        success: true,
+        authenticated: false,
+        data: {
+          settings: settings
+            ? {
+                ...settings,
+                currency: settings.currencyCode,
+              }
+            : {
+                companyName: 'NEED ELECTRO',
+                companyTagline: 'Trusted Electrical & Technological Solutions',
+                phone: '+880 1733-983752',
+                email: 'needelectro23@gmail.com',
+                address: 'Central Road, NEED ELECTRO Building, Moulvibazar 3200, Sylhet Division, Bangladesh',
+                currency: 'BDT',
+                currencySymbol: '৳',
+                theme: 'dark',
+                accentColor: '#008CFF',
+              },
+          setupStatus: setupStatus
+            ? { initialSetupCompleted: setupStatus.initialSetupCompleted }
+            : { initialSetupCompleted: false },
+          branches: branches.map((b) => ({
+            id: b.id,
+            name: b.name,
+            code: b.code,
+            isWarehouse: b.isWarehouse,
+            active: b.active,
+          })),
+          products: serializeRecord(publicProducts),
+        },
+      });
+    }
+
+    // Authenticated staff: ensure financial account balances match ledger entries
     try {
       await syncStoredBalancesWithLedger();
     } catch (e: any) {
@@ -327,60 +420,6 @@ export async function GET(req: NextRequest) {
       autoGenerateSerials: true,
       defaultSerialPrefix: 'NEC-SN-',
     };
-
-    // If unauthenticated, return public branding, branch list, setup status, and published products
-    if (!user) {
-      const publicProducts = await prisma.product.findMany({
-        where: {
-          status: { in: ['ACTIVE', 'OUT_OF_STOCK'] },
-        },
-        select: {
-          id: true,
-          name: true,
-          sku: true,
-          category: true,
-          brand: true,
-          model: true,
-          description: true,
-          imageUrl: true,
-          images: true,
-          retailPrice: true,
-          wholesalePrice: true,
-          emiPrice: true,
-          currentStock: true,
-          minStock: true,
-          warrantyPeriodMonths: true,
-          isSerialized: true,
-          status: true,
-          specs: true,
-          createdAt: true,
-        },
-        orderBy: [{ currentStock: 'desc' }, { createdAt: 'desc' }],
-        take: 200,
-      });
-
-      return NextResponse.json({
-        success: true,
-        authenticated: false,
-        data: {
-          settings: formattedSettings,
-          posSettings: formattedPosSettings,
-          inventoryRules: formattedInventoryRules,
-          setupStatus: setupStatus ? { initialSetupCompleted: setupStatus.initialSetupCompleted } : { initialSetupCompleted: false },
-          branches: branches.map(b => ({
-            id: b.id,
-            name: b.name,
-            code: b.code,
-            address: b.address || '',
-            phone: b.phone || '',
-            email: b.email || '',
-            isWarehouse: b.isWarehouse,
-            active: b.active,
-          })),
-          products: serializeRecord(publicProducts),
-        },
-      });
-    }
 
     // Authenticated: fetch complete business state
     const [

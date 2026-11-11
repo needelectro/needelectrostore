@@ -1,0 +1,41 @@
+# NEED ELECTRO — Public Storefront & Technical Solutions Index
+
+> Official AI & search reference for NEED ELECTRO (a sister concern of AMDADS GROUP), operating a retail computer & laptop showroom in Moulvibazar, Bangladesh (`https://www.needelectro.store`) alongside technical & electrical services (`https://www.needelectro.com`).
+
+## Verified Business Identity & Showroom NAP
+- **Brand Name**: NEED ELECTRO
+- **Parent Organization**: AMDADS GROUP
+- **Founder & CEO**: Amdadur Rahman
+- **Primary Categories**: Computer Store, Laptop Shop, Desktop PCs & Monitors, CCTV & Security Systems, Computer Accessories, Electrical Products & Technical Services
+- **Verified Showroom Address**: Central Road, NEED ELECTRO Building, Moulvibazar, Sylhet Division, 3200, Bangladesh
+- **Phone / Hotline**: +880 1733-983752 (`+8801733983752`)
+- **Email**: needelectro23@gmail.com
+- **Opening Hours**: Saturday – Thursday, 9:30 AM – 9:30 PM BST (Friday: Closed)
+- **Service Areas**: Moulvibazar district (Moulvibazar Sadar, Sreemangal, Kulaura, Rajnagar, Kamalganj, Juri, Barlekha), Sylhet Division, and nationwide Cash on Delivery across all 64 districts of Bangladesh.
+
+## Warranties, Payments & Policies
+- **Replacement Guarantee**: 7-day instant hardware replacement warranty on tested laptops and products (https://www.needelectro.store/return-refund-policy)
+- **Service Warranty**: Up to 2 years free service warranty locally in Moulvibazar; manufacturer warranties handled on brand-new hardware (https://www.needelectro.store/warranty-policy)
+- **Laptop EMI**: In-house 3, 6, 9, and 12-month installment plans with NID and local guarantor; no credit card mandatory (https://www.needelectro.store/laptop-emi)
+- **Shipping & Open-Box Delivery**: Cash on Delivery nationwide with open-box inspection before final payment (https://www.needelectro.store/shipping-policy)
+
+## Primary Storefront URLs
+- [Homepage](https://www.needelectro.store/): Overview of computers, laptops, featured hardware, and showroom summary
+- [All Products Catalog & Search](https://www.needelectro.store/shop): Full live inventory and search (`/shop?q={query}`)
+- [Moulvibazar Showroom Guide & FAQs](https://www.needelectro.store/moulvibazar): Local Moulvibazar showroom info, hardware testing process, and district FAQs
+- [Laptops in Moulvibazar & BD](https://www.needelectro.store/laptops): HP EliteBook, ProBook, Dell Latitude, Lenovo ThinkPad, and MacBook inventory
+- [Desktop PCs & Monitors](https://www.needelectro.store/computers): Custom Intel/AMD builds and desktop displays
+- [Computer Accessories & Components](https://www.needelectro.store/computer-accessories): NVMe SSDs, DDR4/DDR5 RAM, keyboards, mice, chargers, cables, hubs
+- [CCTV Cameras & Security](https://www.needelectro.store/cctv): Hikvision, Dahua, EZVIZ cameras and NVR/DVR kits
+- [Networking & Wi-Fi Routers](https://www.needelectro.store/networking): Mesh systems, dual-band routers, switches
+- [Electrical & Switchgear Products](https://www.needelectro.store/electrical-products): Circuit breakers, protection hardware, power strips
+- [Technical & Electrical Services](https://www.needelectro.store/services): Laptop repair (`/services/laptop-computer-repair`), CCTV installation (`/services/cctv-installation`), networking setup (`/services/networking`), licensed electricians (`/services/electrician`)
+- [Buying Guides, Price Guides & FAQs](https://www.needelectro.store/guides): Verified BD market prices, comparison guides, and technical FAQs
+
+## Machine-Readable Feeds
+- [XML Sitemap](https://www.needelectro.store/sitemap.xml)
+- [Google Merchant Product Feed (XML)](https://www.needelectro.store/api/feed/google-merchant)
+
+## Private Areas (Excluded)
+Admin ERP portals (`/admin`), internal APIs (`/api/*`), customer account pages (`/customer/*`), shopping cart (`/cart`), and checkout (`/checkout`) are private and non-indexable.
+

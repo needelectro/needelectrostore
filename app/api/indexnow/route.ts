@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { authenticateRequest } from '@/lib/auth';
 import { submitToIndexNow, INDEXNOW_KEY, INDEXNOW_HOST } from '@/lib/indexNow';
 
 export const dynamic = 'force-dynamic';
@@ -8,12 +9,16 @@ export async function GET() {
     status: 'active',
     service: 'IndexNow for NEED ELECTRO',
     host: INDEXNOW_HOST,
-    keyLocation: `https://${INDEXNOW_HOST}/${INDEXNOW_KEY}.txt`,
     supportedEngines: ['Bing', 'Microsoft Copilot', 'Yandex', 'Seznam', 'IndexNow API'],
   });
 }
 
 export async function POST(req: NextRequest) {
+  const user = await authenticateRequest(req);
+  if (!user) {
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const body = await req.json();
     const { urls } = body;

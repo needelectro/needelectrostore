@@ -13,6 +13,7 @@ import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
 import { useCart } from '@/src/services/cartContext';
 import { useCustomerAuth } from '@/src/services/customerAuthContext';
 import { useLanguage } from '@/src/services/languageContext';
+import { trackPurchase } from '@/src/lib/analytics';
 import {
   BANGLADESH_DIVISIONS,
   BANGLADESH_DISTRICTS,
@@ -163,6 +164,17 @@ export default function CheckoutPage() {
 
       // Order created successfully!
       const orderNumber = data.data.orderNumber;
+      trackPurchase(
+        orderNumber,
+        items.map((i) => ({
+          item_id: i.sku,
+          item_name: i.name,
+          price: i.price,
+          quantity: i.quantity,
+        })),
+        grandTotal,
+        deliveryCharge
+      );
       clearCart();
       router.push(`/order-confirmation/${orderNumber}`);
     } catch (err: any) {

@@ -39,7 +39,7 @@ export async function GET() {
         companyName: 'NEED ELECTRO',
         companyTagline: 'Trusted Electrical & Technological Solutions',
         phone: '+880 1733-983752',
-        email: 'contact.amdadur@gmail.com',
+        email: 'needelectro23@gmail.com',
         announcementText: '🔥 Flash Sale: Get up to 15% discount on HP & Dell Laptops + 7-Day Replacement Guarantee!',
         announcementActive: true,
         announcementLink: '/laptops',

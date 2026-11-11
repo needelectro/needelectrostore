@@ -8,6 +8,7 @@ import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
 import { useCart } from '@/src/services/cartContext';
 import { useLanguage } from '@/src/services/languageContext';
+import { trackBeginCheckout } from '@/src/lib/analytics';
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, clearCart, subtotal, totalItems } = useCart();
@@ -195,6 +196,17 @@ export default function CartPage() {
 
                 <Link
                   href="/checkout"
+                  onClick={() =>
+                    trackBeginCheckout(
+                      items.map((i) => ({
+                        item_id: i.sku,
+                        item_name: i.name,
+                        price: i.price,
+                        quantity: i.quantity,
+                      })),
+                      subtotal
+                    )
+                  }
                   className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#0070cc] hover:to-[#005bb5] text-white font-extrabold text-sm text-center shadow-lg shadow-[#008CFF]/25 transition-all flex items-center justify-center gap-2 group active:scale-95"
                 >
                   <span>{t('cart.checkout', 'Proceed to Checkout')}</span>

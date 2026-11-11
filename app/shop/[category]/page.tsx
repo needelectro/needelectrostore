@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation';
+import { permanentRedirect } from 'next/navigation';
 
 interface Props {
   params: { category: string };
@@ -19,5 +19,5 @@ const CATEGORY_MAP: Record<string, string> = {
 
 export default function ShopCategoryRedirect({ params }: Props) {
   const target = CATEGORY_MAP[params.category.toLowerCase()] || '/shop';
-  redirect(target);
+  permanentRedirect(target);
 }

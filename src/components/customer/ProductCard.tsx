@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { BUSINESS_INFO, slugify } from '@/lib/seoConfig';
 import { useCart } from '@/src/services/cartContext';
+import { trackAddToCart } from '@/src/lib/analytics';
 import { ProductShareModal } from './ProductShareModal';
 
 export interface ProductCardData {
@@ -66,6 +67,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       imageUrl: product.imageUrl || null,
       maxStock: product.currentStock,
     });
+    trackAddToCart({
+      item_id: product.sku,
+      item_name: product.name,
+      item_category: product.category,
+      item_brand: product.brand,
+      price: product.retailPrice,
+      quantity: 1,
+    });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
     openCart();
@@ -98,7 +107,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             src={imgSrc}
             alt={`${product.name} ${product.brand ? product.brand + ' ' : ''}in Moulvibazar, Bangladesh - NEED ELECTRO`}
             fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1536px) 25vw, 20vw"
             loading="lazy"
             onError={() => {
               if (imgSrc !== fallbackImage) {

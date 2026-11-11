@@ -210,16 +210,8 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({
               <div className="w-full h-full relative overflow-hidden bg-white flex items-center justify-center">
                 {!isErrored ? (
                   <>
-                    {/* Ambient subtle background glow */}
-                    <Image
-                      src={chosenSrc}
-                      alt=""
-                      fill
-                      aria-hidden="true"
-                      sizes="100vw"
-                      priority={index === 0}
-                      className="object-cover object-center blur-2xl opacity-30 scale-105 pointer-events-none"
-                    />
+                    {/* Subtle gradient backdrop (avoids extra duplicate LCP network requests) */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-white to-blue-50/70 pointer-events-none" />
 
                     <div className="w-full h-full block relative z-10">
                       <Image
@@ -228,6 +220,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({
                         fill
                         sizes="100vw"
                         priority={index === 0}
+                        fetchPriority={index === 0 ? 'high' : 'auto'}
                         loading={index === 0 ? undefined : 'lazy'}
                         onError={() => handleImageError(slide.id)}
                         className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.01]"

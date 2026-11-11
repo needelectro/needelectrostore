@@ -21,6 +21,7 @@ const PERMANENT_REDIRECTS: Record<string, string> = {
   '/cctv-cameras': '/cctv',
   '/cctv/installation': '/services/cctv-installation',
   '/electrical': '/electrical-products',
+  '/services/electrical': '/services/electrician',
   '/electrician': '/services/electrician',
   '/electricians': '/services/electrician',
   '/installments': '/laptop-emi',
@@ -79,7 +80,7 @@ export function middleware(request: NextRequest) {
 
   if (
     pathname.startsWith('/admin') ||
-    (pathname.startsWith('/api') && !pathname.startsWith('/api/feed') && !pathname.startsWith('/api/indexnow')) ||
+    (pathname.startsWith('/api') && !pathname.startsWith('/api/feed')) ||
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/erp') ||
     pathname.startsWith('/pos') ||
@@ -87,12 +88,11 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/cash_management') ||
     pathname.startsWith('/checkout') ||
     pathname.startsWith('/order-confirmation') ||
+    pathname.startsWith('/track-order') ||
+    pathname.startsWith('/offline') ||
     pathname.startsWith('/cart') ||
     pathname.startsWith('/account') ||
-    pathname.startsWith('/customer/profile') ||
-    pathname.startsWith('/customer/orders') ||
-    pathname.startsWith('/customer/dashboard') ||
-    pathname.startsWith('/customer/settings') ||
+    pathname.startsWith('/customer') ||
     pathname.startsWith('/sales') ||
     pathname.startsWith('/returns') ||
     pathname.startsWith('/emi') ||

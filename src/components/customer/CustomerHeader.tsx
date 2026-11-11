@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Search, Phone, MessageCircle, Menu, X, ChevronDown, ChevronLeft, ChevronRight,
   Laptop, Monitor, Camera, Zap, Cpu, Wifi, Smartphone,
@@ -45,6 +45,7 @@ const CATEGORY_NAV_ITEMS = [
 
 export const CustomerHeader: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const { openCart, totalItems } = useCart();
   const { customer, logout } = useCustomerAuth();
   const { t, formatNumber, isBangla } = useLanguage();
@@ -195,6 +196,18 @@ export const CustomerHeader: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = searchQuery.trim();
+    setSearchOpen(false);
+    setMobileSearchOpen(false);
+    if (!trimmed) {
+      router.push('/shop');
+      return;
+    }
+    router.push(`/shop?q=${encodeURIComponent(trimmed)}`);
+  };
+
   return (
     <>
       {/* 0. Live Synchronized Storefront Announcement Bar */}
@@ -227,9 +240,10 @@ export const CustomerHeader: React.FC = () => {
 
           {/* Pill-shaped Futuristic Search Bar */}
           <div ref={searchRef} className="relative flex-1 max-w-xl hidden md:block">
-            <div className="relative flex items-center">
+            <form onSubmit={handleSearchSubmit} role="search" className="relative flex items-center">
               <input
-                type="text"
+                type="search"
+                aria-label="Search store catalog"
                 placeholder={t('header.searchPlaceholder', 'Search laptops, computers, CCTV, electrical, tools...')}
                 value={searchQuery}
                 onChange={(e) => {
@@ -240,8 +254,8 @@ export const CustomerHeader: React.FC = () => {
                 className="w-full bg-[#F4F6F8] hover:bg-slate-100/90 focus:bg-white text-slate-900 placeholder-slate-400 rounded-full pl-5 pr-11 py-2 text-xs sm:text-sm font-medium border border-slate-200/90 focus:border-[#008CFF] focus:outline-none focus:ring-2 focus:ring-[#008CFF]/20 shadow-inner transition-all"
               />
               <button
-                type="button"
-                aria-label="Search"
+                type="submit"
+                aria-label="Search catalog"
                 className="absolute right-1 top-1 bottom-1 w-8 h-8 rounded-full bg-[#008CFF] hover:bg-[#0070cc] text-white flex items-center justify-center transition-colors shadow-xs"
               >
                 {isSearching ? (
@@ -250,7 +264,7 @@ export const CustomerHeader: React.FC = () => {
                   <Search size={14} />
                 )}
               </button>
-            </div>
+            </form>
 
             {/* Search Dropdown Results */}
             {searchOpen && searchQuery.trim().length >= 2 && (
@@ -260,38 +274,47 @@ export const CustomerHeader: React.FC = () => {
                   <span>{formatNumber(searchResults.length)} {isBangla ? 'টি ফলাফল' : 'matches'}</span>
                 </div>
                 {searchResults.length > 0 ? (
-                  <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
-                    {searchResults.map((p) => (
-                      <Link
-                        key={p.id}
-                        href={`/product/${p.slug}`}
-                        onClick={() => setSearchOpen(false)}
-                        className="p-3 flex items-center justify-between hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition-colors group"
-                      >
-                        <div>
-                          <p className="text-xs sm:text-sm font-semibold group-hover:text-[#008CFF] transition-colors line-clamp-1">
-                            {p.name}
-                          </p>
-                          <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                            <span className="font-mono bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px]">
-                              {p.sku}
-                            </span>
-                            <span>{p.brand}</span>
-                            <span>•</span>
-                            <span>{p.category}</span>
+                  <>
+                    <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+                      {searchResults.map((p) => (
+                        <Link
+                          key={p.id}
+                          href={`/product/${p.slug}`}
+                          onClick={() => setSearchOpen(false)}
+                          className="p-3 flex items-center justify-between hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition-colors group"
+                        >
+                          <div>
+                            <p className="text-xs sm:text-sm font-semibold group-hover:text-[#008CFF] transition-colors line-clamp-1">
+                              {p.name}
+                            </p>
+                            <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                              <span className="font-mono bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px]">
+                                {p.sku}
+                              </span>
+                              <span>{p.brand}</span>
+                              <span>•</span>
+                              <span>{p.category}</span>
+                            </div>
                           </div>
-                        </div>
-                        <div className="text-right shrink-0 ml-3">
-                          <span className="text-xs sm:text-sm font-extrabold text-[#008CFF] block font-mono">
-                            ৳{formatNumber(p.retailPrice.toLocaleString())}
-                          </span>
-                          <span className={`text-[10px] font-bold ${p.currentStock > 0 ? 'text-emerald-500' : 'text-rose-400'}`}>
-                            {p.currentStock > 0 ? t('common.inStock', 'In Stock') : t('common.outOfStock', 'Pre-Order')}
-                          </span>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
+                          <div className="text-right shrink-0 ml-3">
+                            <span className="text-xs sm:text-sm font-extrabold text-[#008CFF] block font-mono">
+                              ৳{formatNumber(p.retailPrice.toLocaleString())}
+                            </span>
+                            <span className={`text-[10px] font-bold ${p.currentStock > 0 ? 'text-emerald-500' : 'text-rose-400'}`}>
+                              {p.currentStock > 0 ? t('common.inStock', 'In Stock') : t('common.outOfStock', 'Pre-Order')}
+                            </span>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                    <Link
+                      href={`/shop?q=${encodeURIComponent(searchQuery.trim())}`}
+                      onClick={() => setSearchOpen(false)}
+                      className="block p-2.5 text-center text-xs font-bold text-[#008CFF] hover:bg-blue-50 border-t border-slate-100 transition-colors"
+                    >
+                      View all results for &ldquo;{searchQuery.trim()}&rdquo; →
+                    </Link>
+                  </>
                 ) : (
                   <div className="p-6 text-center text-xs text-slate-500">
                     {isSearching ? t('common.loading', 'Searching catalog...') : `${t('common.noResults', 'No matching products found for')} "${searchQuery}".`}
@@ -437,10 +460,11 @@ export const CustomerHeader: React.FC = () => {
             ref={mobileSearchRef}
             className="md:hidden px-3 sm:px-4 py-2.5 bg-white border-t border-slate-100 shadow-sm relative animate-in fade-in slide-in-from-top-1 duration-150"
           >
-            <div className="relative flex items-center">
+            <form onSubmit={handleSearchSubmit} role="search" className="relative flex items-center">
               <input
                 ref={mobileInputRef}
-                type="text"
+                type="search"
+                aria-label="Search store catalog"
                 placeholder={t('header.searchPlaceholder', 'Search CCTV, PC, Laptop, Electricals...')}
                 value={searchQuery}
                 onChange={(e) => {
@@ -465,7 +489,7 @@ export const CustomerHeader: React.FC = () => {
                   </button>
                 )}
                 <button
-                  type="button"
+                  type="submit"
                   aria-label="Submit Search"
                   className="w-7 h-7 rounded-full bg-[#008CFF] text-white flex items-center justify-center shadow-xs"
                 >
@@ -476,7 +500,7 @@ export const CustomerHeader: React.FC = () => {
                   )}
                 </button>
               </div>
-            </div>
+            </form>
 
             {/* Mobile Search Suggestions Dropdown */}
             {searchOpen && searchQuery.trim().length >= 2 && (
@@ -492,33 +516,45 @@ export const CustomerHeader: React.FC = () => {
                   </button>
                 </div>
                 {searchResults.length > 0 ? (
-                  <div className="divide-y divide-slate-100">
-                    {searchResults.map((p) => (
-                      <Link
-                        key={p.id}
-                        href={`/product/${p.slug}`}
-                        onClick={() => {
-                          setSearchOpen(false);
-                          setMobileSearchOpen(false);
-                          setSearchQuery('');
-                        }}
-                        className="p-2.5 flex items-center justify-between hover:bg-slate-50 transition-colors"
-                      >
-                        <div className="pr-2">
-                          <p className="text-xs font-semibold line-clamp-1">{p.name}</p>
-                          <p className="text-[10px] text-slate-400">{p.brand} • {p.category}</p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <span className="text-xs font-bold text-[#008CFF] font-mono block">
-                            ৳{formatNumber(p.retailPrice.toLocaleString())}
-                          </span>
-                          <span className={`text-[9px] font-bold ${p.currentStock > 0 ? 'text-emerald-500' : 'text-rose-400'}`}>
-                            {p.currentStock > 0 ? t('common.inStock', 'In Stock') : t('common.outOfStock', 'Pre-Order')}
-                          </span>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
+                  <>
+                    <div className="divide-y divide-slate-100">
+                      {searchResults.map((p) => (
+                        <Link
+                          key={p.id}
+                          href={`/product/${p.slug}`}
+                          onClick={() => {
+                            setSearchOpen(false);
+                            setMobileSearchOpen(false);
+                            setSearchQuery('');
+                          }}
+                          className="p-2.5 flex items-center justify-between hover:bg-slate-50 transition-colors"
+                        >
+                          <div className="pr-2">
+                            <p className="text-xs font-semibold line-clamp-1">{p.name}</p>
+                            <p className="text-[10px] text-slate-400">{p.brand} • {p.category}</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="text-xs font-bold text-[#008CFF] font-mono block">
+                              ৳{formatNumber(p.retailPrice.toLocaleString())}
+                            </span>
+                            <span className={`text-[9px] font-bold ${p.currentStock > 0 ? 'text-emerald-500' : 'text-rose-400'}`}>
+                              {p.currentStock > 0 ? t('common.inStock', 'In Stock') : t('common.outOfStock', 'Pre-Order')}
+                            </span>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                    <Link
+                      href={`/shop?q=${encodeURIComponent(searchQuery.trim())}`}
+                      onClick={() => {
+                        setSearchOpen(false);
+                        setMobileSearchOpen(false);
+                      }}
+                      className="block p-2 text-center text-[11px] font-bold text-[#008CFF] hover:bg-blue-50 border-t border-slate-100"
+                    >
+                      View all results for &ldquo;{searchQuery.trim()}&rdquo; →
+                    </Link>
+                  </>
                 ) : (
                   <div className="p-4 text-center text-xs text-slate-500">
                     {isSearching ? t('common.loading', 'Searching...') : `No products found for "${searchQuery}"`}
@@ -565,13 +601,16 @@ export const CustomerHeader: React.FC = () => {
           onTouchEnd={() => { isNavPaused.current = false; }}
           className="overflow-x-auto scrollbar-none flex items-center gap-1.5 sm:gap-2 text-xs font-medium whitespace-nowrap px-4 w-full"
         >
-          {/* Double track to enable 100% seamless infinite loop */}
+          {/* Double track to enable 100% seamless infinite loop (cloned items hidden from AT) */}
           {[...CATEGORY_NAV_ITEMS, ...CATEGORY_NAV_ITEMS].map((item, idx) => {
+            const isClone = idx >= CATEGORY_NAV_ITEMS.length;
             const Icon = item.icon;
             return (
               <Link
                 key={`${item.name}-${idx}`}
                 href={item.href}
+                aria-hidden={isClone || undefined}
+                tabIndex={isClone ? -1 : undefined}
                 onFocus={() => { isNavPaused.current = true; }}
                 onBlur={() => { isNavPaused.current = false; }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[#002B5B] hover:text-[#008CFF] bg-white border border-slate-200/90 hover:border-blue-200 shadow-2xs transition-all text-[11px] sm:text-xs font-semibold shrink-0 hover:scale-[1.02]"
