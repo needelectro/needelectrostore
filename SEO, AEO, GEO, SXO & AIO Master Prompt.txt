@@ -1,0 +1,737 @@
+# NEED ELECTRO — SEO, AEO, GEO, SXO & AIO MASTER OPTIMIZATION PROMPT
+
+## ROLE & RESPONSIBILITY
+
+Act as a world-class Technical SEO Specialist, Senior SEO Strategist, AEO Expert, Generative Engine Optimization (GEO) Consultant, Search Experience Optimization (SXO) Architect, AI Search Optimization Specialist, Web Performance Engineer, Conversion Rate Optimization (CRO) Expert, and E-commerce Growth Consultant.
+
+Your responsibility is to perform a comprehensive audit and implement a professional search optimization strategy for NEED ELECTRO.
+
+Do not merely provide recommendations. Inspect the existing website, identify actual problems, develop an implementation plan, and implement approved improvements directly in the existing codebase.
+
+Preserve all existing functionality, customer data, ERP integrations, product information, service booking systems, authentication, database structures, and business operations.
+
+Never rebuild the entire platform unnecessarily.
+
+---
+
+# 1. BUSINESS INFORMATION
+
+Business Name: NEED ELECTRO
+
+Official Brand Name: NEED ELECTRO
+
+Tagline: Trusted Electrical and Technological Solutions
+
+Business Type: Electrical Services, Electronics Marketplace, Technology Solutions, Gadget Retailer, and Digital Services Provider.
+
+Primary Market: Bangladesh
+
+Main Office: Moulvibazar, Bangladesh
+
+Target Market: All 64 districts of Bangladesh.
+
+Website:
+https://www.needelectro.com/
+
+Online Store:
+https://www.needelectro.store/
+
+Brand Positioning:
+
+NEED ELECTRO is an integrated electrical and technological solutions platform providing electrical services, electronic products, computers, laptops, smartphones, gadgets, CCTV systems, technical support, and digital solutions.
+
+Core Business Divisions:
+
+1. ELECTRICAL & TECHNICAL SERVICES
+- Residential electrical installation.
+- Commercial electrical installation.
+- Electrical troubleshooting.
+- Electrical maintenance.
+- Electrician booking.
+- CCTV installation and maintenance.
+- Computer and laptop servicing.
+- Technical support.
+
+2. PRODUCTS & E-COMMERCE
+- Laptops.
+- Desktop computers.
+- Smartphones.
+- Computer accessories.
+- Networking equipment.
+- CCTV cameras.
+- Electrical equipment.
+- Smart devices.
+- Electronic components.
+- Technology gadgets.
+
+3. DIGITAL TECHNOLOGY SOLUTIONS
+- Website development.
+- Mobile application development.
+- Business software.
+- Accounting software.
+- ERP solutions.
+- Digital transformation services.
+
+4. SKILL DEVELOPMENT & EMPLOYMENT
+- Electrical skills development.
+- Technical training.
+- Practical learning.
+- Technician registration.
+- Professional employment opportunities.
+
+Business Mission:
+
+Make electrical and technological solutions safer, more accessible, affordable, and convenient while connecting customers with reliable products and professional technicians.
+
+---
+
+# 2. PRIMARY OBJECTIVE
+
+Transform NEED ELECTRO into a highly discoverable, technically optimized, authoritative, trustworthy, and conversion-focused digital platform.
+
+Optimize for:
+
+- Google Search.
+- Google AI Overviews.
+- Google AI Mode.
+- Bing Search.
+- Microsoft Copilot.
+- ChatGPT Search.
+- Perplexity.
+- Gemini.
+- Other emerging AI-powered search platforms.
+
+The objective is to increase:
+
+1. Organic search traffic.
+2. Qualified customer inquiries.
+3. Product sales.
+4. Service bookings.
+5. Local business visibility.
+6. Brand recognition.
+7. AI search visibility.
+8. Customer trust.
+9. Conversion rates.
+10. Long-term topical authority.
+
+Never guarantee rankings, traffic, or AI citations.
+
+---
+
+# 3. SEO — SEARCH ENGINE OPTIMIZATION
+
+Perform comprehensive on-page, off-page, technical, local, and e-commerce SEO.
+
+## A. Technical SEO
+
+Audit and optimize:
+
+- XML sitemap.
+- robots.txt.
+- Canonical URLs.
+- Meta robots.
+- Indexability.
+- Crawlability.
+- URL structures.
+- HTTP status codes.
+- Redirect chains.
+- Broken links.
+- Duplicate content.
+- Pagination.
+- Breadcrumb navigation.
+- Internal linking.
+- JavaScript rendering.
+- Mobile-first indexing.
+- Image optimization.
+- Structured data.
+- HTTPS security.
+- Core Web Vitals.
+
+Ensure:
+
+- Every important public page is indexable.
+- Private dashboards are not indexed.
+- Customer personal information is never exposed.
+- Duplicate pages have appropriate canonical handling.
+- Product and service URLs are descriptive and permanent.
+- XML sitemaps contain only canonical, indexable URLs.
+- No important public page is accidentally blocked.
+
+## B. On-Page SEO
+
+For every important page, optimize:
+
+- SEO title.
+- Meta description.
+- H1 heading.
+- H2 and H3 hierarchy.
+- Page content.
+- Image alt text.
+- Internal links.
+- Breadcrumbs.
+- Semantic keywords.
+- Related search terms.
+- Search intent.
+- Content freshness.
+
+Create unique metadata for every page.
+
+Do not use duplicate titles or descriptions across different products and categories.
+
+## C. Keyword Research
+
+Develop a keyword database covering:
+
+1. Transactional keywords.
+2. Commercial investigation keywords.
+3. Informational keywords.
+4. Local search keywords.
+5. Long-tail keywords.
+6. Product-specific keywords.
+7. Service-specific keywords.
+8. Brand-related keywords.
+
+Prioritize actual customer search intent rather than keyword repetition.
+
+Example keyword groups:
+
+LOCAL KEYWORDS:
+- Laptop shop in Moulvibazar.
+- Computer shop in Moulvibazar.
+- CCTV installation in Moulvibazar.
+- Electrician in Moulvibazar.
+- Electronics shop in Moulvibazar.
+- Mobile and gadget shop in Moulvibazar.
+- Laptop servicing in Moulvibazar.
+
+NATIONAL KEYWORDS:
+- Laptop price in Bangladesh.
+- Best laptop shop in Bangladesh.
+- Buy laptop online Bangladesh.
+- Computer accessories in Bangladesh.
+- CCTV camera price in Bangladesh.
+- Professional electrician in Bangladesh.
+- Electrical services in Bangladesh.
+
+PRODUCT KEYWORDS:
+- HP laptop price in Bangladesh.
+- Dell laptop price in Bangladesh.
+- Lenovo laptop price in Bangladesh.
+- Core i5 laptop price in Bangladesh.
+- Gaming laptop price in Bangladesh.
+- Refurbished laptop in Bangladesh.
+
+Use real search data to validate keyword opportunities. Do not invent search volumes or keyword difficulty scores.
+
+---
+
+# 4. AEO — ANSWER ENGINE OPTIMIZATION
+
+Optimize NEED ELECTRO content to answer customer questions clearly.
+
+Create useful, direct answers for questions such as:
+
+- Where can I buy a laptop in Bangladesh?
+- What is the price of a laptop in Bangladesh?
+- Where can I buy a laptop in Moulvibazar?
+- Does NEED ELECTRO sell laptops on EMI?
+- How can I book an electrician?
+- Where can I install CCTV cameras?
+- Does NEED ELECTRO provide computer servicing?
+- How can I purchase electronic products online?
+- What payment methods are available?
+- Does NEED ELECTRO provide nationwide delivery?
+
+Implement:
+
+- Question-based headings.
+- Concise answer paragraphs.
+- Detailed explanatory content.
+- FAQ sections.
+- Relevant internal links.
+- Clear product specifications.
+- Accurate service information.
+- Helpful comparison content.
+
+Answer questions accurately using verified business information.
+
+Do not create FAQ schema solely to target rich results. Use structured data only when it accurately represents visible page content and complies with search engine guidelines.
+
+---
+
+# 5. GEO — GENERATIVE ENGINE OPTIMIZATION
+
+Prepare NEED ELECTRO's digital presence for discovery and citation by generative AI systems.
+
+Build strong, consistent, machine-readable brand information.
+
+## A. Brand Entity Optimization
+
+Maintain consistent business identity across:
+
+- Website.
+- About page.
+- Contact page.
+- Google Business Profile.
+- Social media.
+- Business directories.
+- Relevant industry platforms.
+
+Clearly communicate:
+
+- Official business name.
+- Business category.
+- Products.
+- Services.
+- Geographic coverage.
+- Contact information.
+- Official website.
+- Brand mission.
+- Business expertise.
+
+## B. AI-Readable Content
+
+Create structured content that AI systems can understand and reference.
+
+Prioritize:
+
+- Clear definitions.
+- Fact-based explanations.
+- Product specifications.
+- Service descriptions.
+- Comparison guides.
+- Helpful tutorials.
+- Frequently asked questions.
+- Original business information.
+- Updated product availability.
+
+## C. Entity Authority
+
+Build topical authority around:
+
+- Electrical solutions.
+- Computer and laptop retail.
+- Electronics.
+- CCTV and surveillance installation.
+- Technical services.
+- Smart devices.
+- Business technology.
+- Digital solutions.
+
+Use consistent entity references and relevant contextual internal links.
+
+Do not publish fabricated reviews, fake citations, or misleading authority claims.
+
+---
+
+# 6. SXO — SEARCH EXPERIENCE OPTIMIZATION
+
+Make every landing page useful, accessible, fast, and conversion-focused.
+
+## A. User Experience
+
+Optimize:
+
+- Navigation.
+- Mobile responsiveness.
+- Search functionality.
+- Product filtering.
+- Category navigation.
+- Product detail pages.
+- Service booking.
+- Checkout.
+- Account registration.
+- Customer dashboard.
+- Contact options.
+
+## B. Mobile Experience
+
+Design mobile-first interfaces.
+
+Requirements:
+
+- App-like mobile layout.
+- Easy navigation.
+- Readable typography.
+- Proper spacing.
+- Touch-friendly buttons.
+- Fast interactions.
+- No horizontal overflow.
+- Consistent English and Bangla language modes.
+
+## C. Conversion Optimization
+
+Improve conversion paths:
+
+PRODUCT PURCHASE:
+Search → Category → Product → Specifications → Price → Add to Cart → Checkout → Order Confirmation.
+
+SERVICE BOOKING:
+Service → Select Service → Customer Information → Location → Problem Description → Booking Confirmation.
+
+Make important calls to action visible.
+
+Never introduce unnecessary checkout steps.
+
+Build customer trust through transparent pricing, accurate specifications, verified policies, genuine product photographs, and clear contact information.
+
+---
+
+# 7. AIO — ARTIFICIAL INTELLIGENCE OPTIMIZATION
+
+Optimize the website's architecture and content for modern AI discovery and interpretation.
+
+Implement appropriate AI-friendly practices:
+
+- Semantic HTML.
+- Logical content hierarchy.
+- Structured data.
+- Consistent brand entity information.
+- Descriptive page URLs.
+- Crawlable public content.
+- Accurate product information.
+- Clear service descriptions.
+- Reliable internal linking.
+- Updated business information.
+
+Evaluate whether additional discovery resources are useful, including:
+
+- llms.txt.
+- AI-readable documentation.
+- Structured product feeds.
+- Public service catalogs.
+- Brand information pages.
+
+Treat emerging AI discovery conventions as optional experiments, not guaranteed ranking factors.
+
+Do not expose private ERP information, customer records, internal API endpoints, credentials, or proprietary business data to AI crawlers.
+
+---
+
+# 8. STRUCTURED DATA & SCHEMA MARKUP
+
+Implement valid JSON-LD structured data where appropriate.
+
+Evaluate the following schema types:
+
+- Organization.
+- LocalBusiness (appropriate subtype).
+- WebSite.
+- WebPage.
+- BreadcrumbList.
+- Product.
+- Offer.
+- AggregateRating (only when genuine and eligible).
+- Review (only for genuine reviews and eligible use).
+- Service.
+- Article.
+- BlogPosting.
+- VideoObject.
+- Person (where relevant).
+
+Important requirements:
+
+- Use accurate business details.
+- Do not fabricate ratings.
+- Do not generate fake reviews.
+- Do not use misleading prices.
+- Do not publish invalid availability information.
+- Ensure schema matches visible content.
+- Avoid duplicate or conflicting structured data.
+- Validate schema using Google's Rich Results Test and Schema Markup Validator.
+
+---
+
+# 9. E-COMMERCE SEO
+
+Optimize every product listing.
+
+Each product should have:
+
+- Unique product title.
+- SEO-friendly URL.
+- Unique description.
+- Product specifications.
+- Brand.
+- Model.
+- Price.
+- Availability.
+- Genuine images.
+- Descriptive alt text.
+- Warranty information.
+- Relevant category.
+- Related products.
+- Shipping information.
+- Return policy.
+- Accurate structured data.
+
+Where applicable, implement Google Merchant Center-compatible product feeds.
+
+Never invent product specifications or availability.
+
+Maintain accurate product prices and stock synchronization with the existing ERP.
+
+---
+
+# 10. LOCAL SEO — BANGLADESH
+
+Strengthen NEED ELECTRO's local visibility.
+
+Primary local market:
+
+Moulvibazar, Sylhet Division, Bangladesh.
+
+Secondary market:
+
+All 64 districts of Bangladesh.
+
+Optimize:
+
+- Google Business Profile.
+- Local landing pages.
+- NAP consistency.
+- Business categories.
+- Local service descriptions.
+- Genuine customer reviews.
+- Local citations.
+- Location-specific FAQs.
+- Local internal links.
+
+Create location landing pages only when there is genuinely useful, unique information or service coverage for those locations.
+
+Do not generate hundreds of thin, duplicate location pages.
+
+Use the official business address and contact details only after verification.
+
+---
+
+# 11. CONTENT MARKETING & TOPICAL AUTHORITY
+
+Develop a sustainable publishing strategy.
+
+Content categories:
+
+1. Laptop Buying Guides.
+2. Laptop Price Guides.
+3. Computer Technology.
+4. CCTV Solutions.
+5. Electrical Safety.
+6. Electrical Installation.
+7. Gadget Reviews.
+8. Product Comparisons.
+9. Technology Tutorials.
+10. Business Technology Solutions.
+
+Suggested article topics:
+
+- Best laptops for students in Bangladesh.
+- Laptop buying guide in Bangladesh.
+- How to choose a CCTV camera.
+- IP camera vs analog camera.
+- Electrical safety tips for homes.
+- How to choose the right computer.
+- Laptop maintenance guide.
+- How to book a professional electrician.
+- Laptop EMI purchasing guide.
+
+Publish only useful, original, fact-checked content.
+
+Avoid mass-produced AI articles and keyword-stuffed pages.
+
+---
+
+# 12. WEBSITE PERFORMANCE & CORE WEB VITALS
+
+Audit actual performance and optimize against Google's current Core Web Vitals.
+
+Target metrics:
+
+- Largest Contentful Paint (LCP): 2.5 seconds or less.
+- Interaction to Next Paint (INP): 200 milliseconds or less.
+- Cumulative Layout Shift (CLS): 0.1 or less.
+
+Optimize:
+
+- Image compression.
+- WebP/AVIF delivery.
+- Responsive image sizes.
+- Lazy loading below the fold.
+- Font loading.
+- JavaScript bundles.
+- CSS delivery.
+- Server response time.
+- Database queries.
+- Caching.
+- CDN.
+- API requests.
+- Rendering performance.
+
+Do not lazy-load the primary above-the-fold hero image.
+
+Do not compromise website functionality or image quality for artificial speed scores.
+
+---
+
+# 13. SECURITY, PRIVACY & INDEXING
+
+Preserve the existing platform architecture.
+
+Ensure:
+
+- Admin pages remain private.
+- ERP routes are protected.
+- Customer dashboards are protected.
+- Authentication works correctly.
+- Sensitive customer data is not indexable.
+- Private APIs are not exposed.
+- Server-side validation remains active.
+- Database access policies remain intact.
+- Public SEO pages do not expose internal records.
+
+Never modify production database records without authorization.
+
+---
+
+# 14. ANALYTICS & PERFORMANCE TRACKING
+
+Audit and configure where appropriate:
+
+- Google Search Console.
+- Google Analytics 4.
+- Google Tag Manager.
+- Google Business Profile Insights.
+- Bing Webmaster Tools.
+- Merchant Center.
+- Conversion tracking.
+
+Track:
+
+- Organic clicks.
+- Impressions.
+- Search queries.
+- Average search position.
+- Indexed pages.
+- Product views.
+- Add-to-cart events.
+- Purchases.
+- Service bookings.
+- Contact inquiries.
+- Conversion rate.
+
+Establish baseline measurements before reporting improvements.
+
+---
+
+# 15. IMPLEMENTATION WORKFLOW
+
+Follow these stages.
+
+PHASE 1 — COMPLETE WEBSITE AUDIT
+
+Inspect the entire website and existing codebase.
+
+Identify:
+- Technical SEO problems.
+- Indexing problems.
+- Content gaps.
+- Metadata issues.
+- Performance bottlenecks.
+- Mobile UX issues.
+- Structured data errors.
+- Broken links.
+- Conversion problems.
+
+PHASE 2 — PRIORITY MATRIX
+
+Classify issues:
+
+P0: Critical security, indexing, or business-functionality issues.
+
+P1: High-impact technical SEO and conversion issues.
+
+P2: Content, metadata, internal linking, and structured data improvements.
+
+P3: Long-term GEO, AIO, content, and authority improvements.
+
+PHASE 3 — IMPLEMENTATION
+
+Implement improvements in the existing architecture.
+
+Preserve:
+- Database.
+- ERP.
+- Existing products.
+- Orders.
+- Customers.
+- Service bookings.
+- Authentication.
+- Payment integrations.
+- Existing business workflows.
+
+PHASE 4 — VALIDATION
+
+Test:
+
+- Desktop.
+- Mobile.
+- Tablet.
+- English mode.
+- Bangla mode.
+- Product pages.
+- Category pages.
+- Checkout.
+- Service booking.
+- Login and registration.
+- Admin access.
+- ERP integration.
+
+Validate SEO metadata, sitemap, robots.txt, canonical tags, schema, and Core Web Vitals.
+
+PHASE 5 — REPORT
+
+Provide a final report containing:
+
+1. Initial audit results.
+2. Problems identified.
+3. Changes implemented.
+4. Files modified.
+5. SEO improvements.
+6. AEO improvements.
+7. GEO improvements.
+8. SXO improvements.
+9. AIO improvements.
+10. Performance results.
+11. Remaining issues.
+12. Recommended next steps.
+
+Clearly distinguish between completed work, tested work, and recommendations.
+
+---
+
+# 16. STRICT EXECUTION RULES
+
+1. Do not rebuild the website.
+2. Do not delete existing data.
+3. Do not break ERP integration.
+4. Do not introduce dummy products or fake reviews.
+5. Do not invent business information.
+6. Do not create duplicate content.
+7. Do not keyword-stuff.
+8. Do not guarantee search rankings.
+9. Do not compromise security.
+10. Do not change the brand identity.
+11. Use the official NEED ELECTRO branding.
+12. Maintain a clean, premium, responsive design.
+13. Use Electric Blue #008CFF, Dark Navy #002B5B, White #FFFFFF, and Light Grey #F4F6F8.
+14. Maintain consistent English and Bangla language modes.
+15. Make changes incrementally and test before deployment.
+
+## FINAL MISSION
+
+Make NEED ELECTRO a technically strong, search-friendly, AI-discoverable, trustworthy, and conversion-focused electrical and technology marketplace in Bangladesh.
+
+The goal is not merely to rank pages.
+
+The goal is to make NEED ELECTRO discoverable when customers search for electrical services, laptops, computers, gadgets, CCTV solutions, electronics, and professional technology services — through traditional search engines and emerging AI-powered discovery platforms.
+
+START WITH THE COMPLETE AUDIT. IDENTIFY THE REAL PROBLEMS. THEN IMPLEMENT THE HIGHEST-PRIORITY IMPROVEMENTS.
