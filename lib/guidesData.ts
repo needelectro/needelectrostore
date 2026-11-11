@@ -213,7 +213,7 @@ The table above highlights our active selling inventory alongside prevailing mar
 - **Flagship Productivity (৳45,000 – ৳60,000+ BDT):** Engineered for software engineers, video editors, and mobile professionals requiring DDR5 RAM, PCIe 4.0 storage, and 6+ hours of dependable battery runtime (e.g., HP EliteBook 845 G9).
 
 ### 4. Understanding Verified vs Indicative Prices {#verified-vs-market}
-- **Verified Selling Price:** The exact price at which an item is currently sold in our Kusumbag, Moulvibazar showroom or online via nationwide cash-on-delivery.
+- **Verified Selling Price:** The exact price at which an item is currently sold in our Central Road, NEED ELECTRO Building, Moulvibazar showroom or online via nationwide cash-on-delivery.
 - **Indicative Market Price:** The estimated market price range for equivalent hardware based on major Bangladesh IT retail benchmarks.
 - **Unverified Prices:** Prices for upcoming hardware not yet physically inspected or stocked.
 
@@ -728,7 +728,7 @@ Custom PCs offer far superior value and upgrade flexibility compared to pre-buil
     faqs: [
       {
         question: 'Can NEED ELECTRO build a custom desktop according to my budget?',
-        answer: 'Yes! Visit our Kusumbag showroom or message our hotline. We assemble and cable-manage custom setups within 2 hours.',
+        answer: 'Yes! Visit our Central Road, NEED ELECTRO Building, Moulvibazar showroom or message our hotline. We assemble and cable-manage custom setups within 2 hours.',
       },
     ],
     relatedSkus: ['PROD-3710'],
@@ -1018,7 +1018,7 @@ Think of your computer as an office desk. **RAM** is the surface area of the des
     faqs: [
       {
         question: 'Can NEED ELECTRO clone my Windows OS to an SSD without losing files?',
-        answer: 'Yes! Our technician team provides 1-to-1 disk cloning in under 30 minutes at our Kusumbag lab.',
+        answer: 'Yes! Our technician team provides 1-to-1 disk cloning in under 30 minutes at our Central Road, NEED ELECTRO Building, Moulvibazar lab.',
       },
     ],
     relatedSkus: ['PROD-3710'],

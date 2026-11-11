@@ -5,9 +5,10 @@ import { prisma } from '@/lib/prisma';
 import {
   BUSINESS_INFO,
   generateSeoMetadata,
-  buildLocalBusinessSchema,
-  buildBreadcrumbSchema,
   buildItemListSchema,
+  buildFaqSchema,
+  getProductUrlPath,
+  isLowQualityOrHotlinkedImage,
 } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
@@ -16,7 +17,7 @@ import { ProductCard } from '@/src/components/customer/ProductCard';
 import {
   MapPin, Phone, MessageCircle, Laptop, Camera, Zap,
   ShieldCheck, CheckCircle2, Clock, CreditCard, ArrowRight,
-  Truck, Cpu, HelpCircle, Star, Wrench, ChevronRight
+  Truck, Cpu, HelpCircle, Wrench
 } from 'lucide-react';
 
 export const revalidate = 60;
@@ -25,58 +26,28 @@ export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
     title: 'Computer & Laptop Shop in Moulvibazar | NEED ELECTRO',
     description:
-      "Moulvibazar's trusted computer and laptop shop. Buy genuine HP, Dell, Lenovo laptops, desktop PCs, and CCTV cameras with warranty & fast local delivery.",
+      'Computer & laptop shop in Moulvibazar at Central Road, NEED ELECTRO Building. Buy HP, Dell & Lenovo laptops, desktop PCs & accessories with warranty.',
     path: '/moulvibazar',
     keywords: [
       'Computer shop in Moulvibazar',
-      'Computer shop Moulvibazar',
       'Laptop shop in Moulvibazar',
-      'Laptop shop Moulvibazar',
       'Computer store Moulvibazar',
-      'Computer showroom Moulvibazar',
-      'Computer dealer Moulvibazar',
-      'Computer shop in Moulvibazar Bangladesh',
-      'Best computer shop in Moulvibazar',
-      'Best laptop shop in Moulvibazar',
-      'Where to buy laptop in Moulvibazar',
-      'Where to buy computer in Moulvibazar',
-      'Computer accessories in Moulvibazar',
-      'Laptop price in Bangladesh',
       'Laptop price in Moulvibazar',
       'Computer price in Moulvibazar',
-      'Desktop price Moulvibazar',
+      'Desktop PC price Moulvibazar',
       'Monitor price Moulvibazar',
-      'Router price Moulvibazar',
-      'SSD price Moulvibazar',
-      'Printer price Moulvibazar',
-      'CCTV camera shop in Moulvibazar',
-      'CCTV camera Moulvibazar',
-      'CCTV installation in Moulvibazar',
-      'Computer service Moulvibazar',
+      'Computer accessories in Moulvibazar',
       'Laptop repair Moulvibazar',
-      'Used laptop in Moulvibazar',
-      'HP laptop in Moulvibazar',
-      'Dell laptop in Moulvibazar',
-      'Lenovo laptop in Moulvibazar',
-      'Electrician in Moulvibazar',
       'Laptop EMI in Moulvibazar',
+      'CCTV camera shop in Moulvibazar',
       'মৌলভীবাজার ল্যাপটপের দোকান',
       'কম্পিউটার দোকান মৌলভীবাজার',
-      'সিসিটিভি ক্যামেরা মৌলভীবাজার',
-      'ল্যাপটপ কিস্তিতে',
-      'মৌলভীবাজার কম্পিউটার দোকান',
-      'মৌলভীবাজার ল্যাপটপ শপ',
-      'মৌলভীবাজার সিসি ক্যামেরা',
       'মৌলভীবাজার কম্পিউটার সার্ভিসিং',
-      'মৌলভীবাজার সিসি ক্যামেরা ইনস্টলেশন',
-      'ল্যাপটপ কিস্তিতে মৌলভীবাজার',
     ],
   });
 }
 
 export default async function MoulvibazarPage() {
-  const localSchema = buildLocalBusinessSchema();
-
   // Query top featured products in Moulvibazar active stock
   let products: any[] = [];
   try {
@@ -100,26 +71,25 @@ export default async function MoulvibazarPage() {
         warrantyPeriodMonths: true,
         specs: true,
       },
-      take: 12,
-      orderBy: [{ currentStock: 'desc' }, { updatedAt: 'desc' }],
+      take: 16,
+      orderBy: [{ isFeatured: 'desc' }, { currentStock: 'desc' }, { updatedAt: 'desc' }],
     });
   } catch (err) {
     console.error('Moulvibazar query error:', err);
   }
 
-  const breadcrumbs = [
-    { name: 'Home', path: '/' },
-    { name: 'Moulvibazar Hub', path: '/moulvibazar' },
-  ];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
+  const breadcrumbs = [{ name: 'Computer & Laptop Shop Moulvibazar', path: '/moulvibazar' }];
+
+  const cleanList = products.filter((p) => !isLowQualityOrHotlinkedImage(p.imageUrl));
+  const itemListSource = (cleanList.length >= 6 ? cleanList : products).slice(0, 8);
 
   const featuredItemListSchema = buildItemListSchema({
     name: 'Top Laptops and Computers in Moulvibazar Stock',
-    description: 'Authentic laptops, desktop computers, CCTV equipment and accessories in Moulvibazar, Bangladesh.',
+    description: 'Genuine laptops, desktop computers, monitors and accessories at NEED ELECTRO Moulvibazar.',
     url: '/moulvibazar',
-    items: products.slice(0, 8).map((p) => ({
+    items: itemListSource.map((p) => ({
       name: p.name,
-      url: `/product/${p.name ? p.name.toLowerCase().replace(/[\s\W-]+/g, '-') : 'product'}-${p.sku.toLowerCase()}`,
+      url: getProductUrlPath(p.name, p.sku),
       image: p.imageUrl,
       price: Number(p.retailPrice),
       brand: p.brand,
@@ -129,55 +99,41 @@ export default async function MoulvibazarPage() {
 
   const faqs = [
     {
-      question: 'Can I get laptops on EMI in Moulvibazar?',
+      question: 'Where is NEED ELECTRO computer and laptop shop located in Moulvibazar?',
       answer:
-        'Yes! NEED ELECTRO provides flexible 0% interest laptop and desktop computer installment plans (3 to 12 months) for eligible students, professionals, and residents in Moulvibazar. Check our dedicated EMI page or contact our team on WhatsApp for fast qualification with local guarantor or NID.',
+        'Our showroom is located at Central Road, NEED ELECTRO Building, Moulvibazar 3200, Sylhet Division, Bangladesh. You can call +880 1733-983752 or visit Saturday to Thursday from 9:30 AM to 9:30 PM (Friday closed).',
     },
     {
-      question: 'Do you provide home delivery in Moulvibazar & Sylhet?',
+      question: 'What laptops and desktop PCs can I buy at NEED ELECTRO Moulvibazar?',
       answer:
-        'Yes. We provide express doorstep delivery across Moulvibazar town, all upazilas (Sreemangal, Kulaura, Rajnagar, Kamalganj, Barlekha), and Sylhet Division. Local delivery is same-day or within 24 hours with Cash on Delivery (COD), bKash payment, and open-box parcel inspection before payment.',
+        'We stock genuine HP EliteBook and ProBook, Dell Latitude, Lenovo ThinkPad, Apple MacBook, ASUS, and MSI laptops, plus custom Intel Core and AMD Ryzen desktop PCs, HD monitors, NVMe SSDs, RAM, and computer accessories.',
     },
     {
-      question: 'Do you offer CCTV camera installation in Moulvibazar?',
+      question: 'What warranty and replacement guarantee do you offer on laptops?',
       answer:
-        'Yes. Our certified security technicians provide on-site HD and IP CCTV camera installation, DVR/NVR configuration, mobile app live view setup, and licensed electrical wiring services across Moulvibazar Sadar, Sreemangal, Kulaura, Rajnagar, Kamalganj, and Barlekha.',
+        'Every laptop supplied by NEED ELECTRO includes a 7-day instant replacement guarantee and up to 2 years of free service warranty handled directly at our Moulvibazar servicing lab after 24-point hardware diagnostics.',
     },
     {
-      question: 'Where is NEED ELECTRO located in Moulvibazar, and how can I purchase?',
+      question: 'Do you offer laptop and computer servicing or SSD/RAM upgrades in Moulvibazar?',
       answer:
-        'NEED ELECTRO operates its central technology hub, customer fulfillment center, and technician servicing workshop from Central Road, NEED ELECTRO Building, Moulvibazar 3200, Bangladesh. You can order directly online through needelectro.store or consult our sales team via WhatsApp/phone.',
+        'Yes. Our Moulvibazar servicing lab handles NVMe SSD and DDR4/DDR5 RAM upgrades, thermal paste renewal, screen and keyboard replacement, OS optimization, and chip-level laptop and desktop PC repairs.',
     },
     {
-      question: 'What warranty and replacement guarantees are provided for laptops in Moulvibazar?',
+      question: 'Do you provide delivery across Moulvibazar Sadar and nearby upazilas?',
       answer:
-        'Every pre-owned and new laptop supplied by NEED ELECTRO includes a 7-day instant replacement guarantee and 2 years of free service warranty handled directly at our Moulvibazar technical lab. Devices undergo 24-point hardware stress testing covering motherboard health, battery runtime, display panel, and thermals.',
+        'Yes. We provide same-day delivery in Moulvibazar Sadar and 24-hour doorstep delivery across Sreemangal, Kulaura, Rajnagar, Kamalganj, Juri, and Barlekha with Cash on Delivery and open-box verification before payment.',
+    },
+    {
+      question: 'Can I buy a laptop on monthly EMI installments in Moulvibazar?',
+      answer:
+        'Yes! Students, freelancers, and job holders in Moulvibazar can apply for 3, 6, or 12-month laptop EMI plans with NID and a verified local guarantor.',
     },
   ];
 
-  const faqSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqs.map((faq) => ({
-      '@type': 'Question',
-      name: faq.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: faq.answer,
-      },
-    })),
-  };
+  const faqSchema = buildFaqSchema(faqs);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(featuredItemListSchema) }}
@@ -195,7 +151,7 @@ export default async function MoulvibazarPage() {
         <div className="max-w-7xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-900/40 dark:border-blue-500/30 dark:text-cyan-300 px-3 py-1 rounded-full text-xs font-semibold">
             <MapPin size={14} />
-            <span>Moulvibazar Central Tech Hub &amp; Online Marketplace</span>
+            <span>{BUSINESS_INFO.fullAddress}</span>
           </div>
 
           <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
@@ -203,7 +159,8 @@ export default async function MoulvibazarPage() {
           </h1>
 
           <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
-            Welcome to {BUSINESS_INFO.name}, Moulvibazar’s premier technology marketplace and certified technical solutions hub. We supply genuine HP, Dell, and Lenovo laptops, custom desktop computers, CCTV security packages, and smart electronic accessories with official warranty, transparent pricing in BDT, and express doorstep delivery across all upazilas in Moulvibazar.
+            Welcome to {BUSINESS_INFO.name}, Moulvibazar&apos;s trusted store for genuine HP, Dell, Lenovo, and Apple laptops, custom desktop PCs, HD monitors, CCTV cameras, and computer accessories. Visit us at{' '}
+            <strong>{BUSINESS_INFO.address.streetAddress}, Moulvibazar 3200</strong> or order online with official warranty and express delivery across all 7 Moulvibazar upazilas.
           </p>
 
           <div className="pt-2 flex flex-wrap gap-3">
@@ -239,20 +196,20 @@ export default async function MoulvibazarPage() {
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
           <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-1.5">
             <span className="text-blue-600 dark:text-cyan-400 font-bold block text-sm flex items-center gap-1.5">
-              <MapPin size={15} /> Central Tech Hub
+              <MapPin size={15} /> Moulvibazar Showroom
             </span>
             <p className="text-slate-700 dark:text-slate-300">
-              {BUSINESS_INFO.address.addressLocality}, {BUSINESS_INFO.address.addressRegion} - {BUSINESS_INFO.address.postalCode}, Bangladesh.
+              {BUSINESS_INFO.fullAddress}
             </p>
-            <span className="text-slate-500 text-[11px] block">Central dispatch and hardware testing workshop.</span>
+            <span className="text-slate-500 text-[11px] block">Showroom pickup and hardware diagnostics lab.</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-1.5">
             <span className="text-blue-600 dark:text-cyan-400 font-bold block text-sm flex items-center gap-1.5">
-              <Truck size={15} /> Express Local Delivery
+              <Truck size={15} /> All 7 Upazilas Covered
             </span>
             <p className="text-slate-700 dark:text-slate-300">
-              Same-day in Moulvibazar town; 24h across Sreemangal, Kulaura, Rajnagar, Kamalganj, and Barlekha.
+              Same-day in Moulvibazar Sadar; 24h across Sreemangal, Kulaura, Rajnagar, Kamalganj, Juri &amp; Barlekha.
             </p>
             <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-[11px] block">৳60 Local Delivery Rate • Cash on Delivery</span>
           </div>
@@ -269,12 +226,12 @@ export default async function MoulvibazarPage() {
 
           <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-1.5">
             <span className="text-blue-600 dark:text-cyan-400 font-bold block text-sm flex items-center gap-1.5">
-              <Clock size={15} /> Operating Hours
+              <Clock size={15} /> Opening Hours
             </span>
             <p className="text-slate-700 dark:text-slate-300">
               Saturday – Thursday: <strong>9:30 AM – 9:30 PM</strong>
             </p>
-            <span className="text-amber-600 dark:text-amber-400 text-[11px] block">Friday: Closed (WhatsApp orders active).</span>
+            <span className="text-amber-600 dark:text-amber-400 text-[11px] block">Friday: Closed (Online orders accepted).</span>
           </div>
         </div>
       </section>
@@ -347,7 +304,7 @@ export default async function MoulvibazarPage() {
                 Why Buy Your Laptop &amp; Computer from NEED ELECTRO Moulvibazar?
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                Investing in a laptop or desktop computer is a critical decision for your career, education, or business. Unlike informal sellers, {BUSINESS_INFO.name} operates its dedicated tech hub right in Moulvibazar. Every laptop undergoes comprehensive hardware diagnostics: battery health, motherboard circuits, screen pixels, keyboard switches, NVMe SSD speed, and thermal stability under heavy load.
+                Investing in a laptop or desktop computer is a critical decision for your career, education, or business. Unlike informal sellers, {BUSINESS_INFO.name} operates its dedicated computer & laptop showroom on Central Road in Moulvibazar. Every laptop undergoes comprehensive hardware diagnostics: battery health, motherboard circuits, screen pixels, keyboard switches, NVMe SSD speed, and thermal stability under heavy load.
               </p>
               <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300">
                 <li className="flex items-center gap-2">
@@ -555,15 +512,15 @@ export default async function MoulvibazarPage() {
             মৌলভীবাজার জেলা ও শহরে নির্ভরযোগ্য কম্পিউটার ও ল্যাপটপের দোকান — নিড ইলেক্ট্রো
           </h2>
           <p>
-            নিড ইলেক্ট্রো (NEED ELECTRO) মৌলভীবাজারের অন্যতম নির্ভরযোগ্য কম্পিউটার ও ল্যাপটপ প্ল্যাটফর্ম। আমরা সরবরাহ করি প্রিমিয়াম কোয়ালিটির এইচপি এলিটবুক, ডেল ল্যাটিচিউড এবং লেনোভো থিঙ্কপ্যাড ল্যাপটপ। প্রতিটি ডিভাইসে রয়েছে ৭ দিনের ইনস্ট্যান্ট রিপ্লেসমেন্ট এবং ২ বছরের ফ্রি সার্ভিস ওয়ারেন্টি। মৌলভীবাজার সদর, কুসুমবাগ, চৌমোহনা, শ্রীমঙ্গল রোড, শামসেরনগর রোড এবং সকল উপজেলায় আমাদের নিজস্ব হোম ডেলিভারি ও কুরিয়ার সুবিধা উপলব্ধ।
+            নিড ইলেক্ট্রো (NEED ELECTRO) মৌলভীবাজারের অন্যতম নির্ভরযোগ্য কম্পিউটার ও ল্যাপটপ শোরুম (ঠিকানা: সেন্ট্রাল রোড, নিড ইলেক্ট্রো বিল্ডিং, মৌলভীবাজার ৩২০০)। আমরা সরবরাহ করি প্রিমিয়াম কোয়ালিটির এইচপি এলিটবুক, ডেল ল্যাটিচিউড এবং লেনোভো থিঙ্কপ্যাড ল্যাপটপ, ডেস্কটপ পিসি, মনিটর ও এক্সেসরিজ। প্রতিটি ডিভাইসে রয়েছে ৭ দিনের ইনস্ট্যান্ট রিপ্লেসমেন্ট এবং ২ বছরের ফ্রি সার্ভিস ওয়ারেন্টি। মৌলভীবাজার সদর, শ্রীমঙ্গল, কুলাউড়া, রাজনগর, কমলগঞ্জ, জুড়ী ও বড়লেখাসহ সকল উপজেলায় আমাদের দ্রুত হোম ডেলিভারি ও কুরিয়ার সুবিধা উপলব্ধ।
           </p>
           <p>
-            এছাড়া আমাদের রয়েছে দক্ষ টেকনিশিয়ান টিম। মৌলভীবাজারের বাসা-বাড়ি, দোকান ও প্রতিষ্ঠানের জন্য সিসিটিভি ক্যামেরা ইনস্টলেশন, কম্পিউটার সার্ভিসিং ও দক্ষ ইলেকট্রিশিয়ান সেবা পেতে আমাদের হটলাইনে কল করুন অথবা সরাসরি হোয়াটসঅ্যাপে যোগাযোগ করুন।
+            এছাড়া আমাদের রয়েছে দক্ষ টেকনিশিয়ান টিম। মৌলভীবাজারের বাসা-বাড়ি, দোকান ও প্রতিষ্ঠানের জন্য ল্যাপটপ ও কম্পিউটার সার্ভিসিং, র‍্যাম ও এসএসডি আপগ্রেড এবং সিসিটিভি ক্যামেরা ইনস্টলেশন সেবা পেতে আমাদের হটলাইনে কল করুন অথবা সরাসরি হোয়াটসঅ্যাপে যোগাযোগ করুন।
           </p>
           <div className="pt-2 flex flex-wrap items-center gap-3">
             <span className="font-semibold text-slate-900 dark:text-white">হটলাইন: {BUSINESS_INFO.phone}</span>
             <span>•</span>
-            <span className="text-slate-500 dark:text-slate-400">অপারেশনাল হাব: মৌলভীবাজার, বাংলাদেশ</span>
+            <span className="text-slate-500 dark:text-slate-400">ঠিকানা: সেন্ট্রাল রোড, নিড ইলেক্ট্রো বিল্ডিং, মৌলভীবাজার ৩২০০</span>
             <span>•</span>
             <Link href="/locations" className="text-blue-600 dark:text-cyan-400 hover:underline font-semibold">
               ৬৪ জেলার ডেলিভারি তালিকা →

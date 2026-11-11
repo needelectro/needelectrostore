@@ -51,7 +51,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
       });
     }
     if (list.length === 0) {
-      list.push(isLaptop ? '/logo-dark-transparent.png' : '/logo-icon.png');
+      list.push(isLaptop ? '/og-store-banner.jpg' : '/logo-icon.png');
     }
     return list;
   }, [product.imageUrl, product.images, isLaptop]);
@@ -112,7 +112,7 @@ export const ProductDetailView: React.FC<ProductDetailViewProps> = ({
               const fallback =
                 product.category?.toLowerCase().includes('laptop') ||
                 product.name?.toLowerCase().includes('laptop')
-                  ? '/logo-dark-transparent.png'
+                  ? '/og-store-banner.jpg'
                   : '/logo-icon.png';
               if (activeImage !== fallback) {
                 setActiveImage(fallback);

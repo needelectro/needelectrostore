@@ -8,6 +8,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
+    "test:seo": "node scripts/test-seo-regression.mjs",
     "dev:vite": "node scripts/start-dev.mjs",
     "server": "node server/index.js",
     "client": "vite",

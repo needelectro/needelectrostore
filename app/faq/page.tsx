@@ -32,7 +32,7 @@ const FAQS = [
       },
       {
         question: 'Where is NEED ELECTRO located?',
-        answer: 'Our main showroom is located at Shop No: 5, MR Plaza, Kusumbag, Moulvibazar, Sylhet Division, Bangladesh. We are open Saturday to Thursday from 9:30 AM to 9:30 PM.',
+        answer: 'Our main showroom is located at Central Road, NEED ELECTRO Building, Moulvibazar, Sylhet Division, 3200, Bangladesh. We are open Saturday to Thursday from 9:30 AM to 9:30 PM (Friday Closed).',
       },
       {
         question: 'Does NEED ELECTRO sell tested used or pre-owned laptops?',
@@ -57,7 +57,7 @@ const FAQS = [
       },
       {
         question: 'How do I pay my monthly installment?',
-        answer: 'You can pay via bKash, Nagad, bank transfer, or directly at our Kusumbag showroom by the 10th of each calendar month.',
+        answer: 'You can pay via bKash, Nagad, bank transfer, or directly at our Central Road, NEED ELECTRO Building, Moulvibazar showroom by the 10th of each calendar month.',
       },
     ],
   },

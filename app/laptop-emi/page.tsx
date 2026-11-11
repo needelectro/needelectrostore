@@ -87,7 +87,7 @@ export default async function LaptopEmiPage() {
     },
     {
       question: 'Can I pay my monthly installments through bKash or Nagad?',
-      answer: 'Yes! Installments can be paid directly via bKash, Nagad, bank transfer, or at our Kusumbag showroom in Moulvibazar.',
+      answer: 'Yes! Installments can be paid directly via bKash, Nagad, bank transfer, or at our Central Road, NEED ELECTRO Building showroom in Moulvibazar.',
     },
     {
       question: 'Does the laptop warranty stay valid during the EMI period?',

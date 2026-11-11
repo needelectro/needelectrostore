@@ -2,7 +2,12 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema, buildItemListSchema, slugify } from '@/lib/seoConfig';
+import {
+  generateSeoMetadata,
+  buildItemListSchema,
+  getProductUrlPath,
+  resolveCleanImageUrl,
+} from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -14,29 +19,30 @@ import {
 
 export const revalidate = 60;
 
-export async function generateMetadata(): Promise<Metadata> {
+interface ShopPageProps {
+  searchParams?: { q?: string };
+}
+
+export async function generateMetadata({ searchParams }: ShopPageProps): Promise<Metadata> {
+  const query = typeof searchParams?.q === 'string' ? searchParams.q.trim() : '';
+
   return generateSeoMetadata({
-    title: 'Computer & Laptop Shop in BD | NEED ELECTRO Store',
+    title: query
+      ? `Search: ${query} — Computer & Laptop Shop | NEED ELECTRO`
+      : 'Computer & Laptop Shop in Moulvibazar & BD | NEED ELECTRO Store',
     description:
-      'Shop laptops, computers, CCTV cameras & accessories at NEED ELECTRO Bangladesh. Genuine products, official warranty, laptop EMI & nationwide delivery.',
+      'Shop laptops, desktop PCs, monitors & computer accessories at NEED ELECTRO in Moulvibazar & across Bangladesh. Genuine products, official warranty & EMI.',
     path: '/shop',
+    noIndex: Boolean(query),
     keywords: [
-      'Online shop Bangladesh',
-      'Laptop price in Bangladesh',
       'Computer shop in Moulvibazar',
-      'Computer price in Moulvibazar',
       'Laptop shop in Moulvibazar',
-      'Laptop price in Moulvibazar',
-      'CCTV camera price in Bangladesh',
-      'Tech gadgets price in Bangladesh',
-      'HP EliteBook price in Bangladesh',
+      'Laptop price in Bangladesh',
       'Desktop computer price in Bangladesh',
+      'HP EliteBook price in Bangladesh',
       'Computer accessories in Bangladesh',
-      'Electrical products online Bangladesh',
-      'Genuine laptop with warranty in Bangladesh',
-      'Laptop EMI in Bangladesh',
-      'অনলাইন শপ বাংলাদেশ',
-      'ল্যাপটপের দাম বাংলাদেশ',
+      'CCTV camera price in Bangladesh',
+      'Online shop Bangladesh',
     ],
   });
 }
@@ -54,14 +60,27 @@ const CATEGORY_LINKS = [
 import { ShopCatalogClient } from '@/src/components/customer/ShopCatalogClient';
 import type { ProductCardData } from '@/src/components/customer/ProductCard';
 
-export default async function ShopMasterPage() {
+export default async function ShopMasterPage({ searchParams }: ShopPageProps) {
+  const rawQuery = typeof searchParams?.q === 'string' ? searchParams.q.trim() : '';
   let products: any[] = [];
   try {
-    // Fetch ALL active & published products so customers on mobile and desktop can view every single product
+    // Fetch active & published products (optionally filtered by ?q= search query)
     products = await prisma.product.findMany({
       where: {
         status: { in: ['ACTIVE', 'OUT_OF_STOCK'] },
         isPublished: true,
+        ...(rawQuery
+          ? {
+              OR: [
+                { name: { contains: rawQuery, mode: 'insensitive' } },
+                { brand: { contains: rawQuery, mode: 'insensitive' } },
+                { model: { contains: rawQuery, mode: 'insensitive' } },
+                { sku: { contains: rawQuery, mode: 'insensitive' } },
+                { category: { contains: rawQuery, mode: 'insensitive' } },
+                { description: { contains: rawQuery, mode: 'insensitive' } },
+              ],
+            }
+          : {}),
       },
       select: {
         id: true,
@@ -101,16 +120,18 @@ export default async function ShopMasterPage() {
   }));
 
   const breadcrumbs = [{ name: 'Shop All Products', path: '/shop' }];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
 
   const catalogItemListSchema = buildItemListSchema({
-    name: 'All Products Catalog — NEED ELECTRO Store',
-    description: 'Complete catalog of laptops, computers, CCTV security systems, electrical equipment, and computer accessories in Bangladesh.',
+    name: rawQuery
+      ? `Search Results for "${rawQuery}" — NEED ELECTRO Store`
+      : 'All Products Catalog — NEED ELECTRO Store',
+    description:
+      'Complete catalog of laptops, desktop computers, monitors, CCTV security systems, and computer accessories at NEED ELECTRO in Moulvibazar & across Bangladesh.',
     url: '/shop',
     items: mappedProducts.map((p) => ({
       name: p.name,
-      url: `/product/${slugify(p.name)}-${p.sku.toLowerCase()}`,
-      image: p.imageUrl,
+      url: getProductUrlPath(p.name, p.sku),
+      image: resolveCleanImageUrl(p.imageUrl),
       price: p.retailPrice,
       brand: p.brand,
       category: p.category,
@@ -119,10 +140,6 @@ export default async function ShopMasterPage() {
 
   return (
     <div className="min-h-screen bg-[#F4F6F8] text-[#002B5B] flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(catalogItemListSchema) }}
@@ -138,10 +155,10 @@ export default async function ShopMasterPage() {
             <span>Official NEED ELECTRO Storefront — {mappedProducts.length} Products Available</span>
           </div>
           <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-[#002B5B] tracking-tight leading-tight">
-            Online Computer &amp; Laptop Shop in Bangladesh
+            {rawQuery ? `Search Results for "${rawQuery}"` : 'Online Computer & Laptop Shop in Moulvibazar & BD'}
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 max-w-3xl leading-relaxed">
-            Explore our complete live catalog of laptops, computers, CCTV surveillance cameras, electrical equipment, and computer accessories. 100% genuine products with official warranty and doorstep cash on delivery across Bangladesh.
+            Explore our live catalog of laptops, desktop PCs, monitors, CCTV cameras, and computer accessories. 100% genuine products with official warranty from our Moulvibazar showroom and doorstep COD across Bangladesh.
           </p>
 
           <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] sm:text-xs text-slate-600">
@@ -163,7 +180,7 @@ export default async function ShopMasterPage() {
 
       {/* Main Catalog with Interactive Client Filtering */}
       <main className="max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 pb-16 flex-1">
-        <ShopCatalogClient initialProducts={mappedProducts} />
+        <ShopCatalogClient initialProducts={mappedProducts} searchQuery={rawQuery} />
       </main>
 
       <CustomerFooter />

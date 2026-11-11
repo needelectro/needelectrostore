@@ -4,8 +4,7 @@ import Link from 'next/link';
 import {
   BUSINESS_INFO,
   generateSeoMetadata,
-  buildLocalBusinessSchema,
-  buildBreadcrumbSchema,
+  buildFaqSchema,
 } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
@@ -18,19 +17,16 @@ import {
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
     title: 'Computer & Laptop Shop in Sreemangal | NEED ELECTRO',
-    description: 'Serving Sreemangal from our Moulvibazar center. Fast same-day laptop delivery, tested HP/Dell/Lenovo laptops with warranty & EMI, CCTV surveillance installation for resorts and residences, and certified electrician dispatch.',
+    description:
+      'Serving Sreemangal from Central Road, Moulvibazar. Genuine HP, Dell & Lenovo laptops, desktop PCs, CCTV setup & same-day delivery with warranty.',
     path: '/sreemangal',
     keywords: [
       'Laptop shop Sreemangal',
       'Laptop in Sreemangal',
       'Computer shop Sreemangal',
       'CCTV camera Sreemangal',
-      'Electrician in Sreemangal',
       'Resort CCTV Moulvibazar Sreemangal',
       'মৌলভীবাজার ল্যাপটপের দোকান',
-      'কম্পিউটার দোকান মৌলভীবাজার',
-      'সিসিটিভি ক্যামেরা মৌলভীবাজার',
-      'ল্যাপটপ কিস্তিতে',
       'শ্রীমঙ্গল ল্যাপটপ',
     ],
   });
@@ -39,10 +35,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function SreemangalPage() {
   const breadcrumbs = [
     { name: 'Locations', path: '/locations' },
-    { name: 'Sreemangal Hub', path: '/sreemangal' },
+    { name: 'Sreemangal', path: '/sreemangal' },
   ];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
-  const localSchema = buildLocalBusinessSchema();
 
   const faqs = [
     {
@@ -62,29 +56,10 @@ export default function SreemangalPage() {
     },
   ];
 
-  const faqSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqs.map((faq) => ({
-      '@type': 'Question',
-      name: faq.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: faq.answer,
-      },
-    })),
-  };
+  const faqSchema = buildFaqSchema(faqs);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
@@ -105,7 +80,7 @@ export default function SreemangalPage() {
           </h1>
 
           <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
-            Located just 20 minutes away in Kusumbag Moulvibazar, {BUSINESS_INFO.name} provides Sreemangal residents, tea garden estates, eco-resorts, and hotels with prompt tech delivery, CCTV security camera installations, certified electricians, and flexible laptop installment (EMI) options.
+            Located just 20 minutes away at {BUSINESS_INFO.address.streetAddress}, Moulvibazar, {BUSINESS_INFO.name} provides Sreemangal residents, tea garden estates, eco-resorts, and hotels with prompt tech delivery, CCTV security camera installations, certified technicians, and flexible laptop installment (EMI) options.
           </p>
 
           <div className="pt-2 flex flex-wrap gap-3">

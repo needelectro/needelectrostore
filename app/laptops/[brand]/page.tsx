@@ -3,7 +3,13 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema, buildItemListSchema, slugify } from '@/lib/seoConfig';
+import {
+  BUSINESS_INFO,
+  generateSeoMetadata,
+  buildItemListSchema,
+  getProductUrlPath,
+  isLowQualityOrHotlinkedImage,
+} from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -24,34 +30,34 @@ const BRAND_DATA: Record<string, BrandInfo> = {
   hp: {
     name: 'HP',
     slug: 'hp',
-    metaTitle: 'HP Laptops in Bangladesh | NEED ELECTRO',
+    metaTitle: 'HP Laptops in Moulvibazar | EliteBook & ProBook | NEED ELECTRO',
     metaDescription:
-      'Buy authentic HP EliteBook and ProBook laptops in Bangladesh from NEED ELECTRO. Verified condition, official warranty, and EMI options.',
-    h1: 'HP Laptops in Bangladesh — EliteBook & ProBook Series',
+      'Buy genuine HP EliteBook and ProBook laptops in Moulvibazar, Bangladesh from NEED ELECTRO. Verified condition, 2-year service warranty & EMI options.',
+    h1: 'HP Laptops in Moulvibazar — EliteBook & ProBook Series',
     intro:
-      'HP EliteBook and ProBook laptops are renowned for aerospace-grade aluminum chassis, anti-glare displays, and exceptional battery life. Tested high-grade HP laptops available at NEED ELECTRO.',
+      'HP EliteBook and ProBook laptops are renowned for aerospace-grade aluminum chassis, anti-glare displays, and exceptional battery life. Tested high-grade HP laptops available at NEED ELECTRO, Central Road, Moulvibazar.',
     series: ['HP EliteBook 840 Series', 'HP ProBook 440/450 Series', 'HP Pavilion', 'HP Envy'],
   },
   dell: {
     name: 'Dell',
     slug: 'dell',
-    metaTitle: 'Dell Laptops in Bangladesh | NEED ELECTRO',
+    metaTitle: 'Dell Laptops in Moulvibazar | Latitude & Inspiron | NEED ELECTRO',
     metaDescription:
-      'Explore genuine Dell Latitude and Inspiron laptops in Bangladesh. Tested hardware, original chargers, warranty coverage, and laptop EMI.',
-    h1: 'Dell Laptops in Bangladesh — Latitude & Inspiron Series',
+      'Explore genuine Dell Latitude and Inspiron laptops in Moulvibazar, Bangladesh. Tested hardware, original chargers, official warranty & laptop EMI.',
+    h1: 'Dell Laptops in Moulvibazar — Latitude & Inspiron Series',
     intro:
-      'Dell Latitude business laptops deliver class-leading durability, robust cooling architecture, and long-term reliability. Order tested Dell models with warranty from NEED ELECTRO.',
+      'Dell Latitude business laptops deliver class-leading durability, robust cooling architecture, and long-term reliability. Order tested Dell models with warranty from NEED ELECTRO Moulvibazar.',
     series: ['Dell Latitude 7400 / 7490 Series', 'Dell Latitude 5400 Series', 'Dell Inspiron Series', 'Dell XPS'],
   },
   lenovo: {
     name: 'Lenovo',
     slug: 'lenovo',
-    metaTitle: 'Lenovo Laptops in Bangladesh | NEED ELECTRO',
+    metaTitle: 'Lenovo Laptops in Moulvibazar | ThinkPad & IdeaPad | NEED ELECTRO',
     metaDescription:
-      'Find authentic Lenovo ThinkPad and IdeaPad laptops in Bangladesh with warranty, tested keyboards, long battery life, and laptop EMI at NEED ELECTRO.',
-    h1: 'Lenovo Laptops in Bangladesh — ThinkPad & IdeaPad Series',
+      'Find genuine Lenovo ThinkPad and IdeaPad laptops in Moulvibazar, Bangladesh with official warranty, long battery life, and laptop EMI at NEED ELECTRO.',
+    h1: 'Lenovo Laptops in Moulvibazar — ThinkPad & IdeaPad Series',
     intro:
-      'Lenovo ThinkPad laptops are the global standard for typing keyboards and military-grade durability. Every Lenovo machine at NEED ELECTRO is thoroughly inspected and tested.',
+      'Lenovo ThinkPad laptops are the global standard for typing keyboards and military-grade durability. Every Lenovo machine at NEED ELECTRO Moulvibazar is thoroughly inspected and tested.',
     series: ['Lenovo ThinkPad T-Series (T480, T490, T14)', 'Lenovo ThinkPad X-Series (X1 Carbon, X280)', 'Lenovo IdeaPad'],
   },
 };
@@ -186,15 +192,17 @@ export default async function BrandLaptopsPage({ params }: { params: { brand: st
     { name: 'Laptops', path: '/laptops' },
     { name: `${brandInfo.name} Laptops`, path: `/laptops/${brandInfo.slug}` },
   ];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
+
+  const cleanBrandProducts = products.filter((item) => !isLowQualityOrHotlinkedImage(item.imageUrl));
+  const itemListSource = cleanBrandProducts.length > 0 ? cleanBrandProducts : products;
 
   const brandItemListSchema = buildItemListSchema({
     name: `${brandInfo.name} Laptops in Moulvibazar — NEED ELECTRO Store`,
     description: `Buy authentic ${brandInfo.name} laptops at NEED ELECTRO Moulvibazar with warranty and installment EMI.`,
     url: `/laptops/${brandInfo.slug}`,
-    items: products.map((item) => ({
+    items: itemListSource.slice(0, 30).map((item) => ({
       name: item.name,
-      url: `/product/${slugify(item.name)}-${item.sku.toLowerCase()}`,
+      url: getProductUrlPath(item.name, item.sku),
       image: item.imageUrl,
       price: Number(item.retailPrice),
       brand: item.brand,
@@ -204,10 +212,6 @@ export default async function BrandLaptopsPage({ params }: { params: { brand: st
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(brandItemListSchema) }}
@@ -295,7 +299,7 @@ export default async function BrandLaptopsPage({ params }: { params: { brand: st
               New {brandInfo.name} Stock Arriving Soon
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-              Our inventory changes rapidly. Call {BUSINESS_INFO.phone} or visit our Kusumbag showroom to reserve or request a custom {brandInfo.name} model configuration.
+              Our inventory changes rapidly. Call {BUSINESS_INFO.phone} or visit our {BUSINESS_INFO.address.streetAddress}, Moulvibazar showroom to reserve or request a custom {brandInfo.name} model configuration.
             </p>
           </div>
         )}

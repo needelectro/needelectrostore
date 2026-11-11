@@ -2,12 +2,18 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema, buildItemListSchema } from '@/lib/seoConfig';
+import {
+  BUSINESS_INFO,
+  generateSeoMetadata,
+  buildItemListSchema,
+  getProductUrlPath,
+  isLowQualityOrHotlinkedImage,
+} from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
 import { ProductCard } from '@/src/components/customer/ProductCard';
-import { Zap, ShieldCheck, CheckCircle2, Wrench, Phone } from 'lucide-react';
+import { Zap, Wrench } from 'lucide-react';
 
 export const revalidate = 60;
 
@@ -71,15 +77,17 @@ export default async function ElectricalProductsPage() {
   }
 
   const breadcrumbs = [{ name: 'Electrical Products', path: '/electrical-products' }];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
+
+  const cleanElec = products.filter((item) => !isLowQualityOrHotlinkedImage(item.imageUrl));
+  const itemListSource = cleanElec.length > 0 ? cleanElec : products;
 
   const electricalItemListSchema = buildItemListSchema({
-    name: 'Electrical Products & Switchgear in Bangladesh — NEED ELECTRO Store',
+    name: 'Electrical Products & Switchgear in Moulvibazar — NEED ELECTRO Store',
     description: 'Industrial and home circuit breakers, switches, DB boards, and certified wiring supplies in Moulvibazar.',
     url: '/electrical-products',
-    items: products.map((item) => ({
+    items: itemListSource.slice(0, 30).map((item) => ({
       name: item.name,
-      url: `/product/${item.name ? item.name.toLowerCase().replace(/[\s\W-]+/g, '-') : 'electrical'}-${item.sku.toLowerCase()}`,
+      url: getProductUrlPath(item.name, item.sku),
       image: item.imageUrl,
       price: Number(item.retailPrice),
       brand: item.brand,
@@ -89,10 +97,6 @@ export default async function ElectricalProductsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(electricalItemListSchema) }}

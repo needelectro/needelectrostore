@@ -4,8 +4,7 @@ import Link from 'next/link';
 import {
   BUSINESS_INFO,
   generateSeoMetadata,
-  buildLocalBusinessSchema,
-  buildBreadcrumbSchema,
+  buildFaqSchema,
 } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
@@ -18,18 +17,15 @@ import {
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
     title: 'Computer & Laptop Shop in Rajnagar | NEED ELECTRO',
-    description: 'NEED ELECTRO provides prompt laptop delivery, tested HP/Dell/Lenovo laptops with EMI, CCTV security setups, and certified electricians for Rajnagar Upazila from Moulvibazar town.',
+    description:
+      'Serving Rajnagar from Central Road, Moulvibazar. Genuine HP, Dell & Lenovo laptops, desktop PCs, CCTV & 0% EMI with fast same-day delivery.',
     path: '/rajnagar',
     keywords: [
       'Laptop shop Rajnagar',
       'Laptop in Rajnagar',
       'Computer shop Rajnagar',
       'CCTV camera Rajnagar',
-      'Electrician in Rajnagar',
       'মৌলভীবাজার ল্যাপটপের দোকান',
-      'কম্পিউটার দোকান মৌলভীবাজার',
-      'সিসিটিভি ক্যামেরা মৌলভীবাজার',
-      'ল্যাপটপ কিস্তিতে',
       'রাজনগর ল্যাপটপ',
     ],
   });
@@ -38,10 +34,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function RajnagarPage() {
   const breadcrumbs = [
     { name: 'Locations', path: '/locations' },
-    { name: 'Rajnagar Hub', path: '/rajnagar' },
+    { name: 'Rajnagar', path: '/rajnagar' },
   ];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
-  const localSchema = buildLocalBusinessSchema();
 
   const faqs = [
     {
@@ -61,29 +55,10 @@ export default function RajnagarPage() {
     },
   ];
 
-  const faqSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqs.map((faq) => ({
-      '@type': 'Question',
-      name: faq.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: faq.answer,
-      },
-    })),
-  };
+  const faqSchema = buildFaqSchema(faqs);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}

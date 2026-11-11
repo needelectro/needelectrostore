@@ -154,7 +154,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
           <div className="space-y-1 text-center md:text-left">
             <h3 className="text-base font-bold text-slate-900 dark:text-white">Have Questions for Our Tech Team?</h3>
             <p className="text-xs text-slate-600 dark:text-slate-400">
-              Visit our showroom at MR Plaza, Kusumbag, Moulvibazar or consult directly with our technicians.
+              Visit our showroom at {BUSINESS_INFO.fullAddress} or consult directly with our technicians.
             </p>
           </div>
           <div className="flex gap-3 shrink-0">

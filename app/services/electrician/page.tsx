@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BUSINESS_INFO, generateSeoMetadata, buildServiceSchema, buildBreadcrumbSchema } from '@/lib/seoConfig';
+import { BUSINESS_INFO, generateSeoMetadata, buildServiceSchema } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -35,12 +35,6 @@ export default function ElectricianBookingPage() {
     path: '/services/electrician',
   });
 
-  const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: 'Home', path: '/' },
-    { name: 'Electrical Services', path: '/electrical-services' },
-    { name: 'Book Electrician', path: '/services/electrician' },
-  ]);
-
   const breadcrumbs = [
     { name: 'Services', path: '/electrical-services' },
     { name: 'Book Electrician', path: '/services/electrician' },
@@ -51,10 +45,6 @@ export default function ElectricianBookingPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
@@ -100,7 +90,7 @@ export default function ElectricianBookingPage() {
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 dark:text-white">Rapid Same-Day Dispatch</h3>
                   <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                    Technicians are dispatched locally from Kusumbag, Moulvibazar, reaching Kusumbag, Chowmuhana, and Shamshernagar Road within 30 to 60 minutes.
+                    Technicians are dispatched from Central Road, NEED ELECTRO Building, Moulvibazar, reaching Kusumbag, Chowmuhana, and Shamshernagar Road within 30 to 60 minutes.
                   </p>
                 </div>
               </div>

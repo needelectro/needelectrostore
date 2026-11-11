@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { generateSeoMetadata, buildBreadcrumbSchema, buildFaqSchema } from '@/lib/seoConfig';
+import { generateSeoMetadata, buildFaqSchema } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -49,22 +49,12 @@ export default function FaqsHubPage() {
     { name: 'Frequently Asked Questions', path: '/guides/faqs' },
   ];
 
-  const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: 'Home', path: '/' },
-    { name: 'Guides & Advice', path: '/guides' },
-    { name: 'Frequently Asked Questions', path: '/guides/faqs' },
-  ]);
-
   // Aggregate all FAQs for JSON-LD FAQPage schema
   const allFaqItems = Object.values(MASTER_FAQS).flatMap(cat => cat.items);
   const faqSchema = buildFaqSchema(allFaqItems);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}

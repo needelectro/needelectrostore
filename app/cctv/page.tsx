@@ -2,12 +2,18 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema, buildItemListSchema } from '@/lib/seoConfig';
+import {
+  BUSINESS_INFO,
+  generateSeoMetadata,
+  buildItemListSchema,
+  getProductUrlPath,
+  isLowQualityOrHotlinkedImage,
+} from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
 import { ProductCard } from '@/src/components/customer/ProductCard';
-import { Camera, ShieldCheck, CheckCircle2, Phone, Video, Eye, ArrowRight } from 'lucide-react';
+import { Camera, Phone, Video } from 'lucide-react';
 
 export const revalidate = 60;
 
@@ -15,27 +21,18 @@ export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
     title: 'CCTV Camera Shop in Moulvibazar | NEED ELECTRO',
     description:
-      'Premier CCTV camera shop in Moulvibazar. Buy Hikvision & Dahua HD/IP security cameras, NVRs, and DVRs with professional local installation & warranty.',
+      'Premier CCTV camera shop in Moulvibazar. Buy Hikvision, Dahua & EZVIZ IP security cameras, NVRs, and DVRs with local installation & warranty.',
     path: '/cctv',
     keywords: [
       'CCTV camera shop in Moulvibazar',
       'CCTV camera Moulvibazar',
-      'CCTV shop Moulvibazar',
       'CCTV camera price Moulvibazar',
-      'CCTV service Moulvibazar',
       'CCTV installation in Moulvibazar',
-      'CCTV installation Moulvibazar',
-      'Where to buy CCTV camera in Moulvibazar',
       'CCTV camera price in Bangladesh',
-      'Security camera price in Bangladesh',
       'EZVIZ CP1 Wi-Fi IP Camera',
       'Hikvision CCTV camera Bangladesh',
       'Dahua CCTV camera Bangladesh',
-      'IP camera Moulvibazar',
-      'CCTV installation service',
       'মৌলভীবাজার সিসি ক্যামেরা',
-      'মৌলভীবাজার সিসিটিভি ক্যামেরা',
-      'মৌলভীবাজার সিসি ক্যামেরা ইনস্টলেশন',
       'সিসিটিভি ক্যামেরা দাম বাংলাদেশ',
     ],
   });
@@ -79,15 +76,17 @@ export default async function CctvPage() {
   }
 
   const breadcrumbs = [{ name: 'CCTV & Security', path: '/cctv' }];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
+
+  const cleanCctv = products.filter((item) => !isLowQualityOrHotlinkedImage(item.imageUrl));
+  const itemListSource = cleanCctv.length > 0 ? cleanCctv : products;
 
   const cctvItemListSchema = buildItemListSchema({
     name: 'CCTV Cameras & Security Systems in Moulvibazar — NEED ELECTRO Store',
     description: 'HD & IP CCTV cameras, DVR/NVR surveillance equipment, and professional security solutions in Bangladesh.',
     url: '/cctv',
-    items: products.map((item) => ({
+    items: itemListSource.slice(0, 30).map((item) => ({
       name: item.name,
-      url: `/product/${item.name ? item.name.toLowerCase().replace(/[\s\W-]+/g, '-') : 'cctv'}-${item.sku.toLowerCase()}`,
+      url: getProductUrlPath(item.name, item.sku),
       image: item.imageUrl,
       price: Number(item.retailPrice),
       brand: item.brand,
@@ -97,10 +96,6 @@ export default async function CctvPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(cctvItemListSchema) }}

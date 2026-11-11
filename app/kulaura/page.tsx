@@ -4,8 +4,7 @@ import Link from 'next/link';
 import {
   BUSINESS_INFO,
   generateSeoMetadata,
-  buildLocalBusinessSchema,
-  buildBreadcrumbSchema,
+  buildFaqSchema,
 } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
@@ -18,18 +17,15 @@ import {
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
     title: 'Computer & Laptop Shop in Kulaura | NEED ELECTRO',
-    description: 'NEED ELECTRO serves Kulaura with tested business laptops (HP, Dell, Lenovo), flexible laptop EMI, CCTV security setups, and certified electricians with same-day coverage from Moulvibazar.',
+    description:
+      'Serving Kulaura from Central Road, Moulvibazar. Tested HP, Dell & Lenovo laptops, desktop PCs, CCTV setups & 0% EMI with fast 24h delivery.',
     path: '/kulaura',
     keywords: [
       'Laptop shop Kulaura',
       'Laptop in Kulaura',
       'Computer shop Kulaura',
       'CCTV camera Kulaura',
-      'Electrician in Kulaura',
       'মৌলভীবাজার ল্যাপটপের দোকান',
-      'কম্পিউটার দোকান মৌলভীবাজার',
-      'সিসিটিভি ক্যামেরা মৌলভীবাজার',
-      'ল্যাপটপ কিস্তিতে',
       'কুলাউড়া ল্যাপটপ',
     ],
   });
@@ -38,10 +34,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function KulauraPage() {
   const breadcrumbs = [
     { name: 'Locations', path: '/locations' },
-    { name: 'Kulaura Hub', path: '/kulaura' },
+    { name: 'Kulaura', path: '/kulaura' },
   ];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
-  const localSchema = buildLocalBusinessSchema();
 
   const faqs = [
     {
@@ -61,29 +55,10 @@ export default function KulauraPage() {
     },
   ];
 
-  const faqSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqs.map((faq) => ({
-      '@type': 'Question',
-      name: faq.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: faq.answer,
-      },
-    })),
-  };
+  const faqSchema = buildFaqSchema(faqs);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}

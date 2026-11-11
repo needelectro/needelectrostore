@@ -1,10 +1,26 @@
 // NEED ELECTRO ERP & Customer Website — Centralized SEO & Geo-SEO Configuration
 import type { Metadata } from 'next';
 
+const CANONICAL_DOMAIN = (
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://www.needelectro.store'
+).replace(/\/+$/, '');
+
+export const DEFAULT_OG_IMAGE = '/og-store-banner.jpg';
+
+const VERIFIED_MAPS_URL = process.env.NEXT_PUBLIC_GOOGLE_MAPS_URL?.trim() || '';
+const VERIFIED_GEO_LAT = process.env.NEXT_PUBLIC_STORE_LAT
+  ? Number(process.env.NEXT_PUBLIC_STORE_LAT)
+  : undefined;
+const VERIFIED_GEO_LNG = process.env.NEXT_PUBLIC_STORE_LNG
+  ? Number(process.env.NEXT_PUBLIC_STORE_LNG)
+  : undefined;
+
 export const BUSINESS_INFO = {
   name: 'NEED ELECTRO',
   parentOrganization: 'AMDADS GROUP',
   tagline: 'Trusted Electrical and Technological Solutions',
+  storeDescription:
+    "Moulvibazar's trusted computer & laptop shop. Genuine HP, Dell & Lenovo laptops, desktop PCs, monitors, CCTV cameras & accessories with official warranty.",
   legalName: 'NEED ELECTRO',
   founder: 'Amdadur Rahman',
   phone: '+880 1733-983752',
@@ -12,7 +28,7 @@ export const BUSINESS_INFO = {
   whatsappClean: '8801733983752',
   email: 'needelectro23@gmail.com',
   supportEmail: 'contact.amdadur@gmail.com',
-  domain: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.needelectro.store',
+  domain: CANONICAL_DOMAIN,
   currency: 'BDT',
   currencySymbol: '৳',
   address: {
@@ -22,20 +38,48 @@ export const BUSINESS_INFO = {
     postalCode: '3200',
     addressCountry: 'BD',
   },
-  geo: {
-    latitude: 24.4829,
-    longitude: 91.7649,
+  fullAddress:
+    'Central Road, NEED ELECTRO Building, Moulvibazar 3200, Sylhet Division, Bangladesh',
+  openingHours: {
+    days: ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'],
+    opens: '09:30',
+    closes: '21:30',
+    display: 'Sat – Thu: 9:30 AM – 9:30 PM (Friday Closed)',
   },
+  ...(Number.isFinite(VERIFIED_GEO_LAT) && Number.isFinite(VERIFIED_GEO_LNG)
+    ? {
+        geo: {
+          latitude: VERIFIED_GEO_LAT as number,
+          longitude: VERIFIED_GEO_LNG as number,
+        },
+      }
+    : {}),
+  ...(VERIFIED_MAPS_URL ? { hasMap: VERIFIED_MAPS_URL } : {}),
   socialProfiles: {
     facebook: 'https://facebook.com/needelectro',
     instagram: 'https://instagram.com/needelectro',
     youtube: 'https://youtube.com/@needelectro',
     whatsapp: 'https://wa.me/8801733983752',
   },
+  moulvibazarUpazilas: [
+    'Moulvibazar Sadar',
+    'Sreemangal',
+    'Kulaura',
+    'Rajnagar',
+    'Kamalganj',
+    'Juri',
+    'Barlekha',
+  ],
   serviceAreas: [
-    'Moulvibazar',
+    'Moulvibazar Sadar',
+    'Sreemangal',
+    'Kulaura',
+    'Rajnagar',
+    'Kamalganj',
+    'Juri',
+    'Barlekha',
     'Sylhet Division',
-    'Bangladesh (Nationwide Online Delivery)',
+    'Bangladesh',
   ],
   categories: [
     { title: 'Laptops', slug: 'laptops', icon: 'Laptop', description: 'Business, student & gaming laptops from HP, Dell, Lenovo with warranty & EMI in Moulvibazar.' },
@@ -58,6 +102,55 @@ export function slugify(text: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
+// Canonical product detail path generator
+export function getProductUrlPath(name: string, sku: string): string {
+  const namePart = slugify(name || 'product') || 'product';
+  return `/product/${namePart}-${sku.toLowerCase()}`;
+}
+
+// Check if an image URL is a known placeholder or hotlinked Google Search thumbnail
+export function isLowQualityOrHotlinkedImage(url?: string | null): boolean {
+  if (!url) return true;
+  const clean = url.trim().toLowerCase();
+  if (!clean || clean === 'null') return true;
+  return (
+    clean.includes('encrypted-tbn0.gstatic.com') ||
+    clean.includes('logo-dark-transparent.png') ||
+    clean.includes('placeholder')
+  );
+}
+
+// Resolve an image URL to an absolute canonical HTTPS URL, rejecting low-quality placeholders
+export function resolveCleanImageUrl(
+  url?: string | null,
+  fallbackPath: string = DEFAULT_OG_IMAGE
+): string {
+  const domain = BUSINESS_INFO.domain.replace(/\/+$/, '');
+  const trimmed = url?.trim();
+  if (!trimmed || isLowQualityOrHotlinkedImage(trimmed)) {
+    return `${domain}${fallbackPath.startsWith('/') ? fallbackPath : `/${fallbackPath}`}`;
+  }
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed;
+  }
+  return `${domain}${trimmed.startsWith('/') ? trimmed : `/${trimmed}`}`;
+}
+
+// Deduplicate keyword arrays case-insensitively while preserving order
+export function dedupeKeywords(keywords: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const raw of keywords) {
+    const trimmed = raw.trim();
+    if (!trimmed) continue;
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(trimmed);
+  }
+  return result;
+}
+
 // Generate Canonical URL
 export function getCanonicalUrl(path: string = ''): string {
   const base = BUSINESS_INFO.domain.replace(/\/+$/, '');
@@ -71,7 +164,7 @@ export function generateSeoMetadata({
   description,
   path = '',
   keywords = [],
-  ogImage = '/logo-dark-transparent.png',
+  ogImage = DEFAULT_OG_IMAGE,
   noIndex = false,
 }: {
   title: string;
@@ -97,48 +190,28 @@ export function generateSeoMetadata({
   if (cleanDesc.length > 158) {
     cleanDesc = cleanDesc.slice(0, 155).trim() + '...';
   } else if (cleanDesc.length < 50) {
-    cleanDesc = `${cleanDesc} Trusted electrical & tech solutions at NEED ELECTRO Bangladesh.`.slice(0, 158);
+    cleanDesc = `${cleanDesc} Computer & laptop shop in Moulvibazar at NEED ELECTRO.`.slice(0, 158);
   }
 
-  const imageUrl = ogImage.startsWith('http') ? ogImage : `${BUSINESS_INFO.domain.replace(/\/+$/, '')}${ogImage.startsWith('/') ? ogImage : `/${ogImage}`}`;
+  const imageUrl = resolveCleanImageUrl(ogImage, DEFAULT_OG_IMAGE);
+  const cleanKeywords = dedupeKeywords(
+    keywords.length > 0
+      ? keywords
+      : [
+          'NEED ELECTRO',
+          'Computer shop in Moulvibazar',
+          'Laptop shop in Moulvibazar',
+          'Moulvibazar',
+          'Bangladesh',
+        ]
+  );
 
   return {
     title: {
       absolute: fullTitle,
     },
     description: cleanDesc,
-    keywords: [
-      ...keywords,
-      'NEED ELECTRO',
-      'Computer shop in Moulvibazar',
-      'Computer price in Moulvibazar',
-      'Laptop shop in Moulvibazar',
-      'Laptop price in Moulvibazar',
-      'CCTV camera shop in Moulvibazar',
-      'CCTV camera price in Bangladesh',
-      'Tech gadgets in Moulvibazar',
-      'Tech gadgets price in Bangladesh',
-      'Laptop price in Bangladesh',
-      'HP EliteBook price in Bangladesh',
-      'Desktop computer price in Bangladesh',
-      'Computer accessories in Bangladesh',
-      'Electrical shop online Bangladesh',
-      'Electrical services in Moulvibazar',
-      'Electrician service in Bangladesh',
-      'CCTV installation service',
-      'Laptop and computer servicing',
-      'Networking and Wi-Fi installation',
-      'Electrical products online Bangladesh',
-      'Genuine laptop with warranty in Bangladesh',
-      'Moulvibazar',
-      'Sylhet',
-      'Bangladesh',
-      'মৌলভীবাজার ল্যাপটপ দোকান',
-      'কম্পিউটার দোকান মৌলভীবাজার',
-      'সিসিটিভি ক্যামেরা মৌলভীবাজার',
-      'ইলেকট্রিশিয়ান মৌলভীবাজার',
-      'ল্যাপটপ কিস্তিতে',
-    ],
+    keywords: cleanKeywords,
     alternates: {
       canonical,
     },
@@ -155,7 +228,7 @@ export function generateSeoMetadata({
     },
     openGraph: {
       title: fullTitle,
-      description,
+      description: cleanDesc,
       url: canonical,
       siteName: BUSINESS_INFO.name,
       locale: 'en_US',
@@ -172,7 +245,7 @@ export function generateSeoMetadata({
     twitter: {
       card: 'summary_large_image',
       title: fullTitle,
-      description,
+      description: cleanDesc,
       images: [imageUrl],
     },
   };
@@ -182,20 +255,21 @@ export function generateSeoMetadata({
 // Schema.org Structured Data Builders
 // -------------------------------------------------------------
 
-export function buildOrganizationSchema() {
+function buildOrganizationNode(includeContext: boolean) {
+  const domain = BUSINESS_INFO.domain.replace(/\/+$/, '');
   return {
-    '@context': 'https://schema.org',
+    ...(includeContext ? { '@context': 'https://schema.org' } : {}),
     '@type': 'Organization',
-    '@id': `${BUSINESS_INFO.domain}/#organization`,
+    '@id': `${domain}/#organization`,
     name: BUSINESS_INFO.name,
     legalName: BUSINESS_INFO.legalName,
-    url: BUSINESS_INFO.domain,
+    url: domain,
     parentOrganization: {
       '@type': 'Organization',
       name: BUSINESS_INFO.parentOrganization,
     },
-    logo: `${BUSINESS_INFO.domain}/logo-icon.png`,
-    description: BUSINESS_INFO.tagline,
+    logo: `${domain}/logo-icon.png`,
+    description: BUSINESS_INFO.storeDescription,
     telephone: BUSINESS_INFO.phoneClean,
     email: BUSINESS_INFO.email,
     sameAs: [
@@ -215,22 +289,32 @@ export function buildOrganizationSchema() {
   };
 }
 
-export function buildWebSiteSchema() {
+export function buildOrganizationSchema() {
+  return buildOrganizationNode(true);
+}
+
+function buildWebSiteNode(includeContext: boolean, useGraphRef: boolean) {
   const domain = BUSINESS_INFO.domain.replace(/\/+$/, '');
   return {
-    '@context': 'https://schema.org',
+    ...(includeContext ? { '@context': 'https://schema.org' } : {}),
     '@type': 'WebSite',
     '@id': `${domain}/#website`,
     url: domain,
     name: BUSINESS_INFO.name,
-    alternateName: ['NEED ELECTRO Shop', 'Need Electro Store Moulvibazar', 'নিড ইলেকট্রো'],
-    description: BUSINESS_INFO.tagline,
-    publisher: {
-      '@type': 'Organization',
-      name: BUSINESS_INFO.name,
-      url: domain,
-      logo: `${domain}/logo-icon.png`,
-    },
+    alternateName: [
+      'NEED ELECTRO Store',
+      'NEED ELECTRO Computer & Laptop Shop',
+      'নিড ইলেকট্রো',
+    ],
+    description: BUSINESS_INFO.storeDescription,
+    publisher: useGraphRef
+      ? { '@id': `${domain}/#organization` }
+      : {
+          '@type': 'Organization',
+          name: BUSINESS_INFO.name,
+          url: domain,
+          logo: `${domain}/logo-icon.png`,
+        },
     potentialAction: {
       '@type': 'SearchAction',
       target: {
@@ -243,11 +327,30 @@ export function buildWebSiteSchema() {
   };
 }
 
-export function buildLocalBusinessSchema() {
+export function buildWebSiteSchema() {
+  return buildWebSiteNode(true, false);
+}
+
+function buildLocalBusinessNode(includeContext: boolean) {
   const domain = BUSINESS_INFO.domain.replace(/\/+$/, '');
+  const geoSection =
+    'geo' in BUSINESS_INFO && BUSINESS_INFO.geo
+      ? {
+          geo: {
+            '@type': 'GeoCoordinates',
+            latitude: BUSINESS_INFO.geo.latitude,
+            longitude: BUSINESS_INFO.geo.longitude,
+          },
+        }
+      : {};
+  const mapSection =
+    'hasMap' in BUSINESS_INFO && BUSINESS_INFO.hasMap
+      ? { hasMap: BUSINESS_INFO.hasMap }
+      : {};
+
   return {
-    '@context': 'https://schema.org',
-    '@type': ['ComputerStore', 'ElectronicsStore'],
+    ...(includeContext ? { '@context': 'https://schema.org' } : {}),
+    '@type': 'ComputerStore',
     '@id': `${domain}/#store`,
     name: `${BUSINESS_INFO.name} — Computer & Laptop Shop`,
     legalName: BUSINESS_INFO.legalName,
@@ -256,51 +359,45 @@ export function buildLocalBusinessSchema() {
       name: BUSINESS_INFO.parentOrganization,
     },
     image: [
+      `${domain}${DEFAULT_OG_IMAGE}`,
       `${domain}/banners/need-electro-laptops-flagship.jpg`,
-      `${domain}/logo-icon.png`,
     ],
+    logo: `${domain}/logo-icon.png`,
     url: domain,
-    telephone: '+8801733983752',
+    telephone: BUSINESS_INFO.phoneClean,
+    email: BUSINESS_INFO.email,
     priceRange: '৳৳',
-    description: `${BUSINESS_INFO.name} is Moulvibazar's trusted computer and laptop shop, electrical and technology marketplace in Bangladesh. Offering genuine laptops (HP, Dell, Lenovo), desktop computers, CCTV security cameras, electrical equipment, and certified technical services.`,
+    description: `${BUSINESS_INFO.name} is a computer and laptop shop in Moulvibazar, Bangladesh, offering genuine HP, Dell, and Lenovo laptops, custom desktop PCs, monitors, CCTV cameras, and accessories with official warranty.`,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Central Road, NEED ELECTRO Building',
-      addressLocality: 'Moulvibazar',
-      addressRegion: 'Sylhet Division',
-      postalCode: '3200',
-      addressCountry: 'BD',
+      streetAddress: BUSINESS_INFO.address.streetAddress,
+      addressLocality: BUSINESS_INFO.address.addressLocality,
+      addressRegion: BUSINESS_INFO.address.addressRegion,
+      postalCode: BUSINESS_INFO.address.postalCode,
+      addressCountry: BUSINESS_INFO.address.addressCountry,
     },
-    geo: {
-      '@type': 'GeoCoordinates',
-      latitude: 24.4829,
-      longitude: 91.7649,
-    },
+    ...geoSection,
+    ...mapSection,
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',
-        dayOfWeek: [
-          'Saturday',
-          'Sunday',
-          'Monday',
-          'Tuesday',
-          'Wednesday',
-          'Thursday',
-        ],
-        opens: '09:00',
-        closes: '21:00',
-      },
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Friday'],
-        opens: '15:00',
-        closes: '21:00',
+        dayOfWeek: BUSINESS_INFO.openingHours.days,
+        opens: BUSINESS_INFO.openingHours.opens,
+        closes: BUSINESS_INFO.openingHours.closes,
       },
     ],
     currenciesAccepted: 'BDT',
     paymentAccepted: 'Cash on Delivery, bKash, Nagad, Bank Transfer, EMI Installment',
-    hasMap: 'https://maps.google.com/?q=24.4829,91.7649',
+    sameAs: [
+      BUSINESS_INFO.socialProfiles.facebook,
+      BUSINESS_INFO.socialProfiles.instagram,
+      BUSINESS_INFO.socialProfiles.youtube,
+    ],
     areaServed: [
+      ...BUSINESS_INFO.moulvibazarUpazilas.map((upazila) => ({
+        '@type': 'AdministrativeArea',
+        name: upazila,
+      })),
       {
         '@type': 'City',
         name: 'Moulvibazar',
@@ -313,6 +410,25 @@ export function buildLocalBusinessSchema() {
         '@type': 'Country',
         name: 'Bangladesh',
       },
+    ],
+  };
+}
+
+export function buildLocalBusinessSchema() {
+  return buildLocalBusinessNode(true);
+}
+
+/**
+ * Single consolidated JSON-LD @graph emitted once in the root layout
+ * for Organization, ComputerStore, and WebSite without duplicate entities.
+ */
+export function buildGlobalSiteGraphSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      buildOrganizationNode(false),
+      buildLocalBusinessNode(false),
+      buildWebSiteNode(false, true),
     ],
   };
 }
@@ -361,12 +477,14 @@ export function buildItemListSchema({
     numberOfItems: items.length,
     itemListElement: items.map((item, index) => {
       const itemUrl = item.url || item.path || '';
+      const hasCleanImg = item.image && !isLowQualityOrHotlinkedImage(item.image);
+      const resolvedImage = hasCleanImg ? resolveCleanImageUrl(item.image) : undefined;
       return {
         '@type': 'ListItem',
         position: index + 1,
         name: item.name,
         url: itemUrl.startsWith('http') ? itemUrl : getCanonicalUrl(itemUrl),
-        ...(item.image ? { image: item.image.startsWith('http') ? item.image : `${BUSINESS_INFO.domain}${item.image}` } : {}),
+        ...(resolvedImage ? { image: resolvedImage } : {}),
         ...(item.price !== undefined
           ? {
               offers: {
@@ -405,14 +523,12 @@ export function buildProductSchema(product: {
     rating?: number;
   }>;
 }) {
-  const canonical = getCanonicalUrl(`/product/${slugify(product.name)}-${product.sku.toLowerCase()}`);
-  const fallbackImg = `${BUSINESS_INFO.domain}/logo-dark-transparent.png`;
-  const primaryImg = product.imageUrl 
-    ? (product.imageUrl.startsWith('http') ? product.imageUrl : `${BUSINESS_INFO.domain}${product.imageUrl}`)
-    : fallbackImg;
-  const imageList = product.images && product.images.length > 0
-    ? product.images.map(img => img.startsWith('http') ? img : `${BUSINESS_INFO.domain}${img}`)
-    : [primaryImg];
+  const canonical = getCanonicalUrl(getProductUrlPath(product.name, product.sku));
+  const primaryImg = resolveCleanImageUrl(product.imageUrl, DEFAULT_OG_IMAGE);
+  const cleanGallery = (product.images || [])
+    .filter((img) => Boolean(img) && !isLowQualityOrHotlinkedImage(img))
+    .map((img) => resolveCleanImageUrl(img, DEFAULT_OG_IMAGE));
+  const imageList = cleanGallery.length > 0 ? Array.from(new Set([primaryImg, ...cleanGallery])) : [primaryImg];
 
   const isRefurbished = product.name.toLowerCase().includes('refurbished') || 
                         product.name.toLowerCase().includes('used') ||
@@ -561,14 +677,14 @@ export function buildArticleSchema(article: {
   imageUrl?: string;
 }) {
   const canonical = getCanonicalUrl(`/blog/${article.slug}`);
-  const img = article.imageUrl || `${BUSINESS_INFO.domain}/main-logo.jpg`;
+  const img = resolveCleanImageUrl(article.imageUrl, DEFAULT_OG_IMAGE);
 
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: article.title,
     description: article.description,
-    image: img.startsWith('http') ? img : `${BUSINESS_INFO.domain}${img}`,
+    image: img,
     datePublished: article.datePublished,
     dateModified: article.dateModified || article.datePublished,
     author: {
@@ -618,6 +734,7 @@ export function buildServiceSchema({
       name: BUSINESS_INFO.name,
       address: {
         '@type': 'PostalAddress',
+        streetAddress: BUSINESS_INFO.address.streetAddress,
         addressLocality: BUSINESS_INFO.address.addressLocality,
         addressRegion: BUSINESS_INFO.address.addressRegion,
         postalCode: BUSINESS_INFO.address.postalCode,
@@ -844,7 +961,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         question: 'Can I pay my monthly installments through bKash or Nagad?',
-        answer: 'Yes! Customers can pay their monthly installment via bKash, Nagad, bank transfer, or directly at our Kusumbag, Moulvibazar showroom.',
+        answer: 'Yes! Customers can pay their monthly installment via bKash, Nagad, bank transfer, or directly at our Central Road, NEED ELECTRO Building, Moulvibazar showroom.',
       },
     ],
   },

@@ -1,41 +1,36 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema, buildItemListSchema } from '@/lib/seoConfig';
+import {
+  BUSINESS_INFO,
+  generateSeoMetadata,
+  buildItemListSchema,
+  getProductUrlPath,
+  isLowQualityOrHotlinkedImage,
+} from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
 import { ProductCard } from '@/src/components/customer/ProductCard';
-import { Monitor, Cpu, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Monitor } from 'lucide-react';
 
 export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Computer Shop in Moulvibazar BD | NEED ELECTRO',
+    title: 'Desktop PC & Computer Shop in Moulvibazar | NEED ELECTRO',
     description:
-      'Looking for a trusted computer shop in Moulvibazar? Custom desktop PCs, gaming rigs, monitors, and components with warranty at NEED ELECTRO Bangladesh.',
+      'Trusted desktop computer shop in Moulvibazar. Custom Intel & AMD PC builds, HD monitors, motherboards & components with warranty at NEED ELECTRO.',
     path: '/computers',
     keywords: [
       'Computer shop in Moulvibazar',
-      'Computer shop Moulvibazar',
       'Computer price in Moulvibazar',
-      'Computer price Moulvibazar',
       'Desktop price Moulvibazar',
       'Monitor price Moulvibazar',
       'Gaming PC price Moulvibazar',
-      'Best computer shop in Moulvibazar',
-      'Where to buy computer in Moulvibazar',
-      'Computer store Moulvibazar',
-      'Computer showroom Moulvibazar',
-      'Computer shop in Moulvibazar Bangladesh',
       'Desktop computer price in Bangladesh',
-      'Desktop computer Moulvibazar',
-      'PC parts Moulvibazar',
-      'Gaming PC Moulvibazar',
       'Office computer Moulvibazar',
-      'Computer accessories in Bangladesh',
-      'Desktop PC price Bangladesh',
+      'PC parts Moulvibazar',
       'মৌলভীবাজার কম্পিউটার দোকান',
       'কম্পিউটার দাম বাংলাদেশ',
     ],
@@ -78,16 +73,18 @@ export default async function ComputersPage() {
     console.error('Computers query error:', err);
   }
 
-  const breadcrumbs = [{ name: 'Computers', path: '/computers' }];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
+  const breadcrumbs = [{ name: 'Desktop PCs & Monitors', path: '/computers' }];
+
+  const cleanComputers = products.filter((item) => !isLowQualityOrHotlinkedImage(item.imageUrl));
+  const itemListSource = cleanComputers.length > 0 ? cleanComputers : products;
 
   const computersItemListSchema = buildItemListSchema({
-    name: 'Desktop Computers & Workstations in Moulvibazar — NEED ELECTRO Store',
+    name: 'Desktop Computers & Monitors in Moulvibazar — NEED ELECTRO Store',
     description: 'Custom desktop PCs, office workstations, monitors and computer parts available at NEED ELECTRO Moulvibazar.',
     url: '/computers',
-    items: products.map((item) => ({
+    items: itemListSource.slice(0, 30).map((item) => ({
       name: item.name,
-      url: `/product/${item.name ? item.name.toLowerCase().replace(/[\s\W-]+/g, '-') : 'computer'}-${item.sku.toLowerCase()}`,
+      url: getProductUrlPath(item.name, item.sku),
       image: item.imageUrl,
       price: Number(item.retailPrice),
       brand: item.brand,
@@ -97,10 +94,6 @@ export default async function ComputersPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(computersItemListSchema) }}
@@ -127,7 +120,7 @@ export default async function ComputersPage() {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 sm:mb-8">
           <div>
             <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Computers & Display Hardware in Stock</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Visit our Kusumbag showroom for custom PC build consultations</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Visit our {BUSINESS_INFO.address.streetAddress}, Moulvibazar showroom for custom PC build consultations</p>
           </div>
           <span className="text-xs font-mono bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 shadow-xs">
             {products.length} Products Found

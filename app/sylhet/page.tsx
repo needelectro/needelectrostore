@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata, buildLocalBusinessSchema, buildBreadcrumbSchema } from '@/lib/seoConfig';
+import { BUSINESS_INFO, generateSeoMetadata, buildFaqSchema } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -18,24 +18,17 @@ export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
     title: 'Computer & Laptop Shop in Sylhet | NEED ELECTRO',
     description:
-      'Buy authentic HP, Dell, and Lenovo laptops, desktop computers, CCTV surveillance cameras, and electrical equipment in Sylhet. 24-hour express courier delivery across Sylhet Sadar, Zindabazar, Amberkhana & all upazilas.',
+      'Buy genuine HP, Dell & Lenovo laptops, desktop PCs & CCTV cameras in Sylhet Division. 24-hour COD delivery from NEED ELECTRO Moulvibazar.',
     path: '/sylhet',
     keywords: [
       'Laptop shop in Sylhet',
       'Laptop price in Sylhet',
       'Computer shop Sylhet',
       'CCTV camera Sylhet',
-      'Used laptop in Sylhet',
       'HP laptop Sylhet',
       'Dell laptop Sylhet',
       'Lenovo laptop Sylhet',
-      'Electrical products Sylhet',
       'Laptop EMI Sylhet',
-      'Cash on delivery laptop Sylhet',
-      'মৌলভীবাজার ল্যাপটপের দোকান',
-      'কম্পিউটার দোকান মৌলভীবাজার',
-      'সিসিটিভি ক্যামেরা মৌলভীবাজার',
-      'ল্যাপটপ কিস্তিতে',
       'সিলেট ল্যাপটপের দোকান',
       'কম্পিউটার দোকান সিলেট',
     ],
@@ -76,8 +69,6 @@ export default async function SylhetPage() {
     { name: 'Locations', path: '/locations' },
     { name: 'Sylhet Division', path: '/sylhet' },
   ];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
-  const localSchema = buildLocalBusinessSchema();
 
   const faqs = [
     {
@@ -97,29 +88,10 @@ export default async function SylhetPage() {
     },
   ];
 
-  const faqSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqs.map((faq) => ({
-      '@type': 'Question',
-      name: faq.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: faq.answer,
-      },
-    })),
-  };
+  const faqSchema = buildFaqSchema(faqs);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}

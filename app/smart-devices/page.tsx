@@ -1,26 +1,32 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema, buildItemListSchema, slugify } from '@/lib/seoConfig';
+import {
+  BUSINESS_INFO,
+  generateSeoMetadata,
+  buildItemListSchema,
+  getProductUrlPath,
+  isLowQualityOrHotlinkedImage,
+} from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
 import { ProductCard } from '@/src/components/customer/ProductCard';
-import { Smartphone, Zap, ShieldCheck } from 'lucide-react';
+import { Smartphone } from 'lucide-react';
 
 export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Smart Devices & Gadgets | NEED ELECTRO',
+    title: 'Smart Devices & Tech Gadgets in Moulvibazar | NEED ELECTRO',
     description:
-      'Explore smart home devices, plugs, USB converter hubs, and modern electronics at NEED ELECTRO Bangladesh. Verified warranty and support.',
+      'Shop smart plugs, USB-C hubs, adapters & tech gadgets in Moulvibazar at NEED ELECTRO. Genuine electronics with warranty & fast delivery.',
     path: '/smart-devices',
     keywords: [
       'Smart devices in Moulvibazar',
-      'Smart home Moulvibazar',
-      'Gadgets shop Moulvibazar',
+      'Gadget shop in Moulvibazar',
       'USB converter Moulvibazar',
+      'Tech gadgets Moulvibazar',
       'মৌলভীবাজার স্মার্ট গ্যাজেট',
     ],
   });
@@ -62,14 +68,15 @@ export default async function SmartDevicesPage() {
   }
 
   const breadcrumbs = [{ name: 'Smart Devices', path: '/smart-devices' }];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
+  const cleanSmart = products.filter((p) => !isLowQualityOrHotlinkedImage(p.imageUrl));
+  const itemListSource = cleanSmart.length > 0 ? cleanSmart : products;
   const smartDevicesItemListSchema = buildItemListSchema({
     name: 'Smart Devices & Modern Gadgets in Moulvibazar',
     description: 'Explore smart devices, smart plugs, USB converter hubs, and smart home automation gadgets at NEED ELECTRO Store.',
     path: '/smart-devices',
-    items: products.slice(0, 30).map(p => ({
+    items: itemListSource.slice(0, 30).map((p) => ({
       name: p.name,
-      url: `/product/${slugify(p.name)}-${p.sku.toLowerCase()}`,
+      url: getProductUrlPath(p.name, p.sku),
       image: p.imageUrl || undefined,
       price: Number(p.retailPrice) || undefined,
     })),
@@ -77,10 +84,6 @@ export default async function SmartDevicesPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       {smartDevicesItemListSchema && (
         <script
           type="application/ld+json"

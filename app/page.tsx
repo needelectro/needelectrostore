@@ -3,10 +3,11 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   BUSINESS_INFO,
+  DEFAULT_OG_IMAGE,
   generateSeoMetadata,
-  buildLocalBusinessSchema,
-  buildOrganizationSchema,
   buildItemListSchema,
+  getProductUrlPath,
+  isLowQualityOrHotlinkedImage,
 } from '@/lib/seoConfig';
 import { prisma } from '@/lib/prisma';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
@@ -18,8 +19,7 @@ import { BusinessUpdatesFeed } from '@/src/components/customer/BusinessUpdatesFe
 import {
   Laptop, Monitor, Camera, Zap, Wifi, Smartphone,
   Truck, ShieldCheck, CreditCard, Clock, CheckCircle2,
-  Phone, MapPin, ArrowRight, Sparkles, Award, Calculator,
-  Wrench, HelpCircle, Layers, ChevronRight, Sun, MessageCircle
+  Phone, MapPin, ArrowRight, Wrench, ChevronRight, Cpu
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -29,51 +29,46 @@ export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
     title: 'Computer & Laptop Shop in Moulvibazar | NEED ELECTRO',
     description:
-      "Moulvibazar's trusted computer & laptop shop. Shop genuine HP, Dell, Lenovo laptops, desktop PCs, CCTV cameras & accessories with fast local delivery.",
+      'Computer and laptop shop in Moulvibazar. Buy genuine HP, Dell, and Lenovo laptops, desktop PCs, monitors, and accessories with warranty at NEED ELECTRO.',
     path: '/',
+    ogImage: DEFAULT_OG_IMAGE,
     keywords: [
       'Computer shop in Moulvibazar',
       'Laptop shop in Moulvibazar',
-      'Computer shop in Moulvibazar Bangladesh',
-      'Laptop price in Bangladesh',
-      'CCTV camera shop in Moulvibazar',
-      'Gadget shop in Moulvibazar',
       'Computer price in Moulvibazar',
       'Laptop price in Moulvibazar',
+      'Desktop PC Moulvibazar',
+      'Computer accessories in Moulvibazar',
       'HP EliteBook price in Bangladesh',
-      'Desktop computer price in Bangladesh',
-      'Computer accessories in Bangladesh',
-      'Electrical shop online Bangladesh',
-      'CCTV installation in Moulvibazar',
-      'Laptop servicing Moulvibazar',
+      'Laptop price in Bangladesh',
+      'CCTV camera shop in Moulvibazar',
+      'Laptop EMI in Moulvibazar',
       'NEED ELECTRO',
-      'NEED ELECTRO STORE',
       'মৌলভীবাজার ল্যাপটপ দোকান',
       'কম্পিউটার দোকান মৌলভীবাজার',
-      'মৌলভীবাজার সিসিটিভি ক্যামেরা',
     ],
   });
 }
 
-// 7-column categories matching trustcomputermb
+// 7-column product categories leading with computing hardware
 const CATEGORY_TILES = [
   { name: 'Laptops', slug: '/laptops', icon: Laptop, count: 'HP, Dell, Lenovo', color: 'from-blue-600 to-sky-500' },
   { name: 'Desktop & PC', slug: '/computers', icon: Monitor, count: 'Custom & Branded', color: 'from-indigo-600 to-blue-500' },
+  { name: 'Accessories', slug: '/computer-accessories', icon: Cpu, count: 'SSD, RAM & Peripherals', color: 'from-emerald-600 to-teal-500' },
   { name: 'CCTV Security', slug: '/cctv', icon: Camera, count: 'Hikvision & Dahua', color: 'from-cyan-600 to-teal-500' },
-  { name: 'Electricals', slug: '/electrical-products', icon: Zap, count: 'Switches & Breakers', color: 'from-amber-500 to-orange-500' },
-  { name: 'Accessories', slug: '/computer-accessories', icon: Smartphone, count: 'Storage & Hubs', color: 'from-emerald-600 to-teal-500' },
   { name: 'Networking', slug: '/networking', icon: Wifi, count: 'Routers & Switches', color: 'from-violet-600 to-purple-500' },
-  { name: 'Solar & IPS', slug: '/electrical-products', icon: Sun, count: 'Inverter & Battery', color: 'from-rose-500 to-pink-500' },
+  { name: 'Smart Devices', slug: '/smart-devices', icon: Smartphone, count: 'Hubs & Smart Tech', color: 'from-rose-500 to-pink-500' },
+  { name: 'Electricals', slug: '/electrical-products', icon: Zap, count: 'Breakers & Power', color: 'from-amber-500 to-orange-500' },
 ];
 
 const BRANDS = [
   { name: 'HP', desc: 'EliteBook & ProBook', href: '/laptops/hp' },
   { name: 'Dell', desc: 'Latitude & Inspiron', href: '/laptops/dell' },
   { name: 'Lenovo', desc: 'ThinkPad & IdeaPad', href: '/laptops/lenovo' },
-  { name: 'Hikvision', desc: 'IP Camera & NVR', href: '/cctv' },
-  { name: 'Dahua', desc: 'Smart Surveillance', href: '/cctv' },
-  { name: 'Schneider', desc: 'Circuit Breakers', href: '/electrical-products' },
-  { name: 'Super Star', desc: 'Electrical Fixtures', href: '/electrical-products' },
+  { name: 'Apple', desc: 'MacBook Air & Pro', href: '/laptops' },
+  { name: 'ASUS', desc: 'VivoBook & TUF', href: '/laptops' },
+  { name: 'MSI', desc: 'Modern & Katana', href: '/laptops' },
+  { name: 'Hikvision', desc: 'Monitors & CCTV', href: '/cctv' },
   { name: 'TP-Link', desc: 'Wi-Fi 6 Routers', href: '/networking' },
 ];
 
@@ -159,27 +154,18 @@ export default async function HomePage() {
     specs: p.specs,
   }));
 
-  const localBusinessSchema = buildLocalBusinessSchema();
-  const organizationSchema = buildOrganizationSchema();
-  const websiteSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: BUSINESS_INFO.name,
-    url: BUSINESS_INFO.domain,
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: `${BUSINESS_INFO.domain}/shop?q={search_term_string}`,
-      'query-input': 'required name=search_term_string',
-    },
-  };
+  // Prioritize products with clean non-hotlinked images for homepage ItemList JSON-LD
+  const cleanImageProducts = mappedProducts.filter((p) => !isLowQualityOrHotlinkedImage(p.imageUrl));
+  const itemListSource = cleanImageProducts.length >= 8 ? cleanImageProducts : mappedProducts;
 
   const featuredItemListSchema = buildItemListSchema({
-    name: 'Featured Products in Moulvibazar',
-    description: 'Premier authentic laptops, CCTV cameras, computers, and electrical equipment available at NEED ELECTRO Store.',
+    name: 'Featured Computers, Laptops & Tech Products in Moulvibazar',
+    description:
+      'Genuine HP, Dell, Lenovo laptops, desktop PCs, monitors, and computer accessories at NEED ELECTRO Moulvibazar.',
     url: '/',
-    items: mappedProducts.slice(0, 16).map(p => ({
+    items: itemListSource.slice(0, 16).map((p) => ({
       name: p.name,
-      url: `/product/${p.name ? p.name.toLowerCase().replace(/[\s\W-]+/g, '-') : 'product'}-${p.sku.toLowerCase()}`,
+      url: getProductUrlPath(p.name, p.sku),
       image: p.imageUrl,
       price: p.retailPrice,
       brand: p.brand,
@@ -191,32 +177,21 @@ export default async function HomePage() {
     <div className="min-h-screen bg-[#F4F6F8] text-[#002B5B] flex flex-col font-sans selection:bg-[#EAF4FF] selection:text-[#008CFF]">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
-      />
-      <script
-        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(featuredItemListSchema) }}
       />
 
       <CustomerHeader />
 
       <main className="w-full max-w-7xl 2xl:max-w-[1600px] 3xl:max-w-[2000px] 4xl:max-w-[2400px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 xl:px-10 py-3.5 sm:py-5 space-y-4 sm:space-y-6 flex-1">
-        {/* Visible Search Intent Header Banner */}
+        {/* Visible Search Intent & NAP Header Banner */}
         <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="space-y-1">
             <h1 className="text-lg sm:text-2xl font-black text-[#002B5B] tracking-tight">
               Computer &amp; Laptop Shop in Moulvibazar — NEED ELECTRO
             </h1>
             <p className="text-xs sm:text-sm text-slate-600">
-              Moulvibazar's trusted technology marketplace for genuine laptops, desktop PCs, CCTV cameras &amp; accessories with official warranty and fast local delivery.
+              Shop genuine <strong>Computer, Laptop, Desktop PC &amp; Accessories in Moulvibazar</strong> (HP, Dell, Lenovo, monitors &amp; SSDs) with official warranty at{' '}
+              <span className="font-semibold text-[#002B5B]">{BUSINESS_INFO.fullAddress}</span>.
             </p>
           </div>
           <div className="flex items-center gap-2.5 shrink-0 text-xs">
@@ -225,7 +200,7 @@ export default async function HomePage() {
               className="px-4 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-[#002B5B] font-bold transition-colors inline-flex items-center gap-1.5"
             >
               <MapPin size={13} className="text-[#008CFF]" />
-              <span>Moulvibazar Hub</span>
+              <span>Moulvibazar Showroom</span>
             </Link>
             <Link
               href="/shop"
@@ -242,16 +217,16 @@ export default async function HomePage() {
           <HeroCarousel banners={banners} />
         </section>
 
-        {/* 2. Status / Operational Strip (Trust Computer MB Style: Rounded-full Pill) */}
-        <section aria-label="Hub Operational Notice">
+        {/* 2. Showroom NAP & Operational Strip */}
+        <section aria-label="Showroom Operational Notice">
           <div className="bg-white rounded-full py-2.5 px-4 sm:px-6 shadow-xs border border-slate-200/90 flex flex-wrap items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="font-bold text-[#002B5B]">
-                Tech Hub Status:
+                Showroom Open:
               </span>
               <span className="text-slate-600 hidden sm:inline">
-                Open Saturday to Thursday (9:30 AM – 9:30 PM). Moulvibazar Operations &amp; Doorstep Delivery.
+                {BUSINESS_INFO.openingHours.display} • {BUSINESS_INFO.address.streetAddress}, {BUSINESS_INFO.address.addressLocality}
               </span>
             </div>
 
@@ -275,9 +250,9 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* 3. 4 Feature / Quick Action Cards (Trust Computer MB Exact 4 Cards) */}
+        {/* 3. 4 Quick Action Cards Focused on Computer & Laptop Buyers */}
         <section aria-label="Quick Action Tools" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Tool 1: Laptop & PC Finder */}
+          {/* Tool 1: Laptop Finder */}
           <Link
             href="/laptops"
             className="group bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs hover:shadow-lg hover:border-[#008CFF] hover:-translate-y-0.5 transition-all flex items-start gap-4"
@@ -287,15 +262,51 @@ export default async function HomePage() {
             </div>
             <div>
               <h3 className="font-bold text-sm text-[#002B5B] group-hover:text-rose-600 transition-colors">
-                Laptop &amp; PC Finder
+                Laptop Finder &amp; Prices
               </h3>
               <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                Find the ideal laptop or computer for study, office, or gaming within your budget.
+                Compare genuine HP, Dell, Lenovo &amp; Apple laptops in Moulvibazar within your budget.
               </p>
             </div>
           </Link>
 
-          {/* Tool 2: Online Order & Delivery Help */}
+          {/* Tool 2: Desktop PCs & Monitors */}
+          <Link
+            href="/computers"
+            className="group bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs hover:shadow-lg hover:border-[#008CFF] hover:-translate-y-0.5 transition-all flex items-start gap-4"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-sky-50 text-[#008CFF] border border-sky-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+              <Monitor size={24} />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-[#002B5B] group-hover:text-[#008CFF] transition-colors">
+                Desktop PCs &amp; Monitors
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                Custom office &amp; workstation desktop builds, HD monitors, and genuine PC parts.
+              </p>
+            </div>
+          </Link>
+
+          {/* Tool 3: 0% Laptop EMI */}
+          <Link
+            href="/laptop-emi"
+            className="group bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs hover:shadow-lg hover:border-[#008CFF] hover:-translate-y-0.5 transition-all flex items-start gap-4"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+              <CreditCard size={24} />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-[#002B5B] group-hover:text-emerald-600 transition-colors">
+                0% Laptop EMI Plans
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                Flexible 3 to 12-month laptop installments in Moulvibazar with easy NID approval.
+              </p>
+            </div>
+          </Link>
+
+          {/* Tool 4: Delivery & Coverage */}
           <Link
             href="/delivery"
             className="group bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs hover:shadow-lg hover:border-[#008CFF] hover:-translate-y-0.5 transition-all flex items-start gap-4"
@@ -308,62 +319,26 @@ export default async function HomePage() {
                 Order &amp; Delivery Help
               </h3>
               <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                Cash on delivery across all 64 districts in Bangladesh with open-box verification.
-              </p>
-            </div>
-          </Link>
-
-          {/* Tool 3: CCTV Setup Calculator */}
-          <Link
-            href="/services/cctv-installation"
-            className="group bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs hover:shadow-lg hover:border-[#008CFF] hover:-translate-y-0.5 transition-all flex items-start gap-4"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-sky-50 text-[#008CFF] border border-sky-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-              <Calculator size={24} />
-            </div>
-            <div>
-              <h3 className="font-bold text-sm text-[#002B5B] group-hover:text-[#008CFF] transition-colors">
-                CCTV Setup Calculator
-              </h3>
-              <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                Estimate cameras, storage, power supply &amp; installation for home or business.
-              </p>
-            </div>
-          </Link>
-
-          {/* Tool 4: Service & Repair Center */}
-          <Link
-            href="/services/electrician"
-            className="group bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs hover:shadow-lg hover:border-[#008CFF] hover:-translate-y-0.5 transition-all flex items-start gap-4"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-              <Wrench size={24} />
-            </div>
-            <div>
-              <h3 className="font-bold text-sm text-[#002B5B] group-hover:text-emerald-600 transition-colors">
-                Service &amp; Repair Center
-              </h3>
-              <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                Laptop chip-level repair, desktop upgrades &amp; certified electrician booking.
+                Same-day Moulvibazar delivery &amp; open-box COD across all 64 districts in BD.
               </p>
             </div>
           </Link>
         </section>
 
-        {/* 4. Featured Categories (Trust Computer MB 7-Column Grid) */}
+        {/* 4. Featured Categories (7-Column Grid) */}
         <section aria-label="Product Categories">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-[#002B5B] tracking-tight">
                 Featured Categories
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">Explore authentic hardware &amp; equipment by category</p>
+              <p className="text-xs text-slate-500 mt-0.5">Explore laptops, desktop computers, monitors &amp; accessories by category</p>
             </div>
             <Link
               href="/laptops"
               className="text-xs font-bold text-[#008CFF] hover:underline flex items-center gap-1"
             >
-              <span>View All Categories</span>
+              <span>View All Laptops</span>
               <ChevronRight size={14} />
             </Link>
           </div>
@@ -392,20 +367,17 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* 5. Dual Promotional Campaign Banners Grid (Desktop only - consolidated into single hero carousel on mobile) */}
+        {/* 5. Dual Promotional Campaign Banners Grid */}
         <section aria-label="Special Offers and Campaigns" className="hidden md:grid md:grid-cols-2 gap-3 sm:gap-4">
           {/* Promo Card 1: Laptop EMI */}
           <div className="relative rounded-2xl overflow-hidden min-h-[160px] sm:min-h-[180px] flex flex-col justify-between p-4 sm:p-5 border border-blue-200/90 shadow-md group transition-all bg-gradient-to-br from-[#EAF4FF] via-white to-sky-50">
-            {/* Background Image with Hover Scale & Soft Light Blend */}
             <div
               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none opacity-20"
               style={{ backgroundImage: "url('/banners/laptop-emi-promo-banner.jpg')" }}
             />
-            {/* Luminous Light Vignette Overlay */}
             <div className="absolute inset-0 bg-gradient-to-tr from-white/95 via-white/80 to-[#EAF4FF]/40 pointer-events-none" />
             <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform" />
 
-            {/* Content Top */}
             <div className="relative z-10 space-y-1 sm:space-y-1.5">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#008CFF]/15 text-[#008CFF] border border-blue-300/60 uppercase tracking-wider">
                 <CreditCard size={12} className="text-[#008CFF]" />
@@ -415,11 +387,10 @@ export default async function HomePage() {
                 Up to 12 Months 0% Interest Laptop EMI
               </h3>
               <p className="text-[11px] sm:text-xs text-slate-600 leading-snug max-w-sm line-clamp-2">
-                Own genuine HP, Dell &amp; Lenovo laptops with easy monthly credit card installments. Instant showroom eligibility check.
+                Own genuine HP, Dell &amp; Lenovo laptops in Moulvibazar with easy monthly installments and instant eligibility review.
               </p>
             </div>
 
-            {/* Content Bottom CTA */}
             <div className="relative z-10 pt-2 flex items-center justify-between">
               <Link
                 href="/laptop-emi"
@@ -429,23 +400,20 @@ export default async function HomePage() {
                 <ArrowRight size={13} />
               </Link>
               <span className="text-[10px] font-semibold text-slate-600 bg-white border border-slate-200 px-2.5 py-0.5 rounded-md shadow-2xs hidden sm:inline-block">
-                18+ Partner Banks
+                NID + Local Guarantor
               </span>
             </div>
           </div>
 
           {/* Promo Card 2: Wi-Fi 6 & Enterprise Networking */}
           <div className="relative rounded-2xl overflow-hidden min-h-[160px] sm:min-h-[180px] flex flex-col justify-between p-4 sm:p-5 border border-cyan-200/90 shadow-md group transition-all bg-gradient-to-br from-cyan-50/70 via-white to-[#EAF4FF]">
-            {/* Background Image with Hover Scale */}
             <div
               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none opacity-20"
               style={{ backgroundImage: "url('/banners/wifi-networking-banner.jpg')" }}
             />
-            {/* Luminous Light Vignette Overlay */}
             <div className="absolute inset-0 bg-gradient-to-tr from-white/95 via-white/80 to-cyan-50/40 pointer-events-none" />
             <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform" />
 
-            {/* Content Top */}
             <div className="relative z-10 space-y-1 sm:space-y-1.5">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-cyan-100 text-cyan-800 border border-cyan-300 uppercase tracking-wider">
                 <Wifi size={12} className="text-cyan-700" />
@@ -455,11 +423,10 @@ export default async function HomePage() {
                 Ultra-Fast Wi-Fi 6 &amp; Structured Mesh
               </h3>
               <p className="text-[11px] sm:text-xs text-slate-600 leading-snug max-w-sm line-clamp-2">
-                Eliminate Wi-Fi dead spots with dual-band gigabit routers, PoE switches, and commercial Cat6 cabling setup.
+                Eliminate Wi-Fi dead spots with dual-band gigabit routers, PoE switches, and router mini UPS units.
               </p>
             </div>
 
-            {/* Content Bottom CTA */}
             <div className="relative z-10 pt-2 flex items-center justify-between">
               <Link
                 href="/networking"
@@ -475,174 +442,83 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* 6. Products Showcase with Interactive Tabs (Trust Computer Style) */}
+        {/* 6. Products Showcase with Interactive Tabs */}
         <section aria-label="Featured Products">
           <ProductTabsShowcase products={mappedProducts} />
         </section>
 
-        {/* 7. Dedicated Electrical & Technical Services Section */}
-        <section aria-label="Electrical & Technical Services" className="space-y-4">
+        {/* 7. Moulvibazar Computer & Laptop Showroom Advantage */}
+        <section aria-label="Moulvibazar Computer Store Advantage" className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <div>
               <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#008CFF] uppercase tracking-wider mb-1">
-                <Wrench size={13} />
-                <span>On-Site Engineering &amp; Repair Center</span>
+                <ShieldCheck size={13} />
+                <span>Moulvibazar&apos;s Trusted Computer &amp; Laptop Store</span>
               </div>
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#002B5B] tracking-tight">
-                Dedicated Electrical &amp; Technical Services
+                Genuine Hardware, Warranty &amp; Local Support in Moulvibazar
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Certified technicians and electricians providing doorstep diagnostics, installations, and repairs across Moulvibazar.
+                Every laptop, desktop PC, and monitor is tested in-house before dispatch from {BUSINESS_INFO.address.streetAddress}, Moulvibazar.
               </p>
             </div>
             <Link
-              href="/services"
+              href="/moulvibazar"
               className="text-xs font-bold text-[#008CFF] hover:underline flex items-center gap-1 self-start sm:self-auto shrink-0"
             >
-              <span>Explore All Technical Services</span>
+              <span>Visit Moulvibazar Local Hub</span>
               <ChevronRight size={14} />
             </Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Service 1: Certified Electrician */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 hover:border-amber-400 p-5 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all flex flex-col justify-between group">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/70 flex items-center justify-center mb-3.5 group-hover:scale-110 transition-transform">
-                  <Zap size={24} />
-                </div>
-                <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60 uppercase tracking-wide inline-block mb-1.5">
-                  Moulvibazar Town &amp; Upazilas
-                </span>
-                <h3 className="font-bold text-sm text-[#002B5B] group-hover:text-amber-600 transition-colors">
-                  Certified Electrician &amp; Wiring
-                </h3>
-                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                  Residential and commercial wiring, short-circuit diagnostics, MCB circuit breakers, and distribution balance.
-                </p>
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-[#EAF4FF] text-[#008CFF] flex items-center justify-center">
+                <CheckCircle2 size={20} />
               </div>
-              <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                <Link
-                  href="/services/electrician"
-                  className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-1 shadow-xs transition-all active:scale-95"
-                >
-                  <span>Book Electrician</span>
-                  <ArrowRight size={12} />
-                </Link>
-                <a
-                  href={`tel:${BUSINESS_INFO.phoneClean}`}
-                  className="p-1.5 rounded-xl bg-[#F4F6F8] hover:bg-amber-50 text-slate-700 hover:text-amber-600 border border-slate-200 transition-colors"
-                  title="Call Technician"
-                >
-                  <Phone size={14} />
-                </a>
-              </div>
+              <h3 className="font-bold text-sm text-[#002B5B]">24-Point Hardware Diagnostics</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Every HP, Dell, and Lenovo laptop passes battery, display, SSD, RAM, keyboard, and thermal stress checks.
+              </p>
             </div>
 
-            {/* Service 2: CCTV Camera Setup */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 hover:border-cyan-400 p-5 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all flex flex-col justify-between group">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 border border-cyan-200/70 flex items-center justify-center mb-3.5 group-hover:scale-110 transition-transform">
-                  <Camera size={24} />
-                </div>
-                <span className="text-[10px] font-bold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-full border border-cyan-200/60 uppercase tracking-wide inline-block mb-1.5">
-                  Hikvision &amp; Dahua Setup
-                </span>
-                <h3 className="font-bold text-sm text-[#002B5B] group-hover:text-cyan-600 transition-colors">
-                  CCTV Camera Installation
-                </h3>
-                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                  Turnkey HD &amp; IP surveillance, DVR/NVR hard disk storage setup, and live mobile phone surveillance configuration.
-                </p>
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <ShieldCheck size={20} />
               </div>
-              <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                <Link
-                  href="/services/cctv-installation"
-                  className="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs flex items-center gap-1 shadow-xs transition-all active:scale-95"
-                >
-                  <span>Book CCTV Setup</span>
-                  <ArrowRight size={12} />
-                </Link>
-                <a
-                  href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=Hello%20NEED%20ELECTRO%2C%20I%20need%20a%20CCTV%20installation%20quotation.`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-1.5 rounded-xl bg-[#F4F6F8] hover:bg-emerald-50 text-slate-700 hover:text-emerald-600 border border-slate-200 transition-colors"
-                  title="WhatsApp Quotation"
-                >
-                  <MessageCircle size={14} />
-                </a>
-              </div>
+              <h3 className="font-bold text-sm text-[#002B5B]">7-Day Replacement &amp; 2-Year Service</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Transparent warranty protection handled locally at our Moulvibazar servicing lab with genuine parts.
+              </p>
             </div>
 
-            {/* Service 3: Laptop & Computer Repair Lab */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 hover:border-[#008CFF] p-5 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all flex flex-col justify-between group">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-[#EAF4FF] text-[#008CFF] border border-blue-200/70 flex items-center justify-center mb-3.5 group-hover:scale-110 transition-transform">
-                  <Laptop size={24} />
-                </div>
-                <span className="text-[10px] font-bold text-[#008CFF] bg-[#EAF4FF] px-2 py-0.5 rounded-full border border-blue-200/60 uppercase tracking-wide inline-block mb-1.5">
-                  Hardware &amp; Chip-Level
-                </span>
-                <h3 className="font-bold text-sm text-[#002B5B] group-hover:text-[#008CFF] transition-colors">
-                  Laptop &amp; PC Servicing Lab
-                </h3>
-                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                  Motherboard micro-soldering, SSD &amp; RAM speed upgrades, thermal paste replacement, and genuine OS tuning.
-                </p>
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
+                <Truck size={20} />
               </div>
-              <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                <Link
-                  href="/services/laptop-computer-repair"
-                  className="px-3 py-1.5 rounded-xl bg-[#008CFF] hover:bg-[#0070cc] text-white font-bold text-xs flex items-center gap-1 shadow-xs transition-all active:scale-95"
-                >
-                  <span>Book Repair Lab</span>
-                  <ArrowRight size={12} />
-                </Link>
-                <a
-                  href={`tel:${BUSINESS_INFO.phoneClean}`}
-                  className="p-1.5 rounded-xl bg-[#F4F6F8] hover:bg-blue-50 text-slate-700 hover:text-[#008CFF] border border-slate-200 transition-colors"
-                  title="Call Hotline"
-                >
-                  <Phone size={14} />
-                </a>
-              </div>
+              <h3 className="font-bold text-sm text-[#002B5B]">All 7 Moulvibazar Upazilas Covered</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Fast local delivery to Moulvibazar Sadar, Sreemangal, Kulaura, Rajnagar, Kamalganj, Juri &amp; Barlekha.
+              </p>
             </div>
 
-            {/* Service 4: Enterprise Networking & Wi-Fi 6 */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 hover:border-indigo-400 p-5 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all flex flex-col justify-between group">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-200/70 flex items-center justify-center mb-3.5 group-hover:scale-110 transition-transform">
-                  <Wifi size={24} />
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between space-y-3">
+              <div className="space-y-2">
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                  <Wrench size={20} />
                 </div>
-                <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200/60 uppercase tracking-wide inline-block mb-1.5">
-                  Home, Office &amp; Retail
-                </span>
-                <h3 className="font-bold text-sm text-[#002B5B] group-hover:text-indigo-600 transition-colors">
-                  Wi-Fi &amp; Structured Networking
-                </h3>
-                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                  Cat6 structured cabling, dual-band Wi-Fi 6 mesh setup, Gigabit switches, and complete dead-zone elimination.
+                <h3 className="font-bold text-sm text-[#002B5B]">Repair, CCTV &amp; Technical Services</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Need chip-level laptop repair, SSD upgrades, CCTV installation, or electrical services? Book on our dedicated portal.
                 </p>
               </div>
-              <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                <Link
-                  href="/services/networking"
-                  className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1 shadow-xs transition-all active:scale-95"
-                >
-                  <span>Book Networking</span>
-                  <ArrowRight size={12} />
-                </Link>
-                <a
-                  href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=Hello%20NEED%20ELECTRO%2C%20I%20need%20a%20Wi-Fi%20or%20office%20networking%20setup.`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-1.5 rounded-xl bg-[#F4F6F8] hover:bg-emerald-50 text-slate-700 hover:text-emerald-600 border border-slate-200 transition-colors"
-                  title="WhatsApp Inquiries"
-                >
-                  <MessageCircle size={14} />
-                </a>
-              </div>
+              <Link
+                href="/services"
+                className="text-xs font-bold text-[#008CFF] hover:underline inline-flex items-center gap-1"
+              >
+                <span>Open Technical Services Hub</span>
+                <ArrowRight size={12} />
+              </Link>
             </div>
           </div>
         </section>
@@ -652,128 +528,13 @@ export default async function HomePage() {
           <BusinessUpdatesFeed updates={galleryUpdates} />
         )}
 
-        {/* 8. Full-Width Solar Inverter & Emergency IPS Power Banner (Desktop only - consolidated into single hero carousel on mobile) */}
-        <section aria-label="Solar and IPS Power Solutions" className="hidden md:block">
-          <div className="relative rounded-2xl overflow-hidden border border-amber-200/90 shadow-md p-4 sm:p-6 lg:p-7 group bg-gradient-to-r from-[#EAF4FF] via-white to-amber-50/60">
-            {/* Background Solar IPS Banner Image with Zoom */}
-            <div
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none opacity-20"
-              style={{ backgroundImage: "url('/banners/solar-ips-power-banner.jpg')" }}
-            />
-            {/* High-Contrast Luminous Gradient Backdrop */}
-            <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/85 to-white/50 pointer-events-none" />
-            <div className="absolute -right-10 top-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-center relative z-10">
-              <div className="lg:col-span-8 space-y-2 sm:space-y-3">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300 backdrop-blur-md">
-                  <Sun size={13} className="text-amber-600" />
-                  <span>24/7 Load-Shedding Solution — Pure Sine Wave Solar &amp; IPS Systems</span>
-                </div>
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#002B5B] tracking-tight leading-tight">
-                  Uninterrupted Power for Your Home, Office &amp; Lab
-                </h2>
-                <p className="text-xs sm:text-[13px] text-slate-600 max-w-2xl leading-relaxed">
-                  Heavy-duty pure sine wave inverters, deep-cycle tubular batteries, and hybrid solar installations by certified engineers. Auto-switchover ensures zero reboot downtime for laptops, CCTV, and servers.
-                </p>
-
-                {/* Highlights */}
-                <div className="flex flex-wrap gap-1.5 pt-0.5 text-[10px] sm:text-[11px] text-slate-700">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white border border-slate-200 shadow-2xs">
-                    <CheckCircle2 size={12} className="text-emerald-600" /> 100% Pure Sine Wave
-                  </span>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white border border-slate-200 shadow-2xs">
-                    <CheckCircle2 size={12} className="text-emerald-600" /> Up to 36 Months Battery Warranty
-                  </span>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white border border-slate-200 shadow-2xs">
-                    <CheckCircle2 size={12} className="text-emerald-600" /> On-site Setup Across Bangladesh
-                  </span>
-                </div>
-
-                <div className="flex flex-wrap gap-2.5 pt-1.5">
-                  <Link
-                    href="/electrical-products"
-                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs transition-all shadow-md shadow-amber-500/25 active:scale-95"
-                  >
-                    Explore IPS &amp; Solar Packages
-                  </Link>
-                  <Link
-                    href="/services/electrician"
-                    className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-[#002B5B] font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5"
-                  >
-                    <Wrench size={13} className="text-amber-600" />
-                    <span>Book Installation Engineer</span>
-                  </Link>
-                  <a
-                    href={`tel:${BUSINESS_INFO.phoneClean}`}
-                    className="px-3.5 py-2 rounded-xl bg-[#EAF4FF] hover:bg-blue-100 border border-blue-200 text-[#008CFF] font-semibold text-xs transition-colors flex items-center gap-1.5"
-                  >
-                    <Phone size={13} className="text-[#008CFF]" />
-                    <span>Call Hotline: {BUSINESS_INFO.phone}</span>
-                  </a>
-                </div>
-              </div>
-
-              {/* Right Column Quick Packages Box */}
-              <div className="lg:col-span-4 bg-white/95 border border-slate-200/90 rounded-xl p-4 backdrop-blur-md space-y-2.5 shadow-md">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                  <span className="text-[11px] font-bold text-[#002B5B] uppercase tracking-wider flex items-center gap-1.5">
-                    <Zap size={13} className="text-amber-500" /> Power Capacity Guide
-                  </span>
-                  <span className="text-[9px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">
-                    In Stock
-                  </span>
-                </div>
-                <div className="space-y-2 text-xs text-slate-700">
-                  <div className="flex items-center justify-between py-0.5 border-b border-slate-100">
-                    <div>
-                      <div className="font-bold text-[#002B5B] text-xs">Home 600VA – 800VA</div>
-                      <div className="text-[10px] text-slate-500">4 Fans + 6 LED Lights</div>
-                    </div>
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
-                      Economical
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between py-0.5 border-b border-slate-100">
-                    <div>
-                      <div className="font-bold text-[#002B5B] text-xs">Office 1000VA – 1500VA</div>
-                      <div className="text-[10px] text-slate-500">Laptops, Wi-Fi &amp; CCTV Wall</div>
-                    </div>
-                    <span className="text-[10px] font-bold text-[#008CFF] bg-[#EAF4FF] border border-blue-200 px-1.5 py-0.5 rounded">
-                      Standard
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between py-0.5">
-                    <div>
-                      <div className="font-bold text-[#002B5B] text-xs">Commercial 2.5kVA+ Hybrid</div>
-                      <div className="text-[10px] text-slate-500">Full Solar Integration</div>
-                    </div>
-                    <span className="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
-                      Heavy-Duty
-                    </span>
-                  </div>
-                </div>
-                <a
-                  href={`https://wa.me/${BUSINESS_INFO.whatsappClean}?text=Hello%20NEED%20ELECTRO,%20I%20am%20interested%20in%20an%20IPS%20or%20Solar%20package`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all active:scale-95"
-                >
-                  <MessageCircle size={13} />
-                  <span>Get Free WhatsApp Consultation</span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* 9. Authorized Global Brands Showcase */}
         <section aria-label="Featured Brands">
           <div className="text-center max-w-xl mx-auto mb-4">
             <h2 className="text-lg sm:text-xl font-bold text-[#002B5B]">
               Authentic Global Brands We Supply
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">Official manufacturer warranty on all serialized products</p>
+            <p className="text-xs text-slate-500 mt-0.5">Official warranty on laptops, desktop PCs, monitors &amp; accessories</p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 sm:gap-3">
@@ -794,23 +555,30 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* 10. Operational Base & Nationwide Marketplace */}
-        <section aria-label="Operational Base & Delivery" className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">
+        {/* 10. Showroom NAP & Nationwide Delivery */}
+        <section aria-label="Moulvibazar Showroom & Delivery" className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
             <div className="space-y-2 md:col-span-2">
               <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#008CFF] bg-[#EAF4FF] border border-blue-200/70 px-2.5 py-0.5 rounded-full">
                 <MapPin size={13} />
-                <span>Operational Base in Moulvibazar, Bangladesh</span>
+                <span>{BUSINESS_INFO.fullAddress}</span>
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-[#002B5B]">
-                Trusted Online Marketplace with Certified Support
+                Computer, Laptop, Desktop PC &amp; Accessories in Moulvibazar
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl">
-                Order authentic HP, Dell, and Lenovo laptops, custom desktop PCs, CCTV cameras, and electrical equipment online with verified warranty, open-box courier delivery, and technical assistance across all 64 districts in Bangladesh.
+                Visit or order online from NEED ELECTRO for genuine HP, Dell, and Lenovo laptops, custom desktop PCs, HD monitors, and computer accessories with official warranty and open-box courier delivery across Moulvibazar and all 64 districts in Bangladesh.
               </p>
-              <p className="text-xs font-semibold text-[#002B5B] flex items-center gap-2 pt-1">
-                <Truck size={14} className="text-[#008CFF]" />
-                <span>Nationwide Courier Delivery • Express Local Technician Dispatch</span>
+              <p className="text-xs font-semibold text-[#002B5B] flex flex-wrap items-center gap-x-3 gap-y-1 pt-1">
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock size={14} className="text-[#008CFF]" />
+                  <span>{BUSINESS_INFO.openingHours.display}</span>
+                </span>
+                <span className="text-slate-300 hidden sm:inline">•</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Truck size={14} className="text-[#008CFF]" />
+                  <span>Same-Day Moulvibazar Delivery &amp; 64-District COD</span>
+                </span>
               </p>
             </div>
 
@@ -823,10 +591,10 @@ export default async function HomePage() {
                 <span>Call Hotline: {BUSINESS_INFO.phone}</span>
               </a>
               <Link
-                href="/contact"
+                href="/moulvibazar"
                 className="w-full py-3 px-4 rounded-xl border border-slate-300 hover:bg-slate-50 text-[#002B5B] font-bold text-xs text-center transition-colors"
               >
-                Customer Support Details
+                Moulvibazar Showroom &amp; FAQ
               </Link>
             </div>
           </div>

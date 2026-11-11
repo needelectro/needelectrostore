@@ -51,32 +51,7 @@ export default function AboutPage() {
     description:
       'Discover NEED ELECTRO in Bangladesh, founded by Amdadur Rahman, offering electrical products, laptops, CCTV solutions, technical services and software.',
     mainEntity: {
-      '@type': 'Organization',
       '@id': `${BUSINESS_INFO.domain}/#organization`,
-      name: 'NEED ELECTRO',
-      alternateName: 'NEED ELECTRO STORE',
-      legalName: 'NEED ELECTRO',
-      tagline: 'Trusted Electrical and Technological Solutions',
-      founder: {
-        '@type': 'Person',
-        name: 'Amdadur Rahman',
-        jobTitle: 'Founder & CEO',
-      },
-      parentOrganization: {
-        '@type': 'Organization',
-        name: 'AMDADS GROUP',
-      },
-      url: BUSINESS_INFO.domain,
-      logo: `${BUSINESS_INFO.domain}/logo-icon.png`,
-      email: 'needelectro23@gmail.com',
-      telephone: '+8801733983752',
-      address: {
-        '@type': 'PostalAddress',
-        addressLocality: BUSINESS_INFO.address.addressLocality,
-        addressRegion: BUSINESS_INFO.address.addressRegion,
-        postalCode: BUSINESS_INFO.address.postalCode,
-        addressCountry: 'BD',
-      },
     },
   };
 
@@ -99,7 +74,7 @@ export default function AboutPage() {
             </span>
             <span className="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 px-3.5 py-1 rounded-full text-xs font-semibold">
               <Building2 size={13} />
-              <span>Operational Base: Moulvibazar, Bangladesh</span>
+              <span>Showroom: Central Road, Moulvibazar, Bangladesh</span>
             </span>
           </div>
 
@@ -158,7 +133,7 @@ export default function AboutPage() {
               Our tagline, <strong>“Trusted Electrical and Technological Solutions,”</strong> reflects our core commitment to connecting verified, reliable electrical engineering with state-of-the-art technological hardware and modern software. We are building an integrated platform where customers can browse high-grade electrical components, purchase laptops and desktop computers, deploy CCTV security systems, request on-site technical services, and commission software development solutions through one convenient digital hub.
             </p>
             <p>
-              With our operational base in Moulvibazar, Bangladesh, NEED ELECTRO serves clients locally across Sylhet Division and nationwide through our online marketplace, verified courier delivery, and certified technician network. Product delivery and on-site technical services depend on product availability, delivery coverage, service location, and operational capacity.
+              From our showroom at {BUSINESS_INFO.fullAddress}, NEED ELECTRO serves clients locally across Sylhet Division and nationwide through our online storefront, verified courier delivery, and certified technician network. Product delivery and on-site technical services depend on product availability, delivery coverage, service location, and operational capacity.
             </p>
             <p className="font-semibold text-slate-900 dark:text-white bg-blue-50/70 dark:bg-blue-950/40 p-4 rounded-2xl border border-blue-200/70 dark:border-blue-900/50">
               💡 <strong>Our Primary Objective:</strong> To simplify how people find technology products, maintain electrical systems, enhance premises security, and adopt modern digital solutions for everyday life and business growth.
@@ -782,9 +757,9 @@ export default function AboutPage() {
             </div>
 
             <div className="p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-1">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Operational Base</span>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Showroom Address</span>
               <span className="font-semibold text-slate-800 dark:text-slate-200">
-                {BUSINESS_INFO.address.addressLocality}, {BUSINESS_INFO.address.addressRegion} - {BUSINESS_INFO.address.postalCode}, Bangladesh.
+                {BUSINESS_INFO.fullAddress}
               </span>
             </div>
 
@@ -796,7 +771,7 @@ export default function AboutPage() {
               >
                 +880 1733-983752
               </a>
-              <p className="text-[11px] text-slate-500">Sat – Thu: 9:30 AM – 9:30 PM</p>
+              <p className="text-[11px] text-slate-500">Sat – Thu: 9:30 AM – 9:30 PM (Friday Closed)</p>
             </div>
 
             <div className="p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-1">

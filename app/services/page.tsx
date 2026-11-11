@@ -4,7 +4,6 @@ import Link from 'next/link';
 import {
   BUSINESS_INFO,
   generateSeoMetadata,
-  buildBreadcrumbSchema,
   buildServiceSchema
 } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
@@ -108,7 +107,6 @@ const SERVICES_LIST = [
 
 export default function ServicesHubPage() {
   const breadcrumbs = [{ name: 'Services', path: '/services' }];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
 
   const serviceSchema = buildServiceSchema({
     name: 'NEED ELECTRO Technical & Engineering Services',
@@ -120,10 +118,6 @@ export default function ServicesHubPage() {
 
   return (
     <div className="min-h-screen bg-[#F4F6F8] text-[#002B5B] flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}

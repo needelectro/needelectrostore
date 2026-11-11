@@ -47,7 +47,7 @@ export async function GET() {
         ? p.imageUrl.startsWith('http')
           ? p.imageUrl
           : `${domain}${p.imageUrl}`
-        : `${domain}/logo-dark-transparent.png`;
+        : `${domain}/og-store-banner.jpg`;
 
       const isRefurbished =
         p.name.toLowerCase().includes('refurbished') ||

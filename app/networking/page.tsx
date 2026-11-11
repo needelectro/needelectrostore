@@ -1,32 +1,34 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema, buildItemListSchema, slugify } from '@/lib/seoConfig';
+import {
+  BUSINESS_INFO,
+  generateSeoMetadata,
+  buildItemListSchema,
+  getProductUrlPath,
+  isLowQualityOrHotlinkedImage,
+} from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
 import { ProductCard } from '@/src/components/customer/ProductCard';
-import { Wifi, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Wifi } from 'lucide-react';
 
 export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Networking Products & Routers | NEED ELECTRO',
+    title: 'Wi-Fi Routers & Networking Shop in Moulvibazar | NEED ELECTRO',
     description:
-      'Shop Wi-Fi routers, Gigabit switches, ONU fiber modems, and networking gear at NEED ELECTRO Bangladesh. Reliable connectivity equipment.',
+      'Shop Wi-Fi 6 routers, Gigabit switches, ONU fiber modems & router mini UPS in Moulvibazar at NEED ELECTRO. Reliable home & office networking gear.',
     path: '/networking',
     keywords: [
-      'Networking and Wi-Fi installation',
-      'Networking products in Moulvibazar',
       'Router & Networking price in Moulvibazar',
-      'WiFi router price in Bangladesh',
+      'Networking products in Moulvibazar',
       'WiFi router in Moulvibazar',
-      'Router price Moulvibazar',
+      'WiFi router price in Bangladesh',
       'Tenda router Moulvibazar',
-      'Gigabit switch Moulvibazar',
       'WGP mini UPS price in Bangladesh',
-      'Marsiva mini UPS Moulvibazar',
       'রাউটার দাম বাংলাদেশ',
       'মৌলভীবাজার রাউটার',
     ],
@@ -70,14 +72,15 @@ export default async function NetworkingPage() {
   }
 
   const breadcrumbs = [{ name: 'Networking Products', path: '/networking' }];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
+  const cleanNet = products.filter((p) => !isLowQualityOrHotlinkedImage(p.imageUrl));
+  const itemListSource = cleanNet.length > 0 ? cleanNet : products;
   const networkingItemListSchema = buildItemListSchema({
-    name: 'Networking Products & Wi-Fi Routers in Bangladesh',
+    name: 'Networking Products & Wi-Fi Routers in Moulvibazar',
     description: 'High-speed dual-band routers, Gigabit switches, ONU modems, and network accessories at NEED ELECTRO Store.',
     path: '/networking',
-    items: products.slice(0, 30).map(p => ({
+    items: itemListSource.slice(0, 30).map((p) => ({
       name: p.name,
-      url: `/product/${slugify(p.name)}-${p.sku.toLowerCase()}`,
+      url: getProductUrlPath(p.name, p.sku),
       image: p.imageUrl || undefined,
       price: Number(p.retailPrice) || undefined,
     })),
@@ -85,10 +88,6 @@ export default async function NetworkingPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       {networkingItemListSchema && (
         <script
           type="application/ld+json"

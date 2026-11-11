@@ -1,37 +1,36 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema, buildItemListSchema } from '@/lib/seoConfig';
+import {
+  BUSINESS_INFO,
+  generateSeoMetadata,
+  buildItemListSchema,
+  getProductUrlPath,
+  isLowQualityOrHotlinkedImage,
+} from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
 import { ProductCard } from '@/src/components/customer/ProductCard';
-import { Cpu, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Cpu } from 'lucide-react';
 
 export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
-    title: 'Gadget & Accessories Shop in Moulvibazar | NEED ELECTRO',
+    title: 'Computer Accessories Shop in Moulvibazar | NEED ELECTRO',
     description:
-      'Top gadget & computer accessories shop in Moulvibazar. High-speed NVMe SSDs, RAM, gaming mice, keyboards & adapters with warranty at NEED ELECTRO.',
+      'Computer accessories shop in Moulvibazar. NVMe SSDs, DDR4/DDR5 RAM, Logitech mice, mechanical keyboards, hubs & chargers at NEED ELECTRO.',
     path: '/computer-accessories',
     keywords: [
       'Computer accessories in Moulvibazar',
       'Computer accessories Moulvibazar',
-      'Gadget shop in Moulvibazar',
-      'Computer accessories in Bangladesh',
-      'Tech gadgets in Moulvibazar',
       'SSD price Moulvibazar',
-      'Printer price Moulvibazar',
       'RAM upgrade Moulvibazar',
       'Laptop charger Moulvibazar',
       'Keyboard and mouse Moulvibazar',
       'Logitech mouse price in Moulvibazar',
-      'A4Tech keyboard Moulvibazar',
-      'NVMe SSD price Bangladesh',
       'মৌলভীবাজার কম্পিউটার এক্সেসরিজ',
-      'কম্পিউটার এক্সেসরিজ বাংলাদেশ',
     ],
   });
 }
@@ -77,15 +76,17 @@ export default async function ComputerAccessoriesPage() {
   }
 
   const breadcrumbs = [{ name: 'Computer Accessories', path: '/computer-accessories' }];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
+
+  const cleanAcc = products.filter((item) => !isLowQualityOrHotlinkedImage(item.imageUrl));
+  const itemListSource = cleanAcc.length > 0 ? cleanAcc : products;
 
   const accessoriesItemListSchema = buildItemListSchema({
-    name: 'Computer Accessories & PC Peripherals in Bangladesh — NEED ELECTRO Store',
+    name: 'Computer Accessories & PC Peripherals in Moulvibazar — NEED ELECTRO Store',
     description: 'High-speed NVMe SSDs, DDR4/DDR5 RAM, precision mice, mechanical keyboards, hubs and adapters in Moulvibazar.',
     url: '/computer-accessories',
-    items: products.map((item) => ({
+    items: itemListSource.slice(0, 30).map((item) => ({
       name: item.name,
-      url: `/product/${item.name ? item.name.toLowerCase().replace(/[\s\W-]+/g, '-') : 'accessory'}-${item.sku.toLowerCase()}`,
+      url: getProductUrlPath(item.name, item.sku),
       image: item.imageUrl,
       price: Number(item.retailPrice),
       brand: item.brand,
@@ -95,10 +96,6 @@ export default async function ComputerAccessoriesPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(accessoriesItemListSchema) }}
@@ -127,7 +124,7 @@ export default async function ComputerAccessoriesPage() {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 sm:mb-8">
           <div>
             <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Accessories & Upgrade Components in Stock</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Visit our Kusumbag showroom for free laptop RAM & SSD installation</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Visit our {BUSINESS_INFO.address.streetAddress}, Moulvibazar showroom for free laptop RAM &amp; SSD installation</p>
           </div>
           <span className="text-xs font-mono bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 shadow-xs">
             {products.length} Products Found

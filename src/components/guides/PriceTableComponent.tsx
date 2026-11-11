@@ -124,7 +124,7 @@ export const PriceTableComponent: React.FC<PriceTableProps> = ({
       </div>
 
       <div className="p-3 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row justify-between items-center gap-2">
-        <span>* Verified prices apply to physical stock at NEED ELECTRO Kusumbag, Moulvibazar.</span>
+        <span>* Verified prices apply to physical stock at NEED ELECTRO, Central Road, Moulvibazar.</span>
         <span>Nationwide courier delivery with open-box verification across Bangladesh.</span>
       </div>
     </div>

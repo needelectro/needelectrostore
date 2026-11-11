@@ -823,7 +823,7 @@ export const CustomerHeader: React.FC = () => {
                 <span>Call Hotline: {BUSINESS_INFO.phone}</span>
               </a>
               <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
-                <span>📍 Kusumbag, Moulvibazar</span>
+                <span>📍 Central Road, Moulvibazar</span>
                 <Link
                   href="/admin"
                   onClick={() => setMobileMenuOpen(false)}

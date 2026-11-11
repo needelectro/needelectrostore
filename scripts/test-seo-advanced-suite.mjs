@@ -31,9 +31,13 @@ async function runTestSuite() {
   // Dynamically import SEO helper modules
   const {
     BUSINESS_INFO,
+    DEFAULT_OG_IMAGE,
     getCanonicalUrl,
     slugify,
     generateSeoMetadata,
+    resolveCleanImageUrl,
+    isLowQualityOrHotlinkedImage,
+    buildGlobalSiteGraphSchema,
     buildOrganizationSchema,
     buildWebSiteSchema,
     buildLocalBusinessSchema,
@@ -147,7 +151,7 @@ async function runTestSuite() {
 
   const localBizSchema = buildLocalBusinessSchema();
   const isLocalBizValid =
-    localBizSchema['@type'] === 'OnlineStore' ||
+    localBizSchema['@type'] === 'ComputerStore' ||
     localBizSchema['@type'] === 'LocalBusiness' ||
     (Array.isArray(localBizSchema['@type']) && localBizSchema['@type'].includes('ComputerStore'));
   assert(
@@ -155,8 +159,26 @@ async function runTestSuite() {
     'Local business / ComputerStore schema type is valid'
   );
   assert(
-    localBizSchema.address && localBizSchema.address.addressLocality === 'Moulvibazar',
-    'LocalBusiness address correctly identifies Moulvibazar'
+    localBizSchema.address &&
+      localBizSchema.address.addressLocality === 'Moulvibazar' &&
+      /Central Road/i.test(localBizSchema.address.streetAddress || ''),
+    'LocalBusiness address correctly identifies Central Road, Moulvibazar'
+  );
+
+  const globalGraph = buildGlobalSiteGraphSchema();
+  const graphNodes = Array.isArray(globalGraph['@graph']) ? globalGraph['@graph'] : [];
+  assert(
+    graphNodes.filter((n) => n['@type'] === 'Organization').length === 1 &&
+      graphNodes.filter((n) => n['@type'] === 'ComputerStore').length === 1 &&
+      graphNodes.filter((n) => n['@type'] === 'WebSite').length === 1,
+    'Global JSON-LD @graph contains exactly one Organization, ComputerStore, and WebSite'
+  );
+  assert(
+    DEFAULT_OG_IMAGE === '/og-store-banner.jpg' &&
+      resolveCleanImageUrl('/logo-dark-transparent.png') === 'https://www.needelectro.store/og-store-banner.jpg' &&
+      resolveCleanImageUrl('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTest') ===
+        'https://www.needelectro.store/og-store-banner.jpg',
+    'Clean OG banner default and hotlink/transparent logo sanitization active'
   );
 
   const productSchema = buildProductSchema({
@@ -261,6 +283,8 @@ async function runTestSuite() {
       name: true,
       sku: true,
       category: true,
+      imageUrl: true,
+      images: true,
       retailPrice: true,
       currentStock: true,
       status: true,
@@ -269,6 +293,20 @@ async function runTestSuite() {
   });
 
   assert(products.length > 0, `Database contains ${products.length} products`);
+
+  const activePublished = products.filter(
+    (p) => p.isPublished && (p.status === 'ACTIVE' || p.status === 'OUT_OF_STOCK')
+  );
+  const badImages = activePublished.filter((p) => {
+    if (isLowQualityOrHotlinkedImage(p.imageUrl)) return true;
+    const gallery = Array.isArray(p.images) ? p.images : [];
+    return gallery.some((g) => typeof g === 'string' && g.trim() && isLowQualityOrHotlinkedImage(g));
+  });
+  assert(
+    badImages.length === 0,
+    `All ${activePublished.length} active published products have clean non-hotlinked images`,
+    badImages.map((p) => `${p.sku}:${p.imageUrl}`).join(', ')
+  );
 
   const skuSet = new Set();
   let duplicateSkus = 0;
@@ -300,6 +338,8 @@ async function runTestSuite() {
     { from: '/cctv-camera', to: '/cctv' },
     { from: '/installments', to: '/laptop-emi' },
     { from: '/moulvibazar-laptop', to: '/moulvibazar' },
+    { from: '/computer-shop-moulvibazar', to: '/moulvibazar' },
+    { from: '/laptop-shop-moulvibazar', to: '/moulvibazar' },
   ];
 
   testRedirects.forEach(r => {

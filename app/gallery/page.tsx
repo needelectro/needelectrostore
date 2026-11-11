@@ -2,7 +2,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema } from '@/lib/seoConfig';
+import { BUSINESS_INFO, generateSeoMetadata } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -95,7 +95,6 @@ export default async function GalleryPage() {
   const breadcrumbs = [
     { name: 'Photo Gallery & Updates', path: '/gallery' },
   ];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
 
   const gallerySchema = {
     '@context': 'https://schema.org',
@@ -105,10 +104,7 @@ export default async function GalleryPage() {
       'Verified photo gallery showcasing laptops, CCTV installations, customer deliveries, and business updates from NEED ELECTRO Moulvibazar.',
     url: `${BUSINESS_INFO.domain}/gallery`,
     publisher: {
-      '@type': 'Organization',
-      name: BUSINESS_INFO.name,
-      url: BUSINESS_INFO.domain,
-      logo: `${BUSINESS_INFO.domain}/logo-icon.png`,
+      '@id': `${BUSINESS_INFO.domain}/#organization`,
     },
     mainEntity: {
       '@type': 'ItemList',
@@ -127,10 +123,6 @@ export default async function GalleryPage() {
 
   return (
     <div className="min-h-screen bg-[#F4F6F8] text-[#002B5B] flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(gallerySchema) }}

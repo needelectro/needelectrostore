@@ -40,7 +40,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const slug = `${slugify(product.name)}-${product.sku.toLowerCase()}`;
   const isLaptop = product.category.toLowerCase().includes('laptop') || product.name.toLowerCase().includes('laptop');
-  const fallbackImage = isLaptop ? '/logo-dark-transparent.png' : '/logo-icon.png';
+  const fallbackImage = isLaptop ? '/og-store-banner.jpg' : '/logo-icon.png';
   const [imgSrc, setImgSrc] = useState<string>(product.imageUrl || fallbackImage);
   const isInStock = product.currentStock > 0;
   // Business Policy: allow_order_when_stock_is_zero = true

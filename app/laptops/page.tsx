@@ -2,7 +2,13 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema, buildItemListSchema } from '@/lib/seoConfig';
+import {
+  BUSINESS_INFO,
+  generateSeoMetadata,
+  buildItemListSchema,
+  getProductUrlPath,
+  isLowQualityOrHotlinkedImage,
+} from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -15,29 +21,21 @@ export async function generateMetadata(): Promise<Metadata> {
   return generateSeoMetadata({
     title: 'Laptop Shop in Moulvibazar | Price in BD | NEED ELECTRO',
     description:
-      'Best laptop shop in Moulvibazar. Check latest laptop price in Bangladesh for HP, Dell & Lenovo. 7-day replacement, 2-year warranty & 0% EMI available.',
+      'Best laptop shop in Moulvibazar. Check latest HP, Dell, Lenovo & MacBook prices in Bangladesh with 7-day replacement, 2-year warranty & 0% EMI.',
     path: '/laptops',
     keywords: [
       'Laptop shop in Moulvibazar',
-      'Laptop shop Moulvibazar',
-      'Laptop price in Bangladesh',
       'Laptop price in Moulvibazar',
-      'Laptop price Moulvibazar',
+      'Laptop price in Bangladesh',
       'Best laptop shop in Moulvibazar',
-      'Where to buy laptop in Moulvibazar',
-      'Laptop shop in Moulvibazar Bangladesh',
       'HP EliteBook price in Bangladesh',
       'Dell Latitude price in Bangladesh',
       'Lenovo ThinkPad price in Bangladesh',
       'Used laptop in Moulvibazar',
-      'Computer shop in Moulvibazar',
-      'Business laptop Moulvibazar',
-      'Student laptop Moulvibazar',
       'Laptop EMI in Moulvibazar',
       'মৌলভীবাজার ল্যাপটপ শপ',
       'মৌলভীবাজার ল্যাপটপ দোকান',
       'ল্যাপটপের দাম বাংলাদেশ',
-      'ল্যাপটপ কিস্তিতে মৌলভীবাজার',
     ],
   });
 }
@@ -118,15 +116,17 @@ export default async function LaptopsPage() {
   }
 
   const breadcrumbs = [{ name: 'Laptops', path: '/laptops' }];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
+
+  const cleanLaptops = laptops.filter((item) => !isLowQualityOrHotlinkedImage(item.imageUrl));
+  const itemListSource = cleanLaptops.length > 0 ? cleanLaptops : laptops;
 
   const laptopsItemListSchema = buildItemListSchema({
     name: 'Available Laptops in Moulvibazar Stock — NEED ELECTRO Store',
     description: 'Authentic business, student and professional laptops from HP, Dell, Lenovo with warranty and EMI in Bangladesh.',
     url: '/laptops',
-    items: laptops.map((item) => ({
+    items: itemListSource.slice(0, 30).map((item) => ({
       name: item.name,
-      url: `/product/${item.name ? item.name.toLowerCase().replace(/[\s\W-]+/g, '-') : 'laptop'}-${item.sku.toLowerCase()}`,
+      url: getProductUrlPath(item.name, item.sku),
       image: item.imageUrl,
       price: Number(item.retailPrice),
       brand: item.brand,
@@ -136,10 +136,6 @@ export default async function LaptopsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(laptopsItemListSchema) }}
@@ -160,7 +156,7 @@ export default async function LaptopsPage() {
           </h1>
 
           <p className="text-slate-600 dark:text-slate-300 max-w-3xl text-sm md:text-base leading-relaxed">
-            Welcome to {BUSINESS_INFO.name}. Whether you need an ultra-durable business laptop for office work, a high-performance machine for software programming and freelancing, or a budget-friendly student laptop in Moulvibazar, our central tech hub features tested, genuine devices backed by replacement warranties, fast local delivery, and monthly installment financing.
+            Welcome to {BUSINESS_INFO.name}. Whether you need an ultra-durable business laptop for office work, a high-performance machine for software programming and freelancing, or a budget-friendly student laptop in Moulvibazar, our Central Road showroom features tested, genuine devices backed by replacement warranties, fast local delivery, and monthly installment financing.
           </p>
 
           {/* Brand Quick Links */}
@@ -210,7 +206,7 @@ export default async function LaptopsPage() {
           </div>
           <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
             <Phone size={18} className="text-amber-500 dark:text-amber-400 shrink-0" />
-            <span>Showroom: Kusumbag, Moulvibazar</span>
+            <span>Showroom: {BUSINESS_INFO.address.streetAddress}, Moulvibazar</span>
           </div>
         </div>
       </div>
@@ -273,7 +269,7 @@ export default async function LaptopsPage() {
               Why Buy Your Laptop from NEED ELECTRO Moulvibazar?
             </h2>
             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-              Purchasing a laptop is an investment in your career, education, or enterprise. Unlike unverified online sellers, {BUSINESS_INFO.name} operates its central tech hub and online marketplace from Moulvibazar, Bangladesh. Every single pre-owned and new laptop undergoes rigorous 24-point hardware stress testing before being offered for sale.
+              Purchasing a laptop is an investment in your career, education, or enterprise. Unlike unverified online sellers, {BUSINESS_INFO.name} operates its Central Road showroom in Moulvibazar alongside our nationwide online store. Every single pre-owned and new laptop undergoes rigorous 24-point hardware stress testing before being offered for sale.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-600 dark:text-slate-300">
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-1.5">

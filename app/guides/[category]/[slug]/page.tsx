@@ -3,8 +3,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import {
-  BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema,
-  buildArticleSchema, buildFaqSchema
+  BUSINESS_INFO, DEFAULT_OG_IMAGE, generateSeoMetadata,
+  buildArticleSchema, buildFaqSchema, resolveCleanImageUrl
 } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
@@ -60,7 +60,7 @@ export async function generateMetadata({
       'Bangladesh',
       'Laptop price in Bangladesh',
     ],
-    ogImage: guide.featuredImage || '/logo-dark-transparent.png',
+    ogImage: resolveCleanImageUrl(guide.featuredImage, DEFAULT_OG_IMAGE),
   });
 }
 
@@ -94,13 +94,6 @@ export default async function GuideArticlePage({
     { name: guide.title, path: `/guides/${guide.category}/${guide.slug}` },
   ];
 
-  const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: 'Home', path: '/' },
-    { name: 'Guides & Advice', path: '/guides' },
-    { name: categoryLabels[guide.category] || guide.category, path: `/guides/${guide.category}` },
-    { name: guide.title, path: `/guides/${guide.category}/${guide.slug}` },
-  ]);
-
   const articleSchema = buildArticleSchema({
     title: guide.title,
     slug: `guides/${guide.category}/${guide.slug}`,
@@ -126,10 +119,6 @@ export default async function GuideArticlePage({
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}

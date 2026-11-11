@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema } from '@/lib/seoConfig';
+import { BUSINESS_INFO, generateSeoMetadata } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -25,17 +25,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function WarrantyPolicyPage() {
   const breadcrumbs = [
-    { name: 'Home', path: '/' },
     { name: 'Warranty Policy', path: '/warranty-policy' },
   ];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 
@@ -83,7 +77,7 @@ export default function WarrantyPolicyPage() {
             </div>
             <h3 className="font-bold text-base text-slate-900 dark:text-white">2-Year Service Warranty</h3>
             <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-xs">
-              Enterprise and certified tested laptops include 2 years of free labor support, thermal paste renewal, dusting, and operating system diagnostics at our Kusumbag lab.
+              Enterprise and certified tested laptops include 2 years of free labor support, thermal paste renewal, dusting, and operating system diagnostics at our Central Road, Moulvibazar service lab.
             </p>
           </div>
         </div>

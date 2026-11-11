@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { generateSeoMetadata, buildBreadcrumbSchema } from '@/lib/seoConfig';
+import { generateSeoMetadata } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -37,18 +37,8 @@ export default async function PriceGuidesPage() {
     { name: 'Price Guides', path: '/guides/prices' },
   ];
 
-  const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: 'Home', path: '/' },
-    { name: 'Guides & Advice', path: '/guides' },
-    { name: 'Price Guides', path: '/guides/prices' },
-  ]);
-
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
 

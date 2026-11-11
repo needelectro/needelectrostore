@@ -6,7 +6,6 @@ import { prisma } from '@/lib/prisma';
 import {
   BUSINESS_INFO,
   generateSeoMetadata,
-  buildBreadcrumbSchema,
 } from '@/lib/seoConfig';
 import {
   getAllDivisions,
@@ -155,14 +154,12 @@ export default async function LocationDetailPage({ params }: Props) {
     const parentDivision = getAllDivisions().find((d) => d.id === district.divisionId);
 
     const breadcrumbs = [
-      { name: 'Home', path: '/' },
       { name: 'Locations', path: '/locations' },
       ...(parentDivision
         ? [{ name: parentDivision.nameEn, path: `/locations/${parentDivision.slug}` }]
         : []),
       { name: district.nameEn, path: `/locations/${district.slug}` },
     ];
-    const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
 
     const isSylhetZone = district.divisionId === 'sylhet';
 
@@ -200,11 +197,13 @@ export default async function LocationDetailPage({ params }: Props) {
 
     const locationSchema = {
       '@context': 'https://schema.org',
-      '@type': 'OnlineStore',
-      name: `${BUSINESS_INFO.name} — ${district.nameEn} Delivery`,
+      '@type': 'Service',
+      name: `${BUSINESS_INFO.name} — ${district.nameEn} Delivery & Support`,
       url: `${BUSINESS_INFO.domain}/locations/${district.slug}`,
       description: district.seoDescription,
-      telephone: BUSINESS_INFO.phone,
+      provider: {
+        '@id': `${BUSINESS_INFO.domain}/#store`,
+      },
       areaServed: {
         '@type': 'AdministrativeArea',
         name: district.nameEn,
@@ -217,10 +216,6 @@ export default async function LocationDetailPage({ params }: Props) {
 
     return (
       <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
@@ -452,18 +447,12 @@ export default async function LocationDetailPage({ params }: Props) {
     const districtsInDivision = getDistrictsByDivision(division.id);
 
     const breadcrumbs = [
-      { name: 'Home', path: '/' },
       { name: 'Locations', path: '/locations' },
       { name: division.nameEn, path: `/locations/${division.slug}` },
     ];
-    const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
 
     return (
       <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-        />
         <CustomerHeader />
         <Breadcrumb items={breadcrumbs} />
 

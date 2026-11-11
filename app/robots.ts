@@ -47,7 +47,6 @@ const PUBLIC_ALLOW_PATHS = [
   '/guides',
   '/guides/*',
   '/api/feed/google-merchant',
-  '/api/indexnow',
 ];
 
 const DISALLOW_PATHS = [
@@ -70,7 +69,8 @@ const DISALLOW_PATHS = [
   '/customer/orders',
   '/customer/dashboard',
   '/customer/settings',
-  '/api/',
+  '/api',
+  '/api/*',
   '/*?*sort=*',
   '/*?*filter=*',
   '/*?*q=*',

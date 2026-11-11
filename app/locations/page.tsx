@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata, buildBreadcrumbSchema } from '@/lib/seoConfig';
+import { BUSINESS_INFO, generateSeoMetadata } from '@/lib/seoConfig';
 import {
   BANGLADESH_DIVISIONS,
   BANGLADESH_DISTRICTS,
@@ -84,10 +84,8 @@ export default async function LocationsHubPage() {
   }
 
   const breadcrumbs = [
-    { name: 'Home', path: '/' },
     { name: 'Bangladesh Locations & Delivery', path: '/locations' },
   ];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
 
   // Structured Data Schema for Directory
   const directorySchema = {
@@ -98,25 +96,12 @@ export default async function LocationsHubPage() {
       'Official coverage directory covering all 8 administrative divisions and 64 districts of Bangladesh for authentic laptops, CCTV cameras, computers, and electrical components.',
     url: `${BUSINESS_INFO.domain}/locations`,
     provider: {
-      '@type': 'OnlineStore',
-      name: BUSINESS_INFO.name,
-      url: BUSINESS_INFO.domain,
-      telephone: BUSINESS_INFO.phone,
-      address: {
-        '@type': 'PostalAddress',
-        addressLocality: 'Moulvibazar',
-        addressRegion: 'Sylhet',
-        addressCountry: 'BD',
-      },
+      '@id': `${BUSINESS_INFO.domain}/#store`,
     },
   };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(directorySchema) }}

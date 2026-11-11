@@ -13,7 +13,8 @@ interface BreadcrumbProps {
 }
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
-  const allItems: BreadcrumbItem[] = [{ name: 'Home', path: '/' }, ...items];
+  const normalizedItems = items.filter((item) => item.path !== '/');
+  const allItems: BreadcrumbItem[] = [{ name: 'Home', path: '/' }, ...normalizedItems];
   const schema = buildBreadcrumbSchema(allItems);
 
   return (

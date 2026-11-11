@@ -37,7 +37,7 @@ export const ProductShareModal: React.FC<ProductShareModalProps> = ({
 
   // Compute canonical URL and share payload
   const canonicalUrl = getProductCanonicalUrl(product);
-  const fallbackImg = '/logo-dark-transparent.png';
+  const fallbackImg = '/og-store-banner.jpg';
   const displayImage = product.imageUrl || fallbackImg;
   const priceFormatted = Number(product.retailPrice).toLocaleString('en-US');
 

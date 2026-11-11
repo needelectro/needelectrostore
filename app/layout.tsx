@@ -1,6 +1,11 @@
 import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, Hind_Siliguri } from 'next/font/google';
 import './globals.css';
+import {
+  BUSINESS_INFO,
+  DEFAULT_OG_IMAGE,
+  buildGlobalSiteGraphSchema,
+} from '@/lib/seoConfig';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -22,52 +27,34 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
+const ROOT_DESCRIPTION =
+  'Computer and laptop shop in Moulvibazar. Buy genuine HP, Dell, and Lenovo laptops, desktop PCs, monitors, and accessories with warranty at NEED ELECTRO.';
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.needelectro.store'),
+  metadataBase: new URL(BUSINESS_INFO.domain),
   title: {
     default: 'Computer & Laptop Shop in Moulvibazar | NEED ELECTRO',
     template: '%s | NEED ELECTRO',
   },
-  description:
-    "Moulvibazar's trusted computer & laptop shop. Shop genuine HP, Dell, Lenovo laptops, desktop PCs, CCTV cameras & electrical gear with fast delivery.",
+  description: ROOT_DESCRIPTION,
   keywords: [
     'NEED ELECTRO',
-    'NEED ELECTRO SHOP',
     'Computer shop in Moulvibazar',
-    'Computer price in Moulvibazar',
     'Laptop shop in Moulvibazar',
+    'Computer price in Moulvibazar',
     'Laptop price in Moulvibazar',
-    'CCTV camera shop in Moulvibazar',
-    'CCTV camera price in Bangladesh',
-    'Tech gadgets in Moulvibazar',
-    'Tech gadgets price in Bangladesh',
-    'Laptop price in Bangladesh',
+    'Desktop PC Moulvibazar',
+    'Computer accessories in Moulvibazar',
     'HP EliteBook price in Bangladesh',
-    'Desktop computer price in Bangladesh',
-    'Computer accessories in Bangladesh',
-    'Electrical shop online Bangladesh',
-    'Electrical services in Moulvibazar',
-    'Electrician service in Bangladesh',
-    'CCTV installation service',
-    'Laptop and computer servicing',
-    'Networking and Wi-Fi installation',
-    'Electrical products online Bangladesh',
-    'Genuine laptop with warranty in Bangladesh',
-    'AMDADS GROUP',
-    'Moulvibazar',
-    'Sylhet',
-    'Bangladesh',
+    'Laptop price in Bangladesh',
+    'CCTV camera shop in Moulvibazar',
     'মৌলভীবাজার ল্যাপটপ',
     'মৌলভীবাজার কম্পিউটার দোকান',
-    'মৌলভীবাজার সিসিটিভি',
   ],
   authors: [{ name: 'Amdadur Rahman' }],
   creator: 'NEED ELECTRO',
   publisher: 'NEED ELECTRO',
   category: 'technology',
-  alternates: {
-    canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.needelectro.store',
-  },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
     other: {
@@ -79,32 +66,24 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.needelectro.store',
+    url: BUSINESS_INFO.domain,
     siteName: 'NEED ELECTRO',
-    title: 'NEED ELECTRO Bangladesh | Electrical & Tech Solutions',
-    description:
-      'Shop laptops, computers, CCTV cameras and electrical products at NEED ELECTRO. Explore technical services and digital solutions in Bangladesh.',
+    title: 'Computer & Laptop Shop in Moulvibazar | NEED ELECTRO',
+    description: ROOT_DESCRIPTION,
     images: [
       {
-        url: '/banners/need-electro-laptops-flagship.jpg',
+        url: DEFAULT_OG_IMAGE,
         width: 1200,
         height: 630,
-        alt: 'NEED ELECTRO - Authentic Laptops, CCTV & Electrical Solutions',
-      },
-      {
-        url: '/logo-dark-transparent.png',
-        width: 800,
-        height: 600,
-        alt: 'NEED ELECTRO Logo',
+        alt: 'NEED ELECTRO — Computer & Laptop Shop in Moulvibazar',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'NEED ELECTRO Bangladesh | Electrical & Tech Solutions',
-    description:
-      'Shop laptops, computers, CCTV cameras and electrical products at NEED ELECTRO. Explore technical services and digital solutions in Bangladesh.',
-    images: ['/banners/need-electro-laptops-flagship.jpg'],
+    title: 'Computer & Laptop Shop in Moulvibazar | NEED ELECTRO',
+    description: ROOT_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE],
     creator: '@needelectro',
   },
   robots: {
@@ -141,20 +120,13 @@ import { CustomerAuthProvider } from '@/src/services/customerAuthContext';
 import { MobileBottomNav } from '@/src/components/customer/MobileBottomNav';
 import { PwaInstallPrompt } from '@/src/components/pwa/PwaInstallPrompt';
 import { VoiceWelcome } from '@/src/components/common/VoiceWelcome';
-import {
-  buildOrganizationSchema,
-  buildLocalBusinessSchema,
-  buildWebSiteSchema,
-} from '@/lib/seoConfig';
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const organizationSchema = buildOrganizationSchema();
-  const localBusinessSchema = buildLocalBusinessSchema();
-  const webSiteSchema = buildWebSiteSchema();
+  const globalSiteGraphSchema = buildGlobalSiteGraphSchema();
 
   return (
     <html
@@ -166,15 +138,7 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(globalSiteGraphSchema) }}
         />
         <script
           dangerouslySetInnerHTML={{

@@ -26,6 +26,10 @@ const PERMANENT_REDIRECTS: Record<string, string> = {
   '/installments': '/laptop-emi',
   '/moulvibazar-laptop': '/moulvibazar',
   '/moulvibazar-computer': '/moulvibazar',
+  '/computer-shop-moulvibazar': '/moulvibazar',
+  '/laptop-shop-moulvibazar': '/moulvibazar',
+  '/computer-shop-in-moulvibazar': '/moulvibazar',
+  '/laptop-shop-in-moulvibazar': '/moulvibazar',
   '/login': '/admin/login',
   '/login/': '/admin/login',
 };

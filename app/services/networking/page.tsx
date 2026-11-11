@@ -4,7 +4,6 @@ import Link from 'next/link';
 import {
   BUSINESS_INFO,
   generateSeoMetadata,
-  buildBreadcrumbSchema,
   buildServiceSchema
 } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
@@ -61,7 +60,6 @@ export default function NetworkingServicePage() {
     { name: 'Services', path: '/services' },
     { name: 'Networking & Wi-Fi Installation', path: '/services/networking' },
   ];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
 
   const serviceSchema = buildServiceSchema({
     name: 'Networking and Wi-Fi Installation Service',
@@ -73,10 +71,6 @@ export default function NetworkingServicePage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}

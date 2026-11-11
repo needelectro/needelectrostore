@@ -50,42 +50,40 @@ export const CustomerFooter: React.FC = () => {
     <footer className="bg-[#F4F6F8] dark:bg-[#071328] text-[#334155] dark:text-slate-300 border-t border-slate-200/90 dark:border-slate-800 pt-12 pb-20 md:pb-8 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
 
-        {/* Website Network Banner — Clear Differentiation Between .store and .com */}
+        {/* Showroom NAP & Computer Store Summary Banner */}
         <div className="bg-gradient-to-r from-[#002B5B] via-[#003B7B] to-[#008CFF] text-white rounded-2xl p-6 sm:p-7 shadow-lg shadow-blue-900/10 border border-blue-400/20">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="space-y-2 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs text-xs font-semibold text-blue-100 border border-white/20">
-                <Globe size={13} className="text-cyan-300" />
-                <span>{isBangla ? 'নিড ইলেক্ট্রো ওয়েবসাইট নেটওয়ার্ক' : 'NEED ELECTRO Website Network'}</span>
+                <MapPin size={13} className="text-cyan-300" />
+                <span>{isBangla ? 'মৌলভীবাজার কম্পিউটার ও ল্যাপটপ শোরুম' : 'Moulvibazar Computer & Laptop Showroom'}</span>
               </div>
               <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white">
                 {isBangla
-                  ? FOOTER_SETTINGS.mainWebsiteLabel.bn
-                  : FOOTER_SETTINGS.mainWebsiteLabel.en}
+                  ? 'NEED ELECTRO — মৌলভীবাজারের কম্পিউটার, ল্যাপটপ, ডেস্কটপ পিসি ও এক্সেসরিজ'
+                  : 'NEED ELECTRO — Computer, Laptop, Desktop PC & Accessories in Moulvibazar'}
               </h2>
               <p className="text-xs sm:text-sm text-blue-100/90 leading-relaxed">
                 {isBangla
-                  ? FOOTER_SETTINGS.mainWebsitePurpose.bn
-                  : FOOTER_SETTINGS.mainWebsitePurpose.en}
+                  ? `${BUSINESS_INFO.address.streetAddress}, মৌলভীবাজার ৩২০০ • হটলাইন: ${BUSINESS_INFO.phone} • শনি–বৃহস্পতি: সকাল ৯:৩০ – রাত ৯:৩০ (শুক্রবার বন্ধ)`
+                  : `${BUSINESS_INFO.fullAddress} • Hotline: ${BUSINESS_INFO.phone} • ${BUSINESS_INFO.openingHours.display}`}
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
-              <a
-                href={FOOTER_SETTINGS.mainWebsiteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href="/moulvibazar"
                 className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white text-[#002B5B] hover:bg-blue-50 font-bold text-xs sm:text-sm shadow-md transition-all group focus:outline-hidden focus:ring-2 focus:ring-white/80"
               >
-                <span>{t('footer.mainWebsiteCta', 'Visit Main Company & Services Website')}</span>
-                <ExternalLink size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-              </a>
+                <MapPin size={14} className="text-[#008CFF]" />
+                <span>{isBangla ? 'মৌলভীবাজার স্টোর দেখুন' : 'Moulvibazar Store Details'}</span>
+              </Link>
               <Link
                 href="/shop"
                 className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm border border-white/20 backdrop-blur-xs transition-colors"
               >
                 <ShoppingBag size={14} />
-                <span>{isBangla ? 'স্টোরে কেনাকাটা করুন' : 'Shop Products Here'}</span>
+                <span>{isBangla ? 'সব পণ্য দেখুন' : 'Browse All Products'}</span>
               </Link>
             </div>
           </div>
@@ -94,7 +92,7 @@ export const CustomerFooter: React.FC = () => {
         {/* Main 5-Column Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-8">
 
-          {/* Column 1 — Brand */}
+          {/* Column 1 — Brand & Verified NAP */}
           <div className="space-y-4 sm:col-span-2 lg:col-span-1">
             <Link href="/" className="flex items-center gap-3 group focus:outline-hidden">
               <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center p-1.5 shadow-xs">
@@ -105,7 +103,7 @@ export const CustomerFooter: React.FC = () => {
                   {BUSINESS_INFO.name}
                 </span>
                 <span className="text-[11px] text-[#008CFF] font-semibold tracking-wide">
-                  {isBangla ? '- বিশ্বস্ত ইলেকট্রিক্যাল ও প্রযুক্তি সমাধান -' : '- Trusted Electrical & Technological Solutions -'}
+                  {isBangla ? 'কম্পিউটার ও ল্যাপটপ শপ — মৌলভীবাজার' : 'Computer & Laptop Shop — Moulvibazar'}
                 </span>
               </div>
             </Link>
@@ -113,27 +111,18 @@ export const CustomerFooter: React.FC = () => {
             <p className="text-xs text-[#475569] dark:text-slate-400 leading-relaxed">
               {t(
                 'footer.companyDesc',
-                'NEED ELECTRO brings electrical products, modern technology, and reliable electrical and technical services together in one connected ecosystem.'
+                'Computer, laptop, desktop PC & accessories shop in Moulvibazar. Genuine HP, Dell & Lenovo laptops, monitors & CCTV with official warranty.'
               )}
             </p>
-
-            <div className="pt-1">
-              <a
-                href={FOOTER_SETTINGS.mainWebsiteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-[#008CFF] hover:text-[#002B5B] dark:hover:text-blue-300 font-semibold group"
-              >
-                <span>{isBangla ? 'প্রধান কোম্পানি ওয়েবসাইট' : 'Main Company Website'}</span>
-                <ExternalLink size={12} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-              </a>
-            </div>
 
             <div className="space-y-2 text-xs text-[#334155] dark:text-slate-300 pt-1">
               <div className="flex items-start gap-2">
                 <MapPin size={14} className="text-[#008CFF] shrink-0 mt-0.5" />
                 <span>
-                  <strong>{isBangla ? 'অপারেশনস বেস:' : 'Hub:'}</strong> {BUSINESS_INFO.address.addressLocality}, {BUSINESS_INFO.address.addressRegion}, Bangladesh
+                  <strong>{isBangla ? 'ঠিকানা:' : 'Address:'}</strong>{' '}
+                  {isBangla
+                    ? 'সেন্ট্রাল রোড, নিড ইলেক্ট্রো বিল্ডিং, মৌলভীবাজার ৩২০০, সিলেট বিভাগ, বাংলাদেশ'
+                    : BUSINESS_INFO.fullAddress}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -161,7 +150,7 @@ export const CustomerFooter: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Clock size={14} className="text-[#008CFF] shrink-0" />
-                <span>{t('footer.hours', 'Hours: Sat – Thu (9:30 AM – 9:30 PM)')}</span>
+                <span>{t('footer.hours', 'Hours: Sat – Thu (9:30 AM – 9:30 PM) | Fri: Closed')}</span>
               </div>
             </div>
           </div>
@@ -404,8 +393,8 @@ export const CustomerFooter: React.FC = () => {
           <div>
             <span className="font-semibold text-[#002B5B] dark:text-slate-200 block mb-1">
               {isBangla
-                ? 'মৌলভীবাজার ও সারা বাংলাদেশে বিশ্বস্ত প্রযুক্তি ও ইলেকট্রিক্যাল সমাধান'
-                : 'Trusted Technology & Electrical Solutions in Moulvibazar and All Over Bangladesh'}
+                ? 'মৌলভীবাজারের বিশ্বস্ত কম্পিউটার, ল্যাপটপ, ডেস্কটপ পিসি ও এক্সেসরিজ স্টোর'
+                : 'Computer, Laptop, Desktop PC & Accessories in Moulvibazar & All Over Bangladesh'}
             </span>
             <span>
               {isBangla

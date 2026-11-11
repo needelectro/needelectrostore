@@ -4,7 +4,6 @@ import Link from 'next/link';
 import {
   BUSINESS_INFO,
   generateSeoMetadata,
-  buildBreadcrumbSchema,
   buildServiceSchema
 } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
@@ -60,7 +59,6 @@ export default function LaptopRepairPage() {
     { name: 'Services', path: '/services' },
     { name: 'Laptop & Computer Repair', path: '/services/laptop-computer-repair' },
   ];
-  const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
 
   const serviceSchema = buildServiceSchema({
     name: 'Laptop and Computer Repair Service',
@@ -72,10 +70,6 @@ export default function LaptopRepairPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-[#060a14] dark:text-slate-100 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}

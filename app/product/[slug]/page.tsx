@@ -3,7 +3,15 @@ import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { BUSINESS_INFO, generateSeoMetadata, buildProductSchema, buildBreadcrumbSchema, slugify } from '@/lib/seoConfig';
+import {
+  BUSINESS_INFO,
+  DEFAULT_OG_IMAGE,
+  generateSeoMetadata,
+  buildProductSchema,
+  getProductUrlPath,
+  resolveCleanImageUrl,
+  slugify,
+} from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -145,7 +153,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   return generateSeoMetadata({
     title,
     description,
-    path: `/product/${slugify(product.name)}-${product.sku.toLowerCase()}`,
+    path: getProductUrlPath(product.name, product.sku),
     keywords: [
       product.name,
       `${product.name} price in Bangladesh`,
@@ -154,10 +162,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       ...brandKeywords,
       ...laptopKeywords,
       'NEED ELECTRO',
-      'মৌলভীবাজার কম্পিউটার দোকান',
-      'ল্যাপটপের দাম বাংলাদেশ',
+      'Computer shop in Moulvibazar',
     ],
-    ogImage: product.imageUrl || '/logo-dark-transparent.png',
+    ogImage: resolveCleanImageUrl(product.imageUrl, DEFAULT_OG_IMAGE),
     noIndex: isDiscontinued,
   });
 }
@@ -273,10 +280,6 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildBreadcrumbSchema(breadcrumbs)) }}
       />
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />

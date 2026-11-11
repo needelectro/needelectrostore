@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BUSINESS_INFO, generateSeoMetadata, buildServiceSchema, buildBreadcrumbSchema } from '@/lib/seoConfig';
+import { BUSINESS_INFO, generateSeoMetadata, buildServiceSchema } from '@/lib/seoConfig';
 import { CustomerHeader } from '@/src/components/customer/CustomerHeader';
 import { CustomerFooter } from '@/src/components/customer/CustomerFooter';
 import { Breadcrumb } from '@/src/components/customer/Breadcrumb';
@@ -41,12 +41,6 @@ export default function CctvInstallationPage() {
     path: '/services/cctv-installation',
   });
 
-  const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: 'Home', path: '/' },
-    { name: 'CCTV & Security', path: '/cctv' },
-    { name: 'CCTV Installation', path: '/services/cctv-installation' },
-  ]);
-
   const breadcrumbs = [
     { name: 'CCTV & Security', path: '/cctv' },
     { name: 'CCTV Installation', path: '/services/cctv-installation' },
@@ -57,10 +51,6 @@ export default function CctvInstallationPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <CustomerHeader />
       <Breadcrumb items={breadcrumbs} />
