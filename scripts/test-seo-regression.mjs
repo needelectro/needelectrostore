@@ -360,6 +360,8 @@ async function main() {
     assert.ok(trackSrc.includes('maskPhone') && !trackSrc.includes('contains:'), 'Order tracking API must avoid substring phone enumeration and mask PII');
     assert.equal(fs.existsSync(path.join(ROOT, 'public/llms.txt')), true, 'Missing public/llms.txt AIO guide');
     assert.equal(fs.existsSync(path.join(ROOT, 'public/logo-tool.html')), false, 'Unused public/logo-tool.html should remain removed');
+    const nextConfigSrc = fs.readFileSync(path.join(ROOT, 'next.config.mjs'), 'utf8');
+    assert.match(nextConfigSrc, /unoptimized:\s*true/, 'next.config.mjs must set images.unoptimized: true to avoid /_next/image quota 402 failures');
   });
 
   console.log(`\nSummary: ${passed} passed, ${failed} failed\n`);
