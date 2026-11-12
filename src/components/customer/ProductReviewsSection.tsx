@@ -104,6 +104,10 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
   const [formTitle, setFormTitle] = useState('');
   const [formComment, setFormComment] = useState('');
   const [formImages, setFormImages] = useState<string[]>([]);
+  const [guestName, setGuestName] = useState('');
+  const [guestPhone, setGuestPhone] = useState('');
+  const [guestOrderNumber, setGuestOrderNumber] = useState('');
+  const [guestHoneypot, setGuestHoneypot] = useState('');
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -271,6 +275,15 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
     setFormError(null);
     setFormSuccess(null);
 
+    if (!customer && guestName.trim().length < 2) {
+      setFormError(
+        isBangla
+          ? 'রিভিউ প্রকাশ করতে আপনার নাম লিখুন (কমপক্ষে ২ অক্ষর)।'
+          : 'Please enter your name (at least 2 characters) to publish your review.'
+      );
+      return;
+    }
+
     if (formComment.trim().length < 10) {
       setFormError(isBangla ? 'রিভিউ কমপক্ষে ১০ অক্ষরের হতে হবে।' : 'Review must be at least 10 characters long.');
       return;
@@ -287,6 +300,14 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
           title: formTitle.trim() || null,
           comment: formComment.trim(),
           images: formImages,
+          ...(!customer
+            ? {
+                guestName: guestName.trim(),
+                guestPhone: guestPhone.trim() || undefined,
+                orderNumber: guestOrderNumber.trim() || undefined,
+                website: guestHoneypot || undefined,
+              }
+            : {}),
         }),
       });
       const data = await res.json();
@@ -296,6 +317,16 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
         setTimeout(() => {
           setIsWriteModalOpen(false);
           setFormSuccess(null);
+          if (!customer) {
+            setFormRating(5);
+            setFormTitle('');
+            setFormComment('');
+            setFormImages([]);
+            setGuestName('');
+            setGuestPhone('');
+            setGuestOrderNumber('');
+            setGuestHoneypot('');
+          }
           loadReviews(1);
           checkEligibility();
         }, 1200);
@@ -420,29 +451,30 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
           </p>
         </div>
 
-        {/* Write a Review Button */}
-        <div>
-          {customer ? (
-            <button
-              type="button"
-              onClick={() => setIsWriteModalOpen(true)}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#007cdb] hover:to-[#005fb3] text-white text-xs sm:text-sm font-bold shadow-md shadow-[#008CFF]/25 hover:shadow-lg hover:shadow-[#008CFF]/35 transition-all flex items-center gap-2"
-            >
-              <Edit3 size={16} />
-              <span>
-                {eligibility?.existingReview
-                  ? (isBangla ? 'আমার রিভিউ এডিট করুন' : 'Edit My Review')
-                  : (isBangla ? 'রিভিউ লিখুন' : 'Write a Review')}
-              </span>
-            </button>
-          ) : (
-            <Link
-              href={`/customer/login?redirect=/product/${productSku.toLowerCase()}#reviews`}
-              className="px-5 py-2.5 rounded-xl bg-[#002B5B] hover:bg-[#001d3d] text-white text-xs sm:text-sm font-bold shadow-md transition-all flex items-center gap-2"
-            >
-              <Edit3 size={16} />
-              <span>{isBangla ? 'রিভিউ দিতে সাইন ইন করুন' : 'Sign In to Review'}</span>
-            </Link>
+        {/* Write a Review Button (Available for both Guests & Signed-In Customers) */}
+        <div className="flex flex-col sm:items-end gap-1">
+          <button
+            type="button"
+            onClick={() => setIsWriteModalOpen(true)}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#008CFF] to-[#0070cc] hover:from-[#007cdb] hover:to-[#005fb3] text-white text-xs sm:text-sm font-bold shadow-md shadow-[#008CFF]/25 hover:shadow-lg hover:shadow-[#008CFF]/35 transition-all flex items-center gap-2"
+          >
+            <Edit3 size={16} />
+            <span>
+              {customer && eligibility?.existingReview
+                ? (isBangla ? 'আমার রিভিউ এডিট করুন' : 'Edit My Review')
+                : (isBangla ? 'রিভিউ লিখুন' : 'Write a Review')}
+            </span>
+          </button>
+          {!customer && (
+            <span className="text-[10.5px] text-slate-500">
+              {isBangla ? 'সাইন ইন ছাড়াই রিভিউ দিন • ' : 'No sign-in required • '}
+              <Link
+                href={`/customer/login?redirect=/product/${productSku.toLowerCase()}#reviews`}
+                className="text-[#008CFF] font-semibold hover:underline"
+              >
+                {isBangla ? 'সাইন ইন' : 'Sign in'}
+              </Link>
+            </span>
           )}
         </div>
       </div>
@@ -634,24 +666,14 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
                 : 'Have you purchased or used this product? Share your experience, performance thoughts, and photos to help fellow tech shoppers in Bangladesh.'}
             </p>
           </div>
-          {customer ? (
-            <button
-              type="button"
-              onClick={() => setIsWriteModalOpen(true)}
-              className="px-5 py-2.5 rounded-xl bg-[#008CFF] hover:bg-[#0070cc] text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all inline-flex items-center gap-2"
-            >
-              <Edit3 size={15} />
-              <span>{isBangla ? 'প্রথম রিভিউ দিন' : 'Write First Review'}</span>
-            </button>
-          ) : (
-            <Link
-              href={`/customer/login?redirect=/product/${productSku.toLowerCase()}#reviews`}
-              className="px-5 py-2.5 rounded-xl bg-[#002B5B] hover:bg-[#001d3d] text-white text-xs font-bold shadow-md transition-all inline-flex items-center gap-2"
-            >
-              <Edit3 size={15} />
-              <span>{isBangla ? 'রিভিউ দিতে সাইন ইন করুন' : 'Sign in to write review'}</span>
-            </Link>
-          )}
+          <button
+            type="button"
+            onClick={() => setIsWriteModalOpen(true)}
+            className="px-5 py-2.5 rounded-xl bg-[#008CFF] hover:bg-[#0070cc] text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all inline-flex items-center gap-2"
+          >
+            <Edit3 size={15} />
+            <span>{isBangla ? 'প্রথম রিভিউ দিন' : 'Write First Review'}</span>
+          </button>
         </div>
       ) : (
         <div className="space-y-4">
@@ -886,6 +908,92 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
                 </div>
               </div>
 
+              {/* Guest Identity & Optional Purchase Verification (Shown when not signed in) */}
+              {!customer && (
+                <div className="space-y-3 p-3.5 rounded-2xl bg-[#F4F6F8]/80 border border-slate-200/80">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                    <span className="inline-flex items-center gap-1.5 font-bold text-[#002B5B]">
+                      <ShieldCheck size={14} className="text-[#008CFF]" />
+                      <span>
+                        {isBangla
+                          ? 'সাইন ইন ছাড়াই গেস্ট হিসেবে রিভিউ দিন'
+                          : 'Guest Review — no sign-in required'}
+                      </span>
+                    </span>
+                    <Link
+                      href={`/customer/login?redirect=/product/${productSku.toLowerCase()}#reviews`}
+                      className="text-[#008CFF] font-bold hover:underline"
+                    >
+                      {isBangla ? 'অ্যাকাউন্টে সাইন ইন' : 'Sign in instead'}
+                    </Link>
+                  </div>
+
+                  {/* Anti-spam honeypot (hidden from real users) */}
+                  <div className="hidden" aria-hidden="true">
+                    <label htmlFor="review-website-field">Website</label>
+                    <input
+                      id="review-website-field"
+                      type="text"
+                      name="website"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={guestHoneypot}
+                      onChange={(e) => setGuestHoneypot(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      {isBangla ? 'আপনার নাম *' : 'Your Name *'}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      minLength={2}
+                      maxLength={80}
+                      value={guestName}
+                      onChange={(e) => setGuestName(e.target.value)}
+                      placeholder={isBangla ? 'যেমন: রাকিব হাসান' : 'e.g., Rakib Hasan'}
+                      className="w-full text-xs sm:text-sm p-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#008CFF]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        {isBangla ? 'মোবাইল নম্বর (ঐচ্ছিক)' : 'Mobile Number (Optional)'}
+                      </label>
+                      <input
+                        type="tel"
+                        maxLength={32}
+                        value={guestPhone}
+                        onChange={(e) => setGuestPhone(e.target.value)}
+                        placeholder="017XXXXXXXX"
+                        className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#008CFF]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        {isBangla ? 'অর্ডার / ইনভয়েস নং (ঐচ্ছিক)' : 'Order / Invoice ID (Optional)'}
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={64}
+                        value={guestOrderNumber}
+                        onChange={(e) => setGuestOrderNumber(e.target.value)}
+                        placeholder="ORD- / INV-"
+                        className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#008CFF]"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-[10.5px] leading-snug text-slate-500">
+                    {isBangla
+                      ? 'আপনার নম্বর পাবলিকভাবে দেখানো হবে না। পূর্বে পণ্যটি কিনে থাকলে "Verified Purchase" ব্যাজ পেতে এটি দিতে পারেন।'
+                      : 'Private — never shown publicly. Optional: provide your purchase phone or invoice ID to unlock a Verified Buyer badge.'}
+                  </p>
+                </div>
+              )}
+
               {/* Review Title */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -979,7 +1087,7 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
                 </button>
                 <button
                   type="submit"
-                  disabled={submittingReview || formComment.trim().length < 10}
+                  disabled={submittingReview || formComment.trim().length < 10 || (!customer && guestName.trim().length < 2)}
                   className="px-6 py-2.5 rounded-xl bg-[#008CFF] hover:bg-[#0070cc] text-white text-xs sm:text-sm font-bold shadow-md shadow-blue-500/25 transition-all disabled:opacity-50 flex items-center gap-2"
                 >
                   {submittingReview ? (

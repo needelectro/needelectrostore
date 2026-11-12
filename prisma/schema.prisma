@@ -1535,8 +1535,12 @@ model QuotationItem {
 model ProductReview {
   id                 String    @id @default(cuid())
   productId          String    @map("product_id")
-  customerId         String    @map("customer_id")
+  customerId         String?   @map("customer_id")
   customerName       String    @map("customer_name")
+  isGuest            Boolean   @default(false) @map("is_guest")
+  guestPhone         String?   @map("guest_phone")
+  guestEmail         String?   @map("guest_email")
+  ipAddress          String?   @map("ip_address")
   rating             Int       // 1 to 5
   title              String?
   comment            String    @db.Text
@@ -1552,7 +1556,7 @@ model ProductReview {
   updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at")
 
   product            Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
-  customer           Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customer           Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
   images             ReviewImage[]
   votes              ReviewVote[]
   reports            ReviewReport[]
@@ -1561,6 +1565,8 @@ model ProductReview {
   @@unique([productId, customerId])
   @@index([productId])
   @@index([customerId])
+  @@index([ipAddress])
+  @@index([guestPhone])
   @@index([status])
   @@index([rating])
   @@index([isVerifiedPurchase])

@@ -286,10 +286,121 @@ async function runTestSuite() {
         where: { id: newReview.id },
       });
       assert(true, 'Test review and cascading child records cleaned up cleanly');
+
+      // 6. Test Guest Review Lifecycle (customerId = null, multiple guests allowed on same product)
+      const guestReview1 = await prisma.productReview.create({
+        data: {
+          productId: sampleProduct.id,
+          customerId: null,
+          customerName: 'Guest Test One',
+          isGuest: true,
+          guestPhone: '01700000081',
+          ipAddress: '127.0.0.101',
+          rating: 5,
+          title: 'Guest Review Works Great',
+          comment: 'Bought this without signing in and leaving an honest guest review test.',
+          isVerifiedPurchase: false,
+          status: 'PUBLISHED',
+        },
+      });
+      const guestReview2 = await prisma.productReview.create({
+        data: {
+          productId: sampleProduct.id,
+          customerId: null,
+          customerName: 'Guest Test Two',
+          isGuest: true,
+          guestPhone: '01700000082',
+          ipAddress: '127.0.0.102',
+          rating: 4,
+          comment: 'Second independent guest review allowed when customerId is null.',
+          isVerifiedPurchase: false,
+          status: 'PUBLISHED',
+        },
+      });
+      assert(
+        guestReview1.customerId === null && guestReview1.isGuest === true && guestReview2.id !== guestReview1.id,
+        'Allows multiple independent guest reviews (customerId: null) on the same product'
+      );
+
+      await prisma.productReview.deleteMany({
+        where: { id: { in: [guestReview1.id, guestReview2.id] } },
+      });
+      assert(true, 'Guest test reviews cleaned up cleanly');
     } catch (testErr) {
       assert(false, 'Lifecycle execution error', testErr.message);
     }
   }
+
+  // -------------------------------------------------------------
+  // Test Group 6: Guest Review Helpers & Anti-Spam Checks
+  // -------------------------------------------------------------
+  console.log('\n--- Test Group 6: Guest Review Helpers & Anti-Spam Checks ---');
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const { createRequire } = await import('node:module');
+  const require = createRequire(import.meta.url);
+  const ts = require('typescript');
+
+  function loadTsModule(relPath) {
+    const fullPath = path.join(process.cwd(), relPath);
+    const src = fs.readFileSync(fullPath, 'utf8');
+    const transpiled = ts.transpileModule(src, {
+      compilerOptions: {
+        module: ts.ModuleKind.CommonJS,
+        target: ts.ScriptTarget.ES2020,
+        esModuleInterop: true,
+      },
+    }).outputText;
+    const mod = { exports: {} };
+    const customRequire = (id) => {
+      if (id === '@/lib/prisma') return { prisma };
+      if (id.startsWith('@/')) {
+        const target = path.join(process.cwd(), id.slice(2) + '.ts');
+        if (fs.existsSync(target)) return loadTsModule(id.slice(2) + '.ts');
+      }
+      return require(id);
+    };
+    const fn = new Function('exports', 'require', 'module', '__filename', '__dirname', transpiled);
+    fn(mod.exports, customRequire, mod, fullPath, path.dirname(fullPath));
+    return mod.exports;
+  }
+
+  const {
+    normalizeBdPhone,
+    getBdPhoneVariants,
+    containsReviewSpamLinks,
+    validateCommonReviewPayload,
+    detectImageMimeFromMagicBytes,
+    verifyGuestPurchaseEligibility,
+  } = loadTsModule('lib/reviews.ts');
+
+  assert(normalizeBdPhone('+880 1733-983752') === '01733983752', 'Normalizes +880 mobile numbers to 01XXXXXXXXX');
+  assert(normalizeBdPhone('1733983752') === '01733983752', 'Normalizes 10-digit mobile numbers cleanly');
+  assert(getBdPhoneVariants('01733983752').includes('+8801733983752'), 'Generates +88 and 88 lookup variants');
+  assert(containsReviewSpamLinks('Buy cheap coins at https://spam.example.com') === true, 'Blocks external URL spam in reviews');
+  assert(containsReviewSpamLinks('15.6 inch Full HD IPS panel with 2.4GHz Wi-Fi works awesome!') === false, 'Allows normal decimal/product specs without false positives');
+
+  const validPayload = validateCommonReviewPayload({
+    productId: 'prod_123',
+    rating: 5,
+    title: '<b>Superb</b> Quality',
+    comment: 'Works smoothly <script>alert(1)</script> every day.',
+    images: ['https://cdn.needelectro.store/a.jpg', 'javascript:evil()'],
+  });
+  assert(validPayload.ok === true && validPayload.data.images.length === 1 && !validPayload.data.comment.includes('<script>'), 'Shared payload validator sanitizes XSS and filters unsafe image URLs');
+
+  const pngHeader = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d]);
+  const textHeader = Buffer.from('<svg onload=alert(1)>');
+  assert(detectImageMimeFromMagicBytes(pngHeader) === 'image/png', 'Magic-byte detector accepts valid PNG buffer');
+  assert(detectImageMimeFromMagicBytes(textHeader) === null, 'Magic-byte detector rejects disguised SVG/HTML payload');
+
+  const guestNonBuyerCheck = await verifyGuestPurchaseEligibility({
+    productId: 'non_existent_prod',
+    productSku: 'SKU-NONE',
+    phone: '01700000000',
+    orderNumber: 'ORD-NOPE-99999',
+  });
+  assert(guestNonBuyerCheck.isVerified === false && guestNonBuyerCheck.orderId === null, 'Guest without matching delivered order or completed sale is NOT marked Verified Buyer');
 
   // -------------------------------------------------------------
   // Test Group 6: Schema.org Structured Data Compliance

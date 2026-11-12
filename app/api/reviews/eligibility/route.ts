@@ -23,8 +23,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({
         success: true,
         authenticated: false,
-        canReview: false,
-        message: 'Sign in to review this product',
+        canReview: true,
+        isGuestMode: true,
+        isVerifiedPurchase: false,
+        orderId: null,
+        existingReview: null,
+        message: 'Submit a review as a guest or sign in to edit previous reviews',
       });
     }
 

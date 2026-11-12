@@ -5,8 +5,14 @@ import { authenticateCustomer } from '@/lib/customerAuth';
 import {
   getProductReviewsSummary,
   checkCustomerPurchaseEligibility,
+  verifyGuestPurchaseEligibility,
   sanitizeReviewText,
   formatPublicAuthorName,
+  validateCommonReviewPayload,
+  normalizeBdPhone,
+  getBdPhoneVariants,
+  containsReviewSpamLinks,
+  extractClientIp,
 } from '@/lib/reviews';
 
 export const dynamic = 'force-dynamic';
@@ -169,48 +175,24 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const customer = await authenticateCustomer(req);
-    if (!customer) {
-      return NextResponse.json(
-        { success: false, error: 'You must be signed in to submit a review.' },
-        { status: 401 }
-      );
-    }
-
     const body = await req.json();
-    const { productId, rating, title, comment, images } = body;
 
-    if (!productId || typeof productId !== 'string') {
+    // Hidden anti-bot honeypot field (should remain empty for human reviewers)
+    if (typeof body?.website === 'string' && body.website.trim().length > 0) {
       return NextResponse.json(
-        { success: false, error: 'Valid Product ID is required' },
+        { success: false, error: 'Spam verification failed. Please try again.' },
         { status: 400 }
       );
     }
 
-    // Verify rating 1 to 5
-    const numRating = parseInt(String(rating), 10);
-    if (isNaN(numRating) || numRating < 1 || numRating > 5) {
+    const parsed = validateCommonReviewPayload(body);
+    if ('error' in parsed) {
       return NextResponse.json(
-        { success: false, error: 'Rating must be an integer between 1 and 5 stars' },
-        { status: 400 }
+        { success: false, error: parsed.error },
+        { status: parsed.status }
       );
     }
-
-    // Validate comment length (10 to 2000 chars)
-    const cleanComment = sanitizeReviewText(comment);
-    if (cleanComment.length < 10) {
-      return NextResponse.json(
-        { success: false, error: 'Review comment must be at least 10 characters long' },
-        { status: 400 }
-      );
-    }
-    if (cleanComment.length > 2000) {
-      return NextResponse.json(
-        { success: false, error: 'Review comment cannot exceed 2000 characters' },
-        { status: 400 }
-      );
-    }
-
-    const cleanTitle = title ? sanitizeReviewText(title).slice(0, 100) : null;
+    const { productId, rating: numRating, title: cleanTitle, comment: cleanComment, images: validImageUrls } = parsed.data;
 
     // Validate product exists
     const product = await prisma.product.findUnique({
@@ -225,6 +207,168 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ──────────────────────────────────────────────────────────────────
+    // GUEST REVIEW SUBMISSION (No sign-in required)
+    // ──────────────────────────────────────────────────────────────────
+    if (!customer) {
+      const guestName = sanitizeReviewText(
+        typeof body.guestName === 'string' ? body.guestName : ''
+      )
+        .replace(/\s+/g, ' ')
+        .slice(0, 80);
+
+      if (guestName.length < 2) {
+        return NextResponse.json(
+          { success: false, error: 'Please enter your name (at least 2 characters) to submit a review.' },
+          { status: 400 }
+        );
+      }
+
+      if (
+        containsReviewSpamLinks(guestName) ||
+        containsReviewSpamLinks(cleanTitle) ||
+        containsReviewSpamLinks(cleanComment)
+      ) {
+        return NextResponse.json(
+          { success: false, error: 'Website links and promotional URLs are not allowed in product reviews.' },
+          { status: 400 }
+        );
+      }
+
+      const rawPhone = typeof body.guestPhone === 'string' ? body.guestPhone.trim().slice(0, 32) : '';
+      const rawOrderNumber =
+        typeof body.orderNumber === 'string' ? body.orderNumber.trim().slice(0, 64) : '';
+      const rawEmail =
+        typeof body.guestEmail === 'string' ? body.guestEmail.trim().slice(0, 120) : '';
+
+      if (rawPhone && rawPhone.replace(/\D/g, '').length < 6) {
+        return NextResponse.json(
+          { success: false, error: 'Please enter a valid mobile number or leave the optional field blank.' },
+          { status: 400 }
+        );
+      }
+      if (rawEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail)) {
+        return NextResponse.json(
+          { success: false, error: 'Please enter a valid email address or leave it blank.' },
+          { status: 400 }
+        );
+      }
+
+      const normalizedPhone = normalizeBdPhone(rawPhone);
+      const storedGuestPhone = normalizedPhone || (rawPhone || null);
+      const clientIp = extractClientIp(req);
+
+      // Anti-spam IP burst limit (max 3 guest reviews per 15 minutes from one IP)
+      if (clientIp !== 'unknown') {
+        const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+        const recentIpCount = await prisma.productReview.count({
+          where: {
+            isGuest: true,
+            ipAddress: clientIp,
+            createdAt: { gte: fifteenMinutesAgo },
+          },
+        });
+        if (recentIpCount >= 3) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'Too many review submissions from your network. Please wait a few minutes or sign in.',
+            },
+            { status: 429 }
+          );
+        }
+      }
+
+      // Duplicate guest review guard per product (matching phone, or matching IP + name in 24h)
+      const duplicateOrConditions: any[] = [];
+      if (storedGuestPhone) {
+        duplicateOrConditions.push({
+          guestPhone: { in: getBdPhoneVariants(storedGuestPhone) },
+        });
+      }
+      if (clientIp !== 'unknown') {
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        duplicateOrConditions.push({
+          AND: [
+            { ipAddress: clientIp },
+            { customerName: { equals: guestName, mode: 'insensitive' } },
+            { createdAt: { gte: twentyFourHoursAgo } },
+          ],
+        });
+      }
+
+      if (duplicateOrConditions.length > 0) {
+        const existingGuestReview = await prisma.productReview.findFirst({
+          where: {
+            productId: product.id,
+            isGuest: true,
+            OR: duplicateOrConditions,
+          },
+          select: { id: true },
+        });
+        if (existingGuestReview) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'You have already submitted a review for this product. Sign in to manage reviews anytime.',
+            },
+            { status: 409 }
+          );
+        }
+      }
+
+      const guestEligibility = await verifyGuestPurchaseEligibility({
+        productId: product.id,
+        productSku: product.sku,
+        phone: storedGuestPhone,
+        orderNumber: rawOrderNumber || null,
+      });
+
+      const guestReview = await prisma.productReview.create({
+        data: {
+          productId: product.id,
+          customerId: null,
+          customerName: guestName,
+          isGuest: true,
+          guestPhone: storedGuestPhone,
+          guestEmail: rawEmail || null,
+          ipAddress: clientIp === 'unknown' ? null : clientIp,
+          rating: numRating,
+          title: cleanTitle,
+          comment: cleanComment,
+          isVerifiedPurchase: guestEligibility.isVerified,
+          orderId: guestEligibility.orderId,
+          status: 'PUBLISHED',
+          images: {
+            create: validImageUrls.map((url, idx) => ({
+              imageUrl: url,
+              sortOrder: idx,
+            })),
+          },
+        },
+        include: { images: true },
+      });
+
+      return NextResponse.json({
+        success: true,
+        isGuest: true,
+        message: guestEligibility.isVerified
+          ? 'Verified buyer badge confirmed! Thank you — your review is live.'
+          : 'Thank you! Your review has been published.',
+        review: {
+          id: guestReview.id,
+          rating: guestReview.rating,
+          title: guestReview.title,
+          comment: guestReview.comment,
+          isVerifiedPurchase: guestReview.isVerifiedPurchase,
+          createdAt: guestReview.createdAt,
+        },
+      });
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // SIGNED-IN CUSTOMER REVIEW SUBMISSION (Upsert + Purchase Check)
+    // ──────────────────────────────────────────────────────────────────
     // Rate limiting: Maximum 5 reviews created in past 10 minutes by same customer
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
     const recentSubmissionsCount = await prisma.productReview.count({
@@ -248,16 +392,6 @@ export async function POST(req: NextRequest) {
       product.id,
       product.sku
     );
-
-    // Validate images (max 5 URLs, each must start with / or https://)
-    const validImageUrls: string[] = [];
-    if (Array.isArray(images)) {
-      for (const img of images.slice(0, 5)) {
-        if (typeof img === 'string' && (img.startsWith('/') || img.startsWith('https://'))) {
-          validImageUrls.push(img.trim());
-        }
-      }
-    }
 
     // Check if customer already has a review for this product (Upsert pattern)
     const existingReview = await prisma.productReview.findUnique({
@@ -289,6 +423,7 @@ export async function POST(req: NextRequest) {
           title: cleanTitle,
           comment: cleanComment,
           customerName: customer.name,
+          isGuest: false,
           isVerifiedPurchase: eligibility.isVerified || existingReview.isVerifiedPurchase,
           orderId: eligibility.orderId || existingReview.orderId,
           status: 'PUBLISHED', // Auto-publish on edit if active customer
@@ -311,6 +446,7 @@ export async function POST(req: NextRequest) {
           productId,
           customerId: customer.id,
           customerName: customer.name,
+          isGuest: false,
           rating: numRating,
           title: cleanTitle,
           comment: cleanComment,

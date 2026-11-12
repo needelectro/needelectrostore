@@ -29,8 +29,11 @@ interface AdminReviewItem {
     name: string;
     phone: string;
     email: string | null;
-  };
+  } | null;
   customerName: string;
+  isGuest?: boolean;
+  guestPhone?: string | null;
+  guestEmail?: string | null;
   rating: number;
   title: string | null;
   comment: string;
@@ -473,7 +476,7 @@ export const ProductReviewsManager: React.FC<ProductReviewsManagerProps> = ({
                           {r.customerName}
                         </p>
                         <p className="text-[10.5px] text-slate-400 font-mono">
-                          {r.customer.phone}
+                          {r.customer?.phone || r.guestPhone || (r.isGuest ? 'Guest Reviewer' : 'No Phone')}
                         </p>
                         {r.isVerifiedPurchase ? (
                           <span className="inline-flex items-center gap-1 text-[9.5px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.2 rounded mt-0.5 border border-emerald-200 dark:border-emerald-800">
@@ -481,7 +484,9 @@ export const ProductReviewsManager: React.FC<ProductReviewsManagerProps> = ({
                             <span>Verified Buyer</span>
                           </span>
                         ) : (
-                          <span className="text-[9.5px] text-slate-400">Guest / Standard</span>
+                          <span className="text-[9.5px] text-slate-400">
+                            {r.isGuest ? 'Guest Review' : 'Member Review'}
+                          </span>
                         )}
                       </div>
                     </td>
@@ -648,9 +653,16 @@ export const ProductReviewsManager: React.FC<ProductReviewsManagerProps> = ({
                 <p className="font-mono text-slate-500">SKU: {selectedReview.product.sku}</p>
               </div>
               <div>
-                <span className="text-slate-400 block mb-0.5">Customer</span>
+                <span className="text-slate-400 block mb-0.5">
+                  Customer {selectedReview.isGuest ? '(Guest)' : '(Account)'}
+                </span>
                 <p className="font-bold text-slate-900 dark:text-white">{selectedReview.customerName}</p>
-                <p className="font-mono text-slate-500">{selectedReview.customer.phone}</p>
+                <p className="font-mono text-slate-500">
+                  {selectedReview.customer?.phone || selectedReview.guestPhone || 'No phone provided'}
+                </p>
+                {selectedReview.guestEmail && !selectedReview.customer?.email && (
+                  <p className="font-mono text-slate-400 text-[10.5px]">{selectedReview.guestEmail}</p>
+                )}
                 {selectedReview.isVerifiedPurchase && (
                   <span className="text-emerald-600 font-bold">✓ Verified Purchase</span>
                 )}

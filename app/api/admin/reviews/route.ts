@@ -43,6 +43,7 @@ export async function GET(req: NextRequest) {
         { title: { contains: search, mode: 'insensitive' } },
         { comment: { contains: search, mode: 'insensitive' } },
         { customerName: { contains: search, mode: 'insensitive' } },
+        { guestPhone: { contains: search, mode: 'insensitive' } },
         { product: { name: { contains: search, mode: 'insensitive' } } },
         { product: { sku: { contains: search, mode: 'insensitive' } } },
       ];
@@ -115,6 +116,9 @@ export async function GET(req: NextRequest) {
       product: r.product,
       customer: r.customer,
       customerName: r.customerName,
+      isGuest: r.isGuest,
+      guestPhone: r.guestPhone,
+      guestEmail: r.guestEmail,
       rating: r.rating,
       title: r.title,
       comment: r.comment,
